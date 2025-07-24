@@ -113,11 +113,14 @@ const ScreeningPage: React.FC = () => {
                   Let our support team help you decide based on your age, symptoms, or risk factors.
                 </p>
                 <div className="flex flex-col sm:flex-row justify-center gap-4">
-                  <Button variant="primary" className="w-full sm:w-auto text-lg" onClick={() => setShowModal(true)}>
+                  <Button variant="primary"
+                    className="w-full sm:w-auto text-base sm:text-lg lg:text-xl"
+                    onClick={() => setShowModal(true)}>
                     Talk to Us
                   </Button>
                   <Link to="/clinics">
-                    <Button variant="teal" className="w-full sm:w-auto text-lg">
+                    <Button variant="teal"
+                      className="w-full sm:w-auto text-base sm:text-lg lg:text-xl">
                       View Screening Locations
                     </Button>
                   </Link>

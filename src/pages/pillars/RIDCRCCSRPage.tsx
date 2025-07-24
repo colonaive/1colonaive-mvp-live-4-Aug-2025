@@ -5,14 +5,14 @@ import { Container } from '../../components/ui/Container';
 import { Card, CardContent } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Link } from 'react-router-dom';
-import { 
-  Building2, 
-  Heart, 
-  Users, 
-  TrendingUp, 
-  Award, 
-  Shield, 
-  Globe, 
+import {
+  Building2,
+  Heart,
+  Users,
+  TrendingUp,
+  Award,
+  Shield,
+  Globe,
   Target,
   CheckCircle,
   Star,
@@ -47,7 +47,7 @@ const RIDCRCCSRPage: React.FC = () => {
         .from('corporate_sponsorships')
         .select('id')
         .eq('status', 'active');
-      
+
       if (partners) {
         setPartnersCount(partners.length);
         // Simulate lives impacted calculation (you can make this more sophisticated)
@@ -190,24 +190,33 @@ const RIDCRCCSRPage: React.FC = () => {
 
       {/* Crisis Statement with Urgency */}
       <Container>
-        <div className="py-16 max-w-5xl mx-auto">
-          <div className="bg-red-50 border-l-4 border-red-500 p-8 mb-8 rounded-lg">
-            <div className="flex items-start">
-              <AlertTriangle className="h-10 w-10 text-red-600 mr-6 flex-shrink-0 mt-1" />
-              <div>
-                <h2 className="text-3xl font-bold text-red-800 mb-4">The Corporate Opportunity to Save Lives</h2>
-                <p className="text-red-700 mb-4 text-lg">
-                  <strong>Every day, Singaporeans die from colorectal cancer — not because we can't treat it, but because we detect it too late.</strong>
+        <div className="py-12 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto">
+          <div className="bg-red-50 border-l-4 border-red-500 p-6 sm:p-8 mb-8 rounded-lg">
+            <div className="flex flex-col sm:flex-row items-start gap-6">
+              <AlertTriangle className="h-10 w-10 text-red-600 flex-shrink-0" />
+              <div className="min-w-0 w-full">
+                <h2 className="text-2xl sm:text-3xl font-bold text-red-800 mb-4 break-words">
+                  The Corporate Opportunity to Save Lives
+                </h2>
+                <p className="text-red-700 mb-4 text-base sm:text-lg break-words">
+                  <strong>
+                    Every day, Singaporeans die from colorectal cancer — not because we can't treat it, but because we detect it too late.
+                  </strong>
                 </p>
-                <p className="text-red-700 mb-6 text-lg">
-                  Your corporate partnership can change this narrative. While traditional CSR focuses on charity, this is about <strong>measurable life-saving impact</strong> that elevates your brand as a true healthcare champion.
+                <p className="text-red-700 mb-6 text-base sm:text-lg break-words">
+                  Your corporate partnership can change this narrative. While traditional CSR focuses on charity, this is about
+                  <strong> measurable life-saving impact </strong>
+                  that elevates your brand as a true healthcare champion.
                 </p>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+                <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 mt-6">
                   {impactStats.map((stat, index) => (
-                    <div key={index} className="text-center bg-white p-4 rounded-lg shadow-sm">
+                    <div
+                      key={index}
+                      className="text-center bg-white p-4 rounded-lg shadow-sm break-words w-full"
+                    >
                       <div className="flex justify-center mb-2">{stat.icon}</div>
-                      <div className="text-2xl font-bold text-gray-800">{stat.number}</div>
-                      <div className="text-sm text-gray-600">{stat.label}</div>
+                      <div className="text-xl sm:text-2xl font-bold text-gray-800 break-words">{stat.number}</div>
+                      <div className="text-sm text-gray-600 break-words">{stat.label}</div>
                     </div>
                   ))}
                 </div>
@@ -215,6 +224,8 @@ const RIDCRCCSRPage: React.FC = () => {
             </div>
           </div>
         </div>
+
+
       </Container>
 
       {/* Current Impact Stats */}
@@ -252,7 +263,7 @@ const RIDCRCCSRPage: React.FC = () => {
               Every tier creates meaningful impact. Select the partnership level that aligns with your corporate values and budget.
             </p>
           </div>
-          
+
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {tierBenefits.map((tier, index) => (
               <Card key={index} className={`border-t-4 ${tier.borderColor} hover:shadow-xl transition-shadow duration-300 relative`}>
@@ -262,7 +273,7 @@ const RIDCRCCSRPage: React.FC = () => {
                     <h3 className="text-2xl font-bold">{tier.tier}</h3>
                     <p className="text-lg opacity-90">{tier.investment}</p>
                   </div>
-                  
+
                   <div className="space-y-4 mb-6">
                     <h4 className="font-semibold text-lg text-gray-800">Partnership Benefits:</h4>
                     {tier.benefits.map((benefit, benefitIndex) => (
@@ -272,12 +283,12 @@ const RIDCRCCSRPage: React.FC = () => {
                       </div>
                     ))}
                   </div>
-                  
+
                   <div className="bg-gray-50 p-4 rounded-lg mb-6">
                     <h5 className="font-semibold text-gray-800 mb-2">Potential Impact:</h5>
                     <p className="text-gray-700 text-sm">{tier.impact}</p>
                   </div>
-                  
+
                   <Link to="/register/corporate" className="w-full">
                     <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3">
                       Choose {tier.tier}
@@ -300,7 +311,7 @@ const RIDCRCCSRPage: React.FC = () => {
                 Beyond saving lives, your partnership delivers tangible business value and positions your company as a healthcare innovation leader.
               </p>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {corporateBenefits.map((benefit, index) => (
                 <Card key={index} className="hover:shadow-lg transition-shadow duration-300">
@@ -325,7 +336,7 @@ const RIDCRCCSRPage: React.FC = () => {
             <h2 className="text-4xl font-bold mb-6">Partner Success Stories</h2>
             <p className="text-xl text-gray-600">Real feedback from companies making a real difference</p>
           </div>
-          
+
           {testimonials.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {testimonials.map((testimonial, index) => (
@@ -374,46 +385,55 @@ const RIDCRCCSRPage: React.FC = () => {
       </Container>
 
       {/* Impact Calculator Section */}
-      <div id="impact-calculator" className="bg-gradient-to-r from-purple-600 to-blue-600 text-white py-16">
+      <div id="impact-calculator" className="bg-gradient-to-r from-purple-600 to-blue-600 text-white py-16 px-4 sm:px-6 lg:px-8">
         <Container>
           <div className="max-w-4xl mx-auto text-center">
-            <Presentation className="h-16 w-16 mx-auto mb-8" />
-            <h2 className="text-4xl font-bold mb-6">Calculate Your Potential Impact</h2>
-            <p className="text-xl mb-8 opacity-90">
+            <Presentation className="h-12 w-12 sm:h-16 sm:w-16 mx-auto mb-6 sm:mb-8" />
+
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-6">
+              Calculate Your Potential Impact
+            </h2>
+
+            <p className="text-base sm:text-lg md:text-xl mb-6 sm:mb-8 opacity-90">
               See how your corporate partnership translates into lives saved and community impact
             </p>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <div className="bg-white bg-opacity-20 p-6 rounded-lg">
-                <div className="text-3xl font-bold mb-2">500</div>
-                <div className="text-lg">Tests Sponsored</div>
-                <div className="text-sm opacity-75 mt-2">Platinum Partnership</div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mb-8">
+              <div className="bg-white bg-opacity-20 p-4 sm:p-6 rounded-lg">
+                <div className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2">500</div>
+                <div className="text-base sm:text-lg">Tests Sponsored</div>
+                <div className="text-xs sm:text-sm opacity-75 mt-1 sm:mt-2">Platinum Partnership</div>
               </div>
-              <div className="bg-white bg-opacity-20 p-6 rounded-lg">
-                <div className="text-3xl font-bold mb-2">250+</div>
-                <div className="text-lg">Potential Lives Saved</div>
-                <div className="text-sm opacity-75 mt-2">Through early detection</div>
+              <div className="bg-white bg-opacity-20 p-4 sm:p-6 rounded-lg">
+                <div className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2">250+</div>
+                <div className="text-base sm:text-lg">Potential Lives Saved</div>
+                <div className="text-xs sm:text-sm opacity-75 mt-1 sm:mt-2">Through early detection</div>
               </div>
-              <div className="bg-white bg-opacity-20 p-6 rounded-lg">
-                <div className="text-3xl font-bold mb-2">$2.5M+</div>
-                <div className="text-lg">Healthcare Cost Savings</div>
-                <div className="text-sm opacity-75 mt-2">Early vs late treatment</div>
+              <div className="bg-white bg-opacity-20 p-4 sm:p-6 rounded-lg">
+                <div className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2">$2.5M+</div>
+                <div className="text-base sm:text-lg">Healthcare Cost Savings</div>
+                <div className="text-xs sm:text-sm opacity-75 mt-1 sm:mt-2">Early vs late treatment</div>
               </div>
             </div>
-            
-            <div className="space-y-4">
+
+            <div className="space-y-3 sm:space-y-4">
               <Link to="/register/corporate">
-                <Button size="lg" className="bg-white text-purple-600 hover:bg-gray-100 font-semibold px-8 py-4 text-lg">
+                <Button
+                  size="lg"
+                  className="bg-white text-purple-600 hover:bg-gray-100 font-semibold px-6 py-3 sm:px-8 sm:py-4 text-base sm:text-lg w-full sm:w-auto"
+                >
                   Start Your Partnership Journey
                 </Button>
               </Link>
-              <p className="text-sm opacity-75">
+              <p className="text-xs sm:text-sm opacity-75">
                 Custom impact calculations available for larger partnerships
               </p>
             </div>
           </div>
         </Container>
       </div>
+
+
 
       {/* How It Works */}
       <Container>
@@ -422,7 +442,7 @@ const RIDCRCCSRPage: React.FC = () => {
             <h2 className="text-4xl font-bold mb-6">Your Partnership Journey</h2>
             <p className="text-xl text-gray-600">From signup to impact — here's how we make it seamless</p>
           </div>
-          
+
           <div className="space-y-8">
             {[
               {
@@ -432,7 +452,7 @@ const RIDCRCCSRPage: React.FC = () => {
                 icon: <Briefcase className="h-8 w-8 text-blue-600" />
               },
               {
-                step: "2", 
+                step: "2",
                 title: "Program Customization",
                 description: "We tailor the screening program to your workforce size, locations, and CSR objectives.",
                 icon: <Target className="h-8 w-8 text-green-600" />
@@ -450,7 +470,7 @@ const RIDCRCCSRPage: React.FC = () => {
                 icon: <BarChart3 className="h-8 w-8 text-orange-600" />
               }
             ].map((item, index) => (
-              <div key={index} className="flex items-start space-x-6">
+              <div key={index} className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-6 relative">
                 <div className="flex-shrink-0">
                   <div className="bg-gray-100 rounded-full p-4 text-center">
                     <span className="text-2xl font-bold text-gray-800">{item.step}</span>
@@ -463,12 +483,15 @@ const RIDCRCCSRPage: React.FC = () => {
                   </div>
                   <p className="text-gray-600 text-lg">{item.description}</p>
                 </div>
+
+                {/* Responsive Arrow */}
                 {index < 3 && (
-                  <div className="flex-shrink-0">
+                  <div className="hidden sm:flex flex-shrink-0">
                     <ArrowRight className="h-6 w-6 text-gray-400" />
                   </div>
                 )}
               </div>
+
             ))}
           </div>
         </div>
@@ -511,12 +534,14 @@ const RIDCRCCSRPage: React.FC = () => {
                 </p>
               </div>
             </div>
-            <Link to="/csr-showcase">
-              <Button variant="outline" className="mr-4">View Full Showcase</Button>
-            </Link>
-            <Link to="/signup/corporate">
-              <Button>Join the Showcase</Button>
-            </Link>
+            <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mt-4">
+              <Link to="/csr-showcase">
+                <Button variant="outline" className="w-full sm:w-auto">View Full Showcase</Button>
+              </Link>
+              <Link to="/signup/corporate">
+                <Button className="w-full sm:w-auto">Join the Showcase</Button>
+              </Link>
+            </div>
           </div>
         </Container>
       </div>
@@ -528,17 +553,17 @@ const RIDCRCCSRPage: React.FC = () => {
             <Heart className="h-16 w-16 mx-auto mb-8" />
             <h2 className="text-4xl font-bold mb-6">Every Partnership Saves Lives</h2>
             <p className="text-xl mb-8 opacity-90">
-              Don't let this opportunity pass. While your competitors focus on traditional CSR, 
+              Don't let this opportunity pass. While your competitors focus on traditional CSR,
               you can lead Singapore's fight against its #1 cancer and build an unparalleled reputation as a life-saving corporate champion.
             </p>
-            
+
             <div className="bg-white bg-opacity-20 p-6 rounded-lg mb-8 max-w-2xl mx-auto">
               <h3 className="text-2xl font-bold mb-4">Ready to Start Saving Lives?</h3>
               <p className="mb-4">
                 Join the movement that's eliminating colorectal cancer by 2035. Your corporate partnership begins with a single click.
               </p>
             </div>
-            
+
             <div className="space-y-4">
               <Link to="/register/corporate">
                 <Button size="lg" className="bg-white text-red-600 hover:bg-gray-100 font-bold px-12 py-4 text-xl">
@@ -568,21 +593,21 @@ const RIDCRCCSRPage: React.FC = () => {
       <div className="py-8 bg-gray-50">
         <Container>
           <div className="text-center space-y-4">
-            <div className="space-x-4">
+            <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
               <Link to="/movement-pillars">
-                <Button variant="outline">Explore All Pillars</Button>
+                <Button variant="outline" className="w-full sm:w-auto">Explore All Pillars</Button>
               </Link>
               <Link to="/about">
-                <Button variant="outline">Learn More About COLONAiVE™</Button>
+                <Button variant="outline" className="w-full sm:w-auto">Learn More About COLONAiVE™</Button>
               </Link>
             </div>
             <Link to="/">
-              <Button variant="secondary">Return to Home</Button>
+              <Button variant="secondary" className="w-full sm:w-auto">Return to Home</Button>
             </Link>
           </div>
         </Container>
       </div>
-    </div>
+  </div>
   );
 };
 

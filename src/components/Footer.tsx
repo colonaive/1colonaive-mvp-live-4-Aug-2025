@@ -52,16 +52,18 @@ export const Footer: React.FC = () => {
 
 
   return (
-    <footer className="bg-gray-900 text-white pt-16 pb-8">
+    <footer className="bg-gray-900 text-white pt-16 pb-8 relative z-10">
       <Container>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Logo & Social Icons with Animations */}
           <div className="group">
-            <h3 className="text-2xl font-bold mb-4 relative inline-block group-hover:scale-105 transition-transform duration-300">
-              COLON<span className="text-teal-400 group-hover:text-teal-300 transition-colors duration-300">AiVE</span>™
-              <span className="absolute -bottom-1 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-teal-400 to-transparent transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out"></span>
-              <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-teal-300 group-hover:w-full transition-all duration-700 ease-in-out delay-300 opacity-70"></span>
-            </h3>
+            <Link to="/">
+              <h3 className="text-2xl font-bold mb-4 relative inline-block group-hover:scale-105 transition-transform duration-300">
+                COLON<span className="text-teal-400 group-hover:text-teal-300 transition-colors duration-300">AiVE</span>™
+                <span className="absolute -bottom-1 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-teal-400 to-transparent transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out"></span>
+                <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-teal-300 group-hover:w-full transition-all duration-700 ease-in-out delay-300 opacity-70"></span>
+              </h3>
+            </Link>
             <p className="text-gray-300 mb-4 group-hover:text-white transition-all duration-300">
               A National Movement to Outsmart Colorectal Cancer.
             </p>
@@ -182,8 +184,8 @@ export const Footer: React.FC = () => {
           </div>
         </div>
         <p className="text-xs text-center text-gray-500 mt-6">
-  Built with ❤️ using <a href="https://bolt.new" className="underline hover:text-teal-300" target="_blank" rel="noreferrer">BOLT.new</a>
-</p>
+          Built with ❤️ using <a href="https://bolt.new" className="underline hover:text-teal-300" target="_blank" rel="noreferrer">BOLT.new</a>
+        </p>
       </Container>
     </footer>
   );

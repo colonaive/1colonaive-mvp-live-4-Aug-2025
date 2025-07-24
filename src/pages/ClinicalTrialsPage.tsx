@@ -66,7 +66,7 @@ const ClinicalTrialsPage: React.FC = () => {
           </div>
 
           <Link to="/signup-trial">
-            <Button className="text-white">Express Interest in a Trial</Button>
+            <Button className="text-white mb-3">Express Interest in a Trial</Button>
           </Link>
         </div>
       </Container>

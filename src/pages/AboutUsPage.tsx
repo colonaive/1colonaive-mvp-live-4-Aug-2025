@@ -30,7 +30,7 @@ const AboutUsPage: React.FC = () => {
                 Every great mission deserves a name that embodies its purpose and vision.
               </p>
             </div>
-            
+
             {/* Brand Etymology Card */}
             <div className="bg-gradient-to-r from-blue-50 to-teal-50 rounded-2xl p-8 mb-12 border border-blue-100">
               <div className="text-center mb-8">
@@ -41,7 +41,7 @@ const AboutUsPage: React.FC = () => {
                   More than just a name — it's our mission statement
                 </p>
               </div>
-              
+
               <div className="grid md:grid-cols-3 gap-6">
                 <div className="text-center">
                   <div className="bg-blue-600 text-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 text-xl font-bold">
@@ -52,7 +52,7 @@ const AboutUsPage: React.FC = () => {
                     Our focus: outsmarting colorectal cancer through early detection and prevention
                   </p>
                 </div>
-                
+
                 <div className="text-center">
                   <div className="bg-teal-600 text-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 text-xl font-bold">
                     Ai
@@ -62,7 +62,7 @@ const AboutUsPage: React.FC = () => {
                     Harnessing artificial intelligence to enhance screening accuracy and accessibility
                   </p>
                 </div>
-                
+
                 <div className="text-center">
                   <div className="bg-red-500 text-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 text-xl font-bold">
                     VE
@@ -73,7 +73,7 @@ const AboutUsPage: React.FC = () => {
                   </p>
                 </div>
               </div>
-              
+
               <div className="text-center mt-8 pt-6 border-t border-gray-200">
                 <p className="text-xl font-semibold text-gray-800">
                   To Outsmart '<span className="text-blue-600">COLON</span>' cancer using '<span className="text-teal-600">Ai</span>' to save li'<span className="text-red-500">VE</span>'s
@@ -92,7 +92,7 @@ const AboutUsPage: React.FC = () => {
                   </p>
                 </div>
               </div>
-              
+
               <div className="bg-gradient-to-r from-teal-600 to-orange-500 text-white rounded-lg shadow-md overflow-hidden">
                 <div className="p-8 text-center">
                   <Heart className="w-12 h-12 mx-auto mb-4" />
@@ -152,17 +152,18 @@ const AboutUsPage: React.FC = () => {
             <p className="text-xl text-gray-600 mb-8">
               Together, we can eliminate colorectal cancer as a major health threat in Singapore by 2035.
             </p>
-            <div className="space-x-4">
+            <div className="flex flex-col sm:flex-row justify-center gap-4">
               <Link to="/join-the-movement">
-                <Button variant="primary">Join as a Champion</Button>
+                <Button variant="primary" className="w-full sm:w-auto">Join as a Champion</Button>
               </Link>
               <Link to="/vision2035">
-                <Button variant="teal">Learn About Our Vision</Button>
+                <Button variant="teal" className="w-full sm:w-auto">Learn About Our Vision</Button>
               </Link>
             </div>
           </div>
         </Container>
       </section>
+
     </div>
   );
 };
