@@ -183,9 +183,6 @@ export const Footer: React.FC = () => {
             </a>
           </div>
         </div>
-        <p className="text-xs text-center text-gray-500 mt-6">
-          Built with ❤️ using <a href="https://bolt.new" className="underline hover:text-teal-300" target="_blank" rel="noreferrer">BOLT.new</a>
-        </p>
       </Container>
     </footer>
   );
