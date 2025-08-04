@@ -1,15 +1,10 @@
 // src/pages/HomePage.tsx
 import React from 'react';
 
-// ✅ The old HeroSection is commented out safely
-// import HeroSection from "../components/HeroSection";
-
-// ✅ Correct import of the redesigned HeroSection
 import HeroSection from "../components/HeroSection";
-import ScreeningUrgencyWidget from "../components/ScreeningUrgencyWidget";
-
 import CrisisSection from "../components/CrisisSection";
 import WhyColonoscopyMatters from "../components/WhyColonoscopyMatters";
+import ScreeningUrgencyWidget from "../components/ScreeningUrgencyWidget";
 import BloodScreeningSection from "../components/BloodScreeningSection";
 import SG60GiftSection from "../components/SG60GiftSection";
 import PillarsSection from "../components/PillarsSection";
@@ -20,10 +15,10 @@ import JoinMovementSection from "../components/JoinMovementSection";
 const HomePage: React.FC = () => {
   return (
     <>
-      {/* ✅ Render the redesigned HeroSection */}
+      {/* ✅ Hero section */}
       <HeroSection />
 
-      {/* ✅ Screening Urgency Assessment Widget */}
+      {/* ✅ Screening Urgency Widget (must come immediately after hero) */}
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
           <ScreeningUrgencyWidget />
@@ -32,11 +27,8 @@ const HomePage: React.FC = () => {
 
       <CrisisSection />
       <WhyColonoscopyMatters />
-
-      {/* ✅ New section focused on blood-based screening */}
       <BloodScreeningSection />
-
-      {/* <SG60GiftSection /> */}
+      <SG60GiftSection />
       <PillarsSection />
       <EvidenceSection />
       <NationalTargetsSection />

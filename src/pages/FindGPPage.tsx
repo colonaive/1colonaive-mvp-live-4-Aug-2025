@@ -1,12 +1,10 @@
-// /home/project/src/pages/FindGPPage.tsx
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Search, MapPin, Phone, Mail, Globe } from 'lucide-react';
-import { Button } from '@/components/ui/Button'; // Assuming your Button component is here
-import { Container } from '@/components/ui/Container'; // Assuming your Container component is here
-import { supabase } from '@/supabase'; // Assuming your Supabase client is here
-import { Card, CardContent } from '@/components/ui/Card'; // Add Card components for styling consistency
+import { Search, MapPin, Phone, Globe } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
+import { Container } from '@/components/ui/Container';
+import { supabase } from '@/supabase';
+import { Card, CardContent } from '@/components/ui/Card';
 
 // Define the GP interface to match the combined data from GPClinics and Profiles
 interface GP {
@@ -111,10 +109,10 @@ const FindGPPage: React.FC = () => {
   }, [gps, searchTerm, selectedRegion, selectedLanguage]);
 
   return (
-    <div className="pt-20"> {/* Adjusted padding to match other pages */}
+    <div className="pt-20">
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-blue-600 to-teal-600 text-white py-24">
-        <Container> {/* Use Container for consistent max-width and centering */}
+        <Container>
           <div className="max-w-4xl mx-auto text-center">
             <div className="mb-4">
               <Link to="/triage" className="inline-flex items-center text-white/80 hover:text-white text-sm mb-2">
@@ -128,7 +126,7 @@ const FindGPPage: React.FC = () => {
             <p className="text-xl mb-8">
               Connect with GPs who offer colorectal cancer screening and referral services.
             </p>
-            <div className="relative max-w-2xl mx-auto"> {/* Centered search input */}
+            <div className="relative max-w-2xl mx-auto">
               <input
                 type="text"
                 placeholder="Search by doctor name, clinic, or location..."
@@ -144,7 +142,7 @@ const FindGPPage: React.FC = () => {
 
       {/* Main Content */}
       <section className="py-12 bg-slate-50">
-        <Container> {/* Use Container for consistent max-width and centering */}
+        <Container>
           {/* Triage Banner */}
           {location.state?.fromTriage && (
             <div className="bg-yellow-50 text-yellow-800 p-4 rounded mb-6 text-center font-medium">
@@ -206,7 +204,7 @@ const FindGPPage: React.FC = () => {
             <div className="grid gap-6">
               {filteredGPs.map((gp) => (
                 <Card key={gp.id} className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-                  <CardContent> {/* Ensure CardContent wraps the actual content */}
+                  <CardContent>
                     <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
                       <div>
                         <h2 className="text-xl font-semibold mb-2">{gp.doctor_full_name}</h2>
@@ -242,7 +240,6 @@ const FindGPPage: React.FC = () => {
                             </a>
                           </div>
                         )}
-                        {/* Assuming description is for the clinic, not the doctor here */}
                         {gp.description && <p className="text-gray-700 text-sm mt-3">{gp.description}</p>}
                       </div>
 
@@ -272,7 +269,7 @@ const FindGPPage: React.FC = () => {
                             </div>
                           </div>
                         )}
-                        <Button disabled variant="secondary" className="w-full md:w-auto mt-auto">
+                        <Button disabled className="w-full md:w-auto mt-auto">
                           Appointment Booking Coming Soon
                         </Button>
                       </div>
