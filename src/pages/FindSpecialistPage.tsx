@@ -1,5 +1,6 @@
 // /home/project/src/pages/FindSpecialistPage.tsx
 
+import { Link } from 'react-router-dom';
 import { Container } from '@/components/ui/Container';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -93,6 +94,11 @@ const FindSpecialistPage: React.FC = () => {
       <div className="bg-gradient-to-r from-blue-600 to-teal-500 text-white py-24">
         <Container>
           <div className="max-w-3xl mx-auto text-center">
+            <div className="mb-4">
+              <Link to="/triage" className="inline-flex items-center text-white/80 hover:text-white text-sm mb-2">
+                ← Back to Triage Assessment
+              </Link>
+            </div>
             <h1 className="text-4xl font-bold mb-4">Find a Specialist Clinic</h1>
             <p className="text-xl mb-8">Locate screening facilities and specialists near you.</p>
             <div className="relative max-w-2xl mx-auto">

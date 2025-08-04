@@ -1,6 +1,7 @@
 // /home/project/src/pages/FindGPPage.tsx
 
 import React, { useState, useEffect, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { Search, MapPin, Phone, Mail, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/Button'; // Assuming your Button component is here
 import { Container } from '@/components/ui/Container'; // Assuming your Container component is here
@@ -114,6 +115,11 @@ const FindGPPage: React.FC = () => {
       <div className="bg-gradient-to-r from-blue-600 to-teal-600 text-white py-24">
         <Container> {/* Use Container for consistent max-width and centering */}
           <div className="max-w-4xl mx-auto text-center">
+            <div className="mb-4">
+              <Link to="/triage" className="inline-flex items-center text-white/80 hover:text-white text-sm mb-2">
+                ← Back to Triage Assessment
+              </Link>
+            </div>
             <h1 className="text-4xl font-bold mb-6">Find a Trusted Family Doctor (GP)</h1>
             <p className="text-xl mb-8">
               Connect with GPs who offer colorectal cancer screening and referral services.

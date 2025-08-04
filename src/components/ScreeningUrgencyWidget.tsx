@@ -210,13 +210,55 @@ const ScreeningUrgencyWidget: React.FC = () => {
             </div>
           </div>
 
-          {/* CTA Button */}
-          <div className="mt-6 text-center">
-            <Link to="/get-screened">
-              <Button className="bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 text-white text-lg font-semibold px-8 py-4 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105">
-                Start My Screening
-              </Button>
-            </Link>
+          {/* Conditional Referral Buttons */}
+          <div className="mt-6 space-y-4">
+            {riskLevel === 'high' && (
+              <div className="text-center">
+                <Link to="/find-specialist">
+                  <Button className="bg-red-600 hover:bg-red-700 text-white text-lg font-semibold px-8 py-4 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 w-full sm:w-auto">
+                    Book a Colonoscopy Specialist
+                  </Button>
+                </Link>
+                <p className="text-sm text-gray-600 mt-2">
+                  Connect with gastroenterologists and colorectal specialists in Singapore
+                </p>
+              </div>
+            )}
+            
+            {riskLevel === 'moderate' && (
+              <div className="text-center">
+                <Link to="/find-a-gp">
+                  <Button className="bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold px-8 py-4 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 w-full sm:w-auto">
+                    Find a GP Near You
+                  </Button>
+                </Link>
+                <p className="text-sm text-gray-600 mt-2">
+                  Locate general practitioners for screening consultation
+                </p>
+              </div>
+            )}
+            
+            {riskLevel === 'low' && (
+              <div className="text-center">
+                <Link to="/get-screened">
+                  <Button className="bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 text-white text-lg font-semibold px-8 py-4 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 w-full sm:w-auto">
+                    Learn About Screening Options
+                  </Button>
+                </Link>
+                <p className="text-sm text-gray-600 mt-2">
+                  Explore available screening methods and stay informed
+                </p>
+              </div>
+            )}
+            
+            {/* Secondary CTA for all risk levels */}
+            {riskLevel && (
+              <div className="text-center pt-4 border-t border-gray-200">
+                <Link to="/education/faqs" className="text-teal-600 hover:text-teal-800 underline text-sm">
+                  Have questions? Visit our FAQ section
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       )}
