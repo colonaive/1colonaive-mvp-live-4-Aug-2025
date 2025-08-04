@@ -316,7 +316,9 @@ const EducationHub: React.FC = () => {
             )}
 
             {/* Evidence Highlights Component */}
-            <EvidenceHighlights />
+            <section className="py-12 bg-sky-50" id="evidence">
+              <EvidenceHighlights />
+            </section>
 
             {/* Newsroom */}
             <div className="mb-12">
