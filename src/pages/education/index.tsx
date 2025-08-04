@@ -9,7 +9,7 @@ import ArticleCard from '../../components/education/ArticleCard';
 import { useEducationContent } from '../../hooks/useEducationContent';
 import { educationCategories } from '../../data/education/categories';
 import { BookOpen, Users, FileText, TrendingUp, Newspaper, Search, Filter, X, Shield, BarChart3 } from 'lucide-react';
-import EvidenceHighlights from '../../components/EvidenceHighlights';
+import { EvidenceHighlights } from '../../components/EvidenceHighlights';
 
 const EducationHub: React.FC = () => {
   const [audience, setAudience] = useState<'patients' | 'clinicians' | 'both'>('both');
