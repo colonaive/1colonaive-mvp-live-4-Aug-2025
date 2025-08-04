@@ -341,6 +341,22 @@ const EarlyWarningSigns: React.FC = () => {
           </Link>
         </div>
 
+        {/* Triage Tool CTA */}
+        <div className="bg-purple-50 border border-purple-200 rounded-lg p-6 mb-8">
+          <div className="text-center">
+            <h3 className="text-xl font-semibold text-purple-900 mb-3">Unsure if your symptoms need a doctor's review?</h3>
+            <p className="text-purple-800 mb-6">
+              Try our Triage Tool today to get personalized guidance based on your specific symptoms and risk factors.
+            </p>
+            <Link 
+              to="/triage"
+              className="inline-flex items-center px-8 py-4 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 transition-colors"
+            >
+              Try Triage Tool
+            </Link>
+          </div>
+        </div>
+
         {/* Severe Symptoms Warning */}
         <div className="bg-red-100 border-2 border-red-300 rounded-lg p-6 mb-8">
           <div className="flex items-start space-x-3">

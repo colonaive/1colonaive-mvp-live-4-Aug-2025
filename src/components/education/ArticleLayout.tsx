@@ -236,6 +236,33 @@ const ArticleLayout: React.FC<ArticleLayoutProps> = ({
               </div>
             </div>
             
+            {/* Triage Tool Prompt - only for symptom-related articles */}
+            {(article.category.includes('symptoms') || article.tags.some(tag => 
+              ['symptoms', 'warning signs', 'early detection', 'risk factors'].includes(tag.toLowerCase())
+            )) && (
+              <div className="bg-orange-50 border border-orange-200 rounded-lg p-6 mb-8">
+                <div className="flex items-start space-x-3">
+                  <div className="flex-shrink-0">
+                    <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
+                      <span className="text-white text-sm font-bold">?</span>
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-orange-900 mb-2">Worried about symptoms?</h3>
+                    <p className="text-orange-800 mb-4">
+                      Use our secure self-assessment Triage Tool to get personalized guidance based on your symptoms and risk factors.
+                    </p>
+                    <Link 
+                      to="/triage"
+                      className="inline-flex items-center px-6 py-3 bg-orange-600 text-white font-medium rounded-lg hover:bg-orange-700 transition-colors"
+                    >
+                      Start Triage Assessment
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Medical Disclaimer */}
             <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg mb-8">
               <p className="text-sm text-blue-800">

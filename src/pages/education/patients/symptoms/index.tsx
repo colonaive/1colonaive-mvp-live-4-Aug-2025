@@ -96,6 +96,29 @@ const PatientSymptomsHub: React.FC = () => {
           </div>
         </div>
 
+        {/* Triage Tool Alert */}
+        <div className="mt-8 bg-blue-100 border border-blue-300 rounded-lg p-6">
+          <div className="flex items-start space-x-3">
+            <div className="flex-shrink-0">
+              <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center">
+                <span className="text-white text-sm font-bold">!</span>
+              </div>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold text-blue-900 mb-2">Not sure if your symptoms are concerning?</h3>
+              <p className="text-blue-800 mb-4">
+                Try our Triage Tool to get personalized guidance based on your symptoms and risk factors.
+              </p>
+              <Link 
+                to="/triage"
+                className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Try Triage Tool
+              </Link>
+            </div>
+          </div>
+        </div>
+
         {/* FAQ Section */}
         <div className="mt-8 bg-blue-50 rounded-lg p-6 text-center">
           <h3 className="text-lg font-semibold text-blue-900 mb-2">Have more questions?</h3>

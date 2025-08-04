@@ -145,6 +145,22 @@ const EarlySymptomsOfCRC: React.FC = () => {
                 </p>
               </div>
 
+              {/* Triage Tool CTA */}
+              <div className="bg-green-50 border border-green-200 rounded-lg p-6 mb-12">
+                <div className="text-center">
+                  <h3 className="text-xl font-semibold text-green-900 mb-3">Unsure if your symptoms need a doctor's review?</h3>
+                  <p className="text-green-800 mb-6">
+                    Try our Triage Tool today to get personalized guidance based on your symptoms and risk factors.
+                  </p>
+                  <Link 
+                    to="/triage"
+                    className="inline-flex items-center px-8 py-4 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors"
+                  >
+                    Try Triage Tool
+                  </Link>
+                </div>
+              </div>
+
               {/* Final closing text */}
               <div className="text-center border-t border-gray-200 pt-12">
                 <p className="text-xl font-semibold text-gray-800 mb-2">
