@@ -80,7 +80,7 @@ const ScreeningUrgencyWidget: React.FC = () => {
         return {
           icon: '🔴',
           title: 'High Risk',
-          message: 'You are High Risk. Please schedule a colonoscopy today.',
+          message: 'You may be at increased risk. Please consult a healthcare provider about early screening options including colonoscopy or blood tests.',
           bgColor: 'bg-red-50',
           borderColor: 'border-l-red-500',
           textColor: 'text-red-800'
@@ -89,7 +89,7 @@ const ScreeningUrgencyWidget: React.FC = () => {
         return {
           icon: '🟡',
           title: 'Moderate Risk',
-          message: 'You are Moderate Risk. Consider a blood-based screening.',
+          message: 'You may benefit from screening. Consider discussing blood-based or stool-based screening options with your provider.',
           bgColor: 'bg-yellow-50',
           borderColor: 'border-l-yellow-500',
           textColor: 'text-yellow-800'
@@ -98,7 +98,7 @@ const ScreeningUrgencyWidget: React.FC = () => {
         return {
           icon: '🟢',
           title: 'Low Risk',
-          message: 'You are Low Risk. Learn more about CRC and screening options.',
+          message: 'You may not meet current criteria for immediate screening, but stay informed. Learn more about early signs of colorectal cancer.',
           bgColor: 'bg-green-50',
           borderColor: 'border-l-green-500',
           textColor: 'text-green-800'
@@ -202,6 +202,9 @@ const ScreeningUrgencyWidget: React.FC = () => {
                 </h3>
                 <p className={`mt-1 ${riskContent.textColor}`}>
                   {riskContent.message}
+                </p>
+                <p className={`mt-3 text-sm ${riskContent.textColor} italic border-t pt-3 border-gray-300`}>
+                  <em>This triage result does not constitute medical advice. Always consult a licensed healthcare provider to make decisions about screening and diagnosis.</em>
                 </p>
               </div>
             </div>
