@@ -4,8 +4,8 @@ import React from 'react';
 // ✅ The old HeroSection is commented out safely
 // import HeroSection from "../components/HeroSection";
 
-// ✅ Correct import of the new full-screen HeroSection1
-import HeroSection1 from "../components/HeroSection1";
+// ✅ Correct import of the redesigned HeroSection
+import HeroSection from "../components/HeroSection";
 
 import CrisisSection from "../components/CrisisSection";
 import WhyColonoscopyMatters from "../components/WhyColonoscopyMatters";
@@ -19,8 +19,8 @@ import JoinMovementSection from "../components/JoinMovementSection";
 const HomePage: React.FC = () => {
   return (
     <>
-      {/* ✅ Render the new HeroSection1 */}
-      <HeroSection1 />
+      {/* ✅ Render the redesigned HeroSection */}
+      <HeroSection />
 
       <CrisisSection />
       <WhyColonoscopyMatters />
