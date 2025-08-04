@@ -1,7 +1,7 @@
 // /home/project/src/pages/FindGPPage.tsx
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Search, MapPin, Phone, Mail, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/Button'; // Assuming your Button component is here
 import { Container } from '@/components/ui/Container'; // Assuming your Container component is here
@@ -25,6 +25,7 @@ interface GP {
 }
 
 const FindGPPage: React.FC = () => {
+  const location = useLocation();
   const [gps, setGPs] = useState<GP[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -121,6 +122,9 @@ const FindGPPage: React.FC = () => {
               </Link>
             </div>
             <h1 className="text-4xl font-bold mb-6">Find a Trusted Family Doctor (GP)</h1>
+            <p className="text-lg mt-4 text-white font-medium">
+              Colorectal cancer is preventable. Your GP is your first line of defense.
+            </p>
             <p className="text-xl mb-8">
               Connect with GPs who offer colorectal cancer screening and referral services.
             </p>
@@ -141,6 +145,12 @@ const FindGPPage: React.FC = () => {
       {/* Main Content */}
       <section className="py-12 bg-slate-50">
         <Container> {/* Use Container for consistent max-width and centering */}
+          {/* Triage Banner */}
+          {location.state?.fromTriage && (
+            <div className="bg-yellow-50 text-yellow-800 p-4 rounded mb-6 text-center font-medium">
+              Based on your triage result, a GP consult is recommended. Choose a provider below.
+            </div>
+          )}
           {/* Filters */}
           <div className="flex flex-wrap items-center justify-center gap-4 mb-8">
             <select
@@ -179,6 +189,11 @@ const FindGPPage: React.FC = () => {
             )}
           </div>
 
+          {/* Motivational Stats */}
+          <p className="text-center text-gray-700 mb-2 text-sm">
+            Early detection saves lives. Trusted GPs can help you get started.
+          </p>
+          
           {/* Results Count */}
           <p className="text-gray-600 mb-6 text-center">
             {loading ? "Loading..." : `Found ${filteredGPs.length} clinic${filteredGPs.length !== 1 ? 's' : ''}`}
@@ -257,8 +272,8 @@ const FindGPPage: React.FC = () => {
                             </div>
                           </div>
                         )}
-                        <Button className="w-full md:w-auto mt-auto"> {/* Align to bottom if using flex-col */}
-                          Book Appointment
+                        <Button disabled variant="secondary" className="w-full md:w-auto mt-auto">
+                          Appointment Booking Coming Soon
                         </Button>
                       </div>
                     </div>

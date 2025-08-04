@@ -61,6 +61,7 @@ export const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [activeSubmenu, setActiveSubmenu] = useState<string | null>(null);
   const [isTrialsHovered, setIsTrialsHovered] = useState(false);
+  const [isNewsHovered, setIsNewsHovered] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
   const menuLeaveTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -257,6 +258,14 @@ export const Header = () => {
             )}
           </div>
         ))}
+        <Link 
+          to="/newsroom/crc-news-feed" 
+          onClick={handleClose} 
+          className="text-white font-semibold py-2 flex items-center"
+        >
+          📰 Live CRC News
+          <span className="ml-2 w-2 h-2 rounded-full bg-red-500 animate-pulse inline-block" />
+        </Link>
         <Link to="/clinical-trials" onClick={handleClose} className="text-white font-semibold py-2">Clinical Trials</Link>
       </nav>
     </div>
@@ -293,6 +302,21 @@ export const Header = () => {
               {renderDropdown("Education", educationLinks, "edu")}
               {renderDropdown("Get Screened", screeningLinks, "screen")}
               {renderDropdown("Movement Pillars", pillarLinks, "pillars")}
+              <Link
+                to="/newsroom/crc-news-feed"
+                className="relative text-white hover:text-teal-300 flex items-center text-sm font-semibold px-3 h-full"
+                title="Daily updated CRC headlines + summaries from trusted medical sources."
+                onMouseEnter={() => setIsNewsHovered(true)}
+                onMouseLeave={() => setIsNewsHovered(false)}
+              >
+                📰 Live CRC News
+                <span className="ml-1 w-2 h-2 rounded-full bg-red-500 animate-pulse inline-block" />
+                <span
+                  className={`absolute bottom-[20px] left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-teal-400 to-transparent transform transition-transform duration-300 ease-out origin-center ${
+                    isNewsHovered ? 'scale-x-100' : 'scale-x-0'
+                  }`}
+                ></span>
+              </Link>
               {renderDropdown("Join the Movement", joinLinks, "join")}
               {renderDropdown("About Us", aboutLinks, "about")}
               <Link

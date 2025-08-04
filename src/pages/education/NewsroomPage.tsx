@@ -3,7 +3,7 @@ import { Container } from '../../components/ui/Container';
 import { Card, CardContent } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Link } from 'react-router-dom';
-import { Newspaper, Calendar, ArrowRight, Tag } from 'lucide-react';
+import { Newspaper, Calendar, ArrowRight, Tag, Sparkles, TrendingUp } from 'lucide-react';
 
 const newsItems = [
   {
@@ -47,6 +47,47 @@ const NewsroomPage: React.FC = () => {
 
       <Container>
         <div className="max-w-4xl mx-auto py-12">
+          {/* Live CRC News Feed CTA */}
+          <Card className="mb-8 border-l-4 border-l-red-500 bg-gradient-to-r from-red-50 to-orange-50">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-start gap-4">
+                  <div className="relative">
+                    <Newspaper className="h-8 w-8 text-red-600" />
+                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-gray-900 mb-2">📰 Live CRC Research Updates</h2>
+                    <p className="text-gray-700 mb-3">
+                      Get real-time updates on colorectal cancer breakthroughs, screening advances, 
+                      and clinical research from trusted medical sources worldwide.
+                    </p>
+                    <div className="flex items-center gap-4 text-sm text-gray-600">
+                      <div className="flex items-center">
+                        <Sparkles className="h-4 w-4 mr-1 text-blue-500" />
+                        AI Summarized
+                      </div>
+                      <div className="flex items-center">
+                        <TrendingUp className="h-4 w-4 mr-1 text-green-500" />
+                        Daily Updates
+                      </div>
+                      <div className="flex items-center">
+                        <Calendar className="h-4 w-4 mr-1 text-purple-500" />
+                        Latest Research
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <Link to="/newsroom/crc-news-feed">
+                  <Button className="bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-3">
+                    View Live Feed
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+
           <div className="grid gap-6">
             {newsItems.map((item, index) => (
               <Card key={index} className="hover:shadow-lg transition-all duration-300">

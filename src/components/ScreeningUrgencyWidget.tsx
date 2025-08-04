@@ -1,6 +1,6 @@
 // /src/components/ScreeningUrgencyWidget.tsx
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from './ui/Button';
 
 interface FormData {
@@ -12,6 +12,7 @@ interface FormData {
 type RiskLevel = 'low' | 'moderate' | 'high' | null;
 
 const ScreeningUrgencyWidget: React.FC = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState<FormData>({
     age: '',
     familyHistory: '',
@@ -98,7 +99,7 @@ const ScreeningUrgencyWidget: React.FC = () => {
         return {
           icon: '🟢',
           title: 'Low Risk',
-          message: 'Advanced blood-based screening technologies are being evaluated by Singapore\'s Health Sciences Authority. These tests have demonstrated improved detection of early-stage disease compared to traditional methods in clinical studies.',
+          message: 'HSA-cleared advanced blood-based screening technologies are available in Singapore, alongside traditional options like FIT tests. These tests have demonstrated improved detection of early-stage disease in clinical studies.\n\nTalk to your GP if you\'re concerned about early-onset colorectal cancer or want to explore your screening options.',
           bgColor: 'bg-green-50',
           borderColor: 'border-l-green-500',
           textColor: 'text-green-800'
@@ -200,9 +201,11 @@ const ScreeningUrgencyWidget: React.FC = () => {
                 <h3 className={`font-bold text-lg ${riskContent.textColor}`}>
                   {riskContent.title}
                 </h3>
-                <p className={`mt-1 ${riskContent.textColor}`}>
-                  {riskContent.message}
-                </p>
+                {riskContent.message.split('\n\n').map((paragraph, index) => (
+                  <p key={index} className={`${index === 0 ? 'mt-1' : 'mt-3'} ${riskContent.textColor} ${index === 1 ? 'italic' : ''}`}>
+                    {paragraph}
+                  </p>
+                ))}
                 <p className={`mt-3 text-sm ${riskContent.textColor} italic border-t pt-3 border-gray-300`}>
                   <em>This triage result does not constitute medical advice. Always consult a licensed healthcare provider to make decisions about screening and diagnosis.</em>
                 </p>
@@ -227,11 +230,12 @@ const ScreeningUrgencyWidget: React.FC = () => {
             
             {riskLevel === 'moderate' && (
               <div className="text-center">
-                <Link to="/find-a-gp">
-                  <Button className="bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold px-8 py-4 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 w-full sm:w-auto">
-                    Find a GP Near You
-                  </Button>
-                </Link>
+                <Button 
+                  onClick={() => navigate('/find-a-gp', { state: { fromTriage: true } })}
+                  className="bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold px-8 py-4 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 w-full sm:w-auto"
+                >
+                  Find a GP Near You
+                </Button>
                 <p className="text-sm text-gray-600 mt-2">
                   Locate general practitioners for screening consultation
                 </p>

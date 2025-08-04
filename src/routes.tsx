@@ -1,6 +1,7 @@
 import { AdminLogin } from './pages/admin/AdminLogin';
 import { ProtectedAdminRoute } from './components/ProtectedAdminRoute';
 import SuperAdminDashboard from './pages/admin/SuperAdminDashboard';
+import NewsFeedAdmin from './pages/admin/NewsFeedAdmin';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
@@ -49,6 +50,8 @@ import ClinicianCMEHub from './pages/education/clinicians/cme-resources';
 import NewsroomHub from './pages/education/newsroom';
 import PressReleasesPage from './pages/education/newsroom/press-releases';
 import ResearchUpdatesPage from './pages/education/newsroom/research-updates';
+import CRCNewsFeed from './pages/newsroom/CRCNewsFeed';
+import CRCNewsFeedPage from './pages/newsroom/CRCNewsFeedPage';
 import FAQsPage from './pages/education/FAQsPage';
 import NewsroomPage from './pages/education/NewsroomPage';
 import ResourcesPage from './pages/education/ResourcesPage';
@@ -66,6 +69,7 @@ import CSRShowcasePage from './pages/CSRShowcasePage';
 import UpcomingEventsPage from './pages/UpcomingEventsPage';
 import FindGPPage from './pages/FindGPPage';
 import FindSpecialistPage from './pages/FindSpecialistPage';
+import TriagePage from './pages/triage';
 import PillarsPage from './pages/PillarsPage';
 import RIDCRCPUBPage from './pages/pillars/RIDCRCPUBPage';
 import RIDCRCSGPPage from './pages/pillars/RIDCRCSGPPage';
@@ -136,13 +140,16 @@ const MainRoutes = () => {
           <Route path="/education/newsroom" element={<NewsroomHub />} />
           <Route path="/education/newsroom/press-releases" element={<PressReleasesPage />} />
           <Route path="/education/newsroom/research-updates" element={<ResearchUpdatesPage />} />
+          <Route path="/newsroom/crc-news" element={<CRCNewsFeed />} />
+          <Route path="/newsroom/crc-news-feed" element={<CRCNewsFeedPage />} />
           
           <Route path="/education/faqs" element={<FAQsPage />} />
           <Route path="/education/newsroom" element={<NewsroomPage />} />
           <Route path="/education/resources" element={<ResourcesPage />} />
           <Route path="/upcoming-events" element={<UpcomingEventsPage />} />
           <Route path="/find-a-gp" element={<FindGPPage />} />
-          <Route path="/find-a-specialist" element={<FindSpecialistPage />} />
+          <Route path="/find-specialist" element={<FindSpecialistPage />} />
+          <Route path="/triage" element={<TriagePage />} />
           <Route path="/movement-pillars" element={<PillarsPage />} />
           <Route path="/pillars/rid-crc-pub" element={<RIDCRCPUBPage />} />
           <Route path="/pillars/rid-crc-sgp" element={<RIDCRCSGPPage />} />
@@ -170,6 +177,14 @@ const MainRoutes = () => {
             element={
               <ProtectedAdminRoute>
                 <SuperAdminDashboard />
+              </ProtectedAdminRoute>
+            } 
+          />
+          <Route 
+            path="/admin/news" 
+            element={
+              <ProtectedAdminRoute>
+                <NewsFeedAdmin />
               </ProtectedAdminRoute>
             } 
           />
