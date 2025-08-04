@@ -80,7 +80,7 @@ const ScreeningUrgencyWidget: React.FC = () => {
         return {
           icon: '🔴',
           title: 'High Risk',
-          message: 'You may be at increased risk. Please consult a healthcare provider about early screening options including colonoscopy or blood tests.',
+          message: 'Based on your risk factors, you should consult a healthcare provider promptly about screening options. Modern blood-based screening technologies have demonstrated improved detection of early-stage disease and are being evaluated by Singapore\'s Health Sciences Authority.',
           bgColor: 'bg-red-50',
           borderColor: 'border-l-red-500',
           textColor: 'text-red-800'
@@ -89,7 +89,7 @@ const ScreeningUrgencyWidget: React.FC = () => {
         return {
           icon: '🟡',
           title: 'Moderate Risk',
-          message: 'You may benefit from screening. Consider discussing blood-based or stool-based screening options with your provider.',
+          message: 'You may benefit from colorectal cancer screening. Modern screening technologies, including blood-based tests, offer improved detection capabilities. Early detection can improve survival rates to over 90% for early-stage disease.',
           bgColor: 'bg-yellow-50',
           borderColor: 'border-l-yellow-500',
           textColor: 'text-yellow-800'
@@ -98,7 +98,7 @@ const ScreeningUrgencyWidget: React.FC = () => {
         return {
           icon: '🟢',
           title: 'Low Risk',
-          message: 'You may not meet current criteria for immediate screening, but stay informed. Learn more about early signs of colorectal cancer.',
+          message: 'Advanced blood-based screening technologies are being evaluated by Singapore\'s Health Sciences Authority. These tests have demonstrated improved detection of early-stage disease compared to traditional methods in clinical studies.',
           bgColor: 'bg-green-50',
           borderColor: 'border-l-green-500',
           textColor: 'text-green-800'

@@ -8,7 +8,8 @@ import FeaturedContent from '../../components/education/FeaturedContent';
 import ArticleCard from '../../components/education/ArticleCard';
 import { useEducationContent } from '../../hooks/useEducationContent';
 import { educationCategories } from '../../data/education/categories';
-import { BookOpen, Users, FileText, TrendingUp, Newspaper, Search, Filter, X, Shield } from 'lucide-react';
+import { BookOpen, Users, FileText, TrendingUp, Newspaper, Search, Filter, X, Shield, BarChart3 } from 'lucide-react';
+import EvidenceHighlights from '../../components/EvidenceHighlights';
 
 const EducationHub: React.FC = () => {
   const [audience, setAudience] = useState<'patients' | 'clinicians' | 'both'>('both');
@@ -147,6 +148,61 @@ const EducationHub: React.FC = () => {
           )}
         </div>
 
+        {/* Screening Evidence Section */}
+        {!searchQuery && (
+          <div className="mb-12">
+            <div className="bg-gradient-to-r from-blue-50 to-teal-50 rounded-xl p-8 mb-8">
+              <div className="text-center mb-6">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
+                  <BarChart3 className="h-8 w-8 text-blue-600" />
+                </div>
+                <h2 className="text-3xl font-bold text-gray-900 mb-3">Screening Evidence</h2>
+                <p className="text-lg text-gray-700 max-w-3xl mx-auto">
+                  Evidence-based insights supporting colorectal cancer screening effectiveness, powered by peer-reviewed research and clinical guidelines.
+                </p>
+              </div>
+              
+              {/* Key Evidence Highlights */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div className="bg-white rounded-lg p-6 text-center shadow-sm">
+                  <div className="text-3xl font-bold text-red-600 mb-2">53-62%</div>
+                  <div className="text-sm text-gray-600">CRC mortality reduction with colonoscopy</div>
+                  <div className="text-xs text-gray-500 mt-2">Zhang et al. 2020</div>
+                </div>
+                <div className="bg-white rounded-lg p-6 text-center shadow-sm">
+                  <div className="text-3xl font-bold text-green-600 mb-2">90%+</div>
+                  <div className="text-sm text-gray-600">5-year survival for Stage I CRC</div>
+                  <div className="text-xs text-gray-500 mt-2">Multiple clinical studies</div>
+                </div>
+                <div className="bg-white rounded-lg p-6 text-center shadow-sm">
+                  <div className="text-3xl font-bold text-blue-600 mb-2">2.1x</div>
+                  <div className="text-sm text-gray-600">Improved participation with non-invasive screening</div>
+                  <div className="text-xs text-gray-500 mt-2">FIT postal programs</div>
+                </div>
+                <div className="bg-white rounded-lg p-6 text-center shadow-sm">
+                  <div className="text-3xl font-bold text-purple-600 mb-2">15%</div>
+                  <div className="text-sm text-gray-600">Increase in early-onset CRC (adults <50)</div>
+                  <div className="text-xs text-gray-500 mt-2">USPSTF 2021</div>
+                </div>
+              </div>
+              
+              {/* HSA Regulatory Note */}
+              <div className="bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-blue-200">
+                <div className="flex items-start space-x-3">
+                  <Shield className="h-5 w-5 text-blue-600 mt-0.5" />
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-1">Regulatory Context</h4>
+                    <p className="text-sm text-gray-700">
+                      Advanced blood-based screening technologies are being evaluated by Singapore's Health Sciences Authority. 
+                      These tests have demonstrated improved detection of early-stage disease compared to traditional methods in clinical studies.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Featured Content */}
         {featuredArticles.length > 0 && !searchQuery && (
           <FeaturedContent 
@@ -258,6 +314,9 @@ const EducationHub: React.FC = () => {
                 </div>
               </div>
             )}
+
+            {/* Evidence Highlights Component */}
+            <EvidenceHighlights />
 
             {/* Newsroom */}
             <div className="mb-12">
