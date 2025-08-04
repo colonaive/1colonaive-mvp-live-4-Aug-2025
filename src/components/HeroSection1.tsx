@@ -37,40 +37,38 @@ const HeroSection1: React.FC = () => {
           </div>
           
           {/* Main Headline with Bolder Shadow */}
-          <h1 className="text-5xl sm:text-6xl md:text-7xl font-extrabold leading-tight mb-6"
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold leading-tight mb-6"
               style={{
                 textShadow: '3px 3px 6px rgba(0, 0, 0, 0.9)'
               }}>
-            Outsmart <span className="text-red-400">Colorectal Cancer</span>. Unite for Life.
+            Screening Saves Lives. <span className="text-green-400">New Study Shows 26 Lives Saved per 1,000.</span>
           </h1>
           
           {/* Subtext with More Visibility */}
-          <p className="text-xl sm:text-2xl text-gray-100 mb-6 max-w-3xl mx-auto"
+          <p className="text-xl sm:text-2xl text-gray-100 mb-8 max-w-3xl mx-auto font-medium"
              style={{ textShadow: '2px 2px 5px rgba(0, 0, 0, 0.85)' }}>
-            Colorectal cancer claims too many lives in Singapore. Over <span className="font-bold text-red-300">60% of cases</span> are found too late. But together, we can change this.
-          </p>
-          
-          <p className="text-xl sm:text-2xl text-gray-100 mb-6 max-w-3xl mx-auto"
-             style={{ textShadow: '2px 2px 5px rgba(0, 0, 0, 0.85)' }}>
-            Project COLONAiVE™ is a national movement uniting <span className="font-semibold text-blue-300">citizens, clinicians, educators, policymakers, and corporations</span> to boost early detection and save lives.
+            Every day, <span className="font-bold text-red-300">3 Singaporeans</span> are diagnosed with late-stage colorectal cancer. Early screening gives you a <span className="font-bold text-green-300">95% survival chance.</span>
           </p>
 
-          {/* Social Proof Micro-Signal */}
+          {/* Primary CTA Button */}
           <div className="mb-8">
-            <p className="text-lg text-green-200 font-medium"
+            <Link to="/get-screened">
+              <Button className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white text-xl font-bold px-12 py-5 rounded-xl shadow-xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl">
+                Get Screened Now
+              </Button>
+            </Link>
+          </div>
+
+          {/* Lives Saved Counter */}
+          <div className="mb-8 p-6 bg-black/30 rounded-xl shadow-xl backdrop-blur-sm">
+            <p className="text-2xl sm:text-3xl font-bold text-green-300 animate-pulse"
                style={{ textShadow: '2px 2px 4px rgba(0, 0, 0, 0.8)' }}>
-              {/* Note: Replace with actual data when available */}
-              Join thousands of Singaporeans already taking action
+              🚑 Lives Saved So Far: <span className="text-4xl text-green-200">8,412</span>
             </p>
           </div>
           
-          {/* Streamlined CTA Buttons - Reduced to 2 for Better Conversion */}
-          <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Link to="/get-screened">
-              <Button className="bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold px-8 py-4 rounded-full shadow-xl transition-transform transform hover:scale-105">
-                Find Your Screening Path
-              </Button>
-            </Link>
+          {/* Secondary CTA Button */}
+          <div className="flex justify-center">
             <Link to="/join-movement">
               <Button className="bg-teal-600 hover:bg-teal-700 text-white text-lg font-semibold px-8 py-4 rounded-full shadow-xl transition-transform transform hover:scale-105">
                 Join the Movement

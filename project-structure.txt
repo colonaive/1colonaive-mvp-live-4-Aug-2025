@@ -1,0 +1,412 @@
+Folder PATH listing for volume Windows
+Volume serial number is 3EFE-CDCB
+C:.
+¦   .gitignore
+¦   eslint.config.js
+¦   file-tree.txt
+¦   github-workflow.md
+¦   index.html
+¦   install-dependencies.sh
+¦   package-lock.json
+¦   package.json
+¦   postcss.config.js
+¦   project-structure.txt
+¦   README.md
+¦   tailwind.config.js
+¦   tsconfig.app.json
+¦   tsconfig.json
+¦   tsconfig.node.json
+¦   vite.config.ts
+¦   
++---public
+¦   ¦   android-chrome-192x192.png
+¦   ¦   android-chrome-512x512.png
+¦   ¦   apple-touch-icon.png
+¦   ¦   favicon-16x16.png
+¦   ¦   favicon-32x32.png
+¦   ¦   favicon.ico
+¦   ¦   image copy.png
+¦   ¦   image.png
+¦   ¦   site.webmanifest
+¦   ¦   _redirects
+¦   ¦   
+¦   +---assets
+¦   ¦   ¦   hero-pillar-team.webp
+¦   ¦   ¦   
+¦   ¦   +---advisors
+¦   ¦   ¦       eu-kong-weng.jpg
+¦   ¦   ¦       francis-seow.jpg
+¦   ¦   ¦       lawrence-ho.jpg
+¦   ¦   ¦       
+¦   ¦   +---flags
+¦   ¦   ¦       india-flag.png
+¦   ¦   ¦       philippines-flag.png
+¦   ¦   ¦       singapore-flag.png
+¦   ¦   ¦       
+¦   ¦   +---images
+¦   ¦       +---bloodtest
+¦   ¦       ¦       crc-screening-blood-test.webp
+¦   ¦       ¦       
+¦   ¦       +---doctor
+¦   ¦       ¦       doctor-stetescope.webp
+¦   ¦       ¦       
+¦   ¦       +---education
+¦   ¦       ¦   +---anatomy
+¦   ¦       ¦   ¦       colon-polyp-progression-stages.webp
+¦   ¦       ¦   ¦       colorectal-anatomy-diagram.webp
+¦   ¦       ¦   ¦       
+¦   ¦       ¦   +---procedures
+¦   ¦       ¦   ¦       colonoscopy-comfort.webp
+¦   ¦       ¦   ¦       colonoscopy-procedure-room.webp
+¦   ¦       ¦   ¦       
+¦   ¦       ¦   +---symptoms
+¦   ¦       ¦           colorectal-cancer-tumor-diagram.webp
+¦   ¦       ¦           
+¦   ¦       +---logo
+¦   ¦               COLONAiVE-Logo-Dark-version.webp
+¦   ¦               COLONAiVE-Logo-light-version.png
+¦   ¦               COLONAiVE-Logo-light-version.webp
+¦   ¦               
+¦   +---images
+¦   ¦       hero-pillar-team.webp
+¦   ¦       
+¦   +---pdfs
+¦           CSRpitch-deck.html
+¦           CSR_PitchDeck_COLONAiVE.pdf
+¦           
++---src
+¦   ¦   App.tsx
+¦   ¦   index.css
+¦   ¦   index.html
+¦   ¦   main.tsx
+¦   ¦   routes.tsx
+¦   ¦   supabase.ts
+¦   ¦   vite-env.d.ts
+¦   ¦   
+¦   +---api
+¦   ¦       chat.ts
+¦   ¦       
+¦   +---assets
+¦   ¦   ¦   hero-pillar-team.webp
+¦   ¦   ¦   
+¦   ¦   +---images
+¦   ¦       ¦   crc-awareness.webp
+¦   ¦       ¦   
+¦   ¦       +---crisis
+¦   ¦       ¦       crc-top-cancer.webp
+¦   ¦       ¦       late-stage-diagnosis.webp
+¦   ¦       ¦       low-screening-rates.webp
+¦   ¦       ¦       
+¦   ¦       +---herosection
+¦   ¦       ¦       colorectal-surgeons-colonoscopy.webp
+¦   ¦       ¦       
+¦   ¦       +---pillars
+¦   ¦               clinician-engagement.webp
+¦   ¦               corporate-csr.webp
+¦   ¦               patient-education.webp
+¦   ¦               policy-alignment.webp
+¦   ¦               public-awareness.webp
+¦   ¦               singapore-flag circular icon.webp
+¦   ¦               
+¦   +---components
+¦   ¦   ¦   AboutMovementSection.tsx
+¦   ¦   ¦   AdminDataTable.tsx
+¦   ¦   ¦   AdminLayout.tsx
+¦   ¦   ¦   AdminNavigation.tsx
+¦   ¦   ¦   AuthRedirector.tsx
+¦   ¦   ¦   BloodScreeningSection.tsx
+¦   ¦   ¦   BookingButton.tsx
+¦   ¦   ¦   BookingPopup.tsx
+¦   ¦   ¦   ChampionBookingRequestForm.tsx
+¦   ¦   ¦   ChampionChoiceModal.tsx
+¦   ¦   ¦   ChampionFamilyDoctorFlow.tsx
+¦   ¦   ¦   ChampionPopup.tsx
+¦   ¦   ¦   ChampionReferralPopup.tsx
+¦   ¦   ¦   ChampionSignUpForm.tsx
+¦   ¦   ¦   ChampionSmoothScreeningJourney.tsx
+¦   ¦   ¦   ChampionSpecialistFinderFlow.tsx
+¦   ¦   ¦   ChatLauncher.tsx
+¦   ¦   ¦   ClinicDisplay.tsx
+¦   ¦   ¦   ColonaiveLogo.tsx
+¦   ¦   ¦   CountrySelector.tsx
+¦   ¦   ¦   CrisisSection.tsx
+¦   ¦   ¦   CtaSection.tsx
+¦   ¦   ¦   DashboardModules.tsx
+¦   ¦   ¦   EvidenceSection.tsx
+¦   ¦   ¦   Footer.tsx
+¦   ¦   ¦   Header copy.tsx
+¦   ¦   ¦   Header.tsx
+¦   ¦   ¦   Headertest.tsx
+¦   ¦   ¦   HeroSection.tsx
+¦   ¦   ¦   HeroSection1.tsx
+¦   ¦   ¦   HomeSearchBar.tsx
+¦   ¦   ¦   JoinMovementSection.tsx
+¦   ¦   ¦   NationalTargetsSection.tsx
+¦   ¦   ¦   PathwaySection.tsx
+¦   ¦   ¦   PillarGrid.tsx
+¦   ¦   ¦   PillarsSection.tsx
+¦   ¦   ¦   PreviewButton.tsx
+¦   ¦   ¦   ProtectedAdminRoute.tsx
+¦   ¦   ¦   ProtectedRoute.tsx
+¦   ¦   ¦   ReferralFeeTracker.tsx
+¦   ¦   ¦   ScrollToTop.tsx
+¦   ¦   ¦   SG60GiftSection.tsx
+¦   ¦   ¦   ShareYourStoryForm.tsx
+¦   ¦   ¦   StatsSection.tsx
+¦   ¦   ¦   SubmissionSuccess.tsx
+¦   ¦   ¦   ThemeToggleButton.tsx
+¦   ¦   ¦   UpcomingEventsPopup.tsx
+¦   ¦   ¦   WhyColonoscopyMatters.tsx
+¦   ¦   ¦   
+¦   ¦   +---auth
+¦   ¦   ¦       Codetest.tsx
+¦   ¦   ¦       LoginForm.tsx
+¦   ¦   ¦       SignupForm.tsx
+¦   ¦   ¦       
+¦   ¦   +---chat
+¦   ¦   ¦       ChatBot.css
+¦   ¦   ¦       ChatBot.tsx
+¦   ¦   ¦       ChatBot_old.tsx
+¦   ¦   ¦       
+¦   ¦   +---common
+¦   ¦   ¦       ShareTheMovement.tsx
+¦   ¦   ¦       
+¦   ¦   +---education
+¦   ¦   ¦       ArticleCard.tsx
+¦   ¦   ¦       ArticleLayout.tsx
+¦   ¦   ¦       ContentSearch.tsx
+¦   ¦   ¦       FeaturedContent.tsx
+¦   ¦   ¦       RelatedArticles.tsx
+¦   ¦   ¦       
+¦   ¦   +---emails
+¦   ¦   ¦       ChampionConfirmationEmail.tsx
+¦   ¦   ¦       
+¦   ¦   +---ui
+¦   ¦           Button.tsx
+¦   ¦           Card.tsx
+¦   ¦           Container.tsx
+¦   ¦           InputField.tsx
+¦   ¦           
+¦   +---config
+¦   ¦       supabase.ts
+¦   ¦       
+¦   +---contexts
+¦   ¦       AuthContext.tsx
+¦   ¦       
+¦   +---data
+¦   ¦   ¦   clinicDatabase.ts
+¦   ¦   ¦   pillars.ts
+¦   ¦   ¦   
+¦   ¦   +---education
+¦   ¦           articles.ts
+¦   ¦           authors.ts
+¦   ¦           categories.ts
+¦   ¦           
+¦   +---guards
+¦   ¦       ProtectedRoute.tsx and PublicRoute.tsx
+¦   ¦       
+¦   +---hooks
+¦   ¦       useAdminData.ts
+¦   ¦       useAdminSecurity.ts
+¦   ¦       useChampionChoice.ts
+¦   ¦       useEducationContent.ts
+¦   ¦       useScrollToTop.ts
+¦   ¦       
+¦   +---lib
+¦   ¦       utils.ts
+¦   ¦       
+¦   +---pages
+¦   ¦   ¦   AboutUsPage.tsx
+¦   ¦   ¦   ChampionDashboard.tsx
+¦   ¦   ¦   ChampionProfileSettings.tsx
+¦   ¦   ¦   ChampionThankYouPage.tsx
+¦   ¦   ¦   ClinicalTrialsPage.tsx
+¦   ¦   ¦   ClinicianEducationPage.tsx
+¦   ¦   ¦   ClinicianReferralDashboard.tsx
+¦   ¦   ¦   ClinicianThankYouPage.tsx
+¦   ¦   ¦   ClinicProfilePage.tsx
+¦   ¦   ¦   ComingSoonPage.tsx
+¦   ¦   ¦   CookiePolicyPage.tsx
+¦   ¦   ¦   CorporateDashboard.tsx
+¦   ¦   ¦   CRCQuiz.tsx
+¦   ¦   ¦   CSRShowcasePage.tsx
+¦   ¦   ¦   EarlySymptomsPage.tsx
+¦   ¦   ¦   EducationPage.tsx
+¦   ¦   ¦   FindGPPage.tsx
+¦   ¦   ¦   FindSpecialistPage.tsx
+¦   ¦   ¦   GetScreenedPage.tsx
+¦   ¦   ¦   GPClinicDashboard.tsx
+¦   ¦   ¦   GPClinicProfileSettings.tsx
+¦   ¦   ¦   Header.tsx
+¦   ¦   ¦   HomePage.tsx
+¦   ¦   ¦   JoinMovementPage.tsx
+¦   ¦   ¦   JoinMovementSection.tsx
+¦   ¦   ¦   LoginRedirectPage.tsx
+¦   ¦   ¦   PatientDashboard.tsx
+¦   ¦   ¦   PatientEducationPage.tsx
+¦   ¦   ¦   PillarsPage.tsx
+¦   ¦   ¦   PrivacyPolicyPage.tsx
+¦   ¦   ¦   ReferFriendForm.tsx
+¦   ¦   ¦   ScreeningPage.tsx
+¦   ¦   ¦   share-your-story.tsx
+¦   ¦   ¦   SpecialistDashboard.tsx
+¦   ¦   ¦   SpecialistProfileSettings.tsx
+¦   ¦   ¦   stories.tsx
+¦   ¦   ¦   StrategyPage.tsx
+¦   ¦   ¦   TermsOfUsePage.tsx
+¦   ¦   ¦   UpcomingEventsPage.tsx
+¦   ¦   ¦   Vision2035Page.tsx
+¦   ¦   ¦   
+¦   ¦   +---about
+¦   ¦   ¦       AdvisorsPage.tsx
+¦   ¦   ¦       
+¦   ¦   +---admin
+¦   ¦   ¦       AdminLogin.tsx
+¦   ¦   ¦       SuperAdminDashboard.tsx
+¦   ¦   ¦       
+¦   ¦   +---auth
+¦   ¦   ¦       ChampionSignIn.tsx
+¦   ¦   ¦       ForgotPassword.tsx
+¦   ¦   ¦       Login.tsx
+¦   ¦   ¦       ResetPassword.tsx
+¦   ¦   ¦       
+¦   ¦   +---dev
+¦   ¦   ¦       ComponentPreview.tsx
+¦   ¦   ¦       DevPreview.tsx
+¦   ¦   ¦       DynamicPagePreview.tsx
+¦   ¦   ¦       
+¦   ¦   +---education
+¦   ¦   ¦   ¦   FAQsPage.tsx
+¦   ¦   ¦   ¦   index.tsx
+¦   ¦   ¦   ¦   NewsroomPage.tsx
+¦   ¦   ¦   ¦   ResourcesPage.tsx
+¦   ¦   ¦   ¦   
+¦   ¦   ¦   +---article
+¦   ¦   ¦   ¦       [slug].tsx
+¦   ¦   ¦   ¦       
+¦   ¦   ¦   +---clinicians
+¦   ¦   ¦   ¦   ¦   index.tsx
+¦   ¦   ¦   ¦   ¦   kaiser-crc-study.tsx
+¦   ¦   ¦   ¦   ¦   
+¦   ¦   ¦   ¦   +---case-studies
+¦   ¦   ¦   ¦   ¦       index.tsx
+¦   ¦   ¦   ¦   ¦       
+¦   ¦   ¦   ¦   +---cme-resources
+¦   ¦   ¦   ¦   ¦       index.tsx
+¦   ¦   ¦   ¦   ¦       
+¦   ¦   ¦   ¦   +---guidelines
+¦   ¦   ¦   ¦   ¦       index.tsx
+¦   ¦   ¦   ¦   ¦       
+¦   ¦   ¦   ¦   +---research
+¦   ¦   ¦   ¦           index.tsx
+¦   ¦   ¦   ¦           
+¦   ¦   ¦   +---newsroom
+¦   ¦   ¦   ¦   ¦   index.tsx
+¦   ¦   ¦   ¦   ¦   
+¦   ¦   ¦   ¦   +---press-releases
+¦   ¦   ¦   ¦   ¦       index.tsx
+¦   ¦   ¦   ¦   ¦       
+¦   ¦   ¦   ¦   +---research-updates
+¦   ¦   ¦   ¦           index.tsx
+¦   ¦   ¦   ¦           
+¦   ¦   ¦   +---patients
+¦   ¦   ¦       ¦   colonoscopy-gold-standard.tsx
+¦   ¦   ¦       ¦   colorectal-cancer.tsx
+¦   ¦   ¦       ¦   CRC-Singapore Story.tsx
+¦   ¦   ¦       ¦   early-symptoms-of-crc.tsx
+¦   ¦   ¦       ¦   how-crc-develops-from-polyps.tsx
+¦   ¦   ¦       ¦   index.tsx
+¦   ¦   ¦       ¦   
+¦   ¦   ¦       +---basics
+¦   ¦   ¦       ¦       how-crc-develops-from-polyps.tsx
+¦   ¦   ¦       ¦       index.tsx
+¦   ¦   ¦       ¦       understanding-colorectal-cancer.tsx
+¦   ¦   ¦       ¦       
+¦   ¦   ¦       +---prevention
+¦   ¦   ¦       ¦       index.tsx
+¦   ¦   ¦       ¦       
+¦   ¦   ¦       +---screening
+¦   ¦   ¦       ¦       colonoscopy-gold-standard.tsx
+¦   ¦   ¦       ¦       colonoscopy-preparation-complete-guide.tsx
+¦   ¦   ¦       ¦       index.tsx
+¦   ¦   ¦       ¦       
+¦   ¦   ¦       +---symptoms
+¦   ¦   ¦               early-warning-signs.tsx
+¦   ¦   ¦               index.tsx
+¦   ¦   ¦               
+¦   ¦   +---movement
+¦   ¦   ¦       CorporateCSRPage.tsx
+¦   ¦   ¦       
+¦   ¦   +---pillars
+¦   ¦   ¦       RIDCRCCSRPage.tsx
+¦   ¦   ¦       RIDCRCEDUPage.tsx
+¦   ¦   ¦       RIDCRCGOVPage.tsx
+¦   ¦   ¦       RIDCRCPUBPage.tsx
+¦   ¦   ¦       RIDCRCSGPPage.tsx
+¦   ¦   ¦       
+¦   ¦   +---signup
+¦   ¦   ¦       ChampionSignUp.tsx
+¦   ¦   ¦       CorporateSignUp.tsx
+¦   ¦   ¦       GPClinicSignUp.tsx
+¦   ¦   ¦       SpecialistSignUp.tsx
+¦   ¦   ¦       SpecialistSignupSuccess.tsx
+¦   ¦   ¦       
+¦   ¦   +---sponsor-sign-up
+¦   ¦           CorporateSignUp.tsx
+¦   ¦           
+¦   +---store
+¦   ¦       championStore.ts
+¦   ¦       
+¦   +---stores
+¦   ¦       authStore.ts
+¦   ¦       
+¦   +---types
+¦   ¦       index.ts
+¦   ¦       
+¦   +---utils
+¦       ¦   adminPermissions.ts
+¦       ¦   auth.ts
+¦       ¦   fuzzyMatch.ts
+¦       ¦   getChatbotResponse.ts
+¦       ¦   linkParser.tsx
+¦       ¦   smartDisplayClinic.ts
+¦       ¦   supabaseClient.ts
+¦       ¦   toast.ts
+¦       ¦   
+¦       +---knowledge
+¦               general.ts
+¦               screening.ts
+¦               statistics.ts
+¦               symptoms.ts
+¦               
++---supabase
+    +---functions
+    ¦   +---chatbot
+    ¦   ¦       index.ts
+    ¦   ¦       
+    ¦   +---send-referral-email
+    ¦           index.ts
+    ¦           
+    +---migrations
+            20250703163508_soft_breeze.sql
+            20250703164634_precious_butterfly.sql
+            20250703165326_young_star.sql
+            20250703170017_twilight_reef.sql
+            20250703180857_hidden_wave.sql
+            20250703202855_floral_resonance.sql
+            20250703210444_billowing_poetry.sql
+            20250703225157_gentle_beacon.sql
+            20250704111317_quick_shore.sql
+            20250704111351_nameless_shrine.sql
+            20250704111354_lively_pine.sql
+            20250704111403_old_manor.sql
+            20250704131900_super_dawn.sql
+            20250704133703_misty_band.sql
+            20250704141526_morning_disk.sql
+            20250704144753_curly_snow.sql
+            20250704151202_restless_river.sql
+            20250705114052_navy_scene.sql
+            20250705114815_throbbing_darkness.sql
+            20250705142251_frosty_spire.sql
+            20250706_auth_fix.sql
+            
