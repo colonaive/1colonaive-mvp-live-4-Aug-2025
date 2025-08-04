@@ -95,6 +95,20 @@ const PatientSymptomsHub: React.FC = () => {
             </Link>
           </div>
         </div>
+
+        {/* FAQ Section */}
+        <div className="mt-8 bg-blue-50 rounded-lg p-6 text-center">
+          <h3 className="text-lg font-semibold text-blue-900 mb-2">Have more questions?</h3>
+          <p className="text-blue-700 mb-4">
+            Visit our FAQ hub to learn more about symptoms, risk factors, and screening.
+          </p>
+          <Link 
+            to="/education/faqs"
+            className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Explore FAQs
+          </Link>
+        </div>
       </Container>
     </div>
   );

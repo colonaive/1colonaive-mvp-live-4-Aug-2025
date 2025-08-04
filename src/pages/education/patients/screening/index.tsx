@@ -84,6 +84,20 @@ const PatientScreeningHub: React.FC = () => {
             </Link>
           </div>
         </div>
+
+        {/* FAQ Section */}
+        <div className="mt-8 bg-teal-50 rounded-lg p-6 text-center">
+          <h3 className="text-lg font-semibold text-teal-900 mb-2">Still unsure about which test is right for you?</h3>
+          <p className="text-teal-700 mb-4">
+            Explore our Frequently Asked Questions for detailed guidance on screening options, preparation, and what to expect.
+          </p>
+          <Link 
+            to="/education/faqs"
+            className="inline-flex items-center px-6 py-3 bg-teal-600 text-white font-medium rounded-lg hover:bg-teal-700 transition-colors"
+          >
+            View Screening FAQs
+          </Link>
+        </div>
       </Container>
     </div>
   );

@@ -99,7 +99,8 @@ const GetScreenedPage: React.FC = () => {
                 Not Sure Which Option to Choose?
               </h3>
               <p className="text-gray-700 text-center mb-6">
-                Our clinician-backed Champion Support Team can help guide you to the most suitable screening option based on current clinical guidelines, your age, family history, and risk factors.
+                Our clinician-backed Champion Support Team can help guide you to the most suitable screening option based on current clinical guidelines, your age, family history, and risk factors. 
+                Not sure if screening is right for you? <Link to="/education/faqs" className="text-blue-600 hover:text-blue-800 underline">Read our FAQ</Link> for common questions and answers.
               </p>
               <div className="text-center text-sm text-gray-600 mt-4">
                 <p><strong>Clinical Evidence:</strong> Non-invasive screening improves participation rates by 2.1-fold</p>
