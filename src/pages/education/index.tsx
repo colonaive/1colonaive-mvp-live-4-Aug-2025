@@ -181,7 +181,7 @@ const EducationHub: React.FC = () => {
                 </div>
                 <div className="bg-white rounded-lg p-6 text-center shadow-sm">
                   <div className="text-3xl font-bold text-purple-600 mb-2">15%</div>
-                  <div className="text-sm text-gray-600">Increase in early-onset CRC (adults <50)</div>
+                  <div className="text-sm text-gray-600">Increase in early-onset CRC (adults &lt;50)</div>
                   <div className="text-xs text-gray-500 mt-2">USPSTF 2021</div>
                 </div>
               </div>
