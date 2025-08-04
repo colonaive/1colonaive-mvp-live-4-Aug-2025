@@ -45,8 +45,131 @@ const EXCLUSION_KEYWORDS = [
   'unproven', 'alternative medicine', 'celebrity'
 ];
 
+// Whitelisted sources for quality control
+const TRUSTED_SOURCES = [
+  'pubmed', 'nejm', 'jama', 'lancet', 'bmj', 'nature medicine',
+  'journal of clinical oncology', 'gastroenterology', 'annals of internal medicine',
+  'kaiser permanente', 'mayo clinic', 'cleveland clinic', 'johns hopkins',
+  'straits times', 'channelnewsasia', 'today online', 'ministry of health singapore',
+  'reuters health', 'associated press', 'healthline', 'webmd', 'medscape',
+  'world health organization', 'cdc', 'american cancer society', 'national cancer institute'
+];
+
+// Interface for skipped articles logging
+interface SkippedArticle {
+  title?: string;
+  link?: string;
+  source: string;
+  reason: string;
+  timestamp: string;
+  raw_content?: string;
+}
+
 class CRCNewsFeedService {
   private readonly OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
+  private skippedArticles: SkippedArticle[] = [];
+
+  /**
+   * Validate article URL integrity
+   */
+  private isValidUrl(url: string): boolean {
+    try {
+      const urlObj = new URL(url);
+      return urlObj.protocol === 'http:' || urlObj.protocol === 'https:';
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Validate if source is from trusted medical/news outlets
+   */
+  private isTrustedSource(source: string): boolean {
+    const lowerSource = source.toLowerCase();
+    return TRUSTED_SOURCES.some(trusted => 
+      lowerSource.includes(trusted.toLowerCase()) || 
+      trusted.toLowerCase().includes(lowerSource)
+    );
+  }
+
+  /**
+   * Validate article has minimum required fields
+   */
+  private validateArticleIntegrity(item: any, feedSource: string): { isValid: boolean; reason?: string } {
+    // Check for valid title
+    if (!item.title || item.title.trim().length < 10) {
+      return { isValid: false, reason: 'Missing or too short title' };
+    }
+
+    // Check for valid link
+    if (!item.link || !this.isValidUrl(item.link)) {
+      return { isValid: false, reason: 'Missing or invalid URL' };
+    }
+
+    // Check for publication date
+    if (!item.pubDate && !item.published) {
+      return { isValid: false, reason: 'Missing publication date' };
+    }
+
+    // Check if source is trusted (warning level, not blocking)
+    if (!this.isTrustedSource(feedSource)) {
+      console.warn(`Article from untrusted source: ${feedSource}`);
+    }
+
+    // Check for minimum content
+    const content = item.contentSnippet || item.description || item.content || '';
+    if (content.trim().length < 50) {
+      return { isValid: false, reason: 'Insufficient content for analysis' };
+    }
+
+    return { isValid: true };
+  }
+
+  /**
+   * Log skipped articles for admin review
+   */
+  private logSkippedArticle(item: any, feedSource: string, reason: string): void {
+    const skipped: SkippedArticle = {
+      title: item.title || 'No title',
+      link: item.link || 'No link',
+      source: feedSource,
+      reason,
+      timestamp: new Date().toISOString(),
+      raw_content: JSON.stringify(item).substring(0, 500)
+    };
+    
+    this.skippedArticles.push(skipped);
+    console.log(`[SKIPPED ARTICLE] ${reason}: ${skipped.title} from ${feedSource}`);
+    
+    // In production, this would also log to a database table or monitoring service
+    this.saveSkippedArticleToDatabase(skipped);
+  }
+
+  /**
+   * Save skipped articles to database for admin review
+   */
+  private async saveSkippedArticleToDatabase(skipped: SkippedArticle): Promise<void> {
+    try {
+      // In production, save to a dedicated skipped_articles table
+      const { error } = await supabase
+        .from('crc_news_skipped')
+        .insert([{
+          title: skipped.title,
+          link: skipped.link,
+          source: skipped.source,
+          skip_reason: skipped.reason,
+          raw_content: skipped.raw_content,
+          created_at: skipped.timestamp
+        }]);
+
+      if (error && !error.message.includes('relation "crc_news_skipped" does not exist')) {
+        console.error('Error logging skipped article:', error);
+      }
+    } catch (error) {
+      // Silently fail if table doesn't exist yet
+      console.warn('Skipped articles logging unavailable:', error);
+    }
+  }
 
   /**
    * Calculate relevance score based on content analysis
@@ -77,9 +200,9 @@ class CRCNewsFeedService {
   }
 
   /**
-   * Generate AI summary and relevance score using OpenAI
+   * Generate AI summary with strict accuracy guardrails
    */
-  private async generateAISummary(title: string, content: string): Promise<{
+  private async generateAISummary(title: string, content: string, source: string): Promise<{
     summary: string;
     relevance_score: number;
   }> {
@@ -103,28 +226,47 @@ class CRCNewsFeedService {
           messages: [
             {
               role: 'system',
-              content: `You are a medical news analyst specializing in colorectal cancer (CRC) research and screening. 
+              content: `You are a medical news analyst specializing in colorectal cancer (CRC) research and screening.
 
-Your task is to:
-1. Create a concise 2-4 line summary that captures the key clinical insights and implications
-2. Score the article's relevance to CRC screening/prevention (1-10 scale)
+CRITICAL ACCURACY REQUIREMENTS:
+1. NEVER hallucinate or invent statistics, percentages, or numerical data
+2. ONLY cite numbers that are explicitly mentioned in the source text
+3. ALWAYS attribute statistics to their specific source (journal name, study name, institution)
+4. If no specific numbers are provided, describe findings qualitatively
+5. Use phrases like "according to [source]" or "the study found" when citing data
 
-Scoring criteria:
-- 9-10: Major breakthroughs, policy changes, Singapore/APAC relevance, major studies (Kaiser Permanente, RAND)
-- 7-8: Significant clinical findings, new screening methods, mortality data
-- 5-6: General CRC research, routine clinical updates
-- 3-4: Tangentially related, limited clinical relevance  
-- 1-2: Not medically relevant, lifestyle content only
+FORBIDDEN PHRASES (unless explicitly in source):
+- "X% effectiveness" 
+- "Y lives saved"
+- "Z% sensitivity"
+- Any specific numerical claims not in the original text
 
-Respond in JSON format: {"summary": "...", "relevance_score": X}`
+REQUIRED FORMAT:
+- 2-4 sentences maximum
+- First sentence: Main finding with source attribution
+- Second sentence: Clinical significance or implication
+- Third sentence (optional): Relevance to screening/prevention
+
+SCORING CRITERIA (1-10):
+- 9-10: Major breakthroughs, Singapore/APAC relevance, landmark studies
+- 7-8: Significant clinical findings, new screening methods
+- 5-6: General CRC research, routine updates
+- 3-4: Tangentially related content
+- 1-2: Not medically relevant
+
+Respond in JSON: {"summary": "...", "relevance_score": X}`
             },
             {
               role: 'user',
-              content: `Title: ${title}\n\nContent: ${content.substring(0, 1500)}`
+              content: `Source: ${source}
+Title: ${title}
+Content: ${content.substring(0, 2000)}
+
+Generate a factually accurate summary that cites the source and only includes statistics explicitly mentioned in the content.`
             }
           ],
-          max_tokens: 300,
-          temperature: 0.3
+          max_tokens: 250,
+          temperature: 0.1 // Lower temperature for accuracy
         })
       });
 
@@ -133,19 +275,60 @@ Respond in JSON format: {"summary": "...", "relevance_score": X}`
       }
 
       const data = await response.json();
-      const result = JSON.parse(data.choices[0]?.message?.content || '{}');
+      let result;
+      
+      try {
+        result = JSON.parse(data.choices[0]?.message?.content || '{}');
+      } catch (parseError) {
+        console.error('Failed to parse AI response:', data.choices[0]?.message?.content);
+        throw new Error('Invalid AI response format');
+      }
+
+      // Validate summary doesn't contain suspicious patterns
+      const summary = result.summary || '';
+      if (this.containsSuspiciousStatistics(summary, content)) {
+        console.warn('AI summary contains potentially hallucinated statistics, using fallback');
+        return {
+          summary: this.generateFallbackSummary(title, content, source),
+          relevance_score: this.calculateRelevanceScore(title, content)
+        };
+      }
       
       return {
-        summary: result.summary || `${title.substring(0, 200)}...`,
+        summary: summary || this.generateFallbackSummary(title, content, source),
         relevance_score: Math.max(1, Math.min(10, result.relevance_score || 5))
       };
     } catch (error) {
       console.error('Error generating AI summary:', error);
       return {
-        summary: `${title.substring(0, 200)}...`,
+        summary: this.generateFallbackSummary(title, content, source),
         relevance_score: this.calculateRelevanceScore(title, content)
       };
     }
+  }
+
+  /**
+   * Check if summary contains statistics not present in original content
+   */
+  private containsSuspiciousStatistics(summary: string, originalContent: string): boolean {
+    // Extract percentages and numbers from summary
+    const summaryNumbers = summary.match(/\d+%|\d+\.\d+%|\d+\s*lives?\s*saved|\d+\s*sensitivity|\d+\s*specificity/gi) || [];
+    
+    if (summaryNumbers.length === 0) return false;
+    
+    // Check if these numbers appear in original content
+    return summaryNumbers.some(num => {
+      const cleanNum = num.replace(/[^\d.%]/g, '');
+      return !originalContent.toLowerCase().includes(cleanNum.toLowerCase());
+    });
+  }
+
+  /**
+   * Generate fallback summary without AI when accuracy is questionable
+   */
+  private generateFallbackSummary(title: string, content: string, source: string): string {
+    const firstSentence = content.split('.')[0]?.trim() || title;
+    return `According to ${source}, ${firstSentence.toLowerCase()}. This research contributes to ongoing efforts in colorectal cancer screening and detection.`;
   }
 
   /**
@@ -173,10 +356,18 @@ Respond in JSON format: {"summary": "...", "relevance_score": X}`
         
         if (!this.containsCRCKeywords(searchText)) continue;
 
-        // Generate AI summary and relevance score
+        // Validate article integrity before processing
+        const validation = this.validateArticleIntegrity(item, source);
+        if (!validation.isValid) {
+          this.logSkippedArticle(item, source, validation.reason!);
+          continue;
+        }
+
+        // Generate AI summary and relevance score with source attribution
         const { summary, relevance_score } = await this.generateAISummary(
           item.title,
-          content
+          content,
+          source
         );
 
         // Only include articles with relevance score >= 4
@@ -324,6 +515,87 @@ Respond in JSON format: {"summary": "...", "relevance_score": X}`
       }
     } catch (error) {
       console.error('Error in setArticleSticky:', error);
+    }
+  }
+
+  /**
+   * Get skipped articles for admin review
+   */
+  async getSkippedArticles(limit = 50): Promise<SkippedArticle[]> {
+    try {
+      const { data, error } = await supabase
+        .from('crc_news_skipped')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(limit);
+
+      if (error) {
+        console.error('Error fetching skipped articles:', error);
+        return this.skippedArticles.slice(-limit); // Return in-memory fallback
+      }
+
+      return data.map(item => ({
+        title: item.title,
+        link: item.link,
+        source: item.source,
+        reason: item.skip_reason,
+        timestamp: item.created_at,
+        raw_content: item.raw_content
+      }));
+    } catch (error) {
+      console.error('Error in getSkippedArticles:', error);
+      return this.skippedArticles.slice(-limit); // Return in-memory fallback
+    }
+  }
+
+  /**
+   * Get feed quality metrics for admin dashboard
+   */
+  async getFeedQualityMetrics(): Promise<{
+    total_processed: number;
+    total_accepted: number;
+    total_skipped: number;
+    skip_reasons: { [key: string]: number };
+    accuracy_score: number;
+  }> {
+    try {
+      const [articlesResult, skippedResult] = await Promise.all([
+        supabase.from('crc_news_feed').select('id', { count: 'exact' }),
+        supabase.from('crc_news_skipped').select('skip_reason', { count: 'exact' })
+      ]);
+
+      const totalAccepted = articlesResult.count || 0;
+      const totalSkipped = skippedResult.count || 0;
+      const totalProcessed = totalAccepted + totalSkipped;
+
+      // Count skip reasons
+      const skipReasons: { [key: string]: number } = {};
+      if (skippedResult.data) {
+        skippedResult.data.forEach(item => {
+          const reason = item.skip_reason || 'Unknown';
+          skipReasons[reason] = (skipReasons[reason] || 0) + 1;
+        });
+      }
+
+      // Calculate accuracy score (percentage of articles that passed validation)
+      const accuracyScore = totalProcessed > 0 ? (totalAccepted / totalProcessed) * 100 : 100;
+
+      return {
+        total_processed: totalProcessed,
+        total_accepted: totalAccepted,
+        total_skipped: totalSkipped,
+        skip_reasons: skipReasons,
+        accuracy_score: accuracyScore
+      };
+    } catch (error) {
+      console.error('Error calculating feed quality metrics:', error);
+      return {
+        total_processed: 0,
+        total_accepted: 0,
+        total_skipped: 0,
+        skip_reasons: {},
+        accuracy_score: 0
+      };
     }
   }
 }
