@@ -1,0 +1,232 @@
+// /src/components/ScreeningUrgencyWidget.tsx
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Button } from './ui/Button';
+
+interface FormData {
+  age: string;
+  familyHistory: 'yes' | 'no' | '';
+  symptoms: string[];
+}
+
+type RiskLevel = 'low' | 'moderate' | 'high' | null;
+
+const ScreeningUrgencyWidget: React.FC = () => {
+  const [formData, setFormData] = useState<FormData>({
+    age: '',
+    familyHistory: '',
+    symptoms: []
+  });
+  const [riskLevel, setRiskLevel] = useState<RiskLevel>(null);
+
+  const symptomOptions = [
+    'Rectal bleeding',
+    'Unexplained weight loss',
+    'Persistent abdominal pain',
+    'Fatigue',
+    'None of the above'
+  ];
+
+  const handleAgeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData(prev => ({ ...prev, age: e.target.value }));
+    calculateRisk({ ...formData, age: e.target.value });
+  };
+
+  const handleFamilyHistoryChange = (value: 'yes' | 'no') => {
+    setFormData(prev => ({ ...prev, familyHistory: value }));
+    calculateRisk({ ...formData, familyHistory: value });
+  };
+
+  const handleSymptomChange = (symptom: string, checked: boolean) => {
+    let newSymptoms: string[];
+    
+    if (symptom === 'None of the above') {
+      newSymptoms = checked ? ['None of the above'] : [];
+    } else {
+      newSymptoms = checked 
+        ? [...formData.symptoms.filter(s => s !== 'None of the above'), symptom]
+        : formData.symptoms.filter(s => s !== symptom);
+    }
+    
+    setFormData(prev => ({ ...prev, symptoms: newSymptoms }));
+    calculateRisk({ ...formData, symptoms: newSymptoms });
+  };
+
+  const calculateRisk = (data: FormData) => {
+    const age = parseInt(data.age);
+    const hasSymptoms = data.symptoms.length > 0 && !data.symptoms.includes('None of the above');
+    
+    // High Risk Logic
+    if ((age >= 45 && data.familyHistory === 'yes') || hasSymptoms) {
+      setRiskLevel('high');
+    }
+    // Moderate Risk Logic  
+    else if (age >= 45 && data.familyHistory === 'no' && !hasSymptoms) {
+      setRiskLevel('moderate');
+    }
+    // Low Risk Logic
+    else if (age < 45 && data.familyHistory === 'no' && !hasSymptoms) {
+      setRiskLevel('low');
+    }
+    // Incomplete data
+    else {
+      setRiskLevel(null);
+    }
+  };
+
+  const getRiskContent = () => {
+    switch (riskLevel) {
+      case 'high':
+        return {
+          icon: '🔴',
+          title: 'High Risk',
+          message: 'You are High Risk. Please schedule a colonoscopy today.',
+          bgColor: 'bg-red-50',
+          borderColor: 'border-l-red-500',
+          textColor: 'text-red-800'
+        };
+      case 'moderate':
+        return {
+          icon: '🟡',
+          title: 'Moderate Risk',
+          message: 'You are Moderate Risk. Consider a blood-based screening.',
+          bgColor: 'bg-yellow-50',
+          borderColor: 'border-l-yellow-500',
+          textColor: 'text-yellow-800'
+        };
+      case 'low':
+        return {
+          icon: '🟢',
+          title: 'Low Risk',
+          message: 'You are Low Risk. Learn more about CRC and screening options.',
+          bgColor: 'bg-green-50',
+          borderColor: 'border-l-green-500',
+          textColor: 'text-green-800'
+        };
+      default:
+        return null;
+    }
+  };
+
+  const riskContent = getRiskContent();
+
+  return (
+    <div className="bg-teal-50 p-6 shadow-xl rounded-xl max-w-2xl mx-auto">
+      <div className="text-center mb-6">
+        <h2 className="text-2xl sm:text-3xl font-bold text-teal-800 mb-2">
+          Assess Your Screening Urgency
+        </h2>
+        <p className="text-teal-700 text-sm sm:text-base">
+          Quick assessment to understand how urgently you should get screened
+        </p>
+      </div>
+
+      <form className="space-y-6">
+        {/* Age Input */}
+        <div>
+          <label htmlFor="age" className="block text-sm font-semibold text-teal-800 mb-2">
+            Your Age *
+          </label>
+          <input
+            type="number"
+            id="age"
+            min="18"
+            max="100"
+            value={formData.age}
+            onChange={handleAgeChange}
+            className="w-full px-4 py-3 border border-teal-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent text-gray-900"
+            placeholder="Enter your age"
+            required
+          />
+        </div>
+
+        {/* Family History */}
+        <div>
+          <label className="block text-sm font-semibold text-teal-800 mb-3">
+            Family History of Colorectal Cancer? *
+          </label>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <label className="flex items-center cursor-pointer">
+              <input
+                type="radio"
+                name="familyHistory"
+                checked={formData.familyHistory === 'yes'}
+                onChange={() => handleFamilyHistoryChange('yes')}
+                className="mr-2 text-teal-600 focus:ring-teal-500"
+              />
+              <span className="text-gray-700">Yes</span>
+            </label>
+            <label className="flex items-center cursor-pointer">
+              <input
+                type="radio"
+                name="familyHistory"
+                checked={formData.familyHistory === 'no'}
+                onChange={() => handleFamilyHistoryChange('no')}
+                className="mr-2 text-teal-600 focus:ring-teal-500"
+              />
+              <span className="text-gray-700">No</span>
+            </label>
+          </div>
+        </div>
+
+        {/* Symptoms */}
+        <div>
+          <label className="block text-sm font-semibold text-teal-800 mb-3">
+            Current Symptoms (check all that apply)
+          </label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {symptomOptions.map((symptom) => (
+              <label key={symptom} className="flex items-start cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formData.symptoms.includes(symptom)}
+                  onChange={(e) => handleSymptomChange(symptom, e.target.checked)}
+                  className="mr-3 mt-1 text-teal-600 focus:ring-teal-500"
+                />
+                <span className="text-gray-700 text-sm">{symptom}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+      </form>
+
+      {/* Risk Assessment Result */}
+      {riskContent && (
+        <div className="mt-8 animate-fade-in">
+          <div className={`${riskContent.bgColor} p-4 rounded-lg border-l-4 ${riskContent.borderColor}`}>
+            <div className="flex items-start space-x-3">
+              <span className="text-2xl">{riskContent.icon}</span>
+              <div className="flex-1">
+                <h3 className={`font-bold text-lg ${riskContent.textColor}`}>
+                  {riskContent.title}
+                </h3>
+                <p className={`mt-1 ${riskContent.textColor}`}>
+                  {riskContent.message}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* CTA Button */}
+          <div className="mt-6 text-center">
+            <Link to="/get-screened">
+              <Button className="bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 text-white text-lg font-semibold px-8 py-4 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105">
+                Start My Screening
+              </Button>
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {/* Disclaimer */}
+      <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+        <p className="text-xs text-gray-600 text-center">
+          <strong>Disclaimer:</strong> This assessment is for informational purposes only and does not replace professional medical advice. 
+          Please consult with your healthcare provider for personalized screening recommendations.
+        </p>
+      </div>
+    </div>
+  );
+};
+
+export default ScreeningUrgencyWidget;

@@ -6,6 +6,7 @@ import React from 'react';
 
 // ✅ Correct import of the redesigned HeroSection
 import HeroSection from "../components/HeroSection";
+import ScreeningUrgencyWidget from "../components/ScreeningUrgencyWidget";
 
 import CrisisSection from "../components/CrisisSection";
 import WhyColonoscopyMatters from "../components/WhyColonoscopyMatters";
@@ -21,6 +22,13 @@ const HomePage: React.FC = () => {
     <>
       {/* ✅ Render the redesigned HeroSection */}
       <HeroSection />
+
+      {/* ✅ Screening Urgency Assessment Widget */}
+      <section className="py-16 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <ScreeningUrgencyWidget />
+        </div>
+      </section>
 
       <CrisisSection />
       <WhyColonoscopyMatters />
