@@ -4,9 +4,17 @@
 export { default as ColorectalCancerScreeningSingaporePage } from './ColorectalCancerScreeningSingaporePage';
 export { default as ColonCancerTestSingaporePage } from './ColonCancerTestSingaporePage';
 export { default as BloodTestColorectalCancerPage } from './BloodTestColorectalCancerPage';
+export { default as EarlyDetectionColonCancerPage } from './EarlyDetectionColonCancerPage';
+export { default as FITTestSingaporePage } from './FITTestSingaporePage';
+export { default as BowelCancerScreeningPage } from './BowelCancerScreeningPage';
 export { default as ColorectalCancerScreeningAustraliaPage } from './ColorectalCancerScreeningAustraliaPage';
+export { default as ColonCancerTestAustraliaPage } from './ColonCancerTestAustraliaPage';
+export { default as FOBTTestAustraliaPage } from './FOBTTestAustraliaPage';
 export { default as DaChangAiShaZhaPage } from './DaChangAiShaZhaPage';
 export { default as ColorectalCancerScreeningIndiaPage } from './ColorectalCancerScreeningIndiaPage';
+export { default as ColonCancerTestIndiaPage } from './ColonCancerTestIndiaPage';
+export { default as ColonoscopyIndiaCostPage } from './ColonoscopyIndiaCostPage';
+export { default as ColonCancerTestPhilippinesPage } from './ColonCancerTestPhilippinesPage';
 
 // SEO Page Metadata for routing
 export const SEO_PAGES = [
@@ -68,6 +76,86 @@ export const SEO_PAGES = [
     region: 'India',
     priority: 'medium', 
     searchVolume: 800,
+    intent: 'diagnosis'
+  },
+  {
+    path: '/seo/early-detection-colon-cancer',
+    component: 'EarlyDetectionColonCancerPage',
+    keyword: 'early detection colon cancer',
+    language: 'en',
+    region: 'Singapore',
+    priority: 'high',
+    searchVolume: 500,
+    intent: 'early detection'
+  },
+  {
+    path: '/seo/fit-test-singapore',
+    component: 'FITTestSingaporePage',
+    keyword: 'FIT test Singapore',
+    language: 'en',
+    region: 'Singapore',
+    priority: 'high',
+    searchVolume: 400,
+    intent: 'non-invasive'
+  },
+  {
+    path: '/seo/bowel-cancer-screening',
+    component: 'BowelCancerScreeningPage',
+    keyword: 'bowel cancer screening',
+    language: 'en',
+    region: 'Singapore',
+    priority: 'high',
+    searchVolume: 300,
+    intent: 'diagnosis'
+  },
+  {
+    path: '/seo/colon-cancer-test-australia',
+    component: 'ColonCancerTestAustraliaPage',
+    keyword: 'colon cancer test Australia',
+    language: 'en',
+    region: 'Australia',
+    priority: 'high',
+    searchVolume: 1200,
+    intent: 'diagnosis'
+  },
+  {
+    path: '/seo/fobt-test-australia',
+    component: 'FOBTTestAustraliaPage',
+    keyword: 'FOBT test Australia',
+    language: 'en',
+    region: 'Australia',
+    priority: 'high',
+    searchVolume: 800,
+    intent: 'non-invasive'
+  },
+  {
+    path: '/seo/colon-cancer-test-india',
+    component: 'ColonCancerTestIndiaPage',
+    keyword: 'colon cancer test India',
+    language: 'en',
+    region: 'India',
+    priority: 'medium',
+    searchVolume: 600,
+    intent: 'diagnosis'
+  },
+  {
+    path: '/seo/colonoscopy-india-cost',
+    component: 'ColonoscopyIndiaCostPage',
+    keyword: 'colonoscopy India cost',
+    language: 'en',
+    region: 'India',
+    priority: 'medium',
+    searchVolume: 500,
+    intent: 'diagnosis'
+  },
+  {
+    path: '/seo/colon-cancer-test-philippines',
+    component: 'ColonCancerTestPhilippinesPage',
+    keyword: 'colon cancer test Philippines',
+    language: 'en',
+    region: 'Philippines',
+    priority: 'medium',
+    searchVolume: 300,
     intent: 'diagnosis'
   }
 ];

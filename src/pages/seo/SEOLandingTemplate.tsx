@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/Card';
 import { CheckCircle, Calendar, UserCheck, TestTube } from 'lucide-react';
 import SchemaMarkup from '@/components/seo/SchemaMarkup';
 import { SchemaGenerator } from '@/utils/schemaGenerator';
+import HreflangGenerator from '@/utils/hreflangGenerator';
 
 interface SEOLandingTemplateProps {
   keyword: string;
@@ -56,6 +57,14 @@ const SEOLandingTemplate: React.FC<SEOLandingTemplateProps> = ({
     intent,
     faqItems: content.faqItems
   });
+
+  // Generate hreflang tags for international SEO
+  const hreflangTags = HreflangGenerator.generateHreflangTags(
+    `/seo/${keyword.replace(/\s+/g, '-').toLowerCase()}`,
+    language,
+    region,
+    keyword
+  );
 
   const schemas = [
     schemaPackage.medicalOrganization,
@@ -111,10 +120,10 @@ const SEOLandingTemplate: React.FC<SEOLandingTemplateProps> = ({
         <meta name="geo.region" content={region} />
         <meta name="geo.placename" content={region} />
         
-        {/* Hreflang for multilingual support */}
-        {language === 'en' && region === 'Singapore' && (
-          <link rel="alternate" hrefLang="zh" href="https://colonaive.com/seo/da-chang-ai-sha-zha" />
-        )}
+        {/* Hreflang tags for international SEO */}
+        {hreflangTags.map((tag, index) => (
+          <link key={index} rel="alternate" hrefLang={tag.hreflang} href={tag.url} />
+        ))}
       </Helmet>
       
       {/* JSON-LD Schema Markup */}
