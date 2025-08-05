@@ -209,24 +209,101 @@ const ScreeningEligibilityWizard: React.FC = () => {
     calculateRisk(formData);
     setShowResults(true);
     
-    // Analytics hook placeholder
-    trackEligibilityCheck({
+    // Enhanced analytics tracking
+    const trackingData = {
       country: formData.location,
       age: parseInt(formData.age),
       familyHistory: formData.familyHistory === 'yes',
-      symptoms: formData.symptoms,
-      riskLevel: riskLevel
-    });
+      symptoms: formData.symptoms.filter(s => s !== 'None of the above'),
+      symptomCount: formData.symptoms.filter(s => s !== 'None of the above').length,
+      hasSymptoms: formData.symptoms.length > 0 && !formData.symptoms.includes('None of the above'),
+      riskLevel: null, // Will be updated after calculation
+      timestamp: new Date().toISOString(),
+      userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : 'unknown'
+    };
+    
+    // Calculate risk first, then track with final risk level
+    setTimeout(() => {
+      trackingData.riskLevel = riskLevel;
+      trackEligibilityCheck(trackingData);
+    }, 100);
   };
 
-  // Analytics placeholder function
+  // Enhanced analytics function with error handling
   const trackEligibilityCheck = (data: any) => {
-    // Placeholder for analytics tracking
-    console.log('Eligibility check tracked:', data);
+    try {
+      // TODO: Replace with actual analytics service (Google Analytics, Mixpanel, etc.)
+      console.group('🧪 Screening Eligibility Assessment Completed');
+      console.log('Assessment Data:', {
+        country: data.country,
+        ageGroup: data.age < 30 ? '<30' : data.age < 40 ? '30-39' : data.age < 50 ? '40-49' : data.age < 60 ? '50-59' : '60+',
+        familyHistory: data.familyHistory,
+        symptomCount: data.symptomCount,
+        symptoms: data.symptoms,
+        finalRiskLevel: data.riskLevel,
+        timestamp: data.timestamp
+      });
+      console.log('Full Raw Data:', data);
+      console.groupEnd();
+      
+      // Placeholder for future analytics integrations:
+      // - Google Analytics: gtag('event', 'screening_assessment', data)
+      // - Mixpanel: mixpanel.track('Screening Assessment', data)
+      // - Custom API: fetch('/api/analytics/screening', { method: 'POST', body: JSON.stringify(data) })
+      // - Supabase: supabase.from('screening_assessments').insert(data)
+      
+      // Store in localStorage for potential later sync (optional)
+      if (typeof window !== 'undefined') {
+        const assessments = JSON.parse(localStorage.getItem('colonaive_assessments') || '[]');
+        assessments.push({ ...data, sessionId: Date.now() });
+        // Keep only last 10 assessments to avoid storage bloat
+        if (assessments.length > 10) {
+          assessments.splice(0, assessments.length - 10);
+        }
+        localStorage.setItem('colonaive_assessments', JSON.stringify(assessments));
+      }
+    } catch (error) {
+      // Fail silently to not break user experience
+      console.warn('Analytics tracking failed:', error);
+    }
+  };
+
+  // Generate region-specific CTA destinations
+  const getLocalizedCTAs = (config: CountryConfig) => {
+    const ctaDestinations = {
+      SG: {
+        colonoscopy: '/get-screened#colonoscopy',
+        bloodTest: '/get-screened#blood-test',
+        specialists: '/specialists',
+      },
+      IN: {
+        colonoscopy: '/get-screened#endoscopy',
+        bloodTest: '/get-screened#blood-test', 
+        specialists: '/specialists',
+      },
+      PH: {
+        colonoscopy: '/get-screened',
+        bloodTest: '/get-screened',
+        specialists: '/specialists',
+      },
+      JP: {
+        colonoscopy: '/get-screened#book',
+        bloodTest: '/get-screened#blood-test',
+        specialists: '/specialists',
+      },
+      AU: {
+        colonoscopy: '/get-screened#book',
+        bloodTest: '/get-screened#blood-test',
+        specialists: '/specialists',
+      }
+    };
+    
+    return ctaDestinations[config.code] || ctaDestinations.SG;
   };
 
   const getRiskContent = () => {
     const config = countryConfigs[formData.location || 'SG'];
+    const ctas = getLocalizedCTAs(config);
     
     switch (riskLevel) {
       case 'high':
@@ -240,9 +317,9 @@ const ScreeningEligibilityWizard: React.FC = () => {
           textColor: 'text-red-800',
           levelColor: 'text-red-600',
           ctaButtons: [
-            { text: 'Find a Specialist', href: '/specialists', primary: true },
-            { text: 'Book a Colonoscopy', href: '/get-screened#colonoscopy', primary: false },
-            { text: 'Get a Blood Test', href: '/get-screened#blood-test', primary: false }
+            { text: 'Find a Specialist', href: ctas.specialists, primary: true },
+            { text: 'Book a Colonoscopy', href: ctas.colonoscopy, primary: false },
+            { text: 'Get a Blood Test', href: ctas.bloodTest, primary: false }
           ]
         };
       case 'moderate':
@@ -256,8 +333,8 @@ const ScreeningEligibilityWizard: React.FC = () => {
           textColor: 'text-yellow-800',
           levelColor: 'text-yellow-600',
           ctaButtons: [
-            { text: 'Get a Blood Test', href: '/get-screened#blood-test', primary: true },
-            { text: 'Find a Specialist', href: '/specialists', primary: false },
+            { text: 'Get a Blood Test', href: ctas.bloodTest, primary: true },
+            { text: 'Find a Specialist', href: ctas.specialists, primary: false },
             { text: 'Learn More', href: '/education/patients/colorectal-cancer', primary: false }
           ]
         };
@@ -273,7 +350,7 @@ const ScreeningEligibilityWizard: React.FC = () => {
           levelColor: 'text-green-600',
           ctaButtons: [
             { text: 'Learn More', href: '/education/patients/colorectal-cancer', primary: true },
-            { text: 'Get a Blood Test', href: '/get-screened#blood-test', primary: false }
+            { text: 'Get a Blood Test', href: ctas.bloodTest, primary: false }
           ]
         };
       default:
