@@ -372,16 +372,22 @@ const SingaporeCRCEducation: React.FC = () => {
                 {currentContent.cta.subtitle}
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg" className="bg-green-600 hover:bg-green-700">
-                  {currentContent.cta.buttons.clinic}
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-                <Button size="lg" className="bg-orange-500 hover:bg-orange-600">
-                  {currentContent.cta.buttons.bloodTest}
-                </Button>
-                <Button size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-blue-800">
-                  {currentContent.cta.buttons.specialist}
-                </Button>
+                <a href="/specialists">
+                  <Button size="lg" className="bg-green-600 hover:bg-green-700">
+                    {currentContent.cta.buttons.clinic}
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </a>
+                <a href="/get-screened">
+                  <Button size="lg" className="bg-orange-500 hover:bg-orange-600">
+                    {currentContent.cta.buttons.bloodTest}
+                  </Button>
+                </a>
+                <a href="/specialists">
+                  <Button size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-blue-800">
+                    {currentContent.cta.buttons.specialist}
+                  </Button>
+                </a>
               </div>
               
               {/* Internal Links */}

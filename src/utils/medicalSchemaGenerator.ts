@@ -82,7 +82,13 @@ export class MedicalSchemaGenerator {
       name: `COLONAiVE™ ${region}`,
       alternateName: [`COLONAiVE ${region}`, `CRC Screening ${region}`],
       description: `Advanced colorectal cancer screening services in ${region}. HSA-cleared blood-based testing with 94% accuracy for early detection.`,
-      url: `https://colonaive.com/${region.toLowerCase()}`,
+      url: this.getRegionalSEOUrl(region),
+      sameAs: [
+        `https://colonaive.com/education/${this.getRegionalEducationSlug(region)}`,
+        `https://colonaive.com/get-screened`,
+        `https://colonaive.com/specialists`
+      ],
+      mainEntityOfPage: this.getRegionalSEOUrl(region),
       logo: {
         "@type": "ImageObject",
         url: "https://colonaive.com/images/logo-colonaive.png",
@@ -170,6 +176,34 @@ export class MedicalSchemaGenerator {
         category: "Medical Service"
       }
     };
+  }
+
+  /**
+   * Get regional SEO landing page URL
+   */
+  private static getRegionalSEOUrl(region: string): string {
+    const seoUrls: Record<string, string> = {
+      'Singapore': 'https://colonaive.com/seo/singapore-colorectal-screening',
+      'Australia': 'https://colonaive.com/seo/australia-bowel-cancer-screening',
+      'India': 'https://colonaive.com/seo/india-colorectal-screening',
+      'Philippines': 'https://colonaive.com/seo/philippines-colorectal-screening',
+      'Japan': 'https://colonaive.com/seo/japan-colorectal-screening'
+    };
+    return seoUrls[region] || `https://colonaive.com/seo/${region.toLowerCase()}-colorectal-screening`;
+  }
+
+  /**
+   * Get regional education page slug
+   */
+  private static getRegionalEducationSlug(region: string): string {
+    const slugs: Record<string, string> = {
+      'Singapore': 'sg',
+      'Australia': 'au',
+      'India': 'in',
+      'Philippines': 'ph',
+      'Japan': 'jp'
+    };
+    return slugs[region] || region.toLowerCase();
   }
 
   /**

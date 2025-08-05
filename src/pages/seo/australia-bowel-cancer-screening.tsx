@@ -47,13 +47,17 @@ const AustraliaBowelCancerScreening: React.FC = () => {
                 Complement your National Bowel Cancer Screening Program with modern technology.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg" className="bg-orange-500 hover:bg-orange-600">
-                  Book Blood Test Screening
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-                <Button size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-green-800">
-                  Learn About NBCSP
-                </Button>
+                <a href="/get-screened">
+                  <Button size="lg" className="bg-orange-500 hover:bg-orange-600">
+                    Book Blood Test Screening
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </a>
+                <a href="/education/patients/colorectal-cancer">
+                  <Button size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-green-800">
+                    Learn About NBCSP
+                  </Button>
+                </a>
               </div>
             </div>
           </Container>
@@ -250,13 +254,39 @@ const AustraliaBowelCancerScreening: React.FC = () => {
                 advanced blood-based testing for complete peace of mind.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg" className="bg-orange-500 hover:bg-orange-600">
-                  Book Your Blood Test
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-                <Button size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-green-800">
-                  Find Nearest Clinic
-                </Button>
+                <a href="/get-screened">
+                  <Button size="lg" className="bg-orange-500 hover:bg-orange-600">
+                    Book Your Blood Test
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </a>
+                <a href="/specialists">
+                  <Button size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-green-800">
+                    Find Nearest Clinic
+                  </Button>
+                </a>
+              </div>
+              
+              {/* Internal Links */}
+              <div className="mt-12 pt-8 border-t border-green-700">
+                <p className="text-green-200 mb-4">Learn More:</p>
+                <div className="flex flex-wrap justify-center gap-4 text-sm">
+                  <a href="/education/au" className="text-green-200 hover:text-white underline">
+                    Australia Bowel Cancer Education
+                  </a>
+                  <a href="/education/patients/colorectal-cancer" className="text-green-200 hover:text-white underline">
+                    Understanding Bowel Cancer
+                  </a>
+                  <a href="/get-screened" className="text-green-200 hover:text-white underline">
+                    Get Screened
+                  </a>
+                  <a href="/specialists" className="text-green-200 hover:text-white underline">
+                    Find Specialists
+                  </a>
+                  <a href="/movement-pillars" className="text-green-200 hover:text-white underline">
+                    Movement Pillars
+                  </a>
+                </div>
               </div>
             </div>
           </Container>

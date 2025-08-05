@@ -47,13 +47,17 @@ const JapanColorectalScreening: React.FC = () => {
                 Complement Japan's national screening program with modern technology.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg" className="bg-blue-600 hover:bg-blue-700">
-                  血液検査を予約 | Book Blood Test
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-                <Button size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-red-800">
-                  最寄りのクリニック | Find Clinic
-                </Button>
+                <a href="/get-screened">
+                  <Button size="lg" className="bg-blue-600 hover:bg-blue-700">
+                    血液検査を予約 | Book Blood Test
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </a>
+                <a href="/specialists">
+                  <Button size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-red-800">
+                    最寄りのクリニック | Find Clinic
+                  </Button>
+                </a>
               </div>
             </div>
           </Container>
@@ -295,17 +299,43 @@ const JapanColorectalScreening: React.FC = () => {
                 blood-based testing for complete peace of mind.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg" className="bg-blue-600 hover:bg-blue-700">
-                  今すぐ予約 | Book Your Test Now
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-                <Button size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-red-800">
-                  専門医に相談 | Consult Specialists
-                </Button>
+                <a href="/get-screened">
+                  <Button size="lg" className="bg-blue-600 hover:bg-blue-700">
+                    今すぐ予約 | Book Your Test Now
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </a>
+                <a href="/specialists">
+                  <Button size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-red-800">
+                    専門医に相談 | Consult Specialists
+                  </Button>
+                </a>
               </div>
               <p className="text-sm text-red-200 mt-6">
                 日本語・英語対応 | Available in Japanese and English
               </p>
+              
+              {/* Internal Links */}
+              <div className="mt-12 pt-8 border-t border-red-700">
+                <p className="text-red-200 mb-4">Learn More:</p>
+                <div className="flex flex-wrap justify-center gap-4 text-sm">
+                  <a href="/education/jp" className="text-red-200 hover:text-white underline">
+                    Japan CRC Education
+                  </a>
+                  <a href="/education/patients/colorectal-cancer" className="text-red-200 hover:text-white underline">
+                    Understanding Colorectal Cancer
+                  </a>
+                  <a href="/get-screened" className="text-red-200 hover:text-white underline">
+                    Get Screened
+                  </a>
+                  <a href="/specialists" className="text-red-200 hover:text-white underline">
+                    Find Specialists
+                  </a>
+                  <a href="/movement-pillars" className="text-red-200 hover:text-white underline">
+                    Movement Pillars
+                  </a>
+                </div>
+              </div>
             </div>
           </Container>
         </section>

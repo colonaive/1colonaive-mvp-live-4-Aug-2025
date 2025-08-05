@@ -47,13 +47,17 @@ const PhilippinesColorectalScreening: React.FC = () => {
                 walang colonoscopy na kailangan para sa initial screening.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg" className="bg-green-600 hover:bg-green-700">
-                  Mag-book ng Screening Test
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-                <Button size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-blue-800">
-                  Hanapin ang Nearest Clinic
-                </Button>
+                <a href="/get-screened">
+                  <Button size="lg" className="bg-green-600 hover:bg-green-700">
+                    Mag-book ng Screening Test
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </a>
+                <a href="/specialists">
+                  <Button size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-blue-800">
+                    Hanapin ang Nearest Clinic
+                  </Button>
+                </a>
               </div>
             </div>
           </Container>
@@ -295,17 +299,43 @@ const PhilippinesColorectalScreening: React.FC = () => {
                 blood-based testing para sa complete peace of mind.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg" className="bg-green-600 hover:bg-green-700">
-                  Book Your Test Ngayon
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-                <Button size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-blue-800">
-                  Kausapin ang Aming Specialists
-                </Button>
+                <a href="/get-screened">
+                  <Button size="lg" className="bg-green-600 hover:bg-green-700">
+                    Book Your Test Ngayon
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </a>
+                <a href="/specialists">
+                  <Button size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-blue-800">
+                    Kausapin ang Aming Specialists
+                  </Button>
+                </a>
               </div>
               <p className="text-sm text-blue-200 mt-6">
                 Available in English, Filipino, at regional languages
               </p>
+              
+              {/* Internal Links */}
+              <div className="mt-12 pt-8 border-t border-blue-700">
+                <p className="text-blue-200 mb-4">Learn More:</p>
+                <div className="flex flex-wrap justify-center gap-4 text-sm">
+                  <a href="/education/ph" className="text-blue-200 hover:text-white underline">
+                    Philippines CRC Education
+                  </a>
+                  <a href="/education/patients/colorectal-cancer" className="text-blue-200 hover:text-white underline">
+                    Understanding Colorectal Cancer
+                  </a>
+                  <a href="/get-screened" className="text-blue-200 hover:text-white underline">
+                    Get Screened
+                  </a>
+                  <a href="/specialists" className="text-blue-200 hover:text-white underline">
+                    Find Specialists
+                  </a>
+                  <a href="/movement-pillars" className="text-blue-200 hover:text-white underline">
+                    Movement Pillars
+                  </a>
+                </div>
+              </div>
             </div>
           </Container>
         </section>

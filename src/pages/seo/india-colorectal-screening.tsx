@@ -47,13 +47,17 @@ const IndiaColorectalScreening: React.FC = () => {
                 94% accuracy, no colonoscopy required for initial screening.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg" className="bg-green-600 hover:bg-green-700">
-                  Book Screening Test
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-                <Button size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-orange-800">
-                  Find Nearest Clinic
-                </Button>
+                <a href="/get-screened">
+                  <Button size="lg" className="bg-green-600 hover:bg-green-700">
+                    Book Screening Test
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </a>
+                <a href="/specialists">
+                  <Button size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-orange-800">
+                    Find Nearest Clinic
+                  </Button>
+                </a>
               </div>
             </div>
           </Container>
@@ -295,17 +299,43 @@ const IndiaColorectalScreening: React.FC = () => {
                 can save your life. Get tested with our advanced blood-based screening.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg" className="bg-green-600 hover:bg-green-700">
-                  Book Your Test Now
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-                <Button size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-orange-800">
-                  Talk to Our Specialists
-                </Button>
+                <a href="/get-screened">
+                  <Button size="lg" className="bg-green-600 hover:bg-green-700">
+                    Book Your Test Now
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </a>
+                <a href="/specialists">
+                  <Button size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-orange-800">
+                    Talk to Our Specialists
+                  </Button>
+                </a>
               </div>
               <p className="text-sm text-orange-200 mt-6">
                 Available in Hindi, English, and regional languages
               </p>
+              
+              {/* Internal Links */}
+              <div className="mt-12 pt-8 border-t border-orange-700">
+                <p className="text-orange-200 mb-4">Learn More:</p>
+                <div className="flex flex-wrap justify-center gap-4 text-sm">
+                  <a href="/education/in" className="text-orange-200 hover:text-white underline">
+                    India CRC Education
+                  </a>
+                  <a href="/education/patients/colorectal-cancer" className="text-orange-200 hover:text-white underline">
+                    Understanding Colorectal Cancer
+                  </a>
+                  <a href="/get-screened" className="text-orange-200 hover:text-white underline">
+                    Get Screened
+                  </a>
+                  <a href="/specialists" className="text-orange-200 hover:text-white underline">
+                    Find Specialists
+                  </a>
+                  <a href="/movement-pillars" className="text-orange-200 hover:text-white underline">
+                    Movement Pillars
+                  </a>
+                </div>
+              </div>
             </div>
           </Container>
         </section>
