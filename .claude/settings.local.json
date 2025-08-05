@@ -8,7 +8,8 @@
       "Bash(npx supabase:*)",
       "Bash(mkdir:*)",
       "Bash(find:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(mv:*)"
     ],
     "deny": []
   }
