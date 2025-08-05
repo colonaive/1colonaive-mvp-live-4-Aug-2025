@@ -1,0 +1,80 @@
+{
+  "meta": {
+    "version": "1.0",
+    "lastUpdated": "2025-08-05",
+    "totalStories": 0,
+    "regions": ["Singapore", "India", "Philippines", "Australia", "Japan"],
+    "languages": ["en", "zh", "ms", "ta", "hi", "tl", "ja"],
+    "storyTypes": ["video", "text", "audio"],
+    "status": "SCAFFOLD_ONLY"
+  },
+  "configuration": {
+    "moderationRequired": true,
+    "verificationRequired": true,
+    "anonymizationOptions": ["full", "partial", "none"],
+    "consentRequired": true,
+    "medicalDisclaimerRequired": true
+  },
+  "templates": {
+    "textStory": {
+      "fields": [
+        "id",
+        "patientName",
+        "age", 
+        "region",
+        "language",
+        "screeningMethod",
+        "outcome",
+        "timelineMonths",
+        "keyMessage",
+        "fullStory",
+        "consentLevel",
+        "verificationStatus",
+        "moderationStatus",
+        "createdAt",
+        "publishedAt"
+      ],
+      "required": ["patientName", "region", "screeningMethod", "outcome", "consentLevel"]
+    },
+    "videoStory": {
+      "fields": [
+        "id",
+        "patientName",
+        "age",
+        "region", 
+        "language",
+        "videoUrl",
+        "thumbnailUrl",
+        "duration",
+        "transcript",
+        "summary",
+        "screeningMethod",
+        "outcome",
+        "consentLevel",
+        "verificationStatus",
+        "moderationStatus",
+        "createdAt",
+        "publishedAt"
+      ],
+      "required": ["patientName", "region", "videoUrl", "consentLevel"]
+    }
+  },
+  "stories": [],
+  "pendingApproval": [],
+  "drafts": [],
+  "rejectedStories": [],
+  "todo": [
+    "TODO: Inject verified stories only after live patient signups",
+    "TODO: Implement story submission form for patients",
+    "TODO: Add moderation workflow for medical accuracy",
+    "TODO: Create consent management system",
+    "TODO: Add multilingual story support",
+    "TODO: Implement video upload and processing",
+    "TODO: Add story analytics and engagement tracking"
+  ],
+  "legalNotices": {
+    "medicalDisclaimer": "All patient stories are shared with consent and are for informational purposes only. Individual results may vary. Always consult with healthcare professionals for personalized medical advice.",
+    "privacyNotice": "Patient privacy is protected through anonymization where requested. No personal health information is shared without explicit consent.",
+    "moderationPolicy": "All stories undergo medical accuracy review before publication. COLONAiVE reserves the right to edit for clarity while maintaining authenticity."
+  }
+}
