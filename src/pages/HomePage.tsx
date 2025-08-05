@@ -6,7 +6,6 @@ import CrisisSection from "../components/CrisisSection";
 import WhyColonoscopyMatters from "../components/WhyColonoscopyMatters";
 import ScreeningUrgencyWidget from "../components/ScreeningUrgencyWidget";
 import BloodScreeningSection from "../components/BloodScreeningSection";
-import SG60GiftSection from "../components/SG60GiftSection";
 import PillarsSection from "../components/PillarsSection";
 import EvidenceSection from "../components/EvidenceSection";
 import NationalTargetsSection from "../components/NationalTargetsSection";
@@ -28,7 +27,6 @@ const HomePage: React.FC = () => {
       <CrisisSection />
       <WhyColonoscopyMatters />
       <BloodScreeningSection />
-      <SG60GiftSection />
       <PillarsSection />
       <EvidenceSection />
       <NationalTargetsSection />

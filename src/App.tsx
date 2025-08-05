@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './contexts/AuthContext';
 import MainRoutes from './routes';
@@ -7,8 +8,9 @@ import ChatBot from './components/chat/ChatBot'; // <-- NEW: Import ChatBot here
 
 function App() {
   return (
-    <Router>
-      <AuthProvider>
+    <HelmetProvider>
+      <Router>
+        <AuthProvider>
         {/* ✅ Global Toast Notification System */}
         <Toaster
           position="top-center"
@@ -25,8 +27,9 @@ function App() {
 
         {/* ✅ Chatbot - Placed here to ensure global fixed positioning relative to viewport */}
         <ChatBot /> {/* <-- NEW: Render ChatBot here */}
-      </AuthProvider>
-    </Router>
+        </AuthProvider>
+      </Router>
+    </HelmetProvider>
   );
 }
 

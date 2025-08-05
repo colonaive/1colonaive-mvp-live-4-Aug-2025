@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { Search, MapPin, Phone, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Container } from '@/components/ui/Container';
 import { supabase } from '@/supabase';
 import { Card, CardContent } from '@/components/ui/Card';
+import SchemaMarkup from '@/components/seo/SchemaMarkup';
+import ClinicSchemaService from '@/services/clinicSchemaService';
 
 // Define the GP interface to match the combined data from GPClinics and Profiles
 interface GP {
@@ -108,8 +111,25 @@ const FindGPPage: React.FC = () => {
     });
   }, [gps, searchTerm, selectedRegion, selectedLanguage]);
 
+  // Generate schema markup for clinic directory
+  const schemas = [
+    ClinicSchemaService.generateMedicalDirectorySchema(),
+    ClinicSchemaService.generateHealthcareNetworkSchema(),
+    ClinicSchemaService.generateClinicFAQSchema()
+  ];
+
   return (
     <div className="pt-20">
+      {/* SEO and Schema Markup */}
+      <Helmet>
+        <title>Find GP Clinics for Colorectal Cancer Screening | Singapore</title>
+        <meta name="description" content="Find trusted GP clinics and specialists for colorectal cancer screening in Singapore. Book appointments for ColonAiQ® blood tests, FIT tests, and colonoscopy services." />
+        <meta name="keywords" content="GP clinic Singapore, colorectal cancer screening, ColonAiQ blood test, colonoscopy Singapore, find doctor" />
+        <link rel="canonical" href="https://colonaive.com/find-a-gp" />
+      </Helmet>
+      
+      <SchemaMarkup schemas={schemas} />
+      
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-blue-600 to-teal-600 text-white py-24">
         <Container>

@@ -81,10 +81,21 @@ import CRCQuiz from './pages/CRCQuiz';
 import DevPreview from './pages/dev/DevPreview';
 import ComponentPreview from './pages/dev/ComponentPreview';
 import DynamicPagePreview from './pages/dev/DynamicPagePreview';
+import SchemaTestPage from './pages/dev/SchemaTestPage';
 import ChampionThankYouPage from './pages/ChampionThankYouPage';
 import CookiePolicyPage from './pages/CookiePolicyPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import TermsOfUsePage from './pages/TermsOfUsePage';
+
+// SEO Landing Pages
+import {
+  ColorectalCancerScreeningSingaporePage,
+  ColonCancerTestSingaporePage,
+  BloodTestColorectalCancerPage,
+  ColorectalCancerScreeningAustraliaPage,
+  DaChangAiShaZhaPage,
+  ColorectalCancerScreeningIndiaPage
+} from './pages/seo';
 
 // Dashboards
 import ChampionDashboard from './pages/ChampionDashboard';
@@ -212,7 +223,15 @@ const MainRoutes = () => {
           <Route path="/dev-preview" element={<DevPreview />} />
           <Route path="/component-preview" element={<ComponentPreview />} />
           <Route path="/dynamic-page-preview" element={<DynamicPagePreview />} />
+          <Route path="/schema-test" element={<SchemaTestPage />} />
 
+          {/* SEO Landing Pages */}
+          <Route path="/seo/colorectal-cancer-screening-singapore" element={<ColorectalCancerScreeningSingaporePage />} />
+          <Route path="/seo/colon-cancer-test-singapore" element={<ColonCancerTestSingaporePage />} />
+          <Route path="/seo/blood-test-colorectal-cancer" element={<BloodTestColorectalCancerPage />} />
+          <Route path="/seo/colorectal-cancer-screening-australia" element={<ColorectalCancerScreeningAustraliaPage />} />
+          <Route path="/seo/da-chang-ai-sha-zha" element={<DaChangAiShaZhaPage />} />
+          <Route path="/seo/colorectal-cancer-screening-india" element={<ColorectalCancerScreeningIndiaPage />} />
 
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />

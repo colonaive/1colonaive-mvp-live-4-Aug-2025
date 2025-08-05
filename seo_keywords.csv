@@ -1,0 +1,112 @@
+keyword,language,region,search_volume_est,competition,intent,category
+"colorectal cancer screening",en,Singapore,1000,medium,diagnosis,primary
+"colon cancer test Singapore",en,Singapore,800,low,diagnosis,local
+"blood test colorectal cancer",en,Singapore,600,medium,non-invasive,primary
+"early detection colon cancer",en,Singapore,500,medium,early detection,primary
+"FIT test Singapore",en,Singapore,400,low,non-invasive,local
+"colonoscopy Singapore",en,Singapore,900,high,diagnosis,local
+"bowel cancer screening",en,Singapore,300,medium,diagnosis,primary
+"colorectal cancer prevention",en,Singapore,250,medium,early detection,primary
+"non invasive colon cancer test",en,Singapore,200,low,non-invasive,primary
+"stool test colon cancer",en,Singapore,150,low,non-invasive,primary
+"colorectal cancer mortality Singapore",en,Singapore,100,low,mortality,research
+"CRC screening program Singapore",en,Singapore,80,low,diagnosis,local
+"ministry health colorectal screening",en,Singapore,70,low,diagnosis,government
+"polyclinic colon screening",en,Singapore,60,low,diagnosis,local
+"subsidized colonoscopy Singapore",en,Singapore,50,low,diagnosis,local
+
+"colorectal cancer screening Australia",en,Australia,2000,medium,diagnosis,primary
+"bowel cancer screening Australia",en,Australia,1800,medium,diagnosis,local
+"colon cancer test Australia",en,Australia,1200,medium,diagnosis,local
+"FOBT test Australia",en,Australia,800,low,non-invasive,local
+"colonoscopy Australia",en,Australia,1500,high,diagnosis,local
+"bowel screening program Australia",en,Australia,600,low,diagnosis,government
+"early detection bowel cancer",en,Australia,400,medium,early detection,primary
+"blood test bowel cancer Australia",en,Australia,300,medium,non-invasive,local
+"colorectal cancer prevention Australia",en,Australia,250,medium,early detection,local
+"reduce bowel cancer deaths",en,Australia,150,low,mortality,primary
+
+"colorectal cancer screening India",en,India,800,low,diagnosis,primary
+"colon cancer test India",en,India,600,low,diagnosis,local
+"colorectal cancer early detection",en,India,400,medium,early detection,primary
+"blood test colon cancer India",en,India,300,low,non-invasive,local
+"colonoscopy India cost",en,India,500,medium,diagnosis,local
+"bowel cancer screening India",en,India,200,low,diagnosis,local
+"FIT test India",en,India,150,low,non-invasive,local
+"colorectal cancer mortality India",en,India,100,low,mortality,research
+"non invasive colon screening",en,India,80,low,non-invasive,primary
+"stool based colon test",en,India,60,low,non-invasive,primary
+
+"colorectal cancer screening Philippines",en,Philippines,400,low,diagnosis,primary
+"colon cancer test Philippines",en,Philippines,300,low,diagnosis,local
+"colonoscopy Philippines",en,Philippines,250,medium,diagnosis,local
+"early detection colon cancer Philippines",en,Philippines,150,low,early detection,local
+"blood test colorectal cancer Philippines",en,Philippines,120,low,non-invasive,local
+"bowel cancer screening Philippines",en,Philippines,100,low,diagnosis,local
+"FIT test Philippines",en,Philippines,80,low,non-invasive,local
+"colorectal cancer prevention Philippines",en,Philippines,60,low,early detection,local
+
+"大腸癌篩查",zh,Singapore,500,medium,diagnosis,primary
+"結腸鏡檢查新加坡",zh,Singapore,400,medium,diagnosis,local
+"血液檢測大腸癌",zh,Singapore,300,low,non-invasive,primary
+"大腸癌早期檢測",zh,Singapore,250,medium,early detection,primary
+"糞便潛血檢查",zh,Singapore,200,low,non-invasive,primary
+"大腸癌預防",zh,Singapore,150,medium,early detection,primary
+"腸癌篩查計劃",zh,Singapore,100,low,diagnosis,government
+"非侵入性大腸癌檢測",zh,Singapore,80,low,non-invasive,primary
+
+"कोलोरेक्टल कैंसर स्क्रीनिंग",hi,India,300,low,diagnosis,primary
+"कोलन कैंसर टेस्ट",hi,India,250,low,diagnosis,local
+"कोलोनोस्कोपी भारत",hi,India,200,medium,diagnosis,local
+"कोलोरेक्टल कैंसर का जल्दी पता लगाना",hi,India,150,low,early detection,primary
+"रक्त परीक्षण कोलन कैंसर",hi,India,100,low,non-invasive,primary
+"आंत्र कैंसर स्क्रीनिंग",hi,India,80,low,diagnosis,primary
+"मल परीक्षण कोलन कैंसर",hi,India,60,low,non-invasive,primary
+
+"colorectal cancer screening test",ta,Singapore,150,low,diagnosis,primary
+"குடல் புற்றுநோய் பரிசோதனை",ta,Singapore,120,low,diagnosis,local
+"கோலன் கேன்சர் டெஸ்ட்",ta,Singapore,100,low,diagnosis,local
+"இரத்த பிரிக்षை குடல் புற்றுநோய்",ta,Singapore,80,low,non-invasive,primary
+"ஆரம்ப கண்டுபிடிப்பு குடல் புற்றுநோய்",ta,Singapore,60,low,early detection,primary
+
+"colorectal cancer screening",tl,Philippines,100,low,diagnosis,primary
+"pagsusulit sa colon cancer",tl,Philippines,80,low,diagnosis,local
+"magang paghahanap ng colon cancer",tl,Philippines,60,low,early detection,primary
+"dugo test para sa colon cancer",tl,Philippines,50,low,non-invasive,primary
+"colonoscopy Pilipinas",tl,Philippines,40,low,diagnosis,local
+
+"大腸がん検診",ja,Japan,1200,medium,diagnosis,primary
+"大腸内視鏡検査",ja,Japan,1000,high,diagnosis,local
+"便潜血検査",ja,Japan,800,medium,non-invasive,primary
+"大腸がん早期発見",ja,Japan,600,medium,early detection,primary
+"血液検査大腸がん",ja,Japan,400,low,non-invasive,primary
+"大腸がん予防",ja,Japan,350,medium,early detection,primary
+"非侵襲的大腸がん検査",ja,Japan,200,low,non-invasive,primary
+"大腸がん死亡率削減",ja,Japan,150,low,mortality,research
+
+"Shield blood test",en,Singapore,200,low,non-invasive,product
+"Guardant Health Shield",en,Singapore,150,low,non-invasive,product
+"liquid biopsy colorectal cancer",en,Singapore,120,low,non-invasive,technology
+"ctDNA test colon cancer",en,Singapore,100,low,non-invasive,technology
+"non invasive CRC screening",en,Singapore,180,low,non-invasive,primary
+"blood based colon cancer test",en,Singapore,160,low,non-invasive,primary
+"circulating tumor DNA test",en,Singapore,80,low,non-invasive,technology
+
+"early onset colorectal cancer",en,Singapore,250,medium,early detection,concern
+"young adult colon cancer",en,Singapore,200,medium,early detection,concern
+"colorectal cancer under 50",en,Singapore,180,medium,early detection,concern
+"family history colon cancer screening",en,Singapore,150,medium,diagnosis,risk
+"genetic testing colon cancer",en,Singapore,120,medium,diagnosis,risk
+"Lynch syndrome screening",en,Singapore,80,low,diagnosis,genetic
+
+"reduce colorectal cancer mortality",en,Singapore,100,low,mortality,outcome
+"CRC screening effectiveness",en,Singapore,90,low,mortality,research
+"colon cancer survival rates",en,Singapore,80,medium,mortality,outcome
+"early detection saves lives",en,Singapore,70,low,mortality,benefit
+"colorectal cancer death prevention",en,Singapore,60,low,mortality,benefit
+
+"healthcare screening program",en,Singapore,300,medium,diagnosis,system
+"population based screening",en,Singapore,150,low,diagnosis,system
+"national screening guidelines",en,Singapore,120,low,diagnosis,government
+"screening compliance rates",en,Singapore,80,low,diagnosis,metrics
+"healthcare policy colorectal",en,Singapore,60,low,diagnosis,policy

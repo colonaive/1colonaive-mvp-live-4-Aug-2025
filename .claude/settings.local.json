@@ -5,7 +5,9 @@
       "Bash(git commit:*)",
       "Bash(npm run build:*)",
       "Bash(npm install:*)",
-      "Bash(npx supabase:*)"
+      "Bash(npx supabase:*)",
+      "Bash(mkdir:*)",
+      "Bash(find:*)"
     ],
     "deny": []
   }
