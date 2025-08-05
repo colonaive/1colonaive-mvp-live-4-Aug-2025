@@ -96,6 +96,10 @@ const CRCNewsFeed: React.FC = () => {
       'Google News SG': 'bg-green-100 text-green-800',
       'Reuters Health': 'bg-orange-100 text-orange-800',
       'Medical News Today': 'bg-purple-100 text-purple-800',
+      'PubMed': 'bg-green-100 text-green-800',
+      'NEJM': 'bg-red-100 text-red-800',
+      'JAMA': 'bg-indigo-100 text-indigo-800',
+      'Nature Medicine': 'bg-emerald-100 text-emerald-800',
       'System': 'bg-gray-100 text-gray-800',
     };
     return colors[source] || 'bg-gray-100 text-gray-800';
