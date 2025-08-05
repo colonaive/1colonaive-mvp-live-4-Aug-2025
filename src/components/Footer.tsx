@@ -27,6 +27,7 @@ export const Footer: React.FC = () => {
     { label: 'Understand CRC', path: '/education/patients/colorectal-cancer' }, // Assuming /education/patients is the hub for "Understand CRC"
     { label: 'Screening Options', path: '/get-screened' },
     { label: '🌏 Explore by Country', path: '/seo' },
+    { label: '🧠 Learn About COLONAiVE™', path: '/about' },
     { label: 'Find a GP Clinic', path: '/find-a-gp' },         // CORRECTED
     { label: 'Find a Specialist Clinic', path: '/find-a-specialist' } // CORRECTED
     // { label: 'Track Your Screening', path: '/track-screening' }, // Placeholder - add route if page exists

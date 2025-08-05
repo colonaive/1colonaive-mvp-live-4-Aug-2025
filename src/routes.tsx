@@ -113,6 +113,7 @@ const MainRoutes = () => {
           {/* Public Routes */}
           <Route path="/" element={<HomePage />} />
           <Route path="/about-us" element={<AboutUsPage />} />
+          <Route path="/about" element={<AboutUsPage />} />
           <Route path="/about/advisors" element={<AdvisorsPage />} />
           <Route path="/vision2035" element={<Vision2035Page />} />
           <Route path="/csr-showcase" element={<CSRShowcasePage />} />

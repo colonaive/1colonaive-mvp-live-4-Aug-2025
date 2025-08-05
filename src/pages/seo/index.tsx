@@ -1,6 +1,7 @@
 // SEO Landing Pages Catalog
 // Public-facing SEO catalog and index
 import React from 'react';
+import { Helmet } from 'react-helmet-async';
 import { Container } from '../../components/ui/Container';
 import { Card, CardContent } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
@@ -349,6 +350,25 @@ const SEOCatalogPage: React.FC = () => {
 
   return (
     <div className="pt-20 min-h-screen bg-gray-50">
+      {/* SEO Meta Tags */}
+      <Helmet>
+        <title>COLONAiVE™ Regional Screening Options | Explore by Country</title>
+        <meta name="description" content="COLONAiVE™ is a clinician-led movement to outsmart colorectal cancer by promoting timely colonoscopy, education, and access to HSA-cleared blood-based screening. Learn how to take action early." />
+        <meta name="keywords" content="colorectal cancer screening, colonoscopy, blood test, regional screening, COLONAiVE" />
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href="https://colonaive.com/seo" />
+        
+        {/* Open Graph */}
+        <meta property="og:title" content="COLONAiVE™ Regional Screening Options | Explore by Country" />
+        <meta property="og:description" content="COLONAiVE™ is a clinician-led movement to outsmart colorectal cancer by promoting timely colonoscopy, education, and access to HSA-cleared blood-based screening. Learn how to take action early." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://colonaive.com/seo" />
+        
+        {/* Twitter Card */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="COLONAiVE™ Regional Screening Options | Explore by Country" />
+        <meta name="twitter:description" content="COLONAiVE™ is a clinician-led movement to outsmart colorectal cancer by promoting timely colonoscopy, education, and access to HSA-cleared blood-based screening. Learn how to take action early." />
+      </Helmet>
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-blue-600 via-teal-600 to-green-600 text-white py-20">
         <Container>
@@ -494,6 +514,27 @@ const SEOCatalogPage: React.FC = () => {
                 </p>
               </div>
             </div>
+          </div>
+        </Container>
+      </section>
+
+      {/* About COLONAiVE Section */}
+      <section className="py-16 bg-white">
+        <Container>
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-xl font-semibold mb-2">🧠 About COLONAiVE™</h2>
+            <p>
+              COLONAiVE™ is a national movement to outsmart colorectal cancer and reduce CRC-related
+              mortality through early detection, inclusive education, and access to clinically validated
+              screening technologies. Founded in Singapore, the movement champions colonoscopy as the
+              gold standard — the only screening method that both detects and removes precancerous
+              polyps, making it the only true preventive option. COLONAiVE™ also supports HSA-cleared,
+              blood-based screening tools to help more people get tested before symptoms appear. Guided
+              by leading specialists and driven by partnerships across Asia-Pacific, the initiative
+              empowers individuals to know when and how to screen — turning awareness into life-saving
+              action. Its foundation is built on clinical evidence, real-world health impact, and
+              multilingual tools that reach underserved and younger populations.
+            </p>
           </div>
         </Container>
       </section>
