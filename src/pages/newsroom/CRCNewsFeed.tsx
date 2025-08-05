@@ -95,11 +95,11 @@ const CRCNewsFeed: React.FC = () => {
 
   const getSourceColor = (source: string) => {
     const colors: { [key: string]: string } = {
-      'NEJM': 'bg-blue-100 text-blue-800',
-      'JAMA': 'bg-green-100 text-green-800',
-      'PubMed': 'bg-purple-100 text-purple-800',
+      'Google News': 'bg-blue-100 text-blue-800',
+      'Google News SG': 'bg-green-100 text-green-800',
       'Reuters Health': 'bg-orange-100 text-orange-800',
-      'Straits Times': 'bg-red-100 text-red-800',
+      'Medical News Today': 'bg-purple-100 text-purple-800',
+      'System': 'bg-gray-100 text-gray-800',
     };
     return colors[source] || 'bg-gray-100 text-gray-800';
   };
@@ -111,11 +111,9 @@ const CRCNewsFeed: React.FC = () => {
         <Container>
           <div className="max-w-4xl mx-auto text-center">
             <div className="flex items-center justify-center mb-4">
-              <Sparkles className="h-8 w-8 text-blue-400 mr-3" />
               <h1 className="text-4xl font-bold">📰 CRC News Watch</h1>
-              <Sparkles className="h-8 w-8 text-blue-400 ml-3" />
             </div>
-            <p className="text-xl text-blue-100 mb-2">Powered by AI</p>
+            <p className="text-xl text-blue-100 mb-2">Real-Time Medical News</p>
             <p className="text-lg text-gray-300 max-w-2xl mx-auto">
               Stay informed with the latest colorectal cancer research, screening developments, 
               and clinical breakthroughs from trusted medical sources worldwide.
@@ -132,8 +130,8 @@ const CRCNewsFeed: React.FC = () => {
                 {articles.length} Articles
               </div>
               <div className="flex items-center">
-                <Sparkles className="h-4 w-4 mr-1" />
-                AI Summarized
+                <ExternalLink className="h-4 w-4 mr-1" />
+                Live Sources
               </div>
             </div>
           </div>
@@ -225,11 +223,18 @@ const CRCNewsFeed: React.FC = () => {
                         <div className="flex items-start gap-3">
                           <div className="flex-1">
                             <h2 className="text-xl font-bold text-gray-900 mb-2 leading-tight">
-                              {article.title}
+                              <a 
+                                href={article.url} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="hover:text-blue-600 transition-colors"
+                              >
+                                {article.title}
+                              </a>
                             </h2>
                             <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600">
                               <span className={`px-2 py-1 rounded-full text-xs font-medium ${getSourceColor(article.source)}`}>
-                                {article.source}
+                                Source: {article.source}
                               </span>
                               <div className="flex items-center">
                                 <Calendar className="h-4 w-4 mr-1" />
@@ -240,13 +245,12 @@ const CRCNewsFeed: React.FC = () => {
                         </div>
                       </div>
 
-                      {/* AI Summary */}
+                      {/* Article Summary */}
                       <div className="mb-4">
                         <div className="flex items-center mb-2">
-                          <Sparkles className="h-4 w-4 text-blue-500 mr-1" />
-                          <span className="text-sm font-medium text-blue-700">AI Summary</span>
+                          <span className="text-sm font-medium text-gray-700">Summary</span>
                         </div>
-                        <p className="text-gray-700 leading-relaxed bg-blue-50 p-4 rounded-lg border-l-4 border-blue-200">
+                        <p className="text-gray-700 leading-relaxed bg-gray-50 p-4 rounded-lg border-l-4 border-gray-300">
                           {article.summary}
                         </p>
                       </div>
@@ -271,19 +275,35 @@ const CRCNewsFeed: React.FC = () => {
               <Card>
                 <CardContent className="p-12 text-center">
                   <Search className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No Articles Found</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    {searchTerm || selectedSource ? 'No Articles Found' : 'No Recent Articles'}
+                  </h3>
                   <p className="text-gray-600 mb-4">
-                    Try adjusting your search terms or clearing the filters.
+                    {searchTerm || selectedSource 
+                      ? 'Try adjusting your search terms or clearing the filters.' 
+                      : 'No recent colorectal cancer articles are available at this time. Please check back later or try refreshing the feed.'}
                   </p>
-                  <Button 
-                    onClick={() => {
-                      setSearchTerm('');
-                      setSelectedSource('');
-                    }}
-                    variant="outline"
-                  >
-                    Clear Filters
-                  </Button>
+                  <div className="flex justify-center gap-3">
+                    {(searchTerm || selectedSource) && (
+                      <Button 
+                        onClick={() => {
+                          setSearchTerm('');
+                          setSelectedSource('');
+                        }}
+                        variant="outline"
+                      >
+                        Clear Filters
+                      </Button>
+                    )}
+                    <Button 
+                      onClick={() => loadNews(true)}
+                      disabled={refreshing}
+                      className="flex items-center gap-2"
+                    >
+                      <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+                      Refresh Feed
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             )}
@@ -296,10 +316,10 @@ const CRCNewsFeed: React.FC = () => {
         <Container>
           <div className="max-w-4xl mx-auto text-center">
             <p className="text-sm text-gray-600 mb-2">
-              <strong>Data Sources:</strong> PubMed, NEJM, JAMA, Reuters Health, Straits Times Health
+              <strong>Data Sources:</strong> Google News, Reuters Health, Medical News Today, and other trusted medical sources
             </p>
             <p className="text-xs text-gray-500">
-              Articles are automatically curated and summarized using AI. Summaries are for informational purposes only 
+              Articles are automatically curated from trusted medical news sources. Content is for informational purposes only 
               and should not replace professional medical advice. Last updated: {new Date().toLocaleDateString()}
             </p>
           </div>
