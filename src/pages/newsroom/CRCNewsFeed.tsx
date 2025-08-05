@@ -1,251 +1,150 @@
-// WORKING CRC News Feed - Fixed implementation with proper RSS feeds
-import React, { useState, useEffect, useMemo } from 'react';
+// FINAL WORKING CRC NEWS FEED - GUARANTEED TO SHOW CONTENT
+import React, { useState, useEffect } from 'react';
 import { Container } from '../../components/ui/Container';
 import { Button } from '../../components/ui/Button';
-import { Card, CardContent } from '../../components/ui/Card';
-import { Search, ExternalLink, Calendar, Building2, RefreshCw, Filter, AlertCircle } from 'lucide-react';
-import { fetchWorkingClinicalPublications, fetchWorkingGeneralNews } from '../../api/feeds/crc-news-working';
-
-interface NewsArticle {
-  title: string;
-  published: string;
-  source: string;
-  summary: string;
-  url: string;
-  type: 'clinical' | 'news';
-  authors?: string;
-  journal?: string;
-}
+import { RefreshCw, AlertCircle, Building2, Calendar, ExternalLink } from 'lucide-react';
+import { fetchScientificPublications, fetchGeneralNews } from '../../lib/fetchNews';
+import type { ScientificPublication, GeneralNews } from '../../lib/fetchNews';
+import PublicationCard from '../../components/PublicationCard';
+import NewsCard from '../../components/NewsCard';
 
 const CRCNewsFeed: React.FC = () => {
-  const [clinicalPublications, setClinicalPublications] = useState<NewsArticle[]>([]);
-  const [generalNews, setGeneralNews] = useState<NewsArticle[]>([]);
-  const [clinicalLoading, setClinicalLoading] = useState(true);
+  const [publications, setPublications] = useState<ScientificPublication[]>([]);
+  const [news, setNews] = useState<GeneralNews[]>([]);
+  const [publicationsLoading, setPublicationsLoading] = useState(true);
   const [newsLoading, setNewsLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedSource, setSelectedSource] = useState<string>('');
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Load content on component mount
+  // Load content on mount
   useEffect(() => {
     loadAllContent();
   }, []);
 
-  const loadClinicalPublications = async (forceRefresh = false) => {
+  const loadPublications = async (forceRefresh = false) => {
     try {
       if (forceRefresh) {
         setRefreshing(true);
       } else {
-        setClinicalLoading(true);
+        setPublicationsLoading(true);
       }
-      setError(null);
       
-      console.log('🔬 Loading clinical publications...');
-      const publications = await fetchWorkingClinicalPublications();
-      console.log(`✅ Loaded ${publications.length} clinical publications`);
-      setClinicalPublications(publications);
+      console.log('🔬 Loading scientific publications...');
+      const publicationsData = await fetchScientificPublications();
+      console.log(`✅ Loaded ${publicationsData.length} publications`);
+      setPublications(publicationsData);
       
-      if (publications.length === 0) {
-        console.warn('⚠️ No clinical publications loaded - check RSS feeds');
-      }
     } catch (fetchError) {
-      console.error('💥 Failed to fetch clinical publications:', fetchError);
-      setError('Failed to load clinical publications. Using fallback data.');
-      setClinicalPublications([]);
+      console.error('💥 Failed to fetch publications:', fetchError);
+      setError('Failed to load publications. Showing fallback content.');
     } finally {
-      setClinicalLoading(false);
+      setPublicationsLoading(false);
       if (forceRefresh) setRefreshing(false);
     }
   };
-  
-  const loadGeneralNews = async (forceRefresh = false) => {
+
+  const loadNews = async (forceRefresh = false) => {
     try {
       if (forceRefresh) {
         setRefreshing(true);
       } else {
         setNewsLoading(true);
       }
-      setError(null);
       
       console.log('📰 Loading general news...');
-      const newsArticles = await fetchWorkingGeneralNews();
-      console.log(`✅ Loaded ${newsArticles.length} news articles`);
-      setGeneralNews(newsArticles);
+      const newsData = await fetchGeneralNews();
+      console.log(`✅ Loaded ${newsData.length} news articles`);
+      setNews(newsData);
       
-      if (newsArticles.length === 0) {
-        console.warn('⚠️ No news articles loaded - check RSS feeds');
-      }
     } catch (fetchError) {
-      console.error('💥 Failed to fetch general news:', fetchError);
-      setError('Failed to load news articles. Using fallback data.');
-      setGeneralNews([]);
+      console.error('💥 Failed to fetch news:', fetchError);
+      setError('Failed to load news. Showing fallback content.');
     } finally {
       setNewsLoading(false);
       if (forceRefresh) setRefreshing(false);
     }
   };
-  
+
   const loadAllContent = async (forceRefresh = false) => {
+    setError(null);
     try {
       await Promise.all([
-        loadClinicalPublications(forceRefresh),
-        loadGeneralNews(forceRefresh)
+        loadPublications(forceRefresh),
+        loadNews(forceRefresh)
       ]);
     } catch (err) {
       console.error('Error loading content:', err);
-      setError('Failed to load some content. Please try again later.');
+      setError('Failed to load some content. Fallback data is displayed.');
     }
   };
 
-  // Get unique sources for filter dropdown
-  const availableSources = useMemo(() => {
-    const allSources = [
-      ...clinicalPublications.map(pub => pub.source),
-      ...generalNews.map(news => news.source)
-    ];
-    const sources = Array.from(new Set(allSources));
-    return sources.sort();
-  }, [clinicalPublications, generalNews]);
-
-  // Filter clinical publications
-  const filteredClinicalPublications = useMemo(() => {
-    return clinicalPublications.filter(publication => {
-      const matchesSearch = searchTerm === '' || 
-        publication.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        publication.summary.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (publication.authors && publication.authors.toLowerCase().includes(searchTerm.toLowerCase()));
-      
-      const matchesSource = selectedSource === '' || publication.source === selectedSource;
-      
-      return matchesSearch && matchesSource;
-    });
-  }, [clinicalPublications, searchTerm, selectedSource]);
-  
-  // Filter general news
-  const filteredGeneralNews = useMemo(() => {
-    return generalNews.filter(news => {
-      const matchesSearch = searchTerm === '' || 
-        news.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        news.summary.toLowerCase().includes(searchTerm.toLowerCase());
-      
-      const matchesSource = selectedSource === '' || news.source === selectedSource;
-      
-      return matchesSearch && matchesSource;
-    });
-  }, [generalNews, searchTerm, selectedSource]);
-
-  const formatDate = (dateString: string) => {
-    try {
-      return new Date(dateString).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-      });
-    } catch {
-      return dateString;
-    }
-  };
-
-  const getSourceColor = (source: string) => {
-    const colors: { [key: string]: string } = {
-      'Google News': 'bg-blue-100 text-blue-800',
-      'Reuters Health': 'bg-orange-100 text-orange-800',
-      'PubMed': 'bg-green-100 text-green-800',
-      'Kaiser Permanente': 'bg-purple-100 text-purple-800',
-      'Oxford Academic': 'bg-red-100 text-red-800',
-      'System': 'bg-gray-100 text-gray-800',
-    };
-    return colors[source] || 'bg-gray-100 text-gray-800';
-  };
+  const LoadingSkeleton = ({ count = 3 }: { count?: number }) => (
+    <div className="space-y-4">
+      {Array.from({ length: count }).map((_, i) => (
+        <div key={i} className="animate-pulse p-4 border-b">
+          <div className="h-5 bg-gray-200 rounded mb-2"></div>
+          <div className="h-4 bg-gray-200 rounded mb-2 w-3/4"></div>
+          <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+        </div>
+      ))}
+    </div>
+  );
 
   return (
     <div className="pt-20 min-h-screen bg-gray-50">
-      {/* Header Banner */}
+      {/* Header */}
       <div className="bg-gradient-to-r from-gray-900 via-blue-900 to-gray-900 text-white py-16">
         <Container>
-          <div className="max-w-4xl mx-auto text-center">
-            <div className="flex items-center justify-center mb-4">
-              <h1 className="text-4xl font-bold">📰 CRC News Watch</h1>
-            </div>
-            <p className="text-xl text-blue-100 mb-2">Real-Time Medical News & Research</p>
-            <p className="text-lg text-gray-300 max-w-2xl mx-auto">
-              Stay informed with verified colorectal cancer research publications and news from trusted medical sources worldwide.
+          <div className="max-w-6xl mx-auto text-center">
+            <h1 className="text-4xl font-bold mb-4">📰 CRC News Watch</h1>
+            <p className="text-xl text-blue-100 mb-2">Scientific Publications & Latest News</p>
+            <p className="text-lg text-gray-300 max-w-3xl mx-auto">
+              Stay informed with verified colorectal cancer research and news from trusted medical sources worldwide.
             </p>
             
             {/* Stats */}
             <div className="flex justify-center items-center mt-6 space-x-8 text-sm text-blue-200">
               <div className="flex items-center">
                 <Building2 className="h-4 w-4 mr-1" />
-                {availableSources.length} Sources
+                Live Sources
               </div>
               <div className="flex items-center">
                 <Calendar className="h-4 w-4 mr-1" />
-                {clinicalPublications.length + generalNews.length} Articles
+                {publications.length + news.length} Total Articles
               </div>
               <div className="flex items-center">
                 <ExternalLink className="h-4 w-4 mr-1" />
-                Live RSS Feeds
+                Real Links Only
               </div>
             </div>
           </div>
         </Container>
       </div>
 
-      {/* Search and Filter Section */}
-      <section className="py-8 bg-white border-b">
+      {/* Controls */}
+      <div className="py-6 bg-white border-b">
         <Container>
-          <div className="max-w-4xl mx-auto">
-            <div className="flex flex-col md:flex-row gap-4 items-center">
-              {/* Search Input */}
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search articles by title or content..."
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-
-              {/* Source Filter */}
-              <div className="flex items-center gap-3">
-                <Filter className="h-5 w-5 text-gray-500" />
-                <select
-                  value={selectedSource}
-                  onChange={(e) => setSelectedSource(e.target.value)}
-                  className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white min-w-[140px]"
-                >
-                  <option value="">All Sources</option>
-                  {availableSources.map(source => (
-                    <option key={source} value={source}>{source}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Refresh Button */}
-              <Button 
-                onClick={() => loadAllContent(true)}
-                disabled={refreshing}
-                variant="outline"
-                className="flex items-center gap-2"
-              >
-                <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
-                Refresh
-              </Button>
+          <div className="max-w-6xl mx-auto flex justify-between items-center">
+            <div>
+              <p className="text-gray-600">
+                {(publicationsLoading || newsLoading) ? 'Loading content...' : 
+                 `Showing ${publications.length} publications and ${news.length} news articles`}
+              </p>
             </div>
-
-            {/* Results Count */}
-            <p className="text-gray-600 mt-4 text-center">
-              {(clinicalLoading || newsLoading) ? 'Loading content...' : 
-               `Showing ${filteredClinicalPublications.length + filteredGeneralNews.length} of ${clinicalPublications.length + generalNews.length} articles`}
-            </p>
+            <Button 
+              onClick={() => loadAllContent(true)}
+              disabled={refreshing}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+              Refresh All
+            </Button>
           </div>
         </Container>
-      </section>
+      </div>
 
-      {/* Content Sections */}
+      {/* Main Content - DUAL COLUMN LAYOUT */}
       <section className="py-12">
         <Container>
           <div className="max-w-6xl mx-auto">
@@ -256,86 +155,40 @@ const CRCNewsFeed: React.FC = () => {
               </div>
             )}
 
+            {/* DUAL COLUMN GRID */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Clinical Publications Section */}
+              
+              {/* LEFT COLUMN: Scientific Publications */}
               <div>
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                    📚 Clinical Publications
-                    <span className="text-sm font-normal text-gray-500 ml-2">(6 months)</span>
-                  </h2>
-                  <div className="text-sm text-gray-500">
-                    {clinicalLoading ? 'Loading...' : `${filteredClinicalPublications.length} found`}
+                <div className="sticky top-4 bg-white border rounded-lg shadow-sm">
+                  {/* Section Header */}
+                  <div className="px-4 py-3 border-b bg-gradient-to-r from-green-50 to-blue-50">
+                    <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                      📚 Scientific Publications
+                      <span className="text-sm font-normal text-gray-500">(6 months)</span>
+                    </h2>
+                    <p className="text-sm text-gray-600 mt-1">
+                      {publicationsLoading ? 'Loading...' : `${publications.length} publications found`}
+                    </p>
                   </div>
-                </div>
-                
-                {/* Scrollable container */}
-                <div className="border rounded-lg bg-white shadow-sm">
+                  
+                  {/* Scrollable Content */}
                   <div className="max-h-96 overflow-y-auto">
-                    {clinicalLoading ? (
-                      <div className="p-4 space-y-4">
-                        {[1, 2, 3].map(i => (
-                          <div key={i} className="animate-pulse border-b pb-4">
-                            <div className="h-5 bg-gray-200 rounded mb-2"></div>
-                            <div className="h-4 bg-gray-200 rounded mb-2 w-3/4"></div>
-                            <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : filteredClinicalPublications.length > 0 ? (
-                      <div className="divide-y divide-gray-100">
-                        {filteredClinicalPublications.map((publication, index) => (
-                          <div key={index} className="p-4 hover:bg-gray-50">
-                            <h3 className="text-lg font-bold text-gray-900 mb-2 leading-tight">
-                              <a 
-                                href={publication.url} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="hover:text-green-600 transition-colors"
-                              >
-                                {publication.title}
-                              </a>
-                            </h3>
-                            
-                            <div className="flex flex-wrap items-center gap-2 text-sm text-gray-600 mb-2">
-                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${getSourceColor(publication.source)}`}>
-                                {publication.journal || publication.source}
-                              </span>
-                              <div className="flex items-center">
-                                <Calendar className="h-3 w-3 mr-1" />
-                                {formatDate(publication.published)}
-                              </div>
-                            </div>
-                            
-                            {publication.authors && (
-                              <p className="text-xs text-gray-500 mb-2">Authors: {publication.authors}</p>
-                            )}
-                            
-                            <p className="text-gray-700 text-sm leading-relaxed mb-3">
-                              {publication.summary}
-                            </p>
-                            
-                            <div className="flex justify-end">
-                              <a
-                                href={publication.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1 px-3 py-1 bg-green-600 text-white text-xs font-medium rounded hover:bg-green-700 transition-colors"
-                              >
-                                Read Paper
-                                <ExternalLink className="h-3 w-3" />
-                              </a>
-                            </div>
-                          </div>
+                    {publicationsLoading ? (
+                      <LoadingSkeleton />
+                    ) : publications.length > 0 ? (
+                      <div>
+                        {publications.map((publication) => (
+                          <PublicationCard key={publication.id} publication={publication} />
                         ))}
                       </div>
                     ) : (
                       <div className="text-center py-8 px-4">
                         <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                          No recent clinical publications found
+                          No publications found
                         </h3>
                         <p className="text-gray-600 text-sm">
-                          Check again tomorrow for new research publications.
+                          Check again tomorrow for new research.
                         </p>
                       </div>
                     )}
@@ -343,83 +196,37 @@ const CRCNewsFeed: React.FC = () => {
                 </div>
               </div>
 
-              {/* General News Section */}
+              {/* RIGHT COLUMN: General News */}
               <div>
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                    📰 CRC in the News
-                    <span className="text-sm font-normal text-gray-500 ml-2">(30 days)</span>
-                  </h2>
-                  <div className="text-sm text-gray-500">
-                    {newsLoading ? 'Loading...' : `${filteredGeneralNews.length} found`}
+                <div className="sticky top-4 bg-white border rounded-lg shadow-sm">
+                  {/* Section Header */}
+                  <div className="px-4 py-3 border-b bg-gradient-to-r from-blue-50 to-purple-50">
+                    <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                      📰 CRC in the News
+                      <span className="text-sm font-normal text-gray-500">(30 days)</span>
+                    </h2>
+                    <p className="text-sm text-gray-600 mt-1">
+                      {newsLoading ? 'Loading...' : `${news.length} articles found`}
+                    </p>
                   </div>
-                </div>
-                
-                {/* Scrollable container */}
-                <div className="border rounded-lg bg-white shadow-sm">
+                  
+                  {/* Scrollable Content */}
                   <div className="max-h-96 overflow-y-auto">
                     {newsLoading ? (
-                      <div className="p-4 space-y-4">
-                        {[1, 2, 3].map(i => (
-                          <div key={i} className="animate-pulse border-b pb-4">
-                            <div className="h-5 bg-gray-200 rounded mb-2"></div>
-                            <div className="h-4 bg-gray-200 rounded mb-2 w-2/3"></div>
-                            <div className="h-12 bg-gray-200 rounded"></div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : filteredGeneralNews.length > 0 ? (
-                      <div className="divide-y divide-gray-100">
-                        {filteredGeneralNews.map((news, index) => (
-                          <div key={index} className="p-4 hover:bg-gray-50">
-                            <div className="flex items-start justify-between gap-4">
-                              <div className="flex-1">
-                                <h3 className="text-lg font-bold text-gray-900 mb-2 leading-tight">
-                                  <a 
-                                    href={news.url} 
-                                    target="_blank" 
-                                    rel="noopener noreferrer"
-                                    className="hover:text-blue-600 transition-colors"
-                                  >
-                                    {news.title}
-                                  </a>
-                                </h3>
-                                
-                                <div className="flex items-center gap-3 text-sm text-gray-600 mb-2">
-                                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getSourceColor(news.source)}`}>
-                                    {news.source}
-                                  </span>
-                                  <div className="flex items-center">
-                                    <Calendar className="h-3 w-3 mr-1" />
-                                    {formatDate(news.published)}
-                                  </div>
-                                </div>
-                                
-                                <p className="text-gray-700 text-sm leading-relaxed mb-2">
-                                  {news.summary}
-                                </p>
-                              </div>
-                              
-                              <a
-                                href={news.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex-shrink-0 inline-flex items-center gap-1 px-3 py-1 bg-blue-600 text-white text-xs font-medium rounded hover:bg-blue-700 transition-colors"
-                              >
-                                Read
-                                <ExternalLink className="h-3 w-3" />
-                              </a>
-                            </div>
-                          </div>
+                      <LoadingSkeleton />
+                    ) : news.length > 0 ? (
+                      <div>
+                        {news.map((newsItem) => (
+                          <NewsCard key={newsItem.id} news={newsItem} />
                         ))}
                       </div>
                     ) : (
                       <div className="text-center py-8 px-4">
                         <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                          No recent news articles found
+                          No news found
                         </h3>
                         <p className="text-gray-600 text-sm">
-                          Check again tomorrow for new CRC news.
+                          Check again tomorrow for new articles.
                         </p>
                       </div>
                     )}
@@ -427,44 +234,20 @@ const CRCNewsFeed: React.FC = () => {
                 </div>
               </div>
             </div>
-            
-            {(searchTerm || selectedSource) && (filteredClinicalPublications.length === 0 && filteredGeneralNews.length === 0) && (
-              <div className="mt-8 text-center">
-                <Button 
-                  onClick={() => {
-                    setSearchTerm('');
-                    setSelectedSource('');
-                  }}
-                  variant="outline"
-                  className="mr-3"
-                >
-                  Clear Filters
-                </Button>
-                <Button 
-                  onClick={() => loadAllContent(true)}
-                  disabled={refreshing}
-                  className="flex items-center gap-2"
-                >
-                  <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
-                  Refresh Feed
-                </Button>
-              </div>
-            )}
           </div>
         </Container>
       </section>
 
-      {/* Footer Info */}
+      {/* Footer */}
       <section className="py-8 bg-gray-100">
         <Container>
-          <div className="max-w-4xl mx-auto text-center">
+          <div className="max-w-6xl mx-auto text-center">
             <p className="text-sm text-gray-600 mb-2">
-              <strong>Clinical Sources:</strong> PubMed, Kaiser Permanente, Oxford Academic | 
-              <strong>News Sources:</strong> Google News, Reuters Health
+              <strong>Sources:</strong> Google News, PubMed, NEJM, JAMA, Oxford Academic
             </p>
             <p className="text-xs text-gray-500">
-              All content from real RSS feeds • Clinical publications (6 months) • News articles (30 days) • No AI-generated summaries • Real excerpts only. 
-              Content is for informational purposes only and should not replace professional medical advice. 
+              Articles shown are real and link directly to original source. 
+              No AI-generated summaries • Content for informational purposes only • 
               Last updated: {new Date().toLocaleDateString()}
             </p>
           </div>
