@@ -3,7 +3,7 @@ import { Container } from '../components/ui/Container';
 import { Card, CardContent } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { ChampionChoiceModal } from '../components/ChampionChoiceModal';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Activity, Microscope } from 'lucide-react';
 
 const GetScreenedPage: React.FC = () => {
@@ -93,24 +93,53 @@ const GetScreenedPage: React.FC = () => {
               </Card>
             </div>
 
-            {/* Additional Information */}
-            <div className="mt-12 bg-blue-50 rounded-lg p-8">
-              <h3 className="text-xl font-bold text-center mb-4">
-                Not Sure Which Option to Choose?
-              </h3>
-              <p className="text-gray-700 text-center mb-6">
-                Our clinician-backed Champion Support Team can help guide you to the most suitable screening option based on current clinical guidelines, your age, family history, and risk factors. 
-                Not sure if screening is right for you? <Link to="/education/faqs" className="text-blue-600 hover:text-blue-800 underline">Read our FAQ</Link> for common questions and answers.
+            {/* Screening Wizard CTA */}
+            <div className="mt-12 bg-gradient-to-r from-blue-50 to-teal-50 rounded-lg p-8 border border-blue-200">
+              <div className="text-center">
+                <div className="inline-flex items-center justify-center w-12 h-12 bg-blue-100 rounded-full mb-4">
+                  <span className="text-2xl">🧪</span>
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                  Not Sure Which Option to Choose?
+                </h3>
+                <p className="text-gray-700 mb-6 max-w-2xl mx-auto">
+                  Try our new <strong>Screening Eligibility Wizard</strong> - an intelligent tool that provides personalized 
+                  recommendations based on your age, location, family history, and symptoms.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-6">
+                  <div className="flex items-center text-sm text-gray-600">
+                    <span className="mr-2">🌍</span>
+                    Multi-country support
+                  </div>
+                  <div className="flex items-center text-sm text-gray-600">
+                    <span className="mr-2">🎯</span>
+                    Smart risk assessment
+                  </div>
+                  <div className="flex items-center text-sm text-gray-600">
+                    <span className="mr-2">⚡</span>
+                    Instant results
+                  </div>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <a href="/get-screened/triage">
+                    <Button className="bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700 text-white px-8 py-3 text-lg font-semibold">
+                      Try Screening Wizard
+                    </Button>
+                  </a>
+                  <Button variant="outline" onClick={() => handleOpenModal('gp')}>
+                    Get Personal Guidance
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Additional Resources */}
+            <div className="mt-8 text-center text-sm text-gray-600">
+              <p className="mb-2"><strong>Clinical Evidence:</strong> Non-invasive screening improves participation rates by 2.1-fold</p>
+              <p className="text-xs">Early-onset CRC incidence rising 15% in adults under 50 (USPSTF 2021)</p>
+              <p className="mt-4">
+                Have questions? <a href="/education/faqs" className="text-blue-600 hover:text-blue-800 underline">Visit our FAQ section</a>
               </p>
-              <div className="text-center text-sm text-gray-600 mt-4">
-                <p><strong>Clinical Evidence:</strong> Non-invasive screening improves participation rates by 2.1-fold</p>
-                <p className="text-xs mt-1">Early-onset CRC incidence rising 15% in adults under 50 (USPSTF 2021)</p>
-              </div>
-              <div className="flex justify-center">
-                <Button variant="outline" onClick={() => handleOpenModal('gp')}>
-                  Get Personalized Guidance
-                </Button>
-              </div>
             </div>
           </div>
         </Container>

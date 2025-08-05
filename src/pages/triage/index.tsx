@@ -1,73 +1,115 @@
 // /src/pages/triage/index.tsx
 import React from 'react';
 import { Container } from '../../components/ui/Container';
-import ScreeningUrgencyWidget from '../../components/ScreeningUrgencyWidget';
+import ScreeningEligibilityWizard from '../../components/ScreeningEligibilityWizard';
 
 const TriagePage: React.FC = () => {
   return (
     <div className="pt-20 min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-teal-600 to-blue-600 text-white py-16">
+      <div className="bg-gradient-to-r from-blue-600 via-teal-600 to-green-600 text-white py-20">
         <Container>
-          <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-4xl font-bold mb-6">Screening Triage Assessment</h1>
+          <div className="max-w-5xl mx-auto text-center">
+            <h1 className="text-5xl font-bold mb-6">Advanced Screening Eligibility Wizard</h1>
             <p className="text-xl mb-8">
-              Get personalized guidance on your colorectal cancer screening needs based on your age, symptoms, and risk factors.
+              Get personalized, country-specific guidance on your colorectal cancer screening needs with our Phase 4 intelligent triage system.
             </p>
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-sm max-w-2xl mx-auto">
-              <p className="mb-2">
-                <strong>Evidence-Based Assessment:</strong> This tool uses clinical guidelines from USPSTF, AGA, and Singapore's health authorities.
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 text-sm max-w-3xl mx-auto">
+              <p className="mb-3">
+                <strong>🌍 Multi-Country Support:</strong> Adapted guidelines for Singapore, India, Philippines, Japan, and Australia
+              </p>
+              <p className="mb-3">
+                <strong>🎯 Smart Triage Logic:</strong> Country-specific age thresholds and risk assessment algorithms
               </p>
               <p className="text-xs opacity-90">
-                Results connect you directly to appropriate healthcare providers in Singapore.
+                Instantly connects you to appropriate healthcare providers and screening options in your region.
               </p>
             </div>
           </div>
         </Container>
       </div>
 
-      {/* Triage Widget Section */}
+      {/* Triage Wizard Section */}
       <section className="py-16">
         <Container>
-          <div className="max-w-4xl mx-auto">
-            <ScreeningUrgencyWidget />
+          <div className="max-w-6xl mx-auto">
+            <ScreeningEligibilityWizard />
           </div>
         </Container>
       </section>
 
-      {/* Additional Information */}
-      <section className="py-12 bg-white">
+      {/* Enhanced Features Section */}
+      <section className="py-16 bg-white">
         <Container>
-          <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">
-              Why Use Our Triage Tool?
+          <div className="max-w-5xl mx-auto text-center">
+            <h2 className="text-3xl font-bold text-gray-900 mb-8">
+              Phase 4 Wizard Features
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="p-6">
-                <div className="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="p-6 bg-blue-50 rounded-lg">
+                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl">🌍</span>
+                </div>
+                <h3 className="font-semibold mb-2">Multi-Country Logic</h3>
+                <p className="text-sm text-gray-600">
+                  Tailored algorithms for SG, IN, PH, JP, AU with country-specific thresholds
+                </p>
+              </div>
+              <div className="p-6 bg-green-50 rounded-lg">
+                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <span className="text-2xl">🎯</span>
                 </div>
-                <h3 className="font-semibold mb-2">Evidence-Based</h3>
+                <h3 className="font-semibold mb-2">Smart Risk Assessment</h3>
                 <p className="text-sm text-gray-600">
-                  Based on international screening guidelines and Singapore clinical standards
+                  Advanced triage with age-adjusted risk calculations per region
                 </p>
               </div>
-              <div className="p-6">
-                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-2xl">⚡</span>
+              <div className="p-6 bg-purple-50 rounded-lg">
+                <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl">💰</span>
                 </div>
-                <h3 className="font-semibold mb-2">Immediate Results</h3>
+                <h3 className="font-semibold mb-2">Cost Information</h3>
                 <p className="text-sm text-gray-600">
-                  Get personalized recommendations instantly with direct referral paths
+                  Real pricing data and insurance coverage info for each country
+                </p>
+              </div>
+              <div className="p-6 bg-teal-50 rounded-lg">
+                <div className="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl">🔗</span>
+                </div>
+                <h3 className="font-semibold mb-2">Direct CTAs</h3>
+                <p className="text-sm text-gray-600">
+                  Contextual next-step buttons based on risk level and location
+                </p>
+              </div>
+            </div>
+            
+            <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="p-6">
+                <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl">📱</span>
+                </div>
+                <h3 className="font-semibold mb-2">Mobile Optimized</h3>
+                <p className="text-sm text-gray-600">
+                  Fully responsive design with keyboard navigation support
                 </p>
               </div>
               <div className="p-6">
-                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl">📊</span>
+                </div>
+                <h3 className="font-semibold mb-2">Analytics Ready</h3>
+                <p className="text-sm text-gray-600">
+                  Built-in tracking hooks for engagement and conversion analysis
+                </p>
+              </div>
+              <div className="p-6">
+                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <span className="text-2xl">🔒</span>
                 </div>
-                <h3 className="font-semibold mb-2">Secure & Private</h3>
+                <h3 className="font-semibold mb-2">Privacy First</h3>
                 <p className="text-sm text-gray-600">
-                  Your responses are not stored and remain completely confidential
+                  No data storage, complete anonymity with comprehensive disclaimers
                 </p>
               </div>
             </div>
