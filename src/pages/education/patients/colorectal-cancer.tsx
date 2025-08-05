@@ -1,5 +1,6 @@
 import React from 'react';
 import { Container } from '../../../components/ui/Container';
+import { RegionalScreeningCTA } from '../../../components/SEOPageList';
 
 const ColorectalCancerPage: React.FC = () => {
   return (
@@ -84,6 +85,15 @@ const ColorectalCancerPage: React.FC = () => {
               </div>
 
             </div>
+          </div>
+        </Container>
+      </section>
+
+      {/* Regional Screening Options */}
+      <section className="py-16 bg-gray-50">
+        <Container>
+          <div className="max-w-4xl mx-auto">
+            <RegionalScreeningCTA />
           </div>
         </Container>
       </section>

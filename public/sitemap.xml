@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" 
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+
+  <!-- Main Pages -->
+  <url>
+    <loc>https://colonaive.com/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <lastmod>2025-08-05</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://colonaive.com/get-screened</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <lastmod>2025-08-05</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://colonaive.com/get-screened/triage</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <lastmod>2025-08-05</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://colonaive.com/specialists</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2025-08-05</lastmod>
+  </url>
+
+  <!-- SEO Regional Landing Pages (Priority) -->
+  <url>
+    <loc>https://colonaive.com/seo</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <lastmod>2025-08-05</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://colonaive.com/seo/singapore-colorectal-screening</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <lastmod>2025-08-05</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://colonaive.com/seo/singapore-colorectal-screening" />
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://colonaive.com/seo/da-chang-ai-sha-zha" />
+  </url>
+  
+  <url>
+    <loc>https://colonaive.com/seo/australia-bowel-cancer-screening</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <lastmod>2025-08-05</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://colonaive.com/seo/india-colorectal-screening</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <lastmod>2025-08-05</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://colonaive.com/seo/philippines-colorectal-screening</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <lastmod>2025-08-05</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://colonaive.com/seo/japan-colorectal-screening</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <lastmod>2025-08-05</lastmod>
+  </url>
+
+  <!-- SEO Test-Specific Pages -->
+  <url>
+    <loc>https://colonaive.com/seo/colon-cancer-test-singapore</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2025-08-05</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://colonaive.com/seo/blood-test-colorectal-cancer</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2025-08-05</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://colonaive.com/seo/colon-cancer-test-australia</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2025-08-05</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://colonaive.com/seo/colon-cancer-test-india</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2025-08-05</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://colonaive.com/seo/colon-cancer-test-philippines</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2025-08-05</lastmod>
+  </url>
+
+  <!-- Legacy SEO Pages -->
+  <url>
+    <loc>https://colonaive.com/seo/colorectal-cancer-screening-singapore</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2025-08-05</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://colonaive.com/seo/colorectal-cancer-screening-australia</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2025-08-05</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://colonaive.com/seo/colorectal-cancer-screening-india</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2025-08-05</lastmod>
+  </url>
+
+  <!-- Specialized Test Pages -->
+  <url>
+    <loc>https://colonaive.com/seo/fit-test-singapore</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2025-08-05</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://colonaive.com/seo/fobt-test-australia</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2025-08-05</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://colonaive.com/seo/colonoscopy-india-cost</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2025-08-05</lastmod>
+  </url>
+
+  <!-- General SEO Pages -->
+  <url>
+    <loc>https://colonaive.com/seo/early-detection-colon-cancer</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2025-08-05</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://colonaive.com/seo/bowel-cancer-screening</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2025-08-05</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://colonaive.com/seo/da-chang-ai-sha-zha</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2025-08-05</lastmod>
+  </url>
+
+  <!-- Education Pages -->
+  <url>
+    <loc>https://colonaive.com/education</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2025-08-05</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://colonaive.com/education/patients/colorectal-cancer</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2025-08-05</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://colonaive.com/education/patients/screening</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2025-08-05</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://colonaive.com/education/patients/symptoms</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2025-08-05</lastmod>
+  </url>
+
+  <!-- Regional Education Pages -->
+  <url>
+    <loc>https://colonaive.com/education/sg</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2025-08-05</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://colonaive.com/education/au</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2025-08-05</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://colonaive.com/education/in</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2025-08-05</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://colonaive.com/education/ph</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2025-08-05</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://colonaive.com/education/jp</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2025-08-05</lastmod>
+  </url>
+
+  <!-- Clinician Education -->
+  <url>
+    <loc>https://colonaive.com/education/clinicians</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2025-08-05</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://colonaive.com/education/clinicians/guidelines</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2025-08-05</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://colonaive.com/education/clinicians/case-studies</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2025-08-05</lastmod>
+  </url>
+
+  <!-- Movement & Pillars -->
+  <url>
+    <loc>https://colonaive.com/movement-pillars</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2025-08-05</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://colonaive.com/join-movement</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2025-08-05</lastmod>
+  </url>
+
+  <!-- About & Company -->
+  <url>
+    <loc>https://colonaive.com/about</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+    <lastmod>2025-08-05</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://colonaive.com/vision-2035</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+    <lastmod>2025-08-05</lastmod>
+  </url>
+
+  <!-- Legal Pages -->
+  <url>
+    <loc>https://colonaive.com/privacy-policy</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+    <lastmod>2025-08-05</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://colonaive.com/terms-of-use</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+    <lastmod>2025-08-05</lastmod>
+  </url>
+
+</urlset>

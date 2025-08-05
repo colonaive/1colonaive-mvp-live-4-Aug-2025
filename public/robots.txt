@@ -1,0 +1,23 @@
+User-agent: *
+Allow: /
+
+# SEO Landing Pages
+Allow: /seo/
+Allow: /education/
+Allow: /get-screened/
+
+# Disallow admin and auth pages
+Disallow: /admin/
+Disallow: /auth/
+Disallow: /dev/
+Disallow: /api/
+
+# Allow important assets
+Allow: /images/
+Allow: /favicon.ico
+
+# Sitemap
+Sitemap: https://colonaive.com/sitemap.xml
+
+# Crawl delay for politeness
+Crawl-delay: 1

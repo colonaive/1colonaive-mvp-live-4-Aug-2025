@@ -10,6 +10,7 @@ import PillarsSection from "../components/PillarsSection";
 import EvidenceSection from "../components/EvidenceSection";
 import NationalTargetsSection from "../components/NationalTargetsSection";
 import JoinMovementSection from "../components/JoinMovementSection";
+import { RegionalScreeningCTA } from "../components/SEOPageList";
 
 const HomePage: React.FC = () => {
   return (
@@ -29,6 +30,14 @@ const HomePage: React.FC = () => {
       <BloodScreeningSection />
       <PillarsSection />
       <EvidenceSection />
+      
+      {/* Regional Screening Options */}
+      <section className="py-16 bg-gray-50">
+        <div className="container mx-auto px-4 max-w-6xl">
+          <RegionalScreeningCTA />
+        </div>
+      </section>
+      
       <NationalTargetsSection />
       <JoinMovementSection />
 

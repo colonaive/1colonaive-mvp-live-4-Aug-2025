@@ -22,7 +22,14 @@ const screeningLinks = [
   { label: "Colonoscopy (Gold Standard)", path: "/education/article/colonoscopy-gold-standard" },
   { label: "Screening Blood Test", path: "/get-screened" },
   { label: "Find a GP", path: "/find-a-gp" },
-  { label: "Find a Specialist", path: "/find-a-specialist" }
+  { label: "Find a Specialist", path: "/find-a-specialist" },
+  { label: "—————————", path: "#", isHeader: true },
+  { label: "🌏 Explore by Country", path: "/seo", isHeader: true },
+  { label: "🇸🇬 Singapore", path: "/seo/colorectal-cancer-screening-singapore" },
+  { label: "🇦🇺 Australia", path: "/seo/colorectal-cancer-screening-australia" },
+  { label: "🇮🇳 India", path: "/seo/colon-cancer-test-india" },
+  { label: "🇵🇭 Philippines", path: "/seo/colon-cancer-test-philippines" },
+  { label: "🇯🇵 Japan", path: "/seo/japan-colorectal-screening" }
 ];
 
 const pillarLinks = [
@@ -114,7 +121,7 @@ export const Header = () => {
 
   const renderDropdown = (
     label: string,
-    links: { label: string; path: string }[],
+    links: { label: string; path: string; isHeader?: boolean }[],
     menuKey: string
   ) => (
     <div
@@ -138,18 +145,30 @@ export const Header = () => {
       {activeSubmenu === menuKey && (
         <div className="absolute top-full left-0 w-60 mt-0 rounded-b-lg bg-[#0b1e3b] shadow-lg ring-1 ring-white/10 z-[9999]">
           <ul className="py-2">
-            {links.map((link) => (
-              <li key={link.path}>
-                <Link
-                  to={link.path}
-                  className="group relative block w-full px-4 py-2 text-sm text-white hover:text-teal-300 transition-colors duration-300 text-left"
-                  onClick={handleClose}
-                >
-                  <span className="relative inline-block">
-                    {link.label}
-                    <span className="absolute bottom-[-2px] left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-teal-400 to-transparent transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-center"></span>
-                  </span>
-                </Link>
+            {links.map((link, index) => (
+              <li key={`${link.path}-${index}`}>
+                {link.isHeader ? (
+                  link.label.startsWith('—————————') ? (
+                    <div className="px-4 py-1">
+                      <div className="border-t border-white/20"></div>
+                    </div>
+                  ) : (
+                    <div className="px-4 py-2 text-xs font-semibold text-teal-300 uppercase tracking-wider">
+                      {link.label}
+                    </div>
+                  )
+                ) : (
+                  <Link
+                    to={link.path}
+                    className="group relative block w-full px-4 py-2 text-sm text-white hover:text-teal-300 transition-colors duration-300 text-left"
+                    onClick={handleClose}
+                  >
+                    <span className="relative inline-block">
+                      {link.label}
+                      <span className="absolute bottom-[-2px] left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-teal-400 to-transparent transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-center"></span>
+                    </span>
+                  </Link>
+                )}
               </li>
             ))}
           </ul>
@@ -249,9 +268,21 @@ export const Header = () => {
             </button>
             {activeSubmenu === item.key && (
               <ul className="pl-4 border-l-2 border-teal-400/50">
-                {item.links.map(link => (
-                  <li key={link.path}>
-                    <Link to={link.path} onClick={handleClose} className="block py-2 text-sm hover:text-teal-300">{link.label}</Link>
+                {item.links.map((link, linkIndex) => (
+                  <li key={`${link.path}-${linkIndex}`}>
+                    {link.isHeader ? (
+                      link.label.startsWith('—————————') ? (
+                        <div className="py-1">
+                          <div className="border-t border-white/20"></div>
+                        </div>
+                      ) : (
+                        <div className="py-2 text-xs font-semibold text-teal-300 uppercase tracking-wider">
+                          {link.label}
+                        </div>
+                      )
+                    ) : (
+                      <Link to={link.path} onClick={handleClose} className="block py-2 text-sm hover:text-teal-300">{link.label}</Link>
+                    )}
                   </li>
                 ))}
               </ul>

@@ -4,6 +4,7 @@ import { Card, CardContent } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { ChampionChoiceModal } from '../../components/ChampionChoiceModal';
 import ScreeningEligibilityWizard from '../../components/ScreeningEligibilityWizard';
+import { RegionalScreeningCTA } from '../../components/SEOPageList';
 import { useNavigate, Link } from 'react-router-dom';
 import { Activity, Microscope, Target } from 'lucide-react';
 
@@ -166,6 +167,15 @@ const GetScreenedPage: React.FC = () => {
             </div>
             
             <ScreeningEligibilityWizard />
+          </div>
+        </Container>
+      </section>
+
+      {/* Regional Screening Options */}
+      <section className="py-16 bg-white">
+        <Container>
+          <div className="max-w-6xl mx-auto">
+            <RegionalScreeningCTA className="mb-12" />
           </div>
         </Container>
       </section>
