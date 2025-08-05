@@ -200,111 +200,34 @@ class CRCNewsFeedService {
   }
 
   /**
-   * Generate AI summary with strict accuracy guardrails
+   * Generate excerpt from original article content (NO AI GENERATION)
    */
-  private async generateAISummary(title: string, content: string, source: string): Promise<{
+  private generateArticleExcerpt(title: string, content: string, source: string): {
     summary: string;
     relevance_score: number;
-  }> {
-    if (!this.OPENAI_API_KEY) {
-      console.warn('OpenAI API key not found, using fallback scoring');
+  } {
+    // Extract first meaningful sentences from original content only
+    const cleanContent = this.cleanHtmlContent(content);
+    
+    if (!cleanContent || cleanContent.length < 50) {
       return {
-        summary: `${title.substring(0, 200)}...`,
+        summary: `Read the full article from ${source} for complete details.`,
         relevance_score: this.calculateRelevanceScore(title, content)
       };
     }
-
-    try {
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${this.OPENAI_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o',
-          messages: [
-            {
-              role: 'system',
-              content: `You are a medical news analyst specializing in colorectal cancer (CRC) research and screening.
-
-CRITICAL ACCURACY REQUIREMENTS:
-1. NEVER hallucinate or invent statistics, percentages, or numerical data
-2. ONLY cite numbers that are explicitly mentioned in the source text
-3. ALWAYS attribute statistics to their specific source (journal name, study name, institution)
-4. If no specific numbers are provided, describe findings qualitatively
-5. Use phrases like "according to [source]" or "the study found" when citing data
-
-FORBIDDEN PHRASES (unless explicitly in source):
-- "X% effectiveness" 
-- "Y lives saved"
-- "Z% sensitivity"
-- Any specific numerical claims not in the original text
-
-REQUIRED FORMAT:
-- 2-4 sentences maximum
-- First sentence: Main finding with source attribution
-- Second sentence: Clinical significance or implication
-- Third sentence (optional): Relevance to screening/prevention
-
-SCORING CRITERIA (1-10):
-- 9-10: Major breakthroughs, Singapore/APAC relevance, landmark studies
-- 7-8: Significant clinical findings, new screening methods
-- 5-6: General CRC research, routine updates
-- 3-4: Tangentially related content
-- 1-2: Not medically relevant
-
-Respond in JSON: {"summary": "...", "relevance_score": X}`
-            },
-            {
-              role: 'user',
-              content: `Source: ${source}
-Title: ${title}
-Content: ${content.substring(0, 2000)}
-
-Generate a factually accurate summary that cites the source and only includes statistics explicitly mentioned in the content.`
-            }
-          ],
-          max_tokens: 250,
-          temperature: 0.1 // Lower temperature for accuracy
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`OpenAI API error: ${response.status}`);
-      }
-
-      const data = await response.json();
-      let result;
-      
-      try {
-        result = JSON.parse(data.choices[0]?.message?.content || '{}');
-      } catch (parseError) {
-        console.error('Failed to parse AI response:', data.choices[0]?.message?.content);
-        throw new Error('Invalid AI response format');
-      }
-
-      // Validate summary doesn't contain suspicious patterns
-      const summary = result.summary || '';
-      if (this.containsSuspiciousStatistics(summary, content)) {
-        console.warn('AI summary contains potentially hallucinated statistics, using fallback');
-        return {
-          summary: this.generateFallbackSummary(title, content, source),
-          relevance_score: this.calculateRelevanceScore(title, content)
-        };
-      }
-      
-      return {
-        summary: summary || this.generateFallbackSummary(title, content, source),
-        relevance_score: Math.max(1, Math.min(10, result.relevance_score || 5))
-      };
-    } catch (error) {
-      console.error('Error generating AI summary:', error);
-      return {
-        summary: this.generateFallbackSummary(title, content, source),
-        relevance_score: this.calculateRelevanceScore(title, content)
-      };
-    }
+    
+    // Get first 1-2 sentences from original article
+    const sentences = cleanContent.split(/[.!?]+/);
+    const firstSentences = sentences.slice(0, 2).join('. ').trim();
+    
+    const excerpt = firstSentences.length > 20 
+      ? `${firstSentences}. Read the full article from ${source} for complete details.`
+      : `${cleanContent.substring(0, 200)}... Read the full article from ${source} for complete details.`;
+    
+    return {
+      summary: excerpt,
+      relevance_score: this.calculateRelevanceScore(title, content)
+    };
   }
 
   /**
@@ -363,8 +286,8 @@ Generate a factually accurate summary that cites the source and only includes st
           continue;
         }
 
-        // Generate AI summary and relevance score with source attribution
-        const { summary, relevance_score } = await this.generateAISummary(
+        // Generate excerpt from original article content (NO AI GENERATION)
+        const { summary, relevance_score } = this.generateArticleExcerpt(
           item.title,
           content,
           source
@@ -603,42 +526,6 @@ Generate a factually accurate summary that cites the source and only includes st
 // Export singleton instance
 export const crcNewsFeedService = new CRCNewsFeedService();
 
-// Mock data for development
-export const mockCRCNews: CRCNewsArticle[] = [
-  {
-    id: '1',
-    title: 'Kaiser Permanente Study: CRC Screening Saves 26 Lives Per 1,000 Screened',
-    source: 'Kaiser Permanente',
-    link: 'https://about.kaiserpermanente.org/news/kaiser-permanente-study-crc-screening',
-    summary: 'Landmark 20-year study of 1.2 million participants shows systematic colorectal cancer screening prevents 26 deaths per 1,000 people screened. The study validates current screening guidelines and demonstrates significant mortality reduction through early detection programs.',
-    date_published: '2025-08-03T10:00:00Z',
-    relevance_score: 10,
-    is_sticky: true,
-    sticky_priority: 1,
-    created_at: '2025-08-04T06:00:00Z'
-  },
-  {
-    id: '2',
-    title: 'Singapore Ministry of Health Expands CRC Screening to Age 40-44',
-    source: 'Straits Times',
-    link: 'https://www.straitstimes.com/singapore/health/moh-expands-crc-screening',
-    summary: 'Following rising early-onset colorectal cancer rates, Singapore will pilot expanded screening for adults aged 40-44 starting January 2026. The program includes subsidized FIT tests and priority colonoscopy access, targeting a 70% participation rate.',
-    date_published: '2025-08-02T14:30:00Z',
-    relevance_score: 9,
-    is_sticky: true,
-    sticky_priority: 2,
-    created_at: '2025-08-04T07:00:00Z'
-  },
-  {
-    id: '3',
-    title: 'Blood-Based CRC Test Achieves 94% Sensitivity in Multi-Center Trial',
-    source: 'NEJM',
-    link: 'https://www.nejm.org/doi/full/10.1056/NEJMoa2025042',
-    summary: 'The Shield™ blood test demonstrated 94% sensitivity for colorectal cancer detection and 89% sensitivity for advanced adenomas in a 45,000-participant study. This non-invasive screening option could significantly improve participation rates among screening-hesitant populations.',
-    date_published: '2025-08-01T09:15:00Z',
-    relevance_score: 8,
-    is_sticky: false,
-    sticky_priority: 999,
-    created_at: '2025-08-04T08:00:00Z'
-  }
-];
+// REMOVED: All AI-generated mock data with hallucinated statistics
+// This service now only returns real articles from verified RSS sources
+export const mockCRCNews: CRCNewsArticle[] = [];

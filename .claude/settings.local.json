@@ -7,7 +7,8 @@
       "Bash(npm install:*)",
       "Bash(npx supabase:*)",
       "Bash(mkdir:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(git push:*)"
     ],
     "deny": []
   }

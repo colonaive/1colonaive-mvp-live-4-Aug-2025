@@ -4,7 +4,7 @@ import { Container } from '../../components/ui/Container';
 import { Button } from '../../components/ui/Button';
 import { Card, CardContent } from '../../components/ui/Card';
 import { Search, ExternalLink, Calendar, Building2, Sparkles, RefreshCw, Filter } from 'lucide-react';
-import { fetchCRCNews, mockCRCNews } from '../../api/feeds/crc-news';
+import { fetchVerifiedCRCNews } from '../../api/feeds/crc-news-verified';
 
 interface NewsArticle {
   title: string;
@@ -37,25 +37,22 @@ const CRCNewsFeed: React.FC = () => {
       }
       setError(null);
 
-      // Try to fetch live news, fallback to mock data
+      // Fetch VERIFIED news from real RSS sources only
       let newsData: NewsArticle[] = [];
       
       try {
-        newsData = await fetchCRCNews();
-        if (newsData.length === 0) {
-          // Fallback to mock data if no articles found
-          newsData = mockCRCNews;
-        }
+        newsData = await fetchVerifiedCRCNews();
+        console.log(`Loaded ${newsData.length} verified articles from real sources`);
       } catch (fetchError) {
-        console.warn('Failed to fetch live news, using mock data:', fetchError);
-        newsData = mockCRCNews;
+        console.error('Failed to fetch verified news:', fetchError);
+        setError('Unable to load news articles at this time. Please try again later.');
       }
 
       setArticles(newsData);
     } catch (err) {
       console.error('Error loading news:', err);
       setError('Failed to load news articles. Please try again later.');
-      setArticles(mockCRCNews); // Always fallback to mock data
+      setArticles([]); // No fallback to mock data - only show real articles
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -316,11 +313,12 @@ const CRCNewsFeed: React.FC = () => {
         <Container>
           <div className="max-w-4xl mx-auto text-center">
             <p className="text-sm text-gray-600 mb-2">
-              <strong>Data Sources:</strong> Google News, Reuters Health, Medical News Today, and other trusted medical sources
+              <strong>Data Sources:</strong> Google News, PubMed, Reuters Health, and other verified medical news sources
             </p>
             <p className="text-xs text-gray-500">
-              Articles are automatically curated from trusted medical news sources. Content is for informational purposes only 
-              and should not replace professional medical advice. Last updated: {new Date().toLocaleDateString()}
+              Articles displayed are from verified sources only. No AI-generated content is shown. 
+              Content is for informational purposes only and should not replace professional medical advice. 
+              Last updated: {new Date().toLocaleDateString()}
             </p>
           </div>
         </Container>
