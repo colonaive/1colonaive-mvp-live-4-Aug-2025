@@ -15,6 +15,7 @@ import SpecialistProfileSettings from './pages/SpecialistProfileSettings';
 import GPClinicProfileSettings from './pages/GPClinicProfileSettings';
 import HomePage from './pages/HomePage';
 import AboutUsPage from './pages/AboutUsPage';
+import ContactPage from './pages/ContactPage';
 import AdvisorsPage from './pages/about/AdvisorsPage';
 import ScreeningPage from './pages/ScreeningPage';
 import JoinMovementPage from './pages/JoinMovementPage';
@@ -114,6 +115,7 @@ const MainRoutes = () => {
           <Route path="/" element={<HomePage />} />
           <Route path="/about-us" element={<AboutUsPage />} />
           <Route path="/about" element={<AboutUsPage />} />
+          <Route path="/contact" element={<ContactPage />} />
           <Route path="/about/advisors" element={<AdvisorsPage />} />
           <Route path="/vision2035" element={<Vision2035Page />} />
           <Route path="/csr-showcase" element={<CSRShowcasePage />} />

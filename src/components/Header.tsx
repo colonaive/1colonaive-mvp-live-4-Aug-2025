@@ -45,7 +45,8 @@ const aboutLinks = [
   { label: "Our Story", path: "/about-us" },
   { label: "Our Advisors", path: "/about/advisors" },
   { label: "Vision 2035", path: "/vision2035" },
-  { label: "CSR Showcase", path: "/csr-showcase" }
+  { label: "CSR Showcase", path: "/csr-showcase" },
+  { label: "Contact Us", path: "/contact" }
 ];
 
 export const getJoinLinks = (isAuthenticated: boolean) => {

@@ -174,7 +174,14 @@ export const Footer: React.FC = () => {
               ))}
             </div>
           </div>
-          <div className="mt-6 flex justify-center">
+          <div className="mt-6 flex flex-col items-center space-y-3">
+            <Link
+              to="/contact"
+              className="text-sm text-blue-500 hover:text-blue-400 hover:underline transition-colors duration-300 relative group"
+            >
+              📬 Contact Us
+              <span className="absolute -bottom-1 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-blue-400 to-transparent transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out"></span>
+            </Link>
             <a
               href="mailto:info@colonaive.ai"
               className="flex items-center text-gray-400 hover:text-teal-300 text-sm transition-all duration-300 group hover:-translate-y-0.5"
