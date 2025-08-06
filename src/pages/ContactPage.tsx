@@ -5,6 +5,7 @@ import { Card, CardContent } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import InputField from '../components/ui/InputField';
 import { Mail, Phone, MapPin, CheckCircle } from 'lucide-react';
+import { supabase } from '../config/supabase';
 
 interface FormData {
   fullName: string;
@@ -98,15 +99,24 @@ const ContactPage: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      // For now, we'll just console.log the data
-      // This can be replaced with Supabase or Netlify Forms later
-      console.log('Contact form submission:', {
-        ...formData,
-        timestamp: new Date().toISOString()
+      console.log('📨 Submitting contact form via Supabase Edge Function...');
+      
+      // Call the Supabase Edge Function to send email
+      const { error: functionError } = await supabase.functions.invoke('send-contact-email', {
+        body: {
+          fullName: formData.fullName,
+          email: formData.email,
+          subject: formData.subject,
+          message: formData.message
+        }
       });
 
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      if (functionError) {
+        console.error('❌ Error sending contact email:', functionError);
+        throw new Error('Failed to send your message. Please try again or contact us directly at info@colonaive.ai');
+      }
+
+      console.log('✅ Contact form email sent successfully!');
       
       setIsSubmitted(true);
       
@@ -119,9 +129,12 @@ const ContactPage: React.FC = () => {
       });
       setErrors({});
 
-    } catch (error) {
-      console.error('Error submitting form:', error);
-      // In a real implementation, you'd show an error message to the user
+    } catch (error: any) {
+      console.error('Error submitting contact form:', error);
+      
+      // Show error to user - you could use a toast notification here
+      alert(error.message || 'Failed to send your message. Please try again or contact us directly at info@colonaive.ai');
+      
     } finally {
       setIsSubmitting(false);
     }
@@ -140,12 +153,12 @@ const ContactPage: React.FC = () => {
             <div className="max-w-2xl mx-auto text-center">
               <div className="bg-white rounded-lg shadow-md p-12">
                 <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-6" />
-                <h1 className="text-3xl font-bold text-gray-900 mb-4">Thank You!</h1>
+                <h1 className="text-3xl font-bold text-gray-900 mb-4">Message Sent!</h1>
                 <p className="text-lg text-gray-600 mb-6">
-                  We've received your message and will be in touch soon.
+                  Your message has been sent to info@colonaive.ai and we'll be in touch soon.
                 </p>
                 <p className="text-sm text-gray-500 mb-8">
-                  Our team typically responds within 1-2 business days.
+                  Our team typically responds within 1-2 business days depending on your inquiry type.
                 </p>
                 <Button onClick={() => setIsSubmitted(false)} variant="primary">
                   Send Another Message
@@ -283,7 +296,7 @@ const ContactPage: React.FC = () => {
                     <Mail className="w-6 h-6 text-blue-600 mt-1" />
                     <div>
                       <h3 className="font-semibold text-gray-900">Email</h3>
-                      <p className="text-gray-600">info@colonaive.com</p>
+                      <p className="text-gray-600">info@colonaive.ai</p>
                       <p className="text-sm text-gray-500">We typically respond within 1-2 business days</p>
                     </div>
                   </div>
