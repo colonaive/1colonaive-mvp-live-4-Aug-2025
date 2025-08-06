@@ -20,7 +20,12 @@ Deno.serve(async (req) => {
     console.log('🔄 Handling CORS preflight OPTIONS request');
     return new Response(null, {
       status: 204,
-      headers: corsHeaders
+      headers: {
+        "Access-Control-Allow-Origin": "https://1colonaive-mvp-live4aug2025.netlify.app",
+        "Access-Control-Allow-Methods": "POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, authorization, x-client-info, apikey",
+        "Access-Control-Max-Age": "86400"
+      }
     });
   }
 
