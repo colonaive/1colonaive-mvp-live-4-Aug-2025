@@ -83,7 +83,7 @@ const ChampionConfirmationEmail: React.FC<ChampionConfirmationEmailProps> = ({
                   Understanding Early Symptoms →
                 </a>
                 <a 
-                  href="/screening"
+                  href="/get-screened"
                   className="block text-blue-600 hover:text-blue-800"
                 >
                   Screening Options →

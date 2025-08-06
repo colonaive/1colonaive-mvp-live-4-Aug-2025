@@ -140,12 +140,16 @@ const SEOLandingTemplate: React.FC<SEOLandingTemplateProps> = ({
               {content.heroSubtitle}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="w-full sm:w-auto bg-white text-blue-600 hover:bg-gray-100">
-                {content.ctaText.primary}
-              </Button>
-              <Button size="lg" variant="outline" className="w-full sm:w-auto border-white text-white hover:bg-white/10">
-                {content.ctaText.secondary}
-              </Button>
+              <Link to={region === 'Singapore' ? '/find-a-gp' : '/upcoming-clinics'}>
+                <Button size="lg" className="w-full sm:w-auto bg-white text-blue-600 hover:bg-gray-100">
+                  Get Screening Test
+                </Button>
+              </Link>
+              <Link to={region === 'Singapore' ? '/find-specialist' : '/upcoming-clinics'}>
+                <Button size="lg" variant="outline" className="w-full sm:w-auto border-white text-white hover:bg-white/10">
+                  Book Colonoscopy
+                </Button>
+              </Link>
             </div>
           </div>
         </Container>
@@ -254,23 +258,67 @@ const SEOLandingTemplate: React.FC<SEOLandingTemplateProps> = ({
             <p className="text-xl mb-8 text-white/90">
               Don't wait – early detection saves lives.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/screening">
-                <Button size="lg" className="w-full sm:w-auto bg-white text-blue-600 hover:bg-gray-100">
-                  {content.ctaText.primary}
-                </Button>
-              </Link>
-              <Link to="/find-gp">
-                <Button size="lg" variant="outline" className="w-full sm:w-auto border-white text-white hover:bg-white/10">
-                  {content.ctaText.secondary}
-                </Button>
-              </Link>
-              <Link to="/newsroom/crc-news-feed">
-                <Button size="lg" variant="ghost" className="w-full sm:w-auto text-white hover:bg-white/10">
-                  {content.ctaText.tertiary}
-                </Button>
-              </Link>
-            </div>
+            {region === 'Singapore' ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                {/* CTA 1: Get a Screening Test */}
+                <div className="text-center bg-white/10 backdrop-blur-sm rounded-xl p-8 border border-white/20">
+                  <div className="mb-4">
+                    <TestTube className="h-12 w-12 text-white mx-auto" />
+                  </div>
+                  <h3 className="text-xl font-bold text-white mb-3">Get a Screening Test</h3>
+                  <p className="text-white/80 mb-6">Book a blood test or FIT with a GP clinic</p>
+                  <Link to="/find-a-gp">
+                    <Button size="lg" className="w-full bg-white text-blue-600 hover:bg-gray-100 font-semibold">
+                      Find GP Clinic
+                    </Button>
+                  </Link>
+                </div>
+
+                {/* CTA 2: Book Colonoscopy */}
+                <div className="text-center bg-white/10 backdrop-blur-sm rounded-xl p-8 border border-white/20">
+                  <div className="mb-4">
+                    <UserCheck className="h-12 w-12 text-white mx-auto" />
+                  </div>
+                  <h3 className="text-xl font-bold text-white mb-3">Book Colonoscopy</h3>
+                  <p className="text-white/80 mb-6">Go directly for colonoscopy with a specialist</p>
+                  <Link to="/find-specialist">
+                    <Button size="lg" className="w-full bg-white text-blue-600 hover:bg-gray-100 font-semibold">
+                      Find Specialist
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                {/* CTA 1: Get a Screening Test - Non-Singapore */}
+                <div className="text-center bg-white/10 backdrop-blur-sm rounded-xl p-8 border border-white/20">
+                  <div className="mb-4">
+                    <TestTube className="h-12 w-12 text-white mx-auto" />
+                  </div>
+                  <h3 className="text-xl font-bold text-white mb-3">Get a Screening Test</h3>
+                  <p className="text-white/80 mb-6">Coming soon to {region} - Get notified when available</p>
+                  <Link to="/upcoming-clinics">
+                    <Button size="lg" className="w-full bg-white text-blue-600 hover:bg-gray-100 font-semibold">
+                      Get Notified
+                    </Button>
+                  </Link>
+                </div>
+
+                {/* CTA 2: Book Colonoscopy - Non-Singapore */}
+                <div className="text-center bg-white/10 backdrop-blur-sm rounded-xl p-8 border border-white/20">
+                  <div className="mb-4">
+                    <UserCheck className="h-12 w-12 text-white mx-auto" />
+                  </div>
+                  <h3 className="text-xl font-bold text-white mb-3">Book Colonoscopy</h3>
+                  <p className="text-white/80 mb-6">Expanding to {region} soon - Join our waitlist</p>
+                  <Link to="/upcoming-clinics">
+                    <Button size="lg" className="w-full bg-white text-blue-600 hover:bg-gray-100 font-semibold">
+                      Join Waitlist
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            )}
           </div>
         </Container>
       </section>

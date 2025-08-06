@@ -45,7 +45,7 @@ const PatientDashboard: React.FC = () => {
                   <Target className="h-5 w-5 text-green-600" />
                   <span className="text-green-700 font-medium">Up to date with screening recommendations</span>
                 </div>
-                <Link to="/screening">
+                <Link to="/get-screened">
                   <Button variant="primary" className="group">
                     View Screening Timeline
                     <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />

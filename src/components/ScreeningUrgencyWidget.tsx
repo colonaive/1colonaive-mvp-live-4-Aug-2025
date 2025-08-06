@@ -1,278 +1,262 @@
 // /src/components/ScreeningUrgencyWidget.tsx
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React from 'react';
+import { Link } from 'react-router-dom';
 import { Button } from './ui/Button';
 
-interface FormData {
-  age: string;
-  familyHistory: 'yes' | 'no' | '';
-  symptoms: string[];
-}
-
-type RiskLevel = 'low' | 'moderate' | 'high' | null;
-
 const ScreeningUrgencyWidget: React.FC = () => {
-  const navigate = useNavigate();
-  const [formData, setFormData] = useState<FormData>({
-    age: '',
-    familyHistory: '',
-    symptoms: []
-  });
-  const [riskLevel, setRiskLevel] = useState<RiskLevel>(null);
-
-  const symptomOptions = [
-    'Rectal bleeding',
-    'Unexplained weight loss',
-    'Persistent abdominal pain',
-    'Fatigue',
-    'None of the above'
-  ];
-
-  const handleAgeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({ ...prev, age: e.target.value }));
-    calculateRisk({ ...formData, age: e.target.value });
-  };
-
-  const handleFamilyHistoryChange = (value: 'yes' | 'no') => {
-    setFormData(prev => ({ ...prev, familyHistory: value }));
-    calculateRisk({ ...formData, familyHistory: value });
-  };
-
-  const handleSymptomChange = (symptom: string, checked: boolean) => {
-    let newSymptoms: string[];
-    
-    if (symptom === 'None of the above') {
-      newSymptoms = checked ? ['None of the above'] : [];
-    } else {
-      newSymptoms = checked 
-        ? [...formData.symptoms.filter(s => s !== 'None of the above'), symptom]
-        : formData.symptoms.filter(s => s !== symptom);
-    }
-    
-    setFormData(prev => ({ ...prev, symptoms: newSymptoms }));
-    calculateRisk({ ...formData, symptoms: newSymptoms });
-  };
-
-  const calculateRisk = (data: FormData) => {
-    const age = parseInt(data.age);
-    const hasSymptoms = data.symptoms.length > 0 && !data.symptoms.includes('None of the above');
-    
-    // High Risk Logic
-    if ((age >= 45 && data.familyHistory === 'yes') || hasSymptoms) {
-      setRiskLevel('high');
-    }
-    // Moderate Risk Logic  
-    else if (age >= 45 && data.familyHistory === 'no' && !hasSymptoms) {
-      setRiskLevel('moderate');
-    }
-    // Low Risk Logic
-    else if (age < 45 && data.familyHistory === 'no' && !hasSymptoms) {
-      setRiskLevel('low');
-    }
-    // Incomplete data
-    else {
-      setRiskLevel(null);
-    }
-  };
-
-  const getRiskContent = () => {
-    switch (riskLevel) {
-      case 'high':
-        return {
-          icon: '🔴',
-          title: 'High Risk',
-          message: 'Based on your risk factors, you should consult a healthcare provider promptly about screening options. Modern blood-based screening technologies have demonstrated improved detection of early-stage disease and are being evaluated by Singapore\'s Health Sciences Authority.',
-          bgColor: 'bg-red-50',
-          borderColor: 'border-l-red-500',
-          textColor: 'text-red-800'
-        };
-      case 'moderate':
-        return {
-          icon: '🟡',
-          title: 'Moderate Risk',
-          message: 'You may benefit from colorectal cancer screening. Modern screening technologies, including blood-based tests, offer improved detection capabilities. Early detection can improve survival rates to over 90% for early-stage disease.',
-          bgColor: 'bg-yellow-50',
-          borderColor: 'border-l-yellow-500',
-          textColor: 'text-yellow-800'
-        };
-      case 'low':
-        return {
-          icon: '🟢',
-          title: 'Low Risk',
-          message: 'HSA-cleared advanced blood-based screening technologies are available in Singapore, alongside traditional options like FIT tests. These tests have demonstrated improved detection of early-stage disease in clinical studies.\n\nTalk to your GP if you\'re concerned about early-onset colorectal cancer or want to explore your screening options.',
-          bgColor: 'bg-green-50',
-          borderColor: 'border-l-green-500',
-          textColor: 'text-green-800'
-        };
-      default:
-        return null;
-    }
-  };
-
-  const riskContent = getRiskContent();
-
   return (
-    <div className="bg-teal-50 p-6 shadow-xl rounded-xl max-w-2xl mx-auto">
-      <div className="text-center mb-6">
-        <h2 className="text-2xl sm:text-3xl font-bold text-teal-800 mb-2">
-          Assess Your Screening Urgency
+    <div className="bg-gradient-to-br from-teal-50 to-blue-50 p-8 shadow-xl rounded-xl max-w-5xl mx-auto border border-teal-100">
+      <div className="text-center mb-8">
+        <h2 className="text-3xl sm:text-4xl font-bold text-teal-800 mb-3">
+          Colorectal Cancer Screening Guidelines
         </h2>
-        <p className="text-teal-700 text-sm sm:text-base">
-          Quick assessment to understand how urgently you should get screened
+        <p className="text-teal-700 text-lg">
+          Evidence-based guidance to help you understand when and how to get screened
         </p>
       </div>
 
-      <form className="space-y-6">
-        {/* Age Input */}
-        <div>
-          <label htmlFor="age" className="block text-sm font-semibold text-teal-800 mb-2">
-            Your Age *
-          </label>
-          <input
-            type="number"
-            id="age"
-            min="18"
-            max="100"
-            value={formData.age}
-            onChange={handleAgeChange}
-            className="w-full px-4 py-3 border border-teal-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent text-gray-900"
-            placeholder="Enter your age"
-            required
-          />
-        </div>
-
-        {/* Family History */}
-        <div>
-          <label className="block text-sm font-semibold text-teal-800 mb-3">
-            Family History of Colorectal Cancer? *
-          </label>
-          <div className="flex flex-col sm:flex-row gap-4">
-            <label className="flex items-center cursor-pointer">
-              <input
-                type="radio"
-                name="familyHistory"
-                checked={formData.familyHistory === 'yes'}
-                onChange={() => handleFamilyHistoryChange('yes')}
-                className="mr-2 text-teal-600 focus:ring-teal-500"
-              />
-              <span className="text-gray-700">Yes</span>
-            </label>
-            <label className="flex items-center cursor-pointer">
-              <input
-                type="radio"
-                name="familyHistory"
-                checked={formData.familyHistory === 'no'}
-                onChange={() => handleFamilyHistoryChange('no')}
-                className="mr-2 text-teal-600 focus:ring-teal-500"
-              />
-              <span className="text-gray-700">No</span>
-            </label>
-          </div>
-        </div>
-
-        {/* Symptoms */}
-        <div>
-          <label className="block text-sm font-semibold text-teal-800 mb-3">
-            Current Symptoms (check all that apply)
-          </label>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {symptomOptions.map((symptom) => (
-              <label key={symptom} className="flex items-start cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={formData.symptoms.includes(symptom)}
-                  onChange={(e) => handleSymptomChange(symptom, e.target.checked)}
-                  className="mr-3 mt-1 text-teal-600 focus:ring-teal-500"
-                />
-                <span className="text-gray-700 text-sm">{symptom}</span>
-              </label>
-            ))}
-          </div>
-        </div>
-      </form>
-
-      {/* Risk Assessment Result */}
-      {riskContent && (
-        <div className="mt-8 animate-fade-in">
-          <div className={`${riskContent.bgColor} p-4 rounded-lg border-l-4 ${riskContent.borderColor}`}>
-            <div className="flex items-start space-x-3">
-              <span className="text-2xl">{riskContent.icon}</span>
-              <div className="flex-1">
-                <h3 className={`font-bold text-lg ${riskContent.textColor}`}>
-                  {riskContent.title}
-                </h3>
-                {riskContent.message.split('\n\n').map((paragraph, index) => (
-                  <p key={index} className={`${index === 0 ? 'mt-1' : 'mt-3'} ${riskContent.textColor} ${index === 1 ? 'italic' : ''}`}>
-                    {paragraph}
-                  </p>
-                ))}
-                <p className={`mt-3 text-sm ${riskContent.textColor} italic border-t pt-3 border-gray-300`}>
-                  <em>This triage result does not constitute medical advice. Always consult a licensed healthcare provider to make decisions about screening and diagnosis.</em>
-                </p>
+      <div className="space-y-8 text-gray-800">
+        
+        {/* Age-Based Screening Guidelines */}
+        <section>
+          <h3 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+            <span className="bg-blue-100 text-blue-800 rounded-full w-8 h-8 flex items-center justify-center text-lg font-bold mr-3">1</span>
+            Age-Based Screening Guidelines
+          </h3>
+          <div className="bg-white rounded-lg p-6 shadow-sm border-l-4 border-blue-500">
+            <div className="space-y-4">
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  <h4 className="text-lg font-semibold text-blue-900">🎯 Standard Risk (Age 45+)</h4>
+                  <ul className="space-y-2 text-gray-700">
+                    <li className="flex items-start"><span className="text-green-600 mr-2">•</span>Begin regular screening at age 45</li>
+                    <li className="flex items-start"><span className="text-green-600 mr-2">•</span>No family history of colorectal cancer</li>
+                    <li className="flex items-start"><span className="text-green-600 mr-2">•</span>No concerning symptoms present</li>
+                    <li className="flex items-start"><span className="text-green-600 mr-2">•</span>Multiple screening options available</li>
+                  </ul>
+                </div>
+                <div className="space-y-3">
+                  <h4 className="text-lg font-semibold text-orange-900">⚡ High Risk (Earlier Screening)</h4>
+                  <ul className="space-y-2 text-gray-700">
+                    <li className="flex items-start"><span className="text-orange-600 mr-2">•</span>Family history: Start 10 years before youngest relative's diagnosis</li>
+                    <li className="flex items-start"><span className="text-orange-600 mr-2">•</span>Personal history of polyps or inflammatory bowel disease</li>
+                    <li className="flex items-start"><span className="text-orange-600 mr-2">•</span>Genetic syndromes (Lynch syndrome, FAP)</li>
+                    <li className="flex items-start"><span className="text-orange-600 mr-2">•</span>Previous radiation to abdomen/pelvis</li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>
+        </section>
 
-          {/* Conditional Referral Buttons */}
-          <div className="mt-6 space-y-4">
-            {riskLevel === 'high' && (
-              <div className="text-center">
-                <Link to="/find-specialist">
-                  <Button className="bg-red-600 hover:bg-red-700 text-white text-lg font-semibold px-8 py-4 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 w-full sm:w-auto">
-                    Book a Colonoscopy Specialist
-                  </Button>
-                </Link>
-                <p className="text-sm text-gray-600 mt-2">
-                  Connect with gastroenterologists and colorectal specialists in Singapore
-                </p>
+        {/* Symptom Awareness */}
+        <section>
+          <h3 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+            <span className="bg-red-100 text-red-800 rounded-full w-8 h-8 flex items-center justify-center text-lg font-bold mr-3">2</span>
+            When to Seek Immediate Evaluation
+          </h3>
+          <div className="bg-white rounded-lg p-6 shadow-sm border-l-4 border-red-500">
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="space-y-3">
+                <h4 className="text-lg font-semibold text-red-900">🚨 Red Flag Symptoms</h4>
+                <ul className="space-y-2 text-gray-700">
+                  <li className="flex items-start"><span className="text-red-600 mr-2">•</span>Rectal bleeding or blood in stool</li>
+                  <li className="flex items-start"><span className="text-red-600 mr-2">•</span>Persistent change in bowel habits (&ge;2 weeks)</li>
+                  <li className="flex items-start"><span className="text-red-600 mr-2">•</span>Unexplained weight loss (&gt;5% body weight)</li>
+                  <li className="flex items-start"><span className="text-red-600 mr-2">•</span>Persistent abdominal pain or cramping</li>
+                </ul>
               </div>
-            )}
-            
-            {riskLevel === 'moderate' && (
-              <div className="text-center">
-                <Button 
-                  onClick={() => navigate('/find-a-gp', { state: { fromTriage: true } })}
-                  className="bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold px-8 py-4 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 w-full sm:w-auto"
-                >
-                  Find a GP Near You
-                </Button>
-                <p className="text-sm text-gray-600 mt-2">
-                  Locate general practitioners for screening consultation
-                </p>
+              <div className="space-y-3">
+                <h4 className="text-lg font-semibold text-yellow-900">⚠️ Additional Concerns</h4>
+                <ul className="space-y-2 text-gray-700">
+                  <li className="flex items-start"><span className="text-yellow-600 mr-2">•</span>Iron deficiency anemia (unexplained)</li>
+                  <li className="flex items-start"><span className="text-yellow-600 mr-2">•</span>Feeling that bowel doesn't empty completely</li>
+                  <li className="flex items-start"><span className="text-yellow-600 mr-2">•</span>Narrow stools or changes in stool consistency</li>
+                  <li className="flex items-start"><span className="text-yellow-600 mr-2">•</span>Persistent fatigue or weakness</li>
+                </ul>
               </div>
-            )}
-            
-            {riskLevel === 'low' && (
-              <div className="text-center">
-                <Link to="/get-screened">
-                  <Button className="bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 text-white text-lg font-semibold px-8 py-4 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 w-full sm:w-auto">
-                    Learn About Screening Options
-                  </Button>
-                </Link>
-                <p className="text-sm text-gray-600 mt-2">
-                  Explore available screening methods and stay informed
-                </p>
+            </div>
+            <div className="mt-4 p-4 bg-red-50 rounded-lg">
+              <p className="text-red-800 font-medium">
+                <span className="font-bold">Important:</span> Any of these symptoms warrant prompt medical evaluation, regardless of age. 
+                Early-onset colorectal cancer (under age 50) is increasing globally.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Screening Options */}
+        <section>
+          <h3 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+            <span className="bg-green-100 text-green-800 rounded-full w-8 h-8 flex items-center justify-center text-lg font-bold mr-3">3</span>
+            Available Screening Methods
+          </h3>
+          <div className="bg-white rounded-lg p-6 shadow-sm border-l-4 border-green-500">
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <h4 className="text-lg font-semibold text-purple-900">🩸 Non-Invasive Testing</h4>
+                <div className="space-y-3">
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <h5 className="font-semibold text-purple-800">Blood-Based Screening</h5>
+                    <ul className="text-sm text-gray-700 mt-2 space-y-1">
+                      <li>• HSA-cleared technologies available</li>
+                      <li>• Detects circulating tumor DNA</li>
+                      <li>• Convenient, no bowel preparation</li>
+                      <li>• Suitable for average-risk screening</li>
+                    </ul>
+                  </div>
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h5 className="font-semibold text-blue-800">FIT (Fecal Immunochemical Test)</h5>
+                    <ul className="text-sm text-gray-700 mt-2 space-y-1">
+                      <li>• Annual testing recommended</li>
+                      <li>• Detects hidden blood in stool</li>
+                      <li>• Home collection available</li>
+                      <li>• Widely available in Singapore</li>
+                    </ul>
+                  </div>
+                </div>
               </div>
-            )}
-            
-            {/* Secondary CTA for all risk levels */}
-            {riskLevel && (
-              <div className="text-center pt-4 border-t border-gray-200">
-                <Link to="/education/faqs" className="text-teal-600 hover:text-teal-800 underline text-sm">
-                  Have questions? Visit our FAQ section
-                </Link>
+              <div className="space-y-4">
+                <h4 className="text-lg font-semibold text-teal-900">🔬 Colonoscopy (Gold Standard)</h4>
+                <div className="bg-teal-50 p-4 rounded-lg">
+                  <h5 className="font-semibold text-teal-800">Direct Visualization &amp; Prevention</h5>
+                  <ul className="text-sm text-gray-700 mt-2 space-y-1">
+                    <li>• Only method that prevents cancer</li>
+                    <li>• Removes precancerous polyps during procedure</li>
+                    <li>• Most comprehensive screening option</li>
+                    <li>• Recommended every 10 years if normal</li>
+                  </ul>
+                  <div className="mt-3 p-3 bg-teal-100 rounded border border-teal-200">
+                    <p className="text-teal-800 text-sm font-medium">
+                      <span className="font-bold">Best For:</span> High-risk individuals, family history, 
+                      symptoms present, or follow-up after positive screening test
+                    </p>
+                  </div>
+                </div>
               </div>
-            )}
+            </div>
+          </div>
+        </section>
+
+        {/* Decision Framework */}
+        <section>
+          <h3 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+            <span className="bg-indigo-100 text-indigo-800 rounded-full w-8 h-8 flex items-center justify-center text-lg font-bold mr-3">4</span>
+            Choosing Your Screening Approach
+          </h3>
+          <div className="bg-white rounded-lg p-6 shadow-sm border-l-4 border-indigo-500">
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="bg-gray-50">
+                    <th className="text-left p-4 font-semibold text-gray-900 border-b">Your Situation</th>
+                    <th className="text-left p-4 font-semibold text-gray-900 border-b">Recommended Action</th>
+                    <th className="text-left p-4 font-semibold text-gray-900 border-b">Timeframe</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="border-b">
+                    <td className="p-4 text-gray-700">🚨 Any symptoms present</td>
+                    <td className="p-4 font-medium text-red-700">Colonoscopy with specialist</td>
+                    <td className="p-4 text-red-700">Urgent (within weeks)</td>
+                  </tr>
+                  <tr className="border-b bg-gray-50">
+                    <td className="p-4 text-gray-700">👨‍👩‍👧‍👦 Strong family history</td>
+                    <td className="p-4 font-medium text-orange-700">Colonoscopy with specialist</td>
+                    <td className="p-4 text-orange-700">Within 2-3 months</td>
+                  </tr>
+                  <tr className="border-b">
+                    <td className="p-4 text-gray-700">🎯 Age 45+ standard risk</td>
+                    <td className="p-4 font-medium text-blue-700">Blood test or FIT with GP</td>
+                    <td className="p-4 text-blue-700">Within 3-6 months</td>
+                  </tr>
+                  <tr className="border-b bg-gray-50">
+                    <td className="p-4 text-gray-700">✅ Previous normal colonoscopy</td>
+                    <td className="p-4 font-medium text-green-700">Continue routine screening</td>
+                    <td className="p-4 text-green-700">As per previous recommendations</td>
+                  </tr>
+                  <tr>
+                    <td className="p-4 text-gray-700">🤔 Unsure about risk level</td>
+                    <td className="p-4 font-medium text-purple-700">Consult GP for personalized plan</td>
+                    <td className="p-4 text-purple-700">Within 1-2 months</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        {/* Key Statistics */}
+        <section>
+          <div className="bg-gradient-to-r from-blue-100 to-teal-100 rounded-lg p-6">
+            <h4 className="text-lg font-semibold text-gray-900 mb-4 text-center">📊 Evidence-Based Impact</h4>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+              <div>
+                <div className="text-3xl font-bold text-blue-600">90%+</div>
+                <p className="text-gray-700 text-sm mt-1">Survival rate when caught early</p>
+              </div>
+              <div>
+                <div className="text-3xl font-bold text-green-600">62%</div>
+                <p className="text-gray-700 text-sm mt-1">Reduction in CRC mortality with screening</p>
+              </div>
+              <div>
+                <div className="text-3xl font-bold text-purple-600">26</div>
+                <p className="text-gray-700 text-sm mt-1">Lives saved per 1,000 people screened</p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      {/* Horizontal Separator */}
+      <hr className="border-t-2 border-teal-200 my-8" />
+
+      {/* Call-to-Action Buttons */}
+      <div className="text-center space-y-6">
+        <h3 className="text-2xl font-bold text-gray-900">Ready to Take Action?</h3>
+        <p className="text-gray-700 text-lg mb-6">Choose the screening approach that's right for you</p>
+        
+        <div className="flex flex-col sm:flex-row gap-6 justify-center items-center max-w-2xl mx-auto">
+          {/* Get Screened CTA */}
+          <div className="w-full sm:w-1/2">
+            <Link to="/triage">
+              <Button 
+                size="lg" 
+                className="w-full bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700 text-white text-lg font-semibold px-8 py-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105"
+              >
+                <span className="text-2xl mr-3">🩸</span>
+                Get Screened
+              </Button>
+            </Link>
+            <p className="text-sm text-gray-600 mt-3">
+              Non-invasive screening with blood test or FIT
+            </p>
+          </div>
+
+          {/* Get Scoped CTA */}
+          <div className="w-full sm:w-1/2">
+            <Link to="/find-a-specialist">
+              <Button 
+                size="lg" 
+                className="w-full bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white text-lg font-semibold px-8 py-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105"
+              >
+                <span className="text-2xl mr-3">🩺</span>
+                Get Scoped
+              </Button>
+            </Link>
+            <p className="text-sm text-gray-600 mt-3">
+              Direct colonoscopy with specialist
+            </p>
           </div>
         </div>
-      )}
 
-      {/* Disclaimer */}
-      <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-        <p className="text-xs text-gray-600 text-center">
-          <strong>Disclaimer:</strong> This assessment is for informational purposes only and does not replace professional medical advice. 
-          Please consult with your healthcare provider for personalized screening recommendations.
-        </p>
+        {/* Secondary Info */}
+        <div className="mt-8 p-6 bg-gray-50 rounded-lg">
+          <p className="text-sm text-gray-600 text-center">
+            <strong>Medical Disclaimer:</strong> This information is for educational purposes only and does not constitute medical advice. 
+            Always consult with qualified healthcare professionals for personalized screening recommendations based on your individual risk factors and medical history.
+          </p>
+        </div>
       </div>
     </div>
   );

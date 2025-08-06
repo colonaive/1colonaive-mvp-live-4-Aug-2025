@@ -209,7 +209,7 @@ const RegionalEducationTemplate: React.FC<RegionalEducationProps> = ({
                 </Card>
               </Link>
 
-              <Link to="/find-gp" className="group">
+              <Link to="/find-a-gp" className="group">
                 <Card className="h-full hover:shadow-lg transition-shadow">
                   <CardContent className="p-6 text-center">
                     <MapPin className="h-8 w-8 text-blue-600 mx-auto mb-4 group-hover:scale-110 transition-transform" />
@@ -219,7 +219,7 @@ const RegionalEducationTemplate: React.FC<RegionalEducationProps> = ({
                 </Card>
               </Link>
 
-              <Link to="/screening" className="group">
+              <Link to="/get-screened" className="group">
                 <Card className="h-full hover:shadow-lg transition-shadow">
                   <CardContent className="p-6 text-center">
                     <Calendar className="h-8 w-8 text-purple-600 mx-auto mb-4 group-hover:scale-110 transition-transform" />
@@ -254,12 +254,12 @@ const RegionalEducationTemplate: React.FC<RegionalEducationProps> = ({
               Early detection saves lives. Don't wait – start your screening journey today.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/screening">
+              <Link to="/get-screened">
                 <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100">
                   {content.callsToAction.primary}
                 </Button>
               </Link>
-              <Link to="/find-gp">
+              <Link to="/find-a-gp">
                 <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
                   {content.callsToAction.secondary}
                 </Button>

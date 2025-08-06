@@ -88,6 +88,7 @@ import CookiePolicyPage from './pages/CookiePolicyPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import TermsOfUsePage from './pages/TermsOfUsePage';
 import SupportPage from './pages/SupportPage';
+import UpcomingClinicsPage from './pages/UpcomingClinicsPage';
 
 // SEO Landing Pages
 import {
@@ -168,6 +169,7 @@ const MainRoutes = () => {
           <Route path="/triage" element={<TriagePage />} />
           
           <Route path="/support" element={<SupportPage />} />
+          <Route path="/upcoming-clinics" element={<UpcomingClinicsPage />} />
           
           {/* Missing Route Redirects */}
           <Route path="/clinics" element={<Navigate to="/find-a-gp" replace />} />
