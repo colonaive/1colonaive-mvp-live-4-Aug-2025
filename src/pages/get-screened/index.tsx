@@ -172,9 +172,17 @@ const GetScreenedPage: React.FC = () => {
       </section>
 
       {/* Regional Screening Options */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-white" id="clinics">
         <Container>
           <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                Find Healthcare Providers
+              </h2>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                Connect with GPs and specialists in your area for colorectal cancer screening
+              </p>
+            </div>
             <RegionalScreeningCTA className="mb-12" />
           </div>
         </Container>

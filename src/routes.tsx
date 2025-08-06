@@ -87,6 +87,7 @@ import ChampionThankYouPage from './pages/ChampionThankYouPage';
 import CookiePolicyPage from './pages/CookiePolicyPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import TermsOfUsePage from './pages/TermsOfUsePage';
+import SupportPage from './pages/SupportPage';
 
 // SEO Landing Pages
 import {
@@ -163,7 +164,16 @@ const MainRoutes = () => {
           <Route path="/upcoming-events" element={<UpcomingEventsPage />} />
           <Route path="/find-a-gp" element={<FindGPPage />} />
           <Route path="/find-specialist" element={<FindSpecialistPage />} />
+          <Route path="/find-a-specialist" element={<FindSpecialistPage />} />
           <Route path="/triage" element={<TriagePage />} />
+          
+          <Route path="/support" element={<SupportPage />} />
+          
+          {/* Missing Route Redirects */}
+          <Route path="/clinics" element={<Navigate to="/find-a-gp" replace />} />
+          <Route path="/choose-screening" element={<Navigate to="/get-screened" replace />} />
+          <Route path="/terms" element={<Navigate to="/terms-of-use" replace />} />
+          <Route path="/privacy" element={<Navigate to="/privacy-policy" replace />} />
           <Route path="/movement-pillars" element={<PillarsPage />} />
           <Route path="/pillars/rid-crc-pub" element={<RIDCRCPUBPage />} />
           <Route path="/pillars/rid-crc-sgp" element={<RIDCRCSGPPage />} />

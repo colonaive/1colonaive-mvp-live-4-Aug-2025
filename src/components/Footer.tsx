@@ -73,16 +73,40 @@ export const Footer: React.FC = () => {
               For Lives, Not for Profits.
             </p>
             <div className="flex space-x-4">
-              <a href="#" className="text-gray-300 hover:text-teal-300 transition-all duration-300 hover:scale-125 transform-gpu">
+              <a 
+                href="https://www.facebook.com/colonaive" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-gray-300 hover:text-teal-300 transition-all duration-300 hover:scale-125 transform-gpu"
+                aria-label="Follow us on Facebook"
+              >
                 <Facebook className="h-5 w-5" />
               </a>
-              <a href="#" className="text-gray-300 hover:text-teal-300 transition-all duration-300 hover:scale-125 transform-gpu">
+              <a 
+                href="https://twitter.com/colonaive" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-gray-300 hover:text-teal-300 transition-all duration-300 hover:scale-125 transform-gpu"
+                aria-label="Follow us on Twitter"
+              >
                 <Twitter className="h-5 w-5" />
               </a>
-              <a href="#" className="text-gray-300 hover:text-teal-300 transition-all duration-300 hover:scale-125 transform-gpu">
+              <a 
+                href="https://www.instagram.com/colonaive" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-gray-300 hover:text-teal-300 transition-all duration-300 hover:scale-125 transform-gpu"
+                aria-label="Follow us on Instagram"
+              >
                 <Instagram className="h-5 w-5" />
               </a>
-              <a href="#" className="text-gray-300 hover:text-teal-300 transition-all duration-300 hover:scale-125 transform-gpu">
+              <a 
+                href="https://www.youtube.com/@colonaive" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-gray-300 hover:text-teal-300 transition-all duration-300 hover:scale-125 transform-gpu"
+                aria-label="Subscribe to our YouTube channel"
+              >
                 <Youtube className="h-5 w-5" />
               </a>
             </div>

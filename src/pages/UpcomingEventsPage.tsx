@@ -224,10 +224,10 @@ const UpcomingEventsPage: React.FC = () => {
                           </a>
                         ) : (
                           <a 
-                            href="#" 
+                            href="/contact" 
                             className="text-blue-600 hover:text-blue-800 flex items-center gap-1 text-sm font-medium"
                           >
-                            Learn More <ExternalLink className="h-4 w-4" />
+                            Contact Us <ExternalLink className="h-4 w-4" />
                           </a>
                         )}
                       </div>

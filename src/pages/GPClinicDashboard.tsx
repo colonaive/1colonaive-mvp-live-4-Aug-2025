@@ -300,7 +300,7 @@ const GPClinicDashboard: React.FC = () => {
                     <span className="text-sm">Screening Guidelines</span>
                     <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-green-600"/>
                 </Link>
-                <Link to="#" className="flex items-center justify-between p-3 bg-gray-50 hover:bg-green-50 rounded-lg group">
+                <Link to="/education/resources" className="flex items-center justify-between p-3 bg-gray-50 hover:bg-green-50 rounded-lg group">
                     <span className="text-sm">Patient Education Materials</span>
                     <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-green-600"/>
                 </Link>
