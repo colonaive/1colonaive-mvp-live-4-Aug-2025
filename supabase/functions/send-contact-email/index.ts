@@ -1,42 +1,27 @@
 // supabase/functions/send-contact-email/index.ts
 import { Resend } from "npm:resend@1.1.0";
 
-// Define allowed origins for CORS
-const allowedOrigins = [
-  'https://1colonaive-mvp-live4aug2025.netlify.app',
-  'https://colonaive.ai',
-  'https://www.colonaive.ai',
-  'http://localhost:5173', // Vite dev server
-  'http://localhost:3000', // Alternative dev server
-];
-
-// Function to get CORS headers based on request origin
-function getCorsHeaders(origin: string | null) {
-  const isAllowedOrigin = origin && allowedOrigins.includes(origin);
-  
-  return {
-    'Access-Control-Allow-Origin': isAllowedOrigin ? origin : allowedOrigins[0],
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-apikey',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Credentials': 'true',
-    'Access-Control-Max-Age': '86400',
-  };
-}
+// Define explicit CORS headers for Netlify production site
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "https://1colonaive-mvp-live4aug2025.netlify.app",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, authorization, x-client-info, apikey",
+  "Access-Control-Max-Age": "86400"
+};
 
 console.log('✅ "send-contact-email" function initialized');
 
 Deno.serve(async (req) => {
-  // Get the origin from the request headers
-  const origin = req.headers.get('origin');
-  const corsHeaders = getCorsHeaders(origin);
+  console.log(`🌐 Request method: ${req.method}`);
+  console.log(`🌐 Request origin: ${req.headers.get('origin') || 'null'}`);
   
-  console.log(`🌐 Request from origin: ${origin || 'null'}`);
-  console.log(`✅ CORS headers set for: ${corsHeaders['Access-Control-Allow-Origin']}`);
-  
-  // Respond to CORS preflight requests
-  if (req.method === 'OPTIONS') {
-    console.log('🔄 Handling CORS preflight request');
-    return new Response('ok', { headers: corsHeaders });
+  // Handle preflight OPTIONS requests
+  if (req.method === "OPTIONS") {
+    console.log('🔄 Handling CORS preflight OPTIONS request');
+    return new Response(null, {
+      status: 204,
+      headers: corsHeaders
+    });
   }
 
   try {
@@ -201,8 +186,11 @@ This message was sent from the contact form at colonaive.ai
       message: 'Contact email sent successfully',
       id: data?.id 
     }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
+      headers: {
+        ...corsHeaders,
+        "Content-Type": "application/json"
+      }
     });
 
   } catch (error) {
@@ -211,8 +199,11 @@ This message was sent from the contact form at colonaive.ai
       success: false,
       error: error.message 
     }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 500,
+      headers: {
+        ...corsHeaders,
+        "Content-Type": "application/json"
+      }
     });
   }
 });
