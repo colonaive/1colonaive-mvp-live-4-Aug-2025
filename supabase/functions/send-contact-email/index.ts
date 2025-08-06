@@ -8,7 +8,9 @@ const allowedOrigins = [
 console.log('✅ "send-contact-email" function initialized');
 serve(async (req)=>{
   const origin = req.headers.get('origin') || '';
-  const allowOrigin = allowedOrigins.includes(origin) ? origin : '';
+  const allowOrigin = allowedOrigins.includes(origin)
+  ? origin
+  : "https://1colonaive-mvp-live4aug2025.netlify.app"; // fallback for safety
   // Handle CORS preflight request
   if (req.method === 'OPTIONS') {
     return new Response(null, {
