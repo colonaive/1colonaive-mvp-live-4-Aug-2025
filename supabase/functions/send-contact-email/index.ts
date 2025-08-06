@@ -1,23 +1,27 @@
 // supabase/functions/send-contact-email/index.ts
-import { Resend } from 'resend';
+import { Resend } from 'npm:resend@4.0.0';
 
-// Define explicit CORS headers for Netlify production site
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "https://1colonaive-mvp-live4aug2025.netlify.app",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, authorization, x-client-info, apikey",
-  "Access-Control-Max-Age": "86400"
-};
+const allowedOrigins = [
+  'https://1colonaive-mvp-live4aug2025.netlify.app',
+  'https://www.colonaive.ai'
+];
 
 console.log('✅ "send-contact-email" function initialized');
 
-import { serve } from 'std/server';
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 
 serve(async (req) => {
+  const origin = req.headers.get('origin') || '';
+  const allowOrigin = allowedOrigins.includes(origin) ? origin : '';
+
   if (req.method === 'OPTIONS') {
     return new Response(null, {
       status: 204,
-      headers: corsHeaders,
+      headers: {
+        'Access-Control-Allow-Origin': allowOrigin,
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+      },
     });
   }
 
@@ -36,15 +40,25 @@ serve(async (req) => {
     });
 
     return new Response(JSON.stringify({ success: true }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
+      headers: {
+        'Access-Control-Allow-Origin': allowOrigin,
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+        'Content-Type': 'application/json',
+      },
     });
 
   } catch (error) {
     console.error('Error sending email:', error);
     return new Response(JSON.stringify({ success: false, error: error.message }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 500,
+      headers: {
+        'Access-Control-Allow-Origin': allowOrigin,
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+        'Content-Type': 'application/json',
+      },
     });
   }
 });
