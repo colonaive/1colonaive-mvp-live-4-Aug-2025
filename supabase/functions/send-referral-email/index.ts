@@ -7,8 +7,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type'
 };
 
-console.log('✅ "send-referral-email" function initialized');
-
 Deno.serve(async (req) => {
   // Respond to CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -16,16 +14,74 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // 1. Initialize Resend with the secret API key from your Supabase secrets
-    const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
+    // 1. Check and initialize Resend API key
+    const resendApiKey = Deno.env.get('RESEND_API_KEY');
+    console.log('🔑 Resend API Key check:', resendApiKey ? `${resendApiKey.substring(0, 8)}...` : 'MISSING');
+    
+    if (!resendApiKey) {
+      console.error('❌ RESEND_API_KEY not found in environment variables');
+      return new Response(JSON.stringify({ 
+        error: 'Email service not configured',
+        details: 'RESEND_API_KEY missing from environment'
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500,
+      });
+    }
+
+    const resend = new Resend(resendApiKey);
 
     // 2. Get the data from the request sent by the frontend
-    const { to, referrerName, personalMessage, referralLink } = await req.json();
-    console.log(`📨 Received request to send email to: ${to}`);
+    let requestData;
+    try {
+      requestData = await req.json();
+    } catch (parseError) {
+      console.error('❌ JSON parsing error:', parseError);
+      return new Response(JSON.stringify({ 
+        error: 'Invalid request format',
+        details: 'Request body must be valid JSON'
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 400,
+      });
+    }
+
+    const { to, referrerName, personalMessage, referralLink } = requestData;
+    console.log(`📨 Processing referral email request:`, {
+      to: to || 'MISSING',
+      referrerName: referrerName || 'MISSING',
+      hasPersonalMessage: !!personalMessage,
+      referralLink: referralLink ? 'PROVIDED' : 'MISSING'
+    });
 
     // 3. Validate that we received all the necessary data
-    if (!to || !referrerName || !referralLink) {
-      throw new Error("Missing required fields: 'to', 'referrerName', or 'referralLink'");
+    const missingFields = [];
+    if (!to?.trim()) missingFields.push('to');
+    if (!referrerName?.trim()) missingFields.push('referrerName');
+    if (!referralLink?.trim()) missingFields.push('referralLink');
+
+    if (missingFields.length > 0) {
+      console.error('❌ Missing required fields:', missingFields);
+      return new Response(JSON.stringify({ 
+        error: `Missing required fields: ${missingFields.join(', ')}`,
+        details: 'All fields (to, referrerName, referralLink) are required'
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 400,
+      });
+    }
+
+    // 4. Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(to.trim())) {
+      console.error('❌ Invalid email format:', to);
+      return new Response(JSON.stringify({ 
+        error: 'Invalid email format',
+        details: `Email address '${to}' is not valid`
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 400,
+      });
     }
 
     // 4. Create the beautiful HTML for the email body
@@ -69,29 +125,108 @@ Deno.serve(async (req) => {
       </div>
     `;
 
-    // 5. Use the Resend SDK to send the email
-    const { data, error } = await resend.emails.send({
+    // 5. Prepare email payload
+    const emailPayload = {
       from: 'COLONAiVE <info@colonaive.ai>',
-      to: [to],
-      subject: `${referrerName} has invited you to join COLONAiVE™!`,
+      to: [to.trim()],
+      subject: `${referrerName.trim()} has invited you to join COLONAiVE™!`,
       html: html,
       reply_to: 'info@colonaive.ai',
+    };
+
+    console.log('📤 Preparing to send email via Resend...', {
+      from: emailPayload.from,
+      to: emailPayload.to,
+      subject: emailPayload.subject,
+      reply_to: emailPayload.reply_to,
+      htmlLength: html.length
     });
 
-    if (error) {
-      console.error('Resend Error:', error);
-      throw error;
+    // 6. Send email via Resend
+    let emailResult;
+    try {
+      emailResult = await resend.emails.send(emailPayload);
+      console.log('📬 Raw Resend API response:', JSON.stringify(emailResult, null, 2));
+    } catch (resendApiError) {
+      console.error('❌ Resend API threw exception:', {
+        error: resendApiError,
+        message: resendApiError?.message,
+        name: resendApiError?.name,
+        stack: resendApiError?.stack
+      });
+      
+      return new Response(JSON.stringify({ 
+        error: 'Email service exception',
+        details: resendApiError?.message || 'Unknown Resend API error'
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500,
+      });
     }
-    
-    console.log('🎉 Email sent successfully!', data);
-    return new Response(JSON.stringify(data), {
+
+    // 7. Check for Resend API errors
+    if (emailResult.error) {
+      console.error('❌ Resend API returned error:', {
+        error: emailResult.error,
+        errorType: typeof emailResult.error,
+        errorMessage: emailResult.error?.message,
+        fullErrorData: JSON.stringify(emailResult.error, null, 2)
+      });
+
+      const errorMessage = emailResult.error?.message || 
+                          (typeof emailResult.error === 'string' ? emailResult.error : 'Unknown Resend error');
+
+      return new Response(JSON.stringify({ 
+        error: 'Email sending failed',
+        details: errorMessage,
+        resendError: emailResult.error
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500,
+      });
+    }
+
+    // 8. Verify successful response
+    const emailId = emailResult.data?.id || emailResult.id;
+    if (!emailId) {
+      console.error('❌ No email ID returned from Resend:', emailResult);
+      return new Response(JSON.stringify({ 
+        error: 'Email service did not confirm delivery',
+        details: 'No email ID received from Resend API',
+        response: emailResult
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500,
+      });
+    }
+
+    console.log('✅ Referral email sent successfully!', {
+      id: emailId,
+      to: to,
+      referrerName: referrerName
+    });
+
+    return new Response(JSON.stringify({
+      success: true,
+      message: 'Referral email sent successfully',
+      id: emailId
+    }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     });
 
   } catch (error) {
-    console.error('Error in function:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    console.error('❌ Unexpected error in function:', {
+      error: error,
+      message: error?.message,
+      name: error?.name,
+      stack: error?.stack
+    });
+
+    return new Response(JSON.stringify({ 
+      error: 'Server error',
+      details: error?.message || 'Unknown error occurred'
+    }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 500,
     });
