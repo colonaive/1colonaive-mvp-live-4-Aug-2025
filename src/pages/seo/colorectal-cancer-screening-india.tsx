@@ -49,7 +49,7 @@ const ColorectalCancerScreeningIndia: React.FC = () => {
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <a href="/find-clinic">
                   <Button size="lg" className="bg-green-500 hover:bg-green-600">
-                    Get Screening Test
+                    Find Screening Clinics
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </a>
@@ -247,13 +247,13 @@ const ColorectalCancerScreeningIndia: React.FC = () => {
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <a href="/find-clinic">
                   <Button size="lg" className="bg-green-500 hover:bg-green-600">
-                    Schedule Your Test
+                    Find Clinics Near You
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </a>
                 <a href="/specialists">
                   <Button size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-orange-800">
-                    Speak with a Specialist
+                    Find Specialists
                   </Button>
                 </a>
               </div>
@@ -262,14 +262,14 @@ const ColorectalCancerScreeningIndia: React.FC = () => {
               <div className="mt-12 pt-8 border-t border-orange-700">
                 <p className="text-orange-200 mb-4">Learn More:</p>
                 <div className="flex flex-wrap justify-center gap-4 text-sm">
-                  <a href="/education/in" className="text-orange-200 hover:text-white underline">
+                  <a href="/coming-soon/india" className="text-orange-200 hover:text-white underline">
                     India CRC Education
                   </a>
                   <a href="/education/patients/colorectal-cancer" className="text-orange-200 hover:text-white underline">
                     Understanding Colorectal Cancer
                   </a>
                   <a href="/find-clinic" className="text-orange-200 hover:text-white underline">
-                    Get Screened
+                    Find Clinics
                   </a>
                   <a href="/specialists" className="text-orange-200 hover:text-white underline">
                     Find Specialists

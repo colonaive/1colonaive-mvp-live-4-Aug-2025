@@ -106,6 +106,14 @@ import ColorectalCancerScreeningIndia from './pages/seo/colorectal-cancer-screen
 import ColorectalCancerScreeningPhilippines from './pages/seo/colorectal-cancer-screening-philippines';
 import ColorectalCancerScreeningJapan from './pages/seo/colorectal-cancer-screening-japan';
 
+// Import placeholder pages
+import IndiaComingSoon from './pages/placeholder/IndiaComingSoon';
+import PhilippinesComingSoon from './pages/placeholder/PhilippinesComingSoon';
+import JapanComingSoon from './pages/placeholder/JapanComingSoon';
+import AustraliaComingSoon from './pages/placeholder/AustraliaComingSoon';
+import ClinicFinderComingSoon from './pages/placeholder/ClinicFinderComingSoon';
+import SpecialistComingSoon from './pages/placeholder/SpecialistComingSoon';
+
 // Dashboards
 import ChampionDashboard from './pages/ChampionDashboard';
 import CorporateDashboard from './pages/CorporateDashboard';
@@ -259,6 +267,20 @@ const MainRoutes = () => {
           <Route path="/seo/blood-test-colorectal-cancer" element={<BloodTestColorectalCancerPage />} />
           <Route path="/seo/colorectal-cancer-screening-australia" element={<ColorectalCancerScreeningAustraliaPage />} />
           <Route path="/seo/da-chang-ai-sha-zha" element={<DaChangAiShaZhaPage />} />
+
+          {/* Placeholder Pages for International Markets */}
+          <Route path="/find-clinic" element={<ClinicFinderComingSoon />} />
+          <Route path="/specialists" element={<SpecialistComingSoon />} />
+          <Route path="/coming-soon/india" element={<IndiaComingSoon />} />
+          <Route path="/coming-soon/philippines" element={<PhilippinesComingSoon />} />
+          <Route path="/coming-soon/japan" element={<JapanComingSoon />} />
+          <Route path="/coming-soon/australia" element={<AustraliaComingSoon />} />
+
+          {/* Country-specific redirects */}
+          <Route path="/education/in" element={<IndiaComingSoon />} />
+          <Route path="/education/ph" element={<PhilippinesComingSoon />} />
+          <Route path="/education/jp" element={<JapanComingSoon />} />
+          <Route path="/education/au" element={<AustraliaComingSoon />} />
 
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />

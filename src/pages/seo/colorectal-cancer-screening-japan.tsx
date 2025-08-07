@@ -262,7 +262,7 @@ const ColorectalCancerScreeningJapan: React.FC = () => {
               <div className="mt-12 pt-8 border-t border-red-700">
                 <p className="text-red-200 mb-4">Learn More:</p>
                 <div className="flex flex-wrap justify-center gap-4 text-sm">
-                  <a href="/education/jp" className="text-red-200 hover:text-white underline">
+                  <a href="/coming-soon/japan" className="text-red-200 hover:text-white underline">
                     Japan CRC Education
                   </a>
                   <a href="/education/patients/colorectal-cancer" className="text-red-200 hover:text-white underline">

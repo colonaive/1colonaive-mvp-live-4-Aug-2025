@@ -262,7 +262,7 @@ const ColorectalCancerScreeningPhilippines: React.FC = () => {
               <div className="mt-12 pt-8 border-t border-blue-700">
                 <p className="text-blue-200 mb-4">Learn More:</p>
                 <div className="flex flex-wrap justify-center gap-4 text-sm">
-                  <a href="/education/ph" className="text-blue-200 hover:text-white underline">
+                  <a href="/coming-soon/philippines" className="text-blue-200 hover:text-white underline">
                     Philippines CRC Education
                   </a>
                   <a href="/education/patients/colorectal-cancer" className="text-blue-200 hover:text-white underline">

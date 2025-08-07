@@ -23,7 +23,7 @@ const ColonCancerTestSingaporePage: React.FC = () => {
     faqItems: [
       {
         question: 'What types of colon cancer tests are available in Singapore?',
-        answer: 'Singapore offers several colon cancer testing options: HSA-cleared blood tests (like Shield™), FIT (Fecal Immunochemical Test), stool DNA tests, and gold-standard colonoscopy. Each test has different advantages depending on your risk profile and preferences.'
+        answer: 'Singapore offers several colon cancer testing options: HSA-cleared blood tests (like ColonAiQ®), FIT (Fecal Immunochemical Test), stool DNA tests, and gold-standard colonoscopy. Each test has different advantages depending on your risk profile and preferences.'
       },
       {
         question: 'How accurate are blood tests for colon cancer?',

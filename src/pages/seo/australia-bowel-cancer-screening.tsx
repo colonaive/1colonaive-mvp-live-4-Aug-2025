@@ -294,7 +294,7 @@ const AustraliaBowelCancerScreening: React.FC = () => {
               <div className="mt-12 pt-8 border-t border-green-700">
                 <p className="text-green-200 mb-4">Learn More:</p>
                 <div className="flex flex-wrap justify-center gap-4 text-sm">
-                  <a href="/education/au" className="text-green-200 hover:text-white underline">
+                  <a href="/coming-soon/australia" className="text-green-200 hover:text-white underline">
                     Australia Bowel Cancer Education
                   </a>
                   <a href="/education/patients/colorectal-cancer" className="text-green-200 hover:text-white underline">
