@@ -297,7 +297,6 @@ const CRCNewsFeedPage: React.FC = () => {
         ...paper,
         ai_insights: generateAIInsights(paper)
       }));
-      }
 
       // Remove duplicates using intelligent detection and sort by relevance score and date
       console.log(`🔍 Checking ${papers.length} papers for duplicates...`);
@@ -410,7 +409,6 @@ const CRCNewsFeedPage: React.FC = () => {
         ...article,
         ai_insights: generateAIInsights(article)
       }));
-      }
 
       // Remove duplicates using intelligent detection and sort
       console.log(`🔍 Checking ${articles.length} articles for duplicates...`);
