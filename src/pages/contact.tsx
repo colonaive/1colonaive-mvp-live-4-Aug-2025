@@ -93,8 +93,8 @@ const ContactPage: React.FC = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          
-        },
+    'apikey': 'sb-publishable_yxDlCnLusvVjz-AzqxW7g_Nftl_Kbp' // ✅ Use the PUBLISHABLE key here
+  },
         body: JSON.stringify({
           fullName: formData.name.trim(),
           email: formData.email.trim(),
