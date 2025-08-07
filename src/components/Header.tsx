@@ -25,11 +25,11 @@ const screeningLinks = [
   { label: "Find a Specialist", path: "/find-a-specialist" },
   { label: "—————————", path: "#", isHeader: true },
   { label: "🌏 Explore by Country", path: "/seo", isHeader: true },
-  { label: "🇸🇬 Singapore", path: "/seo/colorectal-cancer-screening-singapore" },
-  { label: "🇦🇺 Australia", path: "/seo/colorectal-cancer-screening-australia" },
-  { label: "🇮🇳 India", path: "/seo/colon-cancer-test-india" },
-  { label: "🇵🇭 Philippines", path: "/seo/colon-cancer-test-philippines" },
-  { label: "🇯🇵 Japan", path: "/seo/japan-colorectal-screening" }
+  { label: "🇸🇬 Singapore", path: "/seo/singapore-colorectal-screening" },
+  { label: "🇦🇺 Australia", path: "/seo/australia-bowel-cancer-screening" },
+  { label: "🇮🇳 India", path: "/seo/colorectal-cancer-screening-india" },
+  { label: "🇵🇭 Philippines", path: "/seo/colorectal-cancer-screening-philippines" },
+  { label: "🇯🇵 Japan", path: "/seo/colorectal-cancer-screening-japan" }
 ];
 
 const pillarLinks = [

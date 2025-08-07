@@ -242,16 +242,24 @@ class RSSFeedService {
       }
     }
 
-    // Remove duplicates
+    // Remove duplicates using intelligent detection
+    console.log(`🔍 Processing ${allNews.length} news articles for duplicates...`);
     const uniqueNews = this.removeDuplicates(allNews);
     
     // Sort by date
     uniqueNews.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
-    // Return live news if available, otherwise fallback
-    const finalNews = uniqueNews.length > 0 ? uniqueNews.slice(0, 8) : FALLBACK_NEWS;
+    // Merge with fallback if needed (but check for duplicates against live content)
+    let finalNews = uniqueNews.slice(0, 8);
+    if (finalNews.length < 3) {
+      console.log('📰 Adding fallback news articles...');
+      const fallbackToAdd = FALLBACK_NEWS.filter(fallback => 
+        !this.isDuplicateContent(fallback, finalNews, 0.6)
+      );
+      finalNews = [...finalNews, ...fallbackToAdd].slice(0, 8);
+    }
     
-    console.log(`📰 Returning ${finalNews.length} news articles`);
+    console.log(`📰 Returning ${finalNews.length} unique news articles`);
     return finalNews;
   }
 
@@ -317,29 +325,107 @@ class RSSFeedService {
       }
     }
 
-    // Remove duplicates
+    // Remove duplicates using intelligent detection
+    console.log(`🔍 Processing ${allPubs.length} publications for duplicates...`);
     const uniquePubs = this.removeDuplicates(allPubs);
     
     // Sort by date
     uniquePubs.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
-    // Return live publications if available, otherwise fallback
-    const finalPubs = uniquePubs.length > 0 ? uniquePubs.slice(0, 8) : FALLBACK_PUBLICATIONS;
+    // Merge with fallback if needed (but check for duplicates against live content)
+    let finalPubs = uniquePubs.slice(0, 8);
+    if (finalPubs.length < 3) {
+      console.log('🔬 Adding fallback publications...');
+      const fallbackToAdd = FALLBACK_PUBLICATIONS.filter(fallback => 
+        !this.isDuplicateContent(fallback, finalPubs, 0.6)
+      );
+      finalPubs = [...finalPubs, ...fallbackToAdd].slice(0, 8);
+    }
     
-    console.log(`🔬 Returning ${finalPubs.length} scientific publications`);
+    console.log(`🔬 Returning ${finalPubs.length} unique publications`);
     return finalPubs;
   }
 
   /**
-   * Remove duplicates based on ID
+   * Calculate text similarity score (0-1) using Jaccard similarity
    */
-  private removeDuplicates<T extends { id: string }>(items: T[]): T[] {
-    const seen = new Set<string>();
-    return items.filter(item => {
-      if (seen.has(item.id)) return false;
-      seen.add(item.id);
-      return true;
-    });
+  private calculateSimilarity(text1: string, text2: string): number {
+    const normalize = (text: string) => {
+      return text
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, '')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .split(' ')
+        .filter(word => word.length > 2); // Remove short words
+    };
+
+    const words1 = new Set(normalize(text1));
+    const words2 = new Set(normalize(text2));
+
+    if (words1.size === 0 && words2.size === 0) return 1;
+    if (words1.size === 0 || words2.size === 0) return 0;
+
+    const intersection = new Set([...words1].filter(word => words2.has(word)));
+    const union = new Set([...words1, ...words2]);
+
+    return intersection.size / union.size;
+  }
+
+  /**
+   * Check if article is duplicate based on title and content similarity
+   */
+  private isDuplicateContent<T extends { title: string; summary: string }>(item: T, existingItems: T[], threshold = 0.7): boolean {
+    for (const existing of existingItems) {
+      const titleSimilarity = this.calculateSimilarity(item.title, existing.title);
+      const contentSimilarity = this.calculateSimilarity(item.summary, existing.summary);
+      
+      // If either title or content is highly similar, consider it a duplicate
+      if (titleSimilarity >= threshold || contentSimilarity >= threshold) {
+        console.log(`🚫 Duplicate detected: "${item.title.substring(0, 50)}..." (similarity: title=${titleSimilarity.toFixed(2)}, content=${contentSimilarity.toFixed(2)})`);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Remove duplicates using multiple strategies:
+   * 1. Exact ID matching
+   * 2. Title/content similarity analysis
+   * 3. URL comparison
+   */
+  private removeDuplicates<T extends { id: string; title: string; summary: string; url: string }>(items: T[]): T[] {
+    const uniqueItems: T[] = [];
+    const seenIds = new Set<string>();
+    const seenUrls = new Set<string>();
+
+    for (const item of items) {
+      // Check exact ID duplicates
+      if (seenIds.has(item.id)) {
+        console.log(`🚫 Duplicate ID detected: ${item.id}`);
+        continue;
+      }
+
+      // Check exact URL duplicates
+      if (seenUrls.has(item.url)) {
+        console.log(`🚫 Duplicate URL detected: ${item.url}`);
+        continue;
+      }
+
+      // Check content similarity duplicates
+      if (this.isDuplicateContent(item, uniqueItems)) {
+        continue;
+      }
+
+      // Item is unique, add it
+      uniqueItems.push(item);
+      seenIds.add(item.id);
+      seenUrls.add(item.url);
+    }
+
+    console.log(`✅ Removed ${items.length - uniqueItems.length} duplicates, keeping ${uniqueItems.length} unique items`);
+    return uniqueItems;
   }
 }
 

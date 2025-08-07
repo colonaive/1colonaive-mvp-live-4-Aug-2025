@@ -51,7 +51,6 @@ import ClinicianCMEHub from './pages/education/clinicians/cme-resources';
 import NewsroomHub from './pages/education/newsroom';
 import PressReleasesPage from './pages/education/newsroom/press-releases';
 import ResearchUpdatesPage from './pages/education/newsroom/research-updates';
-import CRCNewsFeed from './pages/newsroom/CRCNewsFeed';
 import CRCNewsFeedPage from './pages/newsroom/CRCNewsFeedPage';
 import FAQsPage from './pages/education/FAQsPage';
 import NewsroomPage from './pages/education/NewsroomPage';
@@ -97,8 +96,15 @@ import {
   BloodTestColorectalCancerPage,
   ColorectalCancerScreeningAustraliaPage,
   DaChangAiShaZhaPage,
-  ColorectalCancerScreeningIndiaPage
+  ColorectalCancerScreeningIndiaPage,
+  SingaporeColorectalScreening,
+  AustraliaBowelCancerScreening
 } from './pages/seo';
+
+// Import the new SEO pages
+import ColorectalCancerScreeningIndia from './pages/seo/colorectal-cancer-screening-india';
+import ColorectalCancerScreeningPhilippines from './pages/seo/colorectal-cancer-screening-philippines';
+import ColorectalCancerScreeningJapan from './pages/seo/colorectal-cancer-screening-japan';
 
 // Dashboards
 import ChampionDashboard from './pages/ChampionDashboard';
@@ -156,7 +162,7 @@ const MainRoutes = () => {
           <Route path="/education/newsroom" element={<NewsroomHub />} />
           <Route path="/education/newsroom/press-releases" element={<PressReleasesPage />} />
           <Route path="/education/newsroom/research-updates" element={<ResearchUpdatesPage />} />
-          <Route path="/newsroom/crc-news" element={<CRCNewsFeed />} />
+          <Route path="/newsroom/crc-news" element={<CRCNewsFeedPage />} />
           <Route path="/newsroom/crc-news-feed" element={<CRCNewsFeedPage />} />
           
           <Route path="/education/faqs" element={<FAQsPage />} />
@@ -241,12 +247,18 @@ const MainRoutes = () => {
           <Route path="/schema-test" element={<SchemaTestPage />} />
 
           {/* SEO Landing Pages */}
+          <Route path="/seo/singapore-colorectal-screening" element={<SingaporeColorectalScreening />} />
+          <Route path="/seo/australia-bowel-cancer-screening" element={<AustraliaBowelCancerScreening />} />
+          <Route path="/seo/colorectal-cancer-screening-india" element={<ColorectalCancerScreeningIndia />} />
+          <Route path="/seo/colorectal-cancer-screening-philippines" element={<ColorectalCancerScreeningPhilippines />} />
+          <Route path="/seo/colorectal-cancer-screening-japan" element={<ColorectalCancerScreeningJapan />} />
+          
+          {/* Legacy SEO Routes */}
           <Route path="/seo/colorectal-cancer-screening-singapore" element={<ColorectalCancerScreeningSingaporePage />} />
           <Route path="/seo/colon-cancer-test-singapore" element={<ColonCancerTestSingaporePage />} />
           <Route path="/seo/blood-test-colorectal-cancer" element={<BloodTestColorectalCancerPage />} />
           <Route path="/seo/colorectal-cancer-screening-australia" element={<ColorectalCancerScreeningAustraliaPage />} />
           <Route path="/seo/da-chang-ai-sha-zha" element={<DaChangAiShaZhaPage />} />
-          <Route path="/seo/colorectal-cancer-screening-india" element={<ColorectalCancerScreeningIndiaPage />} />
 
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
