@@ -2,21 +2,30 @@
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
 import { Resend } from 'https://esm.sh/resend@1.1.0';
 
-console.log('✅ COLONAiVE Contact Email Function - Initialized');
 
 // CORS headers for frontend requests
-const getCorsHeaders = (origin?: string) => ({
-  'Access-Control-Allow-Origin': origin || '*',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-client-info, apikey',
-  'Access-Control-Max-Age': '86400'
-});
+const getCorsHeaders = (origin?: string) => {
+  const allowedOrigins = [
+    'https://www.colonaive.ai',
+    'https://colonaive.ai',
+    'http://localhost:5173',
+    'http://127.0.0.1:5173'
+  ];
+  
+  const allowOrigin = origin && allowedOrigins.includes(origin) ? origin : '*';
+  
+  return {
+    'Access-Control-Allow-Origin': allowOrigin,
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-client-info, apikey',
+    'Access-Control-Max-Age': '86400'
+  };
+};
 
 serve(async (req: Request) => {
   const origin = req.headers.get('origin');
   const corsHeaders = getCorsHeaders(origin);
 
-  console.log(`🌐 ${req.method} request from: ${origin || 'unknown'}`);
 
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
@@ -46,7 +55,6 @@ serve(async (req: Request) => {
     try {
       body = await req.json();
     } catch (parseError) {
-      console.error('❌ JSON parse error:', parseError);
       return new Response(JSON.stringify({
         success: false,
         error: 'Invalid JSON format'
@@ -69,7 +77,6 @@ serve(async (req: Request) => {
     if (!message?.trim()) missingFields.push('message');
 
     if (missingFields.length > 0) {
-      console.log('❌ Missing fields:', missingFields.join(', '));
       return new Response(JSON.stringify({
         success: false,
         error: `Missing required fields: ${missingFields.join(', ')}`
@@ -85,7 +92,6 @@ serve(async (req: Request) => {
     // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email.trim())) {
-      console.log('❌ Invalid email format:', email);
       return new Response(JSON.stringify({
         success: false,
         error: 'Invalid email format'
@@ -100,10 +106,8 @@ serve(async (req: Request) => {
 
     // Get Resend API key from Supabase secrets
     const resendApiKey = Deno.env.get('RESEND_API_KEY');
-    console.log('🔑 Resend API Key check:', resendApiKey ? 'Found' : 'Missing');
     
     if (!resendApiKey) {
-      console.error('❌ RESEND_API_KEY not found in environment');
       return new Response(JSON.stringify({
         success: false,
         error: 'Email service not configured'
@@ -115,15 +119,6 @@ serve(async (req: Request) => {
         }
       });
     }
-
-    console.log(`📨 Processing contact form: ${fullName} <${email}>, Subject: ${subject}`);
-    
-    // Test Resend API key format
-    console.log('🔑 Resend API key format check:', {
-      hasKey: !!resendApiKey,
-      keyPrefix: resendApiKey ? resendApiKey.substring(0, 8) + '...' : 'none',
-      keyLength: resendApiKey ? resendApiKey.length : 0
-    });
 
     // Initialize Resend
     const resend = new Resend(resendApiKey);
@@ -261,11 +256,9 @@ Sent from COLONAiVE Contact Form
 colonaive.ai
     `.trim();
 
-    // Send email via Resend
-    console.log('📤 Sending email via Resend...');
-    
+    // Send email via Resend (using verified domain)
     const emailPayload = {
-      from: 'COLONAiVE Contact Form <onboarding@resend.dev>',
+      from: 'COLONAiVE Contact Form <info@colonaive.ai>',
       to: ['info@colonaive.ai'],
       subject: `[${displaySubject}] ${fullName} - New Contact Message`,
       html: htmlEmail,
@@ -273,26 +266,17 @@ colonaive.ai
       reply_to: email
     };
     
-    console.log('📧 Email payload:', {
-      from: emailPayload.from,
-      to: emailPayload.to,
-      subject: emailPayload.subject,
-      reply_to: emailPayload.reply_to,
-      hasHtml: !!emailPayload.html,
-      hasText: !!emailPayload.text
-    });
-    
     let emailResult;
     try {
-      emailResult = await resend.emails.send(emailPayload);
-    } catch (resendError) {
-      console.error('❌ Resend API call threw exception:', {
-        error: resendError,
-        errorMessage: resendError?.message,
-        errorName: resendError?.name,
-        errorStack: resendError?.stack
-      });
+      console.log('📤 Attempting to send email with Resend...');
+      console.log('🔑 API Key check:', resendApiKey ? `${resendApiKey.substring(0, 8)}...` : 'Missing');
+      console.log('📧 Email payload:', JSON.stringify(emailPayload, null, 2));
       
+      emailResult = await resend.emails.send(emailPayload);
+      
+      console.log('📬 Raw Resend response:', JSON.stringify(emailResult, null, 2));
+    } catch (resendError) {
+      console.error('❌ Resend API threw exception:', resendError);
       return new Response(JSON.stringify({
         success: false,
         error: `Resend API exception: ${resendError?.message || 'Unknown error'}`
@@ -305,20 +289,7 @@ colonaive.ai
       });
     }
 
-    console.log('📧 Resend response:', {
-      success: !emailResult.error,
-      id: emailResult.data?.id,
-      error: emailResult.error?.message
-    });
-
     if (emailResult.error) {
-      console.error('❌ Resend API error details:', {
-        error: emailResult.error,
-        errorType: typeof emailResult.error,
-        errorMessage: emailResult.error?.message,
-        fullError: JSON.stringify(emailResult.error)
-      });
-      
       const errorMsg = emailResult.error?.message || 
                        (typeof emailResult.error === 'string' ? emailResult.error : 'Unknown Resend API error');
       
@@ -335,7 +306,6 @@ colonaive.ai
     }
 
     if (!emailResult.data?.id) {
-      console.error('❌ No email ID returned from Resend');
       return new Response(JSON.stringify({
         success: false,
         error: 'Email service did not confirm delivery'
@@ -347,8 +317,6 @@ colonaive.ai
         }
       });
     }
-
-    console.log(`✅ Email sent successfully! ID: ${emailResult.data.id}`);
 
     return new Response(JSON.stringify({
       success: true,
