@@ -1,13 +1,29 @@
 // supabase/functions/send-referral-email/index.ts
 import { Resend } from "npm:resend@1.1.0";
 
-// Define CORS headers to allow requests from your website
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type'
+// CORS headers for frontend requests
+const getCorsHeaders = (origin?: string) => {
+  const allowedOrigins = [
+    'https://www.colonaive.ai',
+    'https://colonaive.ai',
+    'http://localhost:5173',
+    'http://127.0.0.1:5173'
+  ];
+  
+  const allowOrigin = origin && allowedOrigins.includes(origin) ? origin : '*';
+  
+  return {
+    'Access-Control-Allow-Origin': allowOrigin,
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-client-info, apikey',
+    'Access-Control-Max-Age': '86400'
+  };
 };
 
 Deno.serve(async (req) => {
+  const origin = req.headers.get('origin');
+  const corsHeaders = getCorsHeaders(origin);
+
   // Respond to CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });

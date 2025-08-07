@@ -73,23 +73,48 @@ const ReferFriendForm: React.FC = () => {
           
           // Try to send email via edge function
           try {
-            const { error: functionError } = await supabase.functions.invoke('send-referral-email', {
-              body: {
+            const endpoint = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-referral-email`;
+            const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY;
+            
+            if (!endpoint || !supabaseKey) {
+              throw new Error('Email service configuration missing');
+            }
+
+            const response = await fetch(endpoint, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${supabaseKey}`,
+                'apikey': supabaseKey,
+              },
+              body: JSON.stringify({
                 to: email,
                 referrerName,
                 personalMessage: message || '',
                 referralLink: `${window.location.origin}/signup/champion?ref=${user.id}`
-              }
+              })
             });
-            
-            if (functionError) {
-              console.warn('Email function error:', functionError);
-              // Continue anyway - we'll count this as success since the referral was recorded
+
+            let result;
+            try {
+              result = await response.json();
+            } catch (parseError) {
+              console.error('Failed to parse email response:', parseError);
+              throw new Error('Invalid response from email service');
+            }
+
+            if (!response.ok) {
+              throw new Error(result?.error || result?.details || `Email service error (${response.status})`);
+            }
+
+            if (!result?.success) {
+              throw new Error(result?.error || result?.details || 'Failed to send email');
             }
             
+            console.log(`✅ Email sent successfully to ${email}:`, result);
             successes++;
           } catch (emailError) {
-            console.error(`Email sending failed for ${email}:`, emailError);
+            console.error(`❌ Email sending failed for ${email}:`, emailError);
             // Still count as success since the referral was recorded
             successes++;
           }
