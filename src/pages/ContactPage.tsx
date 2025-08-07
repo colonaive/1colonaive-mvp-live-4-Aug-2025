@@ -102,25 +102,33 @@ const ContactPage: React.FC = () => {
     try {
       console.log('📨 Submitting contact form via fetch to Supabase function...');
       
-      const response = await fetch('https://irkfrlvddkyjziuvirsb.functions.supabase.co/send-contact-email', {
+      const response = await fetch('https://irkfrlvddkyjziuvirsb.functions.supabase.co/functions/v1/send-contact-email', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
         body: JSON.stringify({
-          name: formData.fullName,
+          fullName: formData.fullName,
           email: formData.email,
+          subject: formData.subject,
           message: formData.message
         })
       });
 
+      const responseData = await response.json();
+      
       if (!response.ok) {
-        const errorData = await response.text();
-        console.error('❌ Error response:', errorData);
-        throw new Error('Failed to send your message. Please try again or contact us directly at info@colonaive.ai');
+        console.error('❌ Error response:', responseData);
+        throw new Error(responseData.error || 'Failed to send your message. Please try again or contact us directly at info@colonaive.ai');
       }
 
-      console.log('✅ Contact form email sent successfully!');
+      if (!responseData.success) {
+        console.error('❌ API returned failure:', responseData);
+        throw new Error(responseData.error || 'Failed to send your message. Please try again.');
+      }
+
+      console.log('✅ Contact form email sent successfully!', responseData);
       
       setSubmitMessage({
         type: 'success',
@@ -226,9 +234,8 @@ const ContactPage: React.FC = () => {
                   <CardContent className="p-8">
                     <h2 className="text-2xl font-bold text-gray-900 mb-6">Send us a message</h2>
                     
-                    <form onSubmit={handleSubmit} name="contact" method="POST" data-netlify="true">
-                      {/* Netlify form detection */}
-                      <input type="hidden" name="form-name" value="contact" />
+                    <form onSubmit={handleSubmit}>
+                      {/* Using Supabase edge function instead of Netlify */}
                       
                       <InputField
                         id="fullName"
