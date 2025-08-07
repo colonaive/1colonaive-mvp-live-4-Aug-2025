@@ -17,6 +17,13 @@ export default defineConfig({
     historyApiFallback: true, // Fixes refresh / direct route errors (Dev)
     port: 5173,
     open: true,
+    proxy: {
+      '/api': {
+        target: 'https://irkfrlvddkyjziuvrisb.supabase.co/functions/v1',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+    },
   },
   preview: {
     historyApiFallback: true, // Also fixes for `npm run preview`

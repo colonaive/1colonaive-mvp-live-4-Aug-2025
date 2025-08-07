@@ -32,7 +32,8 @@ serve(async (req) => {
       
       // Check authorization
       const authHeader = req.headers.get('Authorization');
-      if (!authHeader || authHeader !== `Bearer ${Deno.env.get("SUPABASE_FUNCTION_SECRET")}`) {
+      const expectedAuth = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlya2ZybHZkZGt5aml6dXZyaXNiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjUwMDA5NTMsImV4cCI6MjA0MDU3Njk1M30.5uYcn2_wJhtLkHTKZcaU4dGs2FZ67kYiVUDUb1yI6Lc';
+      if (!authHeader || authHeader !== expectedAuth) {
         return new Response("Unauthorized", { status: 401 });
       }
       
