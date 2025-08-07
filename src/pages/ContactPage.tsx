@@ -102,10 +102,11 @@ const ContactPage: React.FC = () => {
     try {
       console.log('📨 Submitting contact form via fetch to Supabase function...');
       
-      const response = await fetch('/api/send-contact-email', {
+      const response = await fetch('https://irkfrlvddkyjziuvrisb.supabase.co/functions/v1/send-contact-email', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
         },
         body: JSON.stringify({
           fullName: formData.fullName,
