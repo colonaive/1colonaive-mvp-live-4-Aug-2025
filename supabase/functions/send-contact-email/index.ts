@@ -20,7 +20,7 @@ serve(async (req) => {
       headers: {
         'Access-Control-Allow-Origin': allowOrigin,
         'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Accept'
+        'Access-Control-Allow-Headers': 'Content-Type, Accept, Authorization'
       }
     });
   }
@@ -29,6 +29,12 @@ serve(async (req) => {
   if (req.method === 'POST') {
     try {
       console.log('📥 Received POST request to send-contact-email');
+      
+      // Check authorization
+      const authHeader = req.headers.get('Authorization');
+      if (!authHeader || authHeader !== `Bearer ${Deno.env.get("SUPABASE_FUNCTION_SECRET")}`) {
+        return new Response("Unauthorized", { status: 401 });
+      }
       
       const { fullName, name, email, subject, message } = await req.json();
       
@@ -52,7 +58,7 @@ serve(async (req) => {
           headers: {
             'Access-Control-Allow-Origin': allowOrigin,
             'Access-Control-Allow-Methods': 'POST, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type, Accept',
+            'Access-Control-Allow-Headers': 'Content-Type, Accept, Authorization',
             'Content-Type': 'application/json'
           }
         });
@@ -118,7 +124,7 @@ Reply directly to this email to respond to ${senderName} at ${email}
           headers: {
             'Access-Control-Allow-Origin': allowOrigin,
             'Access-Control-Allow-Methods': 'POST, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type, Accept',
+            'Access-Control-Allow-Headers': 'Content-Type, Accept, Authorization',
             'Content-Type': 'application/json'
           }
         });
@@ -135,7 +141,7 @@ Reply directly to this email to respond to ${senderName} at ${email}
         headers: {
           'Access-Control-Allow-Origin': allowOrigin,
           'Access-Control-Allow-Methods': 'POST, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Accept',
+          'Access-Control-Allow-Headers': 'Content-Type, Accept, Authorization',
           'Content-Type': 'application/json'
         }
       });
@@ -150,7 +156,7 @@ Reply directly to this email to respond to ${senderName} at ${email}
         headers: {
           'Access-Control-Allow-Origin': allowOrigin,
           'Access-Control-Allow-Methods': 'POST, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Accept',
+          'Access-Control-Allow-Headers': 'Content-Type, Accept, Authorization',
           'Content-Type': 'application/json'
         }
       });
