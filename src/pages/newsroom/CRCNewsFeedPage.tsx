@@ -1,6 +1,6 @@
 // ULTIMATE CRC NEWS FEED - DUAL SCROLLABLE SECTIONS
 // Clinical Papers (6 months) + News Articles (30 days) with Real-Time Rankings
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Container } from '../../components/ui/Container';
 import { Button } from '../../components/ui/Button';
 import { Card, CardContent } from '../../components/ui/Card';
@@ -69,13 +69,23 @@ const CRCNewsFeedPage: React.FC = () => {
   const [expandedInsights, setExpandedInsights] = useState<string | null>(null);
 
   useEffect(() => {
-    loadAllContent();
+    console.log('🚀 Initializing CRC News Feed...');
+    loadAllContent().catch(err => {
+      console.error('❌ Failed to load initial content:', err);
+      setError('Failed to load content. Please try refreshing the page.');
+    });
     
     // Auto-refresh once daily (24 hours)
-    const interval = setInterval(loadAllContentCallback, 24 * 60 * 60 * 1000);
+    const interval = setInterval(() => {
+      console.log('⏰ Daily refresh triggered');
+      loadAllContent(true);
+    }, 24 * 60 * 60 * 1000);
 
-    return () => clearInterval(interval);
-  }, [loadAllContentCallback]);
+    return () => {
+      console.log('🧹 Cleaning up news feed intervals');
+      clearInterval(interval);
+    };
+  }, []);
 
   // Enhanced priority detection for CRC research
   const calculateClinicalRelevance = (title: string, content: string, authors?: string): number => {
@@ -436,28 +446,33 @@ const CRCNewsFeedPage: React.FC = () => {
   const loadAllContent = async (forceRefresh = false) => {
     setError(null);
     try {
+      console.log('📥 Starting to load all content...');
       await Promise.all([
         loadClinicalPapers(forceRefresh),
         loadNewsArticles(forceRefresh)
       ]);
       
-      // Update stats after state is updated
-      const papers = clinicalPapers;
-      const articles = newsArticles;
-      setFeedStats({
-        totalPapers: papers.length,
-        totalNews: articles.length,
-        highPriority: [...papers, ...articles].filter(item => item.is_sticky).length
-      });
-      
       setLastUpdated(new Date());
       console.log('🎉 All content loaded successfully');
       
     } catch (err) {
-      console.error('Error loading content:', err);
-      setError('Some content may be unavailable. Showing latest cached results.');
+      console.error('❌ Error loading content:', err);
+      setError('Some content may be unavailable. Showing available data.');
     }
   };
+
+  // Update stats when papers or articles change
+  useEffect(() => {
+    const totalPapers = clinicalPapers.length;
+    const totalNews = newsArticles.length;
+    const highPriority = [...clinicalPapers, ...newsArticles].filter(item => item.is_sticky).length;
+    
+    setFeedStats({
+      totalPapers,
+      totalNews,
+      highPriority
+    });
+  }, [clinicalPapers, newsArticles]);
 
   const formatDate = (dateString: string) => {
     try {
@@ -675,10 +690,7 @@ const CRCNewsFeedPage: React.FC = () => {
     setExpandedInsights(expandedInsights === articleId ? null : articleId);
   };
 
-  // Fix useEffect dependency warning
-  const loadAllContentCallback = useCallback(() => {
-    loadAllContent(true);
-  }, []);
+  // Removed loadAllContentCallback - using inline function instead
 
   const filterArticles = (articles: EnhancedArticle[]) => {
     if (!searchTerm.trim()) return articles;
@@ -721,6 +733,9 @@ const CRCNewsFeedPage: React.FC = () => {
       </CardContent>
     </Card>
   );
+
+  // Debug: Add console log to verify component is rendering
+  console.log('📰 CRCNewsFeedPage rendering...');
 
   return (
     <div className="pt-20 min-h-screen bg-gray-50">
