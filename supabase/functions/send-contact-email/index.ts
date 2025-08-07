@@ -4,25 +4,31 @@ import { Resend } from 'https://esm.sh/resend@1.1.0';
 
 const allowedOrigins = [
   'https://1colonaive-mvp-live4aug2025.netlify.app',
-  'https://www.colonaive.ai'
+  'https://www.colonaive.ai',
+  'http://localhost:3000',
+  'http://localhost:5173'
 ];
 
 console.log('✅ "send-contact-email" function initialized');
 
+// CORS headers helper
+const getCorsHeaders = (origin: string) => ({
+  'Access-Control-Allow-Origin': allowedOrigins.includes(origin) ? origin : 'https://1colonaive-mvp-live4aug2025.netlify.app',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS, GET',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-client-info, apikey',
+  'Access-Control-Max-Age': '86400'
+});
+
 serve(async (req) => {
   const origin = req.headers.get('origin') || '';
-  const allowOrigin = allowedOrigins.includes(origin) ? origin : "https://1colonaive-mvp-live4aug2025.netlify.app"; // fallback for safety
+  const corsHeaders = getCorsHeaders(origin);
+  
+  console.log(`🌐 Request received: ${req.method} from origin: ${origin}`);
   
   // Handle CORS preflight request
   if (req.method === 'OPTIONS') {
-    return new Response(null, {
-      status: 204,
-      headers: {
-        'Access-Control-Allow-Origin': allowOrigin,
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Accept, Authorization'
-      }
-    });
+    console.log('✅ Handling CORS preflight request');
+    return new Response(null, { status: 204, headers: corsHeaders });
   }
   
   // Handle POST request
@@ -32,12 +38,34 @@ serve(async (req) => {
       
       // Check authorization
       const authHeader = req.headers.get('Authorization');
+      console.log('🔐 Auth header present:', authHeader ? 'YES' : 'NO');
+      
       const expectedAuth = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlya2ZybHZkZGt5aml6dXZyaXNiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjUwMDA5NTMsImV4cCI6MjA0MDU3Njk1M30.5uYcn2_wJhtLkHTKZcaU4dGs2FZ67kYiVUDUb1yI6Lc';
+      
       if (!authHeader || authHeader !== expectedAuth) {
+        console.log('❌ Unauthorized request - invalid or missing auth header');
         return new Response("Unauthorized", { status: 401 });
       }
       
-      const { fullName, name, email, subject, message } = await req.json();
+      console.log('✅ Authorization validated');
+      
+      // Parse request body
+      let requestBody;
+      try {
+        requestBody = await req.json();
+        console.log('📋 Request body parsed successfully');
+      } catch (parseError) {
+        console.error('❌ Failed to parse request body:', parseError);
+        return new Response(JSON.stringify({
+          success: false,
+          error: 'Invalid JSON in request body'
+        }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+      
+      const { fullName, name, email, subject, message } = requestBody;
       
       // Use fullName if available, otherwise fall back to name
       const senderName = fullName || name;
@@ -46,9 +74,10 @@ serve(async (req) => {
         senderName: senderName ? '✓' : '✗',
         email: email ? '✓' : '✗',
         subject: subject ? '✓' : '✗',
-        message: message ? message.length + ' chars' : '✗'
+        message: message ? `✓ (${message.length} chars)` : '✗'
       });
       
+      // Validate required fields
       if (!senderName || !email || !subject || !message) {
         console.log('❌ Validation failed - missing required fields');
         return new Response(JSON.stringify({
@@ -56,20 +85,32 @@ serve(async (req) => {
           error: 'Missing required fields: fullName/name, email, subject, message'
         }), {
           status: 400,
-          headers: {
-            'Access-Control-Allow-Origin': allowOrigin,
-            'Access-Control-Allow-Methods': 'POST, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type, Accept, Authorization',
-            'Content-Type': 'application/json'
-          }
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
       }
       
-      console.log('📧 Initializing Resend...');
-      const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
+      // Check for RESEND_API_KEY
+      const resendApiKey = Deno.env.get('RESEND_API_KEY');
+      console.log('🔑 RESEND_API_KEY present:', resendApiKey ? 'YES' : 'NO');
+      console.log('🔑 RESEND_API_KEY length:', resendApiKey ? resendApiKey.length : 0);
+      console.log('🔑 RESEND_API_KEY starts with:', resendApiKey ? resendApiKey.substring(0, 7) + '...' : 'N/A');
       
-      console.log('📤 Sending email...');
-      const response = await resend.emails.send({
+      if (!resendApiKey) {
+        console.error('❌ RESEND_API_KEY environment variable is not set');
+        return new Response(JSON.stringify({
+          success: false,
+          error: 'Email service configuration error'
+        }), {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+      
+      console.log('📧 Initializing Resend with API key...');
+      const resend = new Resend(resendApiKey);
+      
+      console.log('📤 Preparing email data...');
+      const emailData = {
         from: 'Project COLONAiVE <noreply@colonaive.ai>',
         to: 'info@colonaive.ai',
         subject: `[${subject}] New Contact Form Submission - ${senderName}`,
@@ -112,69 +153,121 @@ ${message}
 ---
 This email was sent from the COLONAiVE contact form.
 Reply directly to this email to respond to ${senderName} at ${email}
-        `
+        `.trim()
+      };
+      
+      console.log('📧 Email data prepared:', {
+        from: emailData.from,
+        to: emailData.to,
+        subject: emailData.subject,
+        htmlLength: emailData.html.length,
+        textLength: emailData.text.length
       });
       
-      if (response.error) {
-        console.error('❌ Resend API error:', response.error);
+      console.log('🚀 Sending email via Resend API...');
+      
+      let response;
+      try {
+        response = await resend.emails.send(emailData);
+        console.log('📬 Resend API response received');
+        console.log('📬 Response type:', typeof response);
+        console.log('📬 Response keys:', Object.keys(response || {}));
+        
+        // Log the response safely
+        if (response) {
+          console.log('📬 Response.data present:', !!response.data);
+          console.log('📬 Response.error present:', !!response.error);
+          
+          if (response.data) {
+            console.log('📬 Response data:', {
+              id: response.data.id,
+              keys: Object.keys(response.data)
+            });
+          }
+          
+          if (response.error) {
+            console.log('📬 Response error:', {
+              message: response.error.message,
+              name: response.error.name,
+              keys: Object.keys(response.error)
+            });
+          }
+        }
+      } catch (sendError) {
+        console.error('❌ Error during resend.emails.send():', sendError);
+        console.error('❌ Send error type:', typeof sendError);
+        console.error('❌ Send error name:', sendError.name);
+        console.error('❌ Send error message:', sendError.message);
+        console.error('❌ Send error stack:', sendError.stack);
+        
         return new Response(JSON.stringify({
           success: false,
-          error: `Email service error: ${response.error.message}`
+          error: `Email sending failed: ${sendError.message || 'Unknown error'}`
         }), {
           status: 500,
-          headers: {
-            'Access-Control-Allow-Origin': allowOrigin,
-            'Access-Control-Allow-Methods': 'POST, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type, Accept, Authorization',
-            'Content-Type': 'application/json'
-          }
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
       }
       
-      console.log('✅ Email sent successfully:', response.data?.id);
+      // Check for Resend API errors
+      if (response && response.error) {
+        console.error('❌ Resend API returned error:', response.error);
+        return new Response(JSON.stringify({
+          success: false,
+          error: `Resend API error: ${response.error.message || 'Unknown Resend error'}`
+        }), {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+      
+      // Check for successful response
+      if (!response || !response.data) {
+        console.error('❌ Resend API returned no data:', response);
+        return new Response(JSON.stringify({
+          success: false,
+          error: 'Email service returned no data - check configuration'
+        }), {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+      
+      console.log('✅ Email sent successfully:', response.data.id);
       
       return new Response(JSON.stringify({
         success: true,
-        messageId: response.data?.id,
+        messageId: response.data.id,
         message: 'Email sent successfully'
       }), {
         status: 200,
-        headers: {
-          'Access-Control-Allow-Origin': allowOrigin,
-          'Access-Control-Allow-Methods': 'POST, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Accept, Authorization',
-          'Content-Type': 'application/json'
-        }
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
       
     } catch (error) {
-      console.error('❌ Error sending email:', error);
+      console.error('❌ Unexpected error in POST handler:', error);
+      console.error('❌ Error type:', typeof error);
+      console.error('❌ Error name:', error.name);
+      console.error('❌ Error message:', error.message);
+      console.error('❌ Error stack:', error.stack);
+      
       return new Response(JSON.stringify({
         success: false,
-        error: error.message || 'An unexpected error occurred'
+        error: error instanceof Error ? error.message : 'An unexpected error occurred'
       }), {
         status: 500,
-        headers: {
-          'Access-Control-Allow-Origin': allowOrigin,
-          'Access-Control-Allow-Methods': 'POST, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Accept, Authorization',
-          'Content-Type': 'application/json'
-        }
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
   }
   
   // Handle unsupported methods
+  console.log(`❌ Unsupported method: ${req.method}`);
   return new Response(JSON.stringify({
     success: false,
     error: 'Method not allowed'
   }), {
     status: 405,
-    headers: {
-      'Access-Control-Allow-Origin': allowOrigin,
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Accept',
-      'Content-Type': 'application/json'
-    }
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' }
   });
 });
