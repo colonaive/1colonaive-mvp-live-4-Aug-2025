@@ -89,13 +89,14 @@ const ContactPage: React.FC = () => {
     setSubmitStatus('idle');
 
     try {
-      const response = await fetch('/functions/v1/contact-form', {
+      const response = await fetch('https://irkfrlvddkyjziuvrisb.supabase.co/functions/v1/send-contact-email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlya2ZybHZkZGt5aml6dXZyaXNiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjUwMDA5NTMsImV4cCI6MjA0MDU3Njk1M30.5uYcn2_wJhtLkHTKZcaU4dGs2FZ67kYiVUDUb1yI6Lc'
         },
         body: JSON.stringify({
-          name: formData.name.trim(),
+          fullName: formData.name.trim(),
           email: formData.email.trim(),
           subject: formData.subject.trim(),
           message: formData.message.trim()
