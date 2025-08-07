@@ -15,7 +15,7 @@ import SpecialistProfileSettings from './pages/SpecialistProfileSettings';
 import GPClinicProfileSettings from './pages/GPClinicProfileSettings';
 import HomePage from './pages/HomePage';
 import AboutUsPage from './pages/AboutUsPage';
-import ContactPage from './pages/ContactPage';
+import ContactPage from './pages/contact';
 import AdvisorsPage from './pages/about/AdvisorsPage';
 import ScreeningPage from './pages/ScreeningPage';
 import JoinMovementPage from './pages/JoinMovementPage';
