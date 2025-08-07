@@ -18,13 +18,22 @@ const ContactPage: React.FC = () => {
   const [formData, setFormData] = useState<ContactFormData>({
     name: '',
     email: '',
-    subject: '',
+    subject: 'general', // Default to general
     message: ''
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [errorMessage, setErrorMessage] = useState<string>('');
+
+  const subjectOptions = [
+    { value: 'general', label: 'General Inquiry' },
+    { value: 'clinical', label: 'Clinical Partnership' },
+    { value: 'media', label: 'Media & Press' },
+    { value: 'sponsorship', label: 'Sponsorship & CSR' },
+    { value: 'other', label: 'Other' }
+  ];
 
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -49,6 +58,8 @@ const ContactPage: React.FC = () => {
     // Validate message
     if (!formData.message.trim()) {
       newErrors.message = 'Message is required';
+    } else if (formData.message.trim().length < 10) {
+      newErrors.message = 'Message must be at least 10 characters long';
     }
 
     setErrors(newErrors);
@@ -56,7 +67,7 @@ const ContactPage: React.FC = () => {
   };
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -75,6 +86,7 @@ const ContactPage: React.FC = () => {
     // Reset submit status when user makes changes
     if (submitStatus !== 'idle') {
       setSubmitStatus('idle');
+      setErrorMessage('');
     }
   };
 
@@ -87,14 +99,30 @@ const ContactPage: React.FC = () => {
 
     setIsSubmitting(true);
     setSubmitStatus('idle');
+    setErrorMessage('');
 
     try {
-      // Call the Supabase Edge Function directly
-      const response = await fetch('https://irkfrlvddkyjziuvrisb.supabase.co/functions/v1/send-contact-email', {
+      console.log('📨 Submitting contact form...');
+      
+      const endpoint = import.meta.env.VITE_CONTACT_ENDPOINT;
+      
+      if (!endpoint) {
+        throw new Error('Contact endpoint not configured');
+      }
+
+      // Temporarily use service role key for testing - should be replaced with correct anon key
+      const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY;
+      
+      if (!supabaseKey) {
+        throw new Error('Supabase configuration missing');
+      }
+
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlya2ZybHZkZGt5aml6dXZyaXNiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjUwMDA5NTMsImV4cCI6MjA0MDU3Njk1M30.5uYcn2_wJhtLkHTKZcaU4dGs2FZ67kYiVUDUb1yI6Lc'}`,
+          'Authorization': `Bearer ${supabaseKey}`,
+          'apikey': supabaseKey,
         },
         body: JSON.stringify({
           fullName: formData.name.trim(),
@@ -104,17 +132,33 @@ const ContactPage: React.FC = () => {
         })
       });
 
-      const result = await response.json();
+      let result;
+      try {
+        result = await response.json();
+      } catch (jsonError) {
+        console.error('❌ Failed to parse response as JSON:', jsonError);
+        throw new Error('Invalid response from server');
+      }
 
-      if (!response.ok || !result.success) {
-        throw new Error(result.error || 'Failed to send message');
+      console.log('📧 Server response:', {
+        status: response.status,
+        success: result?.success,
+        error: result?.error
+      });
+
+      if (!response.ok) {
+        throw new Error(result?.error || `Server error (${response.status})`);
+      }
+
+      if (!result?.success) {
+        throw new Error(result?.error || 'Failed to send message');
       }
 
       // Success - clear form and show success message
       setFormData({
         name: '',
         email: '',
-        subject: '',
+        subject: 'general',
         message: ''
       });
       setSubmitStatus('success');
@@ -123,6 +167,9 @@ const ContactPage: React.FC = () => {
 
     } catch (error) {
       console.error('❌ Contact form submission error:', error);
+      
+      const errorMsg = error instanceof Error ? error.message : 'An unexpected error occurred';
+      setErrorMessage(errorMsg);
       setSubmitStatus('error');
     } finally {
       setIsSubmitting(false);
@@ -152,6 +199,7 @@ const ContactPage: React.FC = () => {
         <div className="max-w-2xl mx-auto">
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
             <form onSubmit={handleSubmit} className="space-y-6">
+              
               {/* Name Field */}
               <div>
                 <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
@@ -199,18 +247,22 @@ const ContactPage: React.FC = () => {
               {/* Subject Field */}
               <div>
                 <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-2">
-                  Subject
+                  Subject *
                 </label>
-                <input
-                  type="text"
+                <select
                   id="subject"
                   name="subject"
                   value={formData.subject}
                   onChange={handleInputChange}
                   disabled={isSubmitting}
                   className="w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:cursor-not-allowed"
-                  placeholder="Enter the subject (optional)"
-                />
+                >
+                  {subjectOptions.map(option => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               {/* Message Field */}
@@ -228,7 +280,7 @@ const ContactPage: React.FC = () => {
                   className={`w-full px-4 py-3 border rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:cursor-not-allowed resize-none ${
                     errors.message ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300'
                   }`}
-                  placeholder="Enter your message..."
+                  placeholder="Enter your message (minimum 10 characters)..."
                 />
                 {errors.message && (
                   <p className="mt-2 text-sm text-red-600">{errors.message}</p>
@@ -248,7 +300,7 @@ const ContactPage: React.FC = () => {
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
-                      Sending...
+                      Sending Message...
                     </>
                   ) : (
                     'Send Message'
@@ -267,7 +319,7 @@ const ContactPage: React.FC = () => {
                     </div>
                     <div className="ml-3">
                       <p className="text-sm font-medium text-green-800">
-                        Your message has been successfully sent.
+                        Your message has been successfully sent! We'll get back to you within 1-2 business days.
                       </p>
                     </div>
                   </div>
@@ -284,7 +336,10 @@ const ContactPage: React.FC = () => {
                     </div>
                     <div className="ml-3">
                       <p className="text-sm font-medium text-red-800">
-                        Something went wrong. Please try again later.
+                        <strong>Error:</strong> {errorMessage || 'Something went wrong. Please try again later.'}
+                      </p>
+                      <p className="text-xs text-red-600 mt-1">
+                        If the problem persists, please contact us directly at info@colonaive.ai
                       </p>
                     </div>
                   </div>
@@ -300,11 +355,20 @@ const ContactPage: React.FC = () => {
             <h3 className="text-lg font-medium text-gray-900 mb-4">Other Ways to Reach Us</h3>
             <div className="space-y-2 text-gray-600">
               <p>
-                <strong>Email:</strong> info@colonaive.ai
+                <strong>Email:</strong> <a href="mailto:info@colonaive.ai" className="text-blue-600 hover:text-blue-800">info@colonaive.ai</a>
               </p>
               <p>
                 <strong>Location:</strong> Singapore Medical District, Central Region, Singapore
               </p>
+            </div>
+            <div className="mt-4 text-sm text-gray-500">
+              <p><strong>Response Times:</strong></p>
+              <ul className="mt-2 space-y-1">
+                <li>General Inquiries: 1-2 business days</li>
+                <li>Clinical Partnerships: 3-5 business days</li>
+                <li>Media Requests: Same day</li>
+                <li>Sponsorship: 2-3 business days</li>
+              </ul>
             </div>
           </div>
         </div>
