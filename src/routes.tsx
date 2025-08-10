@@ -21,6 +21,7 @@ import ScreeningPage from './pages/ScreeningPage';
 import JoinMovementPage from './pages/JoinMovementPage';
 import ShareYourStoryPage from './pages/share-your-story';
 import StoriesPage from './pages/stories';
+import HowItWorksPage from './pages/HowItWorksPage'; // ← NEW
 
 // Registration Pages
 import GPClinicSignUp from './pages/signup/GPClinicSignUp';
@@ -96,7 +97,6 @@ import {
   BloodTestColorectalCancerPage,
   ColorectalCancerScreeningAustraliaPage,
   DaChangAiShaZhaPage,
-  ColorectalCancerScreeningIndiaPage,
   SingaporeColorectalScreening,
   AustraliaBowelCancerScreening
 } from './pages/seo';
@@ -139,40 +139,40 @@ const MainRoutes = () => {
           <Route path="/join-the-movement" element={<JoinMovementPage />} />
           <Route path="/join-movement" element={<JoinMovementPage />} />
           <Route path="/stories" element={<StoriesPage />} />
-        
-          
+          <Route path="/how-it-works" element={<HowItWorksPage />} /> {/* NEW ROUTE */}
+
           {/* Education routes */}
           <Route path="/education" element={<EducationHub />} />
           <Route path="/education/article/:slug" element={<ArticlePage />} />
-          
+
           {/* Patient education routes */}
           <Route path="/education/patients" element={<PatientEducationHub />} />
           <Route path="/education/patients/basics" element={<PatientBasicsHub />} />
           <Route path="/education/patients/screening" element={<PatientScreeningHub />} />
           <Route path="/education/patients/symptoms" element={<PatientSymptomsHub />} />
           <Route path="/education/patients/prevention" element={<PatientPreventionHub />} />
-          
+
           {/* Individual Article Routes */}
           <Route path="/education/article/understanding-colorectal-cancer" element={<UnderstandingColorectalCancer />} />
           <Route path="/education/article/how-crc-develops-from-polyps" element={<HowCrcDevelopsFromPolyps />} />
-         <Route path="/education/article/colonoscopy-preparation-complete-guide" element={<ColonoscopyPreparationGuide />} />
+          <Route path="/education/article/colonoscopy-preparation-complete-guide" element={<ColonoscopyPreparationGuide />} />
           <Route path="/education/article/early-warning-signs" element={<EarlyWarningSigns />} />
           <Route path="/education/article/colonoscopy-gold-standard" element={<ColonoscopyGoldStandard />} />
-          
+
           {/* Clinician education routes */}
           <Route path="/education/clinicians" element={<ClinicianEducationHub />} />
           <Route path="/education/clinicians/guidelines" element={<ClinicianGuidelinesHub />} />
           <Route path="/education/clinicians/research" element={<ClinicianResearchHub />} />
           <Route path="/education/clinicians/case-studies" element={<ClinicianCaseStudiesHub />} />
           <Route path="/education/clinicians/cme-resources" element={<ClinicianCMEHub />} />
-          
+
           {/* Newsroom routes */}
           <Route path="/education/newsroom" element={<NewsroomHub />} />
           <Route path="/education/newsroom/press-releases" element={<PressReleasesPage />} />
           <Route path="/education/newsroom/research-updates" element={<ResearchUpdatesPage />} />
           <Route path="/newsroom/crc-news" element={<CRCNewsFeedPage />} />
           <Route path="/newsroom/crc-news-feed" element={<CRCNewsFeedPage />} />
-          
+
           <Route path="/education/faqs" element={<FAQsPage />} />
           <Route path="/education/newsroom" element={<NewsroomPage />} />
           <Route path="/education/resources" element={<ResourcesPage />} />
@@ -181,10 +181,10 @@ const MainRoutes = () => {
           <Route path="/find-specialist" element={<FindSpecialistPage />} />
           <Route path="/find-a-specialist" element={<FindSpecialistPage />} />
           <Route path="/triage" element={<TriagePage />} />
-          
+
           <Route path="/support" element={<SupportPage />} />
           <Route path="/upcoming-clinics" element={<UpcomingClinicsPage />} />
-          
+
           {/* Missing Route Redirects */}
           <Route path="/clinics" element={<Navigate to="/find-a-gp" replace />} />
           <Route path="/choose-screening" element={<Navigate to="/get-screened" replace />} />
@@ -197,38 +197,38 @@ const MainRoutes = () => {
           <Route path="/pillars/rid-crc-csr" element={<RIDCRCCSRPage />} />
           <Route path="/pillars/rid-crc-edu" element={<RIDCRCEDUPage />} />
           <Route path="/clinical-trials" element={<ClinicalTrialsPage />} />
-          
+
           {/* Auth & Registration */}
           <Route path="/signup/champion" element={<ChampionSignUp />} />
           <Route path="/register/clinic" element={<GPClinicSignUp />} />
           <Route path="/register/specialist" element={<SpecialistSignUp />} />
           <Route path="/register/corporate" element={<CorporateSignUp />} />
           <Route path="/champion-sign-in" element={<PublicRoute><ChampionSignIn /></PublicRoute>} />
-          <Route path="/login" element={<PublicRoute><LoginForm redirectTo="/login-redirect" /></PublicRoute>} /> 
+          <Route path="/login" element={<PublicRoute><LoginForm redirectTo="/login-redirect" /></PublicRoute>} />
           <Route path="/login-redirect" element={<LoginRedirectPage />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/champion-signup-success" element={<ChampionThankYouPage />} />
-          
+
           {/* Admin Routes */}
           <Route path="/admin/login" element={<PublicRoute><AdminLogin /></PublicRoute>} />
-          <Route 
-            path="/admin/dashboard" 
+          <Route
+            path="/admin/dashboard"
             element={
               <ProtectedAdminRoute>
                 <SuperAdminDashboard />
               </ProtectedAdminRoute>
-            } 
+            }
           />
-          <Route 
-            path="/admin/news" 
+          <Route
+            path="/admin/news"
             element={
               <ProtectedAdminRoute>
                 <NewsFeedAdmin />
               </ProtectedAdminRoute>
-            } 
+            }
           />
-          
+
           {/* Protected Routes */}
           <Route path="/refer-friend" element={<ProtectedRoute><ReferFriendForm /></ProtectedRoute>} />
           <Route path="/share-your-story" element={<ProtectedRoute><ShareYourStoryPage /></ProtectedRoute>} />
@@ -237,7 +237,7 @@ const MainRoutes = () => {
           <Route path="/dashboard/specialist" element={<ProtectedRoute><SpecialistDashboard /></ProtectedRoute>} />
           <Route path="/dashboard/corporate" element={<ProtectedRoute><CorporateDashboard /></ProtectedRoute>} />
           <Route path="/dashboard/gp-clinic" element={<ProtectedRoute><GPClinicDashboard /></ProtectedRoute>} />
-          
+
           {/* Profile Pages */}
           <Route path="/profile/champion" element={<ProtectedRoute><ChampionProfileSettings /></ProtectedRoute>} />
           <Route path="/profile/specialist" element={<ProtectedRoute><SpecialistProfileSettings /></ProtectedRoute>} />
@@ -260,7 +260,7 @@ const MainRoutes = () => {
           <Route path="/seo/colorectal-cancer-screening-india" element={<ColorectalCancerScreeningIndia />} />
           <Route path="/seo/colorectal-cancer-screening-philippines" element={<ColorectalCancerScreeningPhilippines />} />
           <Route path="/seo/colorectal-cancer-screening-japan" element={<ColorectalCancerScreeningJapan />} />
-          
+
           {/* Legacy SEO Routes */}
           <Route path="/seo/colorectal-cancer-screening-singapore" element={<ColorectalCancerScreeningSingaporePage />} />
           <Route path="/seo/colon-cancer-test-singapore" element={<ColonCancerTestSingaporePage />} />
