@@ -146,7 +146,7 @@ const HowItWorksPage: React.FC = () => {
             <StepCard
               icon={<Activity className="h-5 w-5" />}
               title="Quality & Safety"
-              text="Clinician‑led, neutral & non‑commercial. We work with accredited sites and evidence‑based guidance."
+              text="Clinician‑led. We work with accredited sites and evidence‑based guidance."
             />
           </div>
         </Container>
@@ -173,7 +173,7 @@ const HowItWorksPage: React.FC = () => {
       {/* Footer reassurance strip */}
       <section className="py-6 bg-gray-100 border-t border-gray-200">
         <Container className="text-sm text-gray-600">
-          ✅ Neutral & non‑commercial · Public–private collaboration · Led by Singapore’s medical experts
+          ✅ Public–private collaboration · Led by Singapore’s medical experts
         </Container>
       </section>
     </main>
