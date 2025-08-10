@@ -1,82 +1,113 @@
-// /src/components/HeroSection.tsx
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Button } from './ui/Button';
-import { Container } from './ui/Container';
+// Preview-only: Upgraded HeroSection (self-contained)
+import React from "react";
 
-const HeroSection: React.FC = () => {
+// Lightweight stubs so canvas can render without your app context
+const Container: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ className = "", children, ...props }) => (
+  <div {...props} className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ${className}`}>{children}</div>
+);
+const Button: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement>> = ({ className = "", children, ...props }) => (
+  <button {...props} className={`inline-flex items-center justify-center rounded-2xl font-semibold transition-all ${className}`}>{children}</button>
+);
+
+const HeroPreview: React.FC = () => {
   return (
     <section
-      className="relative w-full min-h-screen bg-cover bg-center bg-no-repeat text-white overflow-hidden"
+      className="relative w-full min-h-[92vh] overflow-hidden text-gray-900"
       style={{
-        backgroundImage: `url(/public/assets/hero-bg-v2.jpg)`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
+        backgroundImage: `url(/assets/hero-bg-v2.jpg)`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
       }}
     >
-      {/* Professional Darkened Overlay for Text Readability */}
-      <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/60 to-black/80 z-0" />
-      
-      {/* Content */}
-      <Container className="relative z-10 flex items-center justify-center min-h-screen px-4 sm:px-8 text-center">
-        <div className="max-w-5xl mx-auto animate-fade-in">
-          
-          {/* Credibility Badge */}
-          <div className="mb-8 animate-slide-up">
-            <span className="inline-block bg-gradient-to-r from-blue-600/90 to-indigo-600/90 backdrop-blur-sm text-white text-sm font-semibold px-6 py-3 rounded-full shadow-2xl border border-white/20">
-              Clinician-Led National Movement • Singapore's Leading Medical Experts
+      {/* Uplifting, bright overlays for contrast */}
+      <div className="absolute inset-0 bg-white/65" />
+      <div className="absolute inset-0 bg-gradient-to-b from-white/70 via-white/60 to-white/85" />
+      <div className="absolute -top-32 -left-24 h-[60vh] w-[60vh] rounded-full bg-emerald-300/20 blur-3xl" />
+      <div className="absolute -bottom-24 -right-24 h-[60vh] w-[60vh] rounded-full bg-sky-300/25 blur-3xl" />
+
+      <Container className="relative z-10 flex min-h-[92vh] items-center">
+        <div className="w-full">
+          {/* Badges */}
+          <div className="flex flex-wrap items-center gap-3 mb-6">
+            <span className="inline-flex items-center rounded-full bg-blue-100 text-blue-900 px-4 py-2 text-xs font-semibold tracking-wide">
+              Clinician‑Led National Movement
+            </span>
+            <span className="inline-flex items-center rounded-full bg-emerald-100 text-emerald-900 px-4 py-2 text-xs font-semibold tracking-wide">
+              Where Treatment Begins While Screening
             </span>
           </div>
-          
-          {/* Main Headline - Bold & Uppercase */}
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black uppercase leading-tight mb-8 tracking-tight text-shadow-xl animate-slide-up">
-            Screening Saves Lives.
-            <br />
-            <span className="text-emerald-400 font-black">New Study Shows 26 Lives Saved per 1,000.</span>
+
+          {/* Headline */}
+          <h1 className="max-w-6xl text-[44px] sm:text-6xl lg:text-7xl font-extrabold leading-[1.03] tracking-tight">
+            <span className="block">SCREENING SAVES LIVES.</span>
+            <span className="mt-2 block text-emerald-700">
+              New study shows 26 lives saved per 1,000 screened.
+            </span>
           </h1>
-          
-          {/* Subheading - Serious but Hopeful */}
-          <p className="text-lg sm:text-xl md:text-2xl text-gray-100 mb-12 max-w-4xl mx-auto font-medium leading-relaxed text-shadow-lg animate-slide-up animation-delay-200">
-            Every day, <span className="font-bold text-red-300">3 Singaporeans</span> are diagnosed with late-stage colorectal cancer.
-            <br className="hidden sm:block" />
-            Early screening gives you a <span className="font-bold text-emerald-300">95% survival chance.</span>
+
+          {/* Subhead (high contrast) */}
+          <p className="mt-6 max-w-3xl text-lg sm:text-xl text-gray-800 leading-relaxed">
+            Every day, <span className="font-bold text-red-700">3 Singaporeans</span> are diagnosed with
+            late‑stage colorectal cancer. Early screening and timely colonoscopy offer up to a
+            <span className="font-bold text-emerald-700"> 95% survival chance</span>.
           </p>
 
-          {/* CTA Section */}
-          <div className="space-y-8 animate-slide-up animation-delay-400">
-            
-            {/* Primary CTA Button */}
-            <div>
-              <Link to="/get-screened">
-                <Button className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white text-xl font-bold px-14 py-6 rounded-2xl shadow-2xl transition-all duration-500 transform hover:scale-105 hover:shadow-3xl border border-white/20 backdrop-blur-sm">
-                  Get Screened Now
-                </Button>
-              </Link>
-            </div>
+          {/* CTAs */}
+          <div className="mt-10 flex flex-wrap items-center gap-4">
+            <a href="/get-screened">
+              <Button className="px-8 py-5 text-lg bg-gradient-to-r from-sky-600 to-indigo-600 text-white shadow-xl hover:from-sky-700 hover:to-indigo-700 hover:scale-[1.02]">
+                Get Screened Now
+              </Button>
+            </a>
+            <a href="/signup/champion">
+              <Button className="px-7 py-5 text-base bg-gradient-to-r from-emerald-500 to-green-600 text-white shadow-md hover:from-emerald-600 hover:to-green-700">
+                Join the Movement
+              </Button>
+            </a>
+            <a href="/how-it-works">
+              <Button className="px-6 py-4 text-sm bg-white border border-gray-300 text-gray-900 hover:bg-gray-100">
+                How It Works
+              </Button>
+            </a>
+          </div>
 
-            {/* Lives Saved Counter Placeholder */}
-            <div className="p-6 bg-black/10 rounded-2xl shadow-lg backdrop-blur-sm border border-gray-500/20">
-              <p className="text-lg sm:text-xl font-medium text-neutral-400 italic text-shadow-md">
-                🔄 Real-time Lives Saved Counter: Updating Soon (Backed by Verified Screenings)
-              </p>
-              <p className="text-sm text-neutral-500 mt-2 italic text-shadow-sm">
-                This feature will reflect live, verified screening completions once available.
+          {/* Impact strip (light cards) */}
+          <div className="mt-10 grid w-full max-w-5xl grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="rounded-2xl border border-gray-200 bg-white px-5 py-4 shadow">
+              <p className="text-[11px] uppercase tracking-wider text-gray-500">National Targets</p>
+              <p className="mt-1 text-2xl font-extrabold">
+                80% <span className="text-gray-600 font-semibold text-base">screening by 2030</span>
               </p>
             </div>
-            
-            {/* Secondary CTA Button */}
-            <div>
-              <Link to="/signup/champion">
-                <Button className="bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 text-white text-lg font-semibold px-10 py-4 rounded-xl shadow-xl transition-all duration-500 transform hover:scale-105 border border-white/10 backdrop-blur-sm">
-                  Join the Movement
-                </Button>
-              </Link>
+            <div className="rounded-2xl border border-gray-200 bg-white px-5 py-4 shadow">
+              <p className="text-[11px] uppercase tracking-wider text-gray-500">Outcome Goal</p>
+              <p className="mt-1 text-2xl font-extrabold">
+                80% <span className="text-gray-600 font-semibold text-base">mortality reduction by 2035</span>
+              </p>
+            </div>
+            <div className="rounded-2xl border border-gray-200 bg-white px-5 py-4 shadow">
+              <p className="text-[11px] uppercase tracking-wider text-gray-500">Our Approach</p>
+              <p className="mt-1 text-base font-semibold leading-snug text-gray-800">
+                Colonoscopy is the gold standard. Validated blood‑based tests help triage more people to timely scoping.
+              </p>
+            </div>
+          </div>
+
+          {/* Trust notes */}
+          <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center">
+            <div className="rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 shadow">
+              🔄 <span className="font-semibold text-gray-900">Lives Saved</span> counter coming soon, backed by verified screenings.
+            </div>
+            <div className="rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 shadow">
+              ✅ Neutral & non‑commercial • Public–private collaboration • Led by Singapore’s medical experts
             </div>
           </div>
         </div>
       </Container>
+
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-white" />
     </section>
   );
 };
 
-export default HeroSection;
+export default HeroPreview;
