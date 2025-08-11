@@ -1,7 +1,9 @@
 import { AdminLogin } from './pages/admin/AdminLogin';
 import { ProtectedAdminRoute } from './components/ProtectedAdminRoute';
 import SuperAdminDashboard from './pages/admin/SuperAdminDashboard';
-import NewsFeedAdmin from './pages/admin/NewsFeedAdmin';
+// REPLACED old admin component
+import NewsFeedAdminPage from './pages/admin/NewsFeedAdminPage';
+
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
@@ -21,7 +23,7 @@ import ScreeningPage from './pages/ScreeningPage';
 import JoinMovementPage from './pages/JoinMovementPage';
 import ShareYourStoryPage from './pages/share-your-story';
 import StoriesPage from './pages/stories';
-import HowItWorksPage from './pages/HowItWorksPage'; // ← NEW
+import HowItWorksPage from './pages/HowItWorksPage';
 
 // Registration Pages
 import GPClinicSignUp from './pages/signup/GPClinicSignUp';
@@ -56,6 +58,9 @@ import CRCNewsFeedPage from './pages/newsroom/CRCNewsFeedPage';
 import FAQsPage from './pages/education/FAQsPage';
 import NewsroomPage from './pages/education/NewsroomPage';
 import ResourcesPage from './pages/education/ResourcesPage';
+
+// NEW public News page (moderated list from Supabase)
+import NewsFeedPage from './pages/NewsFeedPage';
 
 // Individual Article Pages
 import UnderstandingColorectalCancer from './pages/education/patients/basics/understanding-colorectal-cancer';
@@ -139,7 +144,9 @@ const MainRoutes = () => {
           <Route path="/join-the-movement" element={<JoinMovementPage />} />
           <Route path="/join-movement" element={<JoinMovementPage />} />
           <Route path="/stories" element={<StoriesPage />} />
-          <Route path="/how-it-works" element={<HowItWorksPage />} /> {/* NEW ROUTE */}
+          <Route path="/how-it-works" element={<HowItWorksPage />} />
+          {/* NEW: Public news feed (approved items only) */}
+          <Route path="/news" element={<NewsFeedPage />} />
 
           {/* Education routes */}
           <Route path="/education" element={<EducationHub />} />
@@ -166,7 +173,7 @@ const MainRoutes = () => {
           <Route path="/education/clinicians/case-studies" element={<ClinicianCaseStudiesHub />} />
           <Route path="/education/clinicians/cme-resources" element={<ClinicianCMEHub />} />
 
-          {/* Newsroom routes */}
+          {/* Newsroom routes (legacy) */}
           <Route path="/education/newsroom" element={<NewsroomHub />} />
           <Route path="/education/newsroom/press-releases" element={<PressReleasesPage />} />
           <Route path="/education/newsroom/research-updates" element={<ResearchUpdatesPage />} />
@@ -224,7 +231,7 @@ const MainRoutes = () => {
             path="/admin/news"
             element={
               <ProtectedAdminRoute>
-                <NewsFeedAdmin />
+                <NewsFeedAdminPage />
               </ProtectedAdminRoute>
             }
           />
