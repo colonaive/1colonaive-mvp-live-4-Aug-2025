@@ -1,7 +1,6 @@
 import { AdminLogin } from './pages/admin/AdminLogin';
 import { ProtectedAdminRoute } from './components/ProtectedAdminRoute';
 import SuperAdminDashboard from './pages/admin/SuperAdminDashboard';
-// REPLACED old admin component
 import NewsFeedAdminPage from './pages/admin/NewsFeedAdminPage';
 
 import { Routes, Route, Navigate } from 'react-router-dom';
@@ -54,12 +53,11 @@ import ClinicianCMEHub from './pages/education/clinicians/cme-resources';
 import NewsroomHub from './pages/education/newsroom';
 import PressReleasesPage from './pages/education/newsroom/press-releases';
 import ResearchUpdatesPage from './pages/education/newsroom/research-updates';
-import CRCNewsFeedPage from './pages/newsroom/CRCNewsFeedPage';
 import FAQsPage from './pages/education/FAQsPage';
 import NewsroomPage from './pages/education/NewsroomPage';
 import ResourcesPage from './pages/education/ResourcesPage';
 
-// NEW public News page (moderated list from Supabase)
+// NEW public News page (approved items only)
 import NewsFeedPage from './pages/NewsFeedPage';
 
 // Individual Article Pages
@@ -173,12 +171,14 @@ const MainRoutes = () => {
           <Route path="/education/clinicians/case-studies" element={<ClinicianCaseStudiesHub />} />
           <Route path="/education/clinicians/cme-resources" element={<ClinicianCMEHub />} />
 
-          {/* Newsroom routes (legacy) */}
+          {/* Newsroom (keep hub pages only) */}
           <Route path="/education/newsroom" element={<NewsroomHub />} />
           <Route path="/education/newsroom/press-releases" element={<PressReleasesPage />} />
           <Route path="/education/newsroom/research-updates" element={<ResearchUpdatesPage />} />
-          <Route path="/newsroom/crc-news" element={<CRCNewsFeedPage />} />
-          <Route path="/newsroom/crc-news-feed" element={<CRCNewsFeedPage />} />
+
+          {/* Redirect the two legacy CRC-news URLs to the new feed */}
+          <Route path="/newsroom/crc-news" element={<Navigate to="/news" replace />} />
+          <Route path="/newsroom/crc-news-feed" element={<Navigate to="/news" replace />} />
 
           <Route path="/education/faqs" element={<FAQsPage />} />
           <Route path="/education/newsroom" element={<NewsroomPage />} />

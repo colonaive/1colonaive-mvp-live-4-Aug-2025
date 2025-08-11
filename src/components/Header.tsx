@@ -22,7 +22,7 @@ const educationLinks: NavLink[] = [
   { label: "Patient Education", path: "/education/patients" },
   { label: "Clinician Education", path: "/education/clinicians" },
   { label: "FAQs", path: "/education/faqs" },
-  { label: "Newsroom", path: "/education/newsroom" },
+  { label: "📰 Live CRC News", path: "/news" },
   { label: "Resources", path: "/education/resources" },
   { label: "Upcoming Events", path: "/upcoming-events" },
 ];
@@ -345,8 +345,9 @@ export const Header = () => {
               )}
             </div>
           ))}
+          {/* FIXED: point to /news instead of old CRCNewsFeed page */}
           <Link
-            to="/newsroom/crc-news-feed"
+            to="/news"
             onClick={handleClose}
             className="text-white font-semibold py-2 flex items-center"
           >
@@ -394,7 +395,7 @@ export const Header = () => {
               {renderDropdown("Get Screened", screeningLinks, "screen")}
               {renderDropdown("Movement Pillars", pillarLinks, "pillars")}
               <Link
-                to="/newsroom/crc-news-feed"
+                to="/news"
                 className="relative text-white hover:text-teal-300 flex items-center text-sm font-semibold px-3 h-full"
                 title="Daily updated CRC headlines + summaries from trusted medical sources."
                 onMouseEnter={() => setIsNewsHovered(true)}
