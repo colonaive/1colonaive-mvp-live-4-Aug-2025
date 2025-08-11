@@ -79,7 +79,7 @@ const HowItWorksPage: React.FC = () => {
                   </Button>
                 </Link>
                 <Link to="/education/article/colonoscopy-gold-standard">
-                  <Button variant="outline" className="bg-white text-gray-800 hover:bg-gray-100 border-gray-300">
+                  <Button className="bg-white text-gray-800 hover:bg-gray-100 border border-gray-300">
                     Why Colonoscopy?
                   </Button>
                 </Link>
@@ -99,7 +99,7 @@ const HowItWorksPage: React.FC = () => {
                   </Button>
                 </Link>
                 <Link to="/education/patients">
-                  <Button variant="outline" className="bg-white text-gray-800 hover:bg-gray-100 border-gray-300">
+                  <Button className="bg-white text-gray-800 hover:bg-gray-100 border border-gray-300">
                     Patient Education
                   </Button>
                 </Link>
