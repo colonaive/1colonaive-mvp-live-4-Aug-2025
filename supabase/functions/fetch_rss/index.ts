@@ -1,9 +1,9 @@
 // supabase/functions/fetch_rss/index.ts
 // Trusted-source RSS ingester with GPT classification & summary.
-// - Allow-listed sources only (domain verified by registrable root).
-// - Extracts canonical URL, builds url_key, UPSERTS on url_key (cross-source de-dup).
-// - Publishes APPROVED immediately; admin can hide/delete/pin.
-// ENV secrets: SB_URL, SB_SERVICE_ROLE_KEY, OPENAI_API_KEY
+// - Only ingests from allow-listed sources (domain verified).
+// - Extracts canonical URL, builds url_key, and UPSERTs on url_key (cross-source de-dup).
+// - Publishes APPROVED only if CRC-relevant; otherwise skipped (or could be pending).
+// ENV needed: SB_URL, SB_SERVICE_ROLE_KEY, OPENAI_API_KEY
 
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -15,14 +15,23 @@ const OPENAI = Deno.env.get("OPENAI_API_KEY") || "";
 const sb = createClient(SB_URL, SB_KEY, { auth: { persistSession: false } });
 const UA = "Mozilla/5.0 (compatible; COLONAiVE-RSS/1.5)";
 
-// caps & timeouts to keep invocations snappy
-const TOTAL_ITEM_LIMIT = 80;     // hard cap per run
-const PER_SOURCE_LIMIT = 25;     // per-source cap
-const AI_MAX_ITEMS = 10;         // at most this many items use GPT per run
-const RSS_TIMEOUT_MS = 8000;     // 8s per RSS
-const PAGE_TIMEOUT_MS = 6000;    // 6s per article page
+// ---- CRC keyword gate (fallback + safety net) ----
+const CRC_TERMS = [
+  "colorectal", "colon cancer", "rectal cancer", "bowel cancer", "crc ",
+  "adenoma", "polyp", "sessile serrated", "advanced adenoma",
+  "colonoscopy", "sigmoidoscopy", "fit ", "fecal immunochemical",
+  "stool dna", "cologuard", "msi-h", "lynch", "fap", "hnpcc",
+  "metastatic colorectal", "mcrc", "rectum", "hemicolectomy",
+  "kras", "braf", "egfr", "bevacizumab", "cetuximab", "oxaliplatin", "capecitabine",
+  // screening/policy
+  "screening", "screening age", "age 45", "early-onset", "early onset", "eo crc", "eo-crc"
+];
 
-// ---------- small utils ----------
+function isClearlyCRC(title: string, text: string) {
+  const hay = (title + " " + text).toLowerCase();
+  return CRC_TERMS.some(t => hay.includes(t));
+}
+
 const strip = (s: string) =>
   s.replace(/<script[\s\S]*?<\/script>/gi, "")
     .replace(/<style[\s\S]*?<\/style>/gi, "")
@@ -33,21 +42,10 @@ const strip = (s: string) =>
 const host = (u: string) => { try { return new URL(u).host; } catch { return ""; } };
 const root = (h: string) => (h || "").toLowerCase().split(".").filter(Boolean).slice(-2).join(".");
 
-// fetch with timeout
-async function fetchWithTimeout(url: string, ms: number, init?: RequestInit) {
-  const ctrl = new AbortController();
-  const t = setTimeout(() => ctrl.abort(), ms);
-  try {
-    const r = await fetch(url, { ...init, signal: ctrl.signal });
-    return r;
-  } finally {
-    clearTimeout(t);
-  }
-}
-
-async function fetchText(url: string, ms: number) {
-  const r = await fetchWithTimeout(url, ms, { headers: { "user-agent": UA }, redirect: "follow" });
-  if (!r.ok) throw new Error(`Fetch ${r.status} ${url}`);
+// ---------- helpers ----------
+async function fetchText(u: string) {
+  const r = await fetch(u, { headers: { "user-agent": UA }, redirect: "follow" });
+  if (!r.ok) throw new Error(`Fetch ${r.status} ${u}`);
   return await r.text();
 }
 
@@ -76,17 +74,10 @@ function extractCanonical(html: string): string | null {
   return null;
 }
 
-// ---------- RSS parse (never throws) ----------
+// ---------- RSS parse ----------
 async function parseFeed(rss: string) {
-  let xml = "";
-  try {
-    xml = await fetchText(rss, RSS_TIMEOUT_MS);
-  } catch {
-    return [];
-  }
-
+  const xml = await fetchText(rss);
   const out: Array<{ title: string; link: string; pub?: string; desc?: string }> = [];
-
   const items = xml.match(/<item[\s\S]*?<\/item>/gi) || [];
   if (items.length) {
     for (const b of items) {
@@ -98,7 +89,6 @@ async function parseFeed(rss: string) {
     }
     return out;
   }
-
   const entries = xml.match(/<entry[\s\S]*?<\/entry>/gi) || [];
   for (const b of entries) {
     const title = textBetween(b, "title") ?? "";
@@ -114,14 +104,9 @@ async function parseFeed(rss: string) {
 // ---------- GPT classifier ----------
 type Catalog = { tag: string; label: string; group_name: string };
 
-async function classifyAndSummarize(
-  allowed: Catalog[],
-  title: string,
-  text: string,
-  aiBudgetLeft: { v: number },
-) {
-  // heuristic fallback or when AI budget is exhausted
-  const heuristic = () => {
+async function classifyAndSummarize(allowed: Catalog[], title: string, text: string) {
+  if (!OPENAI) {
+    // Heuristic fallback
     const low = (title + " " + text).toLowerCase();
     const tags: string[] = [];
     if (low.includes("early-onset") || low.includes("early onset") || low.includes("age 45") || low.includes("younger than 50"))
@@ -131,43 +116,39 @@ async function classifyAndSummarize(
     if (low.includes("bleeding") || low.includes("hematochezia")) tags.push("rectal_bleeding", "hematochezia");
     if (low.includes("hemorrhoid") || low.includes("piles")) tags.push("hemorrhoids");
     if (low.includes("constipation")) tags.push("constipation");
-
     const uniq = Array.from(new Set(tags.filter(t => allowed.find(a => a.tag === t))));
-    const score = uniq.includes("early_onset_crc") ? 8 : (uniq.length ? 5 : 2);
-    return { tags: uniq, relevance: score, reason: "Heuristic fallback", summary: null, model: null as string | null };
-  };
-
-  if (!OPENAI || aiBudgetLeft.v <= 0) return heuristic();
-  aiBudgetLeft.v--;
+    const score = isClearlyCRC(title, text) ? 8 : (uniq.length ? 5 : 1);
+    return { tags: uniq, relevance: score, reason: "Heuristic fallback", summary: null };
+  }
 
   const allowedList = allowed.map(a => a.tag).join(", ");
   const messages = [
     { role: "system", content:
-`You are a medical editor for colorectal cancer. Use ONLY facts present in the text.
+`You are a medical editor for colorectal cancer. Use ONLY facts in the text.
 Return STRICT JSON with keys:
-  "tags": array subset of [${allowedList}]
-  "relevance": integer 0..10
-  "reason": one sentence citing explicit facts
-  "summary": 2–3 factual sentences.` },
-    { role: "user", content: `TITLE: ${title}\n\nTEXT (truncated):\n${text.slice(0, 12000)}\n\nReturn JSON only.` }
-  ] as const;
+"tags": array subset of [${allowedList}]
+"relevance": integer 0..10 (≥8 if clearly CRC/EOCRC/guideline; 5–7 CRC-related; ≤4 off-topic)
+"reason": one sentence citing explicit facts
+"summary": 2–3 factual sentences.` },
+    { role: "user", content: `TITLE: ${title}\n\nTEXT:\n${text.slice(0, 12000)}\n\nReturn JSON only.` }
+  ];
 
+  const r = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: { authorization: `Bearer ${OPENAI}`, "content-type": "application/json" },
+    body: JSON.stringify({ model: "gpt-4o-mini", temperature: 0.1, messages })
+  });
+  const j = await r.json();
+  const raw = j?.choices?.[0]?.message?.content?.trim?.() || "{}";
   try {
-    const r = await fetchWithTimeout("https://api.openai.com/v1/chat/completions", 8000, {
-      method: "POST",
-      headers: { authorization: `Bearer ${OPENAI}`, "content-type": "application/json" },
-      body: JSON.stringify({ model: "gpt-4o-mini", temperature: 0.1, messages })
-    });
-    const j = await r.json();
-    const raw = j?.choices?.[0]?.message?.content?.trim?.() || "{}";
     const p = JSON.parse(raw);
     const tags: string[] = Array.isArray(p.tags) ? p.tags.filter((t: string) => allowed.find(a => a.tag === t)) : [];
     const relevance = Math.max(0, Math.min(10, Number(p.relevance) || 0));
     const reason = typeof p.reason === "string" ? p.reason : null;
     const summary = typeof p.summary === "string" ? p.summary : null;
-    return { tags, relevance, reason, summary, model: "gpt-4o-mini" };
+    return { tags, relevance, reason, summary };
   } catch {
-    return heuristic();
+    return { tags: [], relevance: 0, reason: "Parse error", summary: null };
   }
 }
 
@@ -180,40 +161,34 @@ async function run() {
 
   const { data: catalog } = await sb.from("topic_catalog").select("*") as unknown as { data: Catalog[] };
 
-  let total = 0, inserted = 0, skipped = 0, processed = 0;
-  const aiBudget = { v: AI_MAX_ITEMS };
+  let total = 0, inserted = 0, skipped = 0;
 
   for (const s of sources ?? []) {
-    if (processed >= TOTAL_ITEM_LIMIT) break;
-
     try {
       const allowRoot = root(s.allowed_domain || host(s.rss_url));
-      const feedItems = (await parseFeed(s.rss_url)).slice(0, PER_SOURCE_LIMIT);
+      const feedItems = await parseFeed(s.rss_url);
       total += feedItems.length;
 
       for (const it of feedItems) {
-        if (processed >= TOTAL_ITEM_LIMIT) break;
-        processed++;
-
         try {
-          const finalUrl = it.link;
-
-          // allowlist check by registrable root
+          // resolve final URL & verify domain allowlist
+          const head = await fetch(it.link, { redirect: "follow", headers: { "user-agent": UA } });
+          if (!head.ok) { skipped++; continue; }
+          const finalUrl = head.url || it.link;
           if (allowRoot && root(host(finalUrl)) !== allowRoot) { skipped++; continue; }
 
-          // fetch page (best effort)
+          // fetch article page
           let html = "";
           try {
-            const page = await fetchWithTimeout(finalUrl, PAGE_TIMEOUT_MS, { headers: { "user-agent": UA }, redirect: "follow" });
+            const page = await fetch(finalUrl, { headers: { "user-agent": UA } });
             if (page.ok) html = await page.text();
           } catch {}
-
           const canonical = extractCanonical(html) || finalUrl;
           const url_key = normalizeForKey(canonical);
           const pageText = strip(html);
           const title = strip(it.title);
 
-          // meta from page or feed
+          // meta
           const meta = (name: string) => {
             const m = html.match(new RegExp(`<meta[^>]+name=["']${name}["'][^>]+content=["']([^"']+)["']`, "i"));
             return m ? m[1] : null;
@@ -225,11 +200,14 @@ async function run() {
           const metaDesc = prop("og:description") || meta("description") || it.desc || "";
           const metaImg = prop("og:image") || null;
 
-          // classify & summarize (bounded AI)
-          const cls = await classifyAndSummarize(catalog || [], title, pageText || metaDesc, aiBudget);
-          const autoSticky = cls.tags.includes("early_onset_crc") && cls.relevance >= 8;
+          // classify & summarize
+          const cls = await classifyAndSummarize(catalog || [], title, pageText || metaDesc);
 
-          // legacy hash
+          // ---- Relevance gate ----
+          const relevant = (cls.relevance >= 5) || isClearlyCRC(title, pageText || metaDesc);
+          if (!relevant) { skipped++; continue; }
+
+          // Compute legacy hash (keep for forensics)
           const enc = new TextEncoder().encode(`${title}|${finalUrl}`);
           const buf = await crypto.subtle.digest("SHA-256", enc);
           const hash = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
@@ -246,42 +224,37 @@ async function run() {
             kind: s.kind,                                  // 'journal' | 'news'
             excerpt: metaDesc ? strip(metaDesc).slice(0, 400) : null,
             thumbnail_url: metaImg,
-            status: "approved",
+            status: "approved",                            // only relevant items reach here
             topic_tags: cls.tags,
             relevance_score: cls.relevance,
             ai_relevance_reason: cls.reason,
             ai_summary: cls.summary,
-            ai_model: cls.model,
-            ai_confidence: cls.model ? 70 : null,
-            ai_updated_at: cls.model ? new Date().toISOString() : null,
-            is_sticky: autoSticky,
-            sticky_priority: autoSticky ? 1 : 999,
+            ai_model: cls.summary ? "gpt-4o-mini" : null,
+            ai_confidence: cls.summary ? 70 : null,
+            ai_updated_at: cls.summary ? new Date().toISOString() : null,
+            is_sticky: cls.tags?.includes("early_onset_crc") && cls.relevance >= 8,
+            sticky_priority: (cls.tags?.includes("early_onset_crc") && cls.relevance >= 8) ? 1 : 999,
             hash
           }], { onConflict: "url_key", ignoreDuplicates: true });
 
-          if (upErr) { skipped++; } else { inserted++; }
+          if (upErr) skipped++; else inserted++;
         } catch {
           skipped++;
         }
       }
     } catch {
-      // skip whole source if its feed fails hard
+      skipped += 1;
       continue;
     }
   }
-  return { total, inserted, skipped, processed, ai_used: AI_MAX_ITEMS - aiBudget.v };
+  return { total, inserted, skipped };
 }
 
 serve(async () => {
   try {
     const r = await run();
-    return new Response(JSON.stringify({ ok: true, ...r }), {
-      headers: { "content-type": "application/json" }
-    });
+    return new Response(JSON.stringify({ ok: true, ...r }), { headers: { "content-type": "application/json" } });
   } catch (e) {
-    return new Response(JSON.stringify({ ok: false, error: String(e) }), {
-      status: 500,
-      headers: { "content-type": "application/json" }
-    });
+    return new Response(JSON.stringify({ ok: false, error: String(e) }), { status: 500, headers: { "content-type": "application/json" } });
   }
 });
