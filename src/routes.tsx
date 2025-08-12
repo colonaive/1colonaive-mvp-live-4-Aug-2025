@@ -1,6 +1,7 @@
 import { AdminLogin } from './pages/admin/AdminLogin';
 import { ProtectedAdminRoute } from './components/ProtectedAdminRoute';
 import SuperAdminDashboard from './pages/admin/SuperAdminDashboard';
+import NewsLiveFeedPage from './pages/news/NewsLiveFeedPage';
 import NewsFeedAdminPage from './pages/admin/NewsFeedAdminPage';
 
 import { Routes, Route, Navigate } from 'react-router-dom';
@@ -144,6 +145,7 @@ const MainRoutes = () => {
           <Route path="/stories" element={<StoriesPage />} />
           <Route path="/how-it-works" element={<HowItWorksPage />} />
           {/* NEW: Public news feed (approved items only) */}
+          <Route path="/news-live" element={<NewsLiveFeedPage />} />
           <Route path="/news" element={<NewsFeedPage />} />
 
           {/* Education routes */}
