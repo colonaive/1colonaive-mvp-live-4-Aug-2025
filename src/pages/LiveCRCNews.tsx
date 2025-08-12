@@ -1,166 +1,222 @@
 // src/pages/LiveCRCNews.tsx
 import React, { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
-import { ExternalLink, ShieldCheck, Search } from "lucide-react";
-
-const CATS = ["All", "Clinical Research", "Screening & Policy", "Awareness & Campaigns"] as const;
-type Cat = typeof CATS[number];
+import { ExternalLink, Search } from "lucide-react";
 
 type Item = {
   id: string;
   title: string;
   url: string;
   source: string;
-  source_domain: string;
+  source_domain: string | null;
   authors: string[] | null;
-  image_url?: string | null;
-  category: Cat | string;
-  published_at: string;
-  summary?: string | null;
-  tags?: string[] | null;
+  image_url: string | null;
+  category: "Clinical Research" | "Screening & Policy" | "Awareness & Campaigns" | null;
+  published_at: string; // ISO
+  summary: string | null;
+  tags: string[] | null;
 };
 
-const Pill: React.FC<{ active: boolean; onClick: () => void; label: string }> = ({ active, onClick, label }) => (
-  <button
-    onClick={onClick}
-    className={`px-3 py-1.5 rounded-full text-sm border transition ${
-      active ? "bg-emerald-600 text-white border-emerald-600" : "bg-white text-gray-700 border-gray-200 hover:border-gray-300"
-    }`}
-  >
-    {label}
-  </button>
-);
+const CATS = ["All", "Clinical Research", "Screening & Policy", "Awareness & Campaigns"] as const;
+type Cat = (typeof CATS)[number];
 
-const Card: React.FC<{ item: Item }> = ({ item }) => {
-  const d = new Date(item.published_at);
-  const date = d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+function formatDate(iso?: string) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return "";
+  return d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+}
+
+function classNames(...c: (string | false | null | undefined)[]) {
+  return c.filter(Boolean).join(" ");
+}
+
+function NewsCard({ item }: { item: Item }) {
   return (
-    <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm hover:shadow-md transition">
-      <div className="flex items-start gap-4">
-        <div className="shrink-0">
-          <div className="h-14 w-14 rounded-xl bg-gray-50 flex items-center justify-center">
-            <ShieldCheck className="h-6 w-6 text-emerald-600" />
-          </div>
+    <article className="group rounded-2xl border border-slate-200 bg-white p-4 shadow-sm hover:shadow-md transition-shadow">
+      <div className="flex gap-4">
+        <div className="w-24 h-24 shrink-0 rounded-lg bg-slate-100 overflow-hidden">
+          {item.image_url ? (
+            <img src={item.image_url} alt="" className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-slate-400 text-xs">
+              no image
+            </div>
+          )}
         </div>
         <div className="min-w-0">
-          <h3 className="text-base md:text-lg font-semibold text-gray-900 leading-snug">
+          <a
+            href={item.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block text-slate-900 font-semibold leading-snug group-hover:text-emerald-700"
+            title={item.title}
+          >
             {item.title}
-          </h3>
-          <div className="mt-1 text-xs text-gray-500">
-            <span className="font-medium">{item.source}</span>
-            <span className="mx-1.5">•</span>
-            <time>{date}</time>
-            <span className="mx-1.5">•</span>
-            <span className="rounded bg-gray-100 px-2 py-0.5">{item.category}</span>
+            <ExternalLink className="inline ml-1 h-4 w-4 align-text-top opacity-60 group-hover:opacity-100" />
+          </a>
+          <div className="mt-1 text-xs text-slate-500">
+            {item.source || item.source_domain}
+            {item.published_at ? ` • ${formatDate(item.published_at)}` : ""}
           </div>
-
           {item.summary && (
-            <p className="mt-3 text-sm text-gray-700">
-              {item.summary}
-            </p>
+            <p className="mt-2 text-sm text-slate-700 line-clamp-4">{item.summary}</p>
           )}
-
-          <div className="mt-3 flex items-center gap-3">
+          <div className="mt-3">
             <a
               href={item.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-emerald-700 hover:text-emerald-800 text-sm font-medium"
-              aria-label="Read original article"
+              className="text-sm font-medium text-emerald-700 hover:text-emerald-800"
             >
-              Read original <ExternalLink className="h-4 w-4" />
+              Read full article →
             </a>
-            <span className="text-xs text-gray-500">Verified source: {item.source_domain}</span>
           </div>
         </div>
       </div>
     </article>
   );
-};
+}
 
-const Column: React.FC<{ title: string; items: Item[] }> = ({ title, items }) => (
-  <section className="flex-1 min-w-[320px]">
-    <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">{title}</h2>
-    <div className="flex flex-col gap-4 h-[70vh] overflow-y-auto pr-1">
-      {items.map(i => <Card key={i.id} item={i} />)}
-      {!items.length && <div className="text-sm text-gray-500">No stories yet.</div>}
-    </div>
-  </section>
-);
-
-const LiveCRCNews: React.FC = () => {
-  const [cat, setCat] = useState<Cat>("All");
+export default function LiveCRCNews() {
+  const [active, setActive] = useState<Cat>("All");
   const [q, setQ] = useState("");
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
+  const [err, setErr] = useState<string | null>(null);
 
-  async function load() {
-    setLoading(true);
-    const qs = new URLSearchParams();
-    if (cat) qs.set("category", cat);
-    if (q.trim()) qs.set("q", q.trim());
-    qs.set("limit", "80");
-    const res = await fetch(`/.netlify/functions/list_crc_news?${qs.toString()}`);
-    const json = await res.json();
-    setItems(json.items || []);
-    setLoading(false);
-  }
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      setLoading(true);
+      setErr(null);
+      try {
+        const params = new URLSearchParams();
+        params.set("category", active);
+        params.set("limit", "80");
+        if (q.trim()) params.set("q", q.trim());
+        const res = await fetch(`/.netlify/functions/list_crc_news?${params.toString()}`);
+        if (!res.ok) {
+          const txt = await res.text();
+          throw new Error(`${res.status}: ${txt}`);
+        }
+        const data = await res.json();
+        if (!cancelled) setItems(data.items || []);
+      } catch (e: any) {
+        if (!cancelled) setErr(e?.message || "Failed to load news");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    load();
+    return () => { cancelled = true; };
+    // re-run when active or q changes
+  }, [active, q]);
 
-  useEffect(() => { load(); /* eslint-disable-next-line */ }, [cat]);
-  const filtered = useMemo(() => {
-    const text = q.trim().toLowerCase();
-    if (!text) return items;
-    return items.filter(i => i.title.toLowerCase().includes(text) || (i.summary || "").toLowerCase().includes(text));
-  }, [items, q]);
-
-  const clinical = filtered.filter(i => i.category === "Clinical Research");
-  const policy   = filtered.filter(i => i.category === "Screening & Policy");
-  const aware    = filtered.filter(i => i.category === "Awareness & Campaigns");
+  const groups = useMemo(() => {
+    const fil = items; // already filtered server‑side by category & title
+    const research = fil.filter(i => i.category === "Clinical Research");
+    const policy = fil.filter(i => i.category === "Screening & Policy");
+    const awareness = fil.filter(i => i.category === "Awareness & Campaigns");
+    return { research, policy, awareness };
+  }, [items]);
 
   return (
-    <main className="bg-gray-50 min-h-screen">
-      <div className="container mx-auto px-4 py-10">
-        <header className="mb-6">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Latest in Colorectal Cancer</h1>
-          <p className="mt-1 text-sm text-gray-600">Only verified stories with direct links to original sources.</p>
-        </header>
+    <div className="mx-auto max-w-6xl px-4 py-10">
+      {/* Title */}
+      <header className="mb-6">
+        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
+          Latest in Colorectal Cancer
+        </h1>
+        <p className="mt-1 text-slate-600 text-sm">
+          Only verified stories with direct links to original sources.
+        </p>
+      </header>
 
-        <div className="flex items-center gap-2 flex-wrap mb-4">
-          {CATS.map(c => <Pill key={c} label={c} active={cat===c} onClick={() => setCat(c)} />)}
-          <div className="ml-auto relative">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
-            <input
-              value={q}
-              onChange={e => setQ(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter") load(); }}
-              placeholder="Explore topics, care, coverage"
-              className="pl-9 pr-3 py-2 rounded-lg border border-gray-200 bg-white text-sm w-72 outline-none focus:border-gray-300"
-            />
-          </div>
+      {/* Tabs + search */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
+        <div className="flex flex-wrap gap-2">
+          {CATS.map(cat => (
+            <button
+              key={cat}
+              onClick={() => setActive(cat)}
+              className={classNames(
+                "px-3 py-1.5 rounded-full text-sm border",
+                active === cat
+                  ? "bg-emerald-600 text-white border-emerald-600"
+                  : "bg-white text-slate-700 border-slate-300 hover:bg-slate-50"
+              )}
+            >
+              {cat}
+            </button>
+          ))}
         </div>
 
-        {loading ? (
-          <div className="py-16 text-center text-gray-500">Loading verified CRC stories…</div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Column title="Clinical Research" items={cat==="All" ? clinical : filtered} />
-            <div className="flex flex-col gap-6">
-              <Column title="Screening & Policy" items={cat==="All" ? policy : filtered} />
-              <Column title="Awareness & Campaigns" items={cat==="All" ? aware : filtered} />
-            </div>
-          </div>
-        )}
-
-        <div className="mt-10 text-xs text-gray-500">
-          Tip: Click “Read original” to open the journal or guideline page in a new tab. We never rewrite headlines and we only summarize to help you triage what to read.
-        </div>
-
-        <div className="mt-8">
-          <Link to="/" className="text-sm text-emerald-700 hover:text-emerald-800">← Back to Home</Link>
+        <div className="relative w-full sm:w-80">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Explore topics, care, coverage"
+            className="w-full rounded-full border border-slate-300 pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          />
         </div>
       </div>
-    </main>
-  );
-};
 
-export default LiveCRCNews;
+      {/* Errors / loading */}
+      {err && (
+        <div className="mb-6 rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">
+          {err}
+        </div>
+      )}
+      {loading && (
+        <div className="text-slate-500 text-sm mb-6">Loading the latest verified stories…</div>
+      )}
+
+      {/* Two-column main sections */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <section>
+          <h2 className="mb-3 text-sm font-semibold tracking-wide text-slate-600">
+            CLINICAL RESEARCH
+          </h2>
+          <div className="grid gap-4">
+            {groups.research.length === 0 && !loading && (
+              <div className="text-sm text-slate-500">No stories yet.</div>
+            )}
+            {groups.research.map((it) => (
+              <NewsCard key={it.id} item={it} />
+            ))}
+          </div>
+        </section>
+
+        <section>
+          <h2 className="mb-3 text-sm font-semibold tracking-wide text-slate-600">
+            SCREENING &amp; POLICY
+          </h2>
+          <div className="grid gap-4">
+            {groups.policy.length === 0 && !loading && (
+              <div className="text-sm text-slate-500">No stories yet.</div>
+            )}
+            {groups.policy.map((it) => (
+              <NewsCard key={it.id} item={it} />
+            ))}
+          </div>
+        </section>
+      </div>
+
+      {/* Awareness below, full width */}
+      <section className="mt-10">
+        <h2 className="mb-3 text-sm font-semibold tracking-wide text-slate-600">
+          AWARENESS &amp; CAMPAIGNS
+        </h2>
+        <div className="grid gap-4">
+          {groups.awareness.length === 0 && !loading && (
+            <div className="text-sm text-slate-500">No stories yet.</div>
+          )}
+          {groups.awareness.map((it) => (
+            <NewsCard key={it.id} item={it} />
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+}
