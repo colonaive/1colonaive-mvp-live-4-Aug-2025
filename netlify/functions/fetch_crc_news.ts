@@ -1,162 +1,110 @@
-// netlify/functions/fetch_crc_news.ts
 import type { Handler } from "@netlify/functions";
 import crypto from "crypto";
-
-// @ts-ignore - netlify functions allow dynamic import
+// @ts-ignore
 import Parser from "rss-parser";
 
-const parser: any = new (Parser as any)({
-  headers: { "User-Agent": "COLONAiVE/NewsFetcher" },
-});
+const parser: any = new (Parser as any)({ headers: { "User-Agent": "COLONAiVE/NewsFetcher" } });
 
-const FEEDS: { url: string; category?: string }[] = [
-  // Top clinical journals
+// Feeds (we'll limit when in "fast" mode)
+const FEEDS: { url: string; category: "Clinical Research" | "Screening & Policy" | "Awareness & Campaigns" }[] = [
   { url: "https://www.nejm.org/feed/rss", category: "Clinical Research" },
   { url: "https://jamanetwork.com/rss/site_9/mostRecentIssue.xml", category: "Clinical Research" },
   { url: "https://www.thelancet.com/rssfeed/lancet_oncology_current.xml", category: "Clinical Research" },
-  { url: "https://feeds.feedburner.com/gastrojournal", category: "Clinical Research" },
-  { url: "https://feeds.nature.com/nature/rss/current", category: "Clinical Research" },
-  { url: "https://feeds.nature.com/nature-research/oncology/rss", category: "Clinical Research" },
   { url: "https://gut.bmj.com/rss/current.xml", category: "Clinical Research" },
-
-  // Guidelines / policy
+  { url: "https://ascopost.com/rss", category: "Clinical Research" },
   { url: "https://www.nccn.org/rss", category: "Screening & Policy" },
   { url: "https://www.uspreventiveservicestaskforce.org/uspstf/site-feed.xml", category: "Screening & Policy" },
-
-  // ASCO news
-  { url: "https://ascopost.com/rss", category: "Clinical Research" },
-
-  // Awareness (campaigns, NGOs)
   { url: "https://www.cancer.org/feeds/newsroom.rss", category: "Awareness & Campaigns" },
 ];
 
-const CRC_KEYWORDS = [
-  "colorectal", "colon cancer", "rectal cancer", "crc",
-  "adenoma", "advanced adenoma", "polyps", "colonoscopy",
-  "screening", "sigmoidoscopy", "fecal", "stool test", "ct colonography",
-  "blood-based", "liquid biopsy", "dna methylation", "FIT", "FOBT", "mt-sDNA"
-];
+const CRC_KEYWORDS = ["colorectal","colon cancer","rectal cancer","crc","adenoma","advanced adenoma","polyp","polyps","colonoscopy","screening","sigmoidoscopy","fecal","stool test","ct colonography","blood-based","liquid biopsy","dna methylation","fit","fobt","mt-sdna"];
+const TRUSTED_DOMAINS = ["nejm.org","jamanetwork.com","thelancet.com","lancet.com","gut.bmj.com","bmj.com","ascopost.com","nccn.org","uspreventiveservicestaskforce.org","cancer.org","nature.com","annals.org","sciencedirect.com","cell.com"];
 
-const TRUSTED_DOMAINS = [
-  "nejm.org","jamanetwork.com","thelancet.com","lancet.com",
-  "gastrojournal.org","nature.com","gut.bmj.com","bmj.com",
-  "nccn.org","uspreventiveservicestaskforce.org","ascopost.com",
-  "cancer.org","aacr.org","asco.org","annals.org","sciencedirect.com","cell.com"
-];
+const sha = (s:string)=>crypto.createHash("sha256").update(s).digest("hex");
+const domainOf = (u:string)=>{ try { return new URL(u).hostname.replace(/^www\./,""); } catch { return ""; } };
+const isCRC = (t?:string)=> (t||"").toLowerCase() && CRC_KEYWORDS.some(k => (t||"").toLowerCase().includes(k));
 
-function sha(input: string) {
-  return crypto.createHash("sha256").update(input).digest("hex");
-}
-
-function looksCRC(text: string) {
-  const t = (text || "").toLowerCase();
-  return CRC_KEYWORDS.some(k => t.includes(k));
-}
-
-function toDomain(u: string) {
-  try { return new URL(u).hostname.replace(/^www\./, ""); } catch { return ""; }
-}
-
-async function aiSummarize(title: string, text: string) {
-  const key = process.env.OPENAI_API_KEY;
-  if (!key) {
-    // Fallback extractive snippet
-    const snippet = (text || "").split(/[\.\n]/).slice(0, 3).join(". ").trim();
-    return snippet || "Summary unavailable. Open the original article for details.";
-  }
-  try {
-    const res = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: { "Authorization": `Bearer ${key}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: [
-          { role: "system", content: "You are a medical editor. Write a 2–3 sentence neutral summary for clinicians about colorectal cancer research or screening policy. No hype." },
-          { role: "user", content: `Title: ${title}\nText:\n${text}\n\nWrite the summary.` }
-        ],
-        temperature: 0.2,
-      })
-    });
-    const json = await res.json();
-    return json.choices?.[0]?.message?.content?.trim() || "";
-  } catch {
-    return "Summary unavailable. Open the original article for details.";
-  }
-}
-
-type UpsertPayload = {
-  title: string; url: string; source: string; source_domain: string;
-  authors: string[]; image_url?: string | null; category: string;
-  published_at: string; summary: string; tags: string[]; hash: string;
-};
-
-async function upsert(items: UpsertPayload[]) {
-  const supabaseUrl = process.env.SUPABASE_URL!;
-  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-  const res = await fetch(`${supabaseUrl}/rest/v1/crc_news`, {
+async function upsert(items: any[]) {
+  if (!items.length) return;
+  const url = process.env.SUPABASE_URL!;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+  const res = await fetch(`${url}/rest/v1/crc_news`, {
     method: "POST",
-    headers: {
-      apikey: supabaseKey,
-      Authorization: `Bearer ${supabaseKey}`,
-      "Content-Type": "application/json",
-      Prefer: "resolution=merge-duplicates"
-    },
+    headers: { apikey: key, Authorization: `Bearer ${key}`, "Content-Type":"application/json", Prefer:"resolution=merge-duplicates" },
     body: JSON.stringify(items),
   });
-  if (!res.ok) {
-    const t = await res.text();
-    throw new Error(`Supabase upsert failed: ${res.status} ${t}`);
-  }
+  if (!res.ok) throw new Error(`Supabase upsert failed: ${res.status} ${await res.text()}`);
 }
 
-export const handler: Handler = async () => {
-  try {
-    const collected: UpsertPayload[] = [];
-
-    for (const feed of FEEDS) {
-      let out: any;
-      try { out = await parser.parseURL(feed.url); } catch { continue; }
-      for (const i of out.items || []) {
-        const title = i.title || "";
-        const link = i.link || i.guid || "";
-        if (!title || !link) continue;
-
-        const domain = toDomain(link);
-        if (!TRUSTED_DOMAINS.includes(domain)) continue;
-
-        // CRC filter by title/summary categories
-        const textBody = `${i.contentSnippet || ""}\n${i.content || ""}\n${i.summary || ""}`;
-        if (!looksCRC([title, textBody].join(" "))) continue;
-
-        const category = feed.category || "Clinical Research";
-        const summary = await aiSummarize(title, textBody);
-        const authors = i.creator ? [String(i.creator)] : [];
-        const pub = i.isoDate || i.pubDate || new Date().toISOString();
-
-        const payload: UpsertPayload = {
-          title,
-          url: link,
-          source: out.title || domain,
-          source_domain: domain,
-          authors,
-          image_url: i.enclosure?.url || null,
-          category,
-          published_at: new Date(pub).toISOString(),
-          summary,
-          tags: [],
-          hash: sha(`${title}|${link}`),
-        };
-        collected.push(payload);
-      }
-    }
-
-    if (collected.length) await upsert(collected);
-
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ inserted_or_merged: collected.length }),
-    };
-  } catch (e: any) {
-    return { statusCode: 500, body: e?.message || "error" };
+async function aiSummary(title:string, text:string, useAI:boolean) {
+  if (!useAI || !process.env.OPENAI_API_KEY) {
+    const snippet = (text||"").split(/[\.\n]/).slice(0,3).join(". ").trim();
+    return snippet || "Summary unavailable. Open the original article for details.";
   }
+  const r = await fetch("https://api.openai.com/v1/chat/completions",{
+    method:"POST",
+    headers:{Authorization:`Bearer ${process.env.OPENAI_API_KEY}`, "Content-Type":"application/json"},
+    body:JSON.stringify({
+      model:"gpt-4o-mini",
+      temperature:0.2,
+      messages:[
+        {role:"system",content:"Medical editor. Write a neutral 2–3 sentence summary for clinicians about colorectal cancer research or screening policy."},
+        {role:"user",content:`Title: ${title}\nText:\n${text}\n\nWrite the summary.`}
+      ]
+    })
+  });
+  const j = await r.json();
+  return j.choices?.[0]?.message?.content?.trim() || "Summary unavailable.";
+}
+
+export const handler: Handler = async (event) => {
+  const started = Date.now();
+  const FAST = event.queryStringParameters?.fast === "1";
+  const useAI = !FAST; // fast mode skips AI
+
+  // In fast mode, use fewer feeds and cap items
+  const feeds = FAST ? FEEDS.slice(0, 4) : FEEDS;
+
+  const collected: any[] = [];
+
+  for (const f of feeds) {
+    if (Date.now() - started > 23000) break; // safety to avoid 30s timeout
+
+    let out:any;
+    try { out = await parser.parseURL(f.url); } catch { continue; }
+    const sourceTitle = out.title || "";
+
+    for (const it of out.items?.slice(0, FAST ? 6 : 12) || []) {
+      const title = it.title || "";
+      const link = it.link || it.guid || "";
+      if (!title || !link) continue;
+      const dom = domainOf(link);
+      if (!TRUSTED_DOMAINS.includes(dom)) continue;
+
+      const text = `${it.contentSnippet || ""}\n${it.content || ""}\n${it.summary || ""}`;
+      if (!isCRC(`${title}\n${text}`)) continue;
+
+      const summary = await aiSummary(title, text, useAI);
+      const pub = it.isoDate || it.pubDate || new Date().toISOString();
+
+      collected.push({
+        title,
+        url: link,
+        source: sourceTitle || dom,
+        source_domain: dom,
+        authors: it.creator ? [String(it.creator)] : [],
+        image_url: it.enclosure?.url || null,
+        category: f.category,
+        published_at: new Date(pub).toISOString(),
+        summary,
+        tags: [],
+        hash: sha(`${title}|${link}`),
+      });
+
+      if (Date.now() - started > 25000) break;
+    }
+  }
+
+  try { await upsert(collected); } catch (e:any) { return { statusCode: 500, body: e.message || "upsert error" }; }
+  return { statusCode: 200, body: JSON.stringify({ inserted_or_merged: collected.length, fast: FAST }) };
 };
