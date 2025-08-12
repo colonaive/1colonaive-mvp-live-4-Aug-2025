@@ -1,0 +1,2 @@
+[functions.fetch_rss]
+verify_jwt = false
