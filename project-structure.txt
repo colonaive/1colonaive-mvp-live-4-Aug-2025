@@ -1,23 +1,119 @@
 Folder PATH listing for volume Windows
 Volume serial number is 3EFE-CDCB
 C:.
+¦   .env.local
 ¦   .gitignore
+¦   clinics.csv
+¦   CONTACT-FORM-EMAIL-SETUP.md
+¦   CORS-FIX-DEPLOYMENT.md
+¦   CRC_NEWS_FEED_README.md
 ¦   eslint.config.js
 ¦   file-tree.txt
 ¦   github-workflow.md
 ¦   index.html
 ¦   install-dependencies.sh
+¦   netlify.toml
 ¦   package-lock.json
 ¦   package.json
 ¦   postcss.config.js
 ¦   project-structure.txt
 ¦   README.md
+¦   SCHEMA_IMPLEMENTATION.md
+¦   seo_keywords.csv
 ¦   tailwind.config.js
 ¦   tsconfig.app.json
 ¦   tsconfig.json
 ¦   tsconfig.node.json
 ¦   vite.config.ts
 ¦   
++---.claude
+¦       settings.local.json
+¦       
++---.vscode
+¦       settings.json
+¦       
++---content
+¦       stories.json
+¦       
++---dist
+¦   ¦   android-chrome-192x192.png
+¦   ¦   android-chrome-512x512.png
+¦   ¦   apple-touch-icon.png
+¦   ¦   favicon-16x16.png
+¦   ¦   favicon-32x32.png
+¦   ¦   favicon.ico
+¦   ¦   image copy.png
+¦   ¦   image.png
+¦   ¦   index.html
+¦   ¦   robots.txt
+¦   ¦   site.webmanifest
+¦   ¦   sitemap.xml
+¦   ¦   _redirects
+¦   ¦   
+¦   +---assets
+¦   ¦   ¦   clinician-engagement-D2o3tI40.webp
+¦   ¦   ¦   corporate-csr-Bvv9Gfwp.webp
+¦   ¦   ¦   crc-top-cancer-grYcE3jx.webp
+¦   ¦   ¦   hero-pillar-team.webp
+¦   ¦   ¦   index-BjD9zSIS.css
+¦   ¦   ¦   index-CC2WhjCl.js
+¦   ¦   ¦   index-CC2WhjCl.js.map
+¦   ¦   ¦   late-stage-diagnosis-BMNoiLX9.webp
+¦   ¦   ¦   low-screening-rates-BoV1ZMZz.webp
+¦   ¦   ¦   patient-education-B4CZ6o7_.webp
+¦   ¦   ¦   policy-alignment-A5A0MIeo.webp
+¦   ¦   ¦   public-awareness-CsvELi11.webp
+¦   ¦   ¦   react-vendor-cFMfgyYr.js
+¦   ¦   ¦   react-vendor-cFMfgyYr.js.map
+¦   ¦   ¦   singapore-flag circular icon-DF4U0K_4.webp
+¦   ¦   ¦   
+¦   ¦   +---advisors
+¦   ¦   ¦       eu-kong-weng.jpg
+¦   ¦   ¦       francis-seow.jpg
+¦   ¦   ¦       lawrence-ho.jpg
+¦   ¦   ¦       
+¦   ¦   +---flags
+¦   ¦   ¦       india-flag.png
+¦   ¦   ¦       philippines-flag.png
+¦   ¦   ¦       singapore-flag.png
+¦   ¦   ¦       
+¦   ¦   +---images
+¦   ¦       +---bloodtest
+¦   ¦       ¦       crc-screening-blood-test.webp
+¦   ¦       ¦       
+¦   ¦       +---doctor
+¦   ¦       ¦       doctor-stetescope.webp
+¦   ¦       ¦       
+¦   ¦       +---education
+¦   ¦       ¦   +---anatomy
+¦   ¦       ¦   ¦       colon-polyp-progression-stages.webp
+¦   ¦       ¦   ¦       colorectal-anatomy-diagram.webp
+¦   ¦       ¦   ¦       
+¦   ¦       ¦   +---procedures
+¦   ¦       ¦   ¦       colonoscopy-comfort.webp
+¦   ¦       ¦   ¦       colonoscopy-procedure-room.webp
+¦   ¦       ¦   ¦       
+¦   ¦       ¦   +---symptoms
+¦   ¦       ¦           colorectal-cancer-tumor-diagram.webp
+¦   ¦       ¦           
+¦   ¦       +---logo
+¦   ¦               COLONAiVE-Logo-Dark-version.webp
+¦   ¦               COLONAiVE-Logo-light-version.png
+¦   ¦               COLONAiVE-Logo-light-version.webp
+¦   ¦               
+¦   +---images
+¦   ¦       hero-pillar-team.webp
+¦   ¦       
+¦   +---pdfs
+¦           CSRpitch-deck.html
+¦           CSR_PitchDeck_COLONAiVE.pdf
+¦           PQ_EvidenceValidation_Messaging.pdf.pdf
+¦           
++---netlify
+¦   +---functions
+¦           fetch_crc_news.ts
+¦           list_crc_news.ts
+¦           
 +---public
 ¦   ¦   android-chrome-192x192.png
 ¦   ¦   android-chrome-512x512.png
@@ -27,7 +123,9 @@ C:.
 ¦   ¦   favicon.ico
 ¦   ¦   image copy.png
 ¦   ¦   image.png
+¦   ¦   robots.txt
 ¦   ¦   site.webmanifest
+¦   ¦   sitemap.xml
 ¦   ¦   _redirects
 ¦   ¦   
 ¦   +---assets
@@ -73,6 +171,7 @@ C:.
 ¦   +---pdfs
 ¦           CSRpitch-deck.html
 ¦           CSR_PitchDeck_COLONAiVE.pdf
+¦           PQ_EvidenceValidation_Messaging.pdf.pdf
 ¦           
 +---src
 ¦   ¦   App.tsx
@@ -84,8 +183,13 @@ C:.
 ¦   ¦   vite-env.d.ts
 ¦   ¦   
 ¦   +---api
-¦   ¦       chat.ts
-¦   ¦       
+¦   ¦   ¦   chat.ts
+¦   ¦   ¦   
+¦   ¦   +---feeds
+¦   ¦           crc-news-verified.ts
+¦   ¦           crc-news-working.ts
+¦   ¦           crc-news.ts
+¦   ¦           
 ¦   +---assets
 ¦   ¦   ¦   hero-pillar-team.webp
 ¦   ¦   ¦   
@@ -130,26 +234,34 @@ C:.
 ¦   ¦   ¦   ColonaiveLogo.tsx
 ¦   ¦   ¦   CountrySelector.tsx
 ¦   ¦   ¦   CrisisSection.tsx
+¦   ¦   ¦   CriticalCSS.tsx
 ¦   ¦   ¦   CtaSection.tsx
 ¦   ¦   ¦   DashboardModules.tsx
+¦   ¦   ¦   EvidenceHighlights.tsx
 ¦   ¦   ¦   EvidenceSection.tsx
 ¦   ¦   ¦   Footer.tsx
 ¦   ¦   ¦   Header copy.tsx
 ¦   ¦   ¦   Header.tsx
 ¦   ¦   ¦   Headertest.tsx
 ¦   ¦   ¦   HeroSection.tsx
-¦   ¦   ¦   HeroSection1.tsx
 ¦   ¦   ¦   HomeSearchBar.tsx
 ¦   ¦   ¦   JoinMovementSection.tsx
 ¦   ¦   ¦   NationalTargetsSection.tsx
+¦   ¦   ¦   NewsCard.tsx
 ¦   ¦   ¦   PathwaySection.tsx
+¦   ¦   ¦   PerformanceMonitor.tsx
 ¦   ¦   ¦   PillarGrid.tsx
 ¦   ¦   ¦   PillarsSection.tsx
 ¦   ¦   ¦   PreviewButton.tsx
 ¦   ¦   ¦   ProtectedAdminRoute.tsx
 ¦   ¦   ¦   ProtectedRoute.tsx
+¦   ¦   ¦   PublicationCard.tsx
 ¦   ¦   ¦   ReferralFeeTracker.tsx
+¦   ¦   ¦   ScreeningEligibilityWizard.tsx
+¦   ¦   ¦   ScreeningUrgencyWidget.tsx
 ¦   ¦   ¦   ScrollToTop.tsx
+¦   ¦   ¦   SEOMonitoringDashboard.tsx
+¦   ¦   ¦   SEOPageList.tsx
 ¦   ¦   ¦   SG60GiftSection.tsx
 ¦   ¦   ¦   ShareYourStoryForm.tsx
 ¦   ¦   ¦   StatsSection.tsx
@@ -176,18 +288,33 @@ C:.
 ¦   ¦   ¦       ArticleLayout.tsx
 ¦   ¦   ¦       ContentSearch.tsx
 ¦   ¦   ¦       FeaturedContent.tsx
+¦   ¦   ¦       RegionalEducationTemplate.tsx
 ¦   ¦   ¦       RelatedArticles.tsx
 ¦   ¦   ¦       
 ¦   ¦   +---emails
 ¦   ¦   ¦       ChampionConfirmationEmail.tsx
+¦   ¦   ¦       
+¦   ¦   +---news
+¦   ¦   ¦       NewsCard.tsx
+¦   ¦   ¦       
+¦   ¦   +---seo
+¦   ¦   ¦       SchemaMarkup.tsx
+¦   ¦   ¦       
+¦   ¦   +---stories
+¦   ¦   ¦       SuccessStoryHub.tsx
+¦   ¦   ¦       
+¦   ¦   +---testimonials
+¦   ¦   ¦       TestimonialCarousel.tsx
 ¦   ¦   ¦       
 ¦   ¦   +---ui
 ¦   ¦           Button.tsx
 ¦   ¦           Card.tsx
 ¦   ¦           Container.tsx
 ¦   ¦           InputField.tsx
+¦   ¦           OptimizedImage.tsx
 ¦   ¦           
 ¦   +---config
+¦   ¦       seoConfig.ts
 ¦   ¦       supabase.ts
 ¦   ¦       
 ¦   +---contexts
@@ -226,6 +353,7 @@ C:.
 ¦   ¦   ¦   ClinicianThankYouPage.tsx
 ¦   ¦   ¦   ClinicProfilePage.tsx
 ¦   ¦   ¦   ComingSoonPage.tsx
+¦   ¦   ¦   contact.tsx
 ¦   ¦   ¦   CookiePolicyPage.tsx
 ¦   ¦   ¦   CorporateDashboard.tsx
 ¦   ¦   ¦   CRCQuiz.tsx
@@ -239,9 +367,12 @@ C:.
 ¦   ¦   ¦   GPClinicProfileSettings.tsx
 ¦   ¦   ¦   Header.tsx
 ¦   ¦   ¦   HomePage.tsx
+¦   ¦   ¦   HowItWorksPage.tsx
 ¦   ¦   ¦   JoinMovementPage.tsx
 ¦   ¦   ¦   JoinMovementSection.tsx
+¦   ¦   ¦   LiveCRCNews.tsx
 ¦   ¦   ¦   LoginRedirectPage.tsx
+¦   ¦   ¦   NewsFeedPage.tsx
 ¦   ¦   ¦   PatientDashboard.tsx
 ¦   ¦   ¦   PatientEducationPage.tsx
 ¦   ¦   ¦   PillarsPage.tsx
@@ -253,15 +384,19 @@ C:.
 ¦   ¦   ¦   SpecialistProfileSettings.tsx
 ¦   ¦   ¦   stories.tsx
 ¦   ¦   ¦   StrategyPage.tsx
+¦   ¦   ¦   SupportPage.tsx
 ¦   ¦   ¦   TermsOfUsePage.tsx
+¦   ¦   ¦   UpcomingClinicsPage.tsx
 ¦   ¦   ¦   UpcomingEventsPage.tsx
 ¦   ¦   ¦   Vision2035Page.tsx
 ¦   ¦   ¦   
 ¦   ¦   +---about
 ¦   ¦   ¦       AdvisorsPage.tsx
+¦   ¦   ¦       NewsLiveFeedPage.tsx
 ¦   ¦   ¦       
 ¦   ¦   +---admin
 ¦   ¦   ¦       AdminLogin.tsx
+¦   ¦   ¦       NewsFeedAdminPage.tsx
 ¦   ¦   ¦       SuperAdminDashboard.tsx
 ¦   ¦   ¦       
 ¦   ¦   +---auth
@@ -274,12 +409,18 @@ C:.
 ¦   ¦   ¦       ComponentPreview.tsx
 ¦   ¦   ¦       DevPreview.tsx
 ¦   ¦   ¦       DynamicPagePreview.tsx
+¦   ¦   ¦       SchemaTestPage.tsx
 ¦   ¦   ¦       
 ¦   ¦   +---education
+¦   ¦   ¦   ¦   au.tsx
 ¦   ¦   ¦   ¦   FAQsPage.tsx
+¦   ¦   ¦   ¦   in.tsx
 ¦   ¦   ¦   ¦   index.tsx
+¦   ¦   ¦   ¦   jp.tsx
 ¦   ¦   ¦   ¦   NewsroomPage.tsx
+¦   ¦   ¦   ¦   ph.tsx
 ¦   ¦   ¦   ¦   ResourcesPage.tsx
+¦   ¦   ¦   ¦   sg.tsx
 ¦   ¦   ¦   ¦   
 ¦   ¦   ¦   +---article
 ¦   ¦   ¦   ¦       [slug].tsx
@@ -310,32 +451,47 @@ C:.
 ¦   ¦   ¦   ¦           index.tsx
 ¦   ¦   ¦   ¦           
 ¦   ¦   ¦   +---patients
-¦   ¦   ¦       ¦   colonoscopy-gold-standard.tsx
-¦   ¦   ¦       ¦   colorectal-cancer.tsx
-¦   ¦   ¦       ¦   CRC-Singapore Story.tsx
-¦   ¦   ¦       ¦   early-symptoms-of-crc.tsx
-¦   ¦   ¦       ¦   how-crc-develops-from-polyps.tsx
-¦   ¦   ¦       ¦   index.tsx
-¦   ¦   ¦       ¦   
-¦   ¦   ¦       +---basics
-¦   ¦   ¦       ¦       how-crc-develops-from-polyps.tsx
-¦   ¦   ¦       ¦       index.tsx
-¦   ¦   ¦       ¦       understanding-colorectal-cancer.tsx
-¦   ¦   ¦       ¦       
-¦   ¦   ¦       +---prevention
-¦   ¦   ¦       ¦       index.tsx
-¦   ¦   ¦       ¦       
-¦   ¦   ¦       +---screening
-¦   ¦   ¦       ¦       colonoscopy-gold-standard.tsx
-¦   ¦   ¦       ¦       colonoscopy-preparation-complete-guide.tsx
-¦   ¦   ¦       ¦       index.tsx
-¦   ¦   ¦       ¦       
-¦   ¦   ¦       +---symptoms
-¦   ¦   ¦               early-warning-signs.tsx
-¦   ¦   ¦               index.tsx
-¦   ¦   ¦               
+¦   ¦   ¦   ¦   ¦   colonoscopy-gold-standard.tsx
+¦   ¦   ¦   ¦   ¦   colorectal-cancer.tsx
+¦   ¦   ¦   ¦   ¦   CRC-Singapore Story.tsx
+¦   ¦   ¦   ¦   ¦   early-symptoms-of-crc.tsx
+¦   ¦   ¦   ¦   ¦   how-crc-develops-from-polyps.tsx
+¦   ¦   ¦   ¦   ¦   index.tsx
+¦   ¦   ¦   ¦   ¦   
+¦   ¦   ¦   ¦   +---basics
+¦   ¦   ¦   ¦   ¦       how-crc-develops-from-polyps.tsx
+¦   ¦   ¦   ¦   ¦       index.tsx
+¦   ¦   ¦   ¦   ¦       understanding-colorectal-cancer.tsx
+¦   ¦   ¦   ¦   ¦       
+¦   ¦   ¦   ¦   +---prevention
+¦   ¦   ¦   ¦   ¦       index.tsx
+¦   ¦   ¦   ¦   ¦       
+¦   ¦   ¦   ¦   +---screening
+¦   ¦   ¦   ¦   ¦       colonoscopy-gold-standard.tsx
+¦   ¦   ¦   ¦   ¦       colonoscopy-preparation-complete-guide.tsx
+¦   ¦   ¦   ¦   ¦       index.tsx
+¦   ¦   ¦   ¦   ¦       
+¦   ¦   ¦   ¦   +---symptoms
+¦   ¦   ¦   ¦           early-warning-signs.tsx
+¦   ¦   ¦   ¦           index.tsx
+¦   ¦   ¦   ¦           
+¦   ¦   ¦   +---regional
+¦   ¦   ¦           AustraliaEducationPage.tsx
+¦   ¦   ¦           index.tsx
+¦   ¦   ¦           IndiaEducationPage.tsx
+¦   ¦   ¦           JapanEducationPage.tsx
+¦   ¦   ¦           PhilippinesEducationPage.tsx
+¦   ¦   ¦           SingaporeEducationPage.tsx
+¦   ¦   ¦           
+¦   ¦   +---get-screened
+¦   ¦   ¦       index.tsx
+¦   ¦   ¦       triage.tsx
+¦   ¦   ¦       
 ¦   ¦   +---movement
 ¦   ¦   ¦       CorporateCSRPage.tsx
+¦   ¦   ¦       
+¦   ¦   +---news
+¦   ¦   ¦       NewsLiveFeedPage.tsx
 ¦   ¦   ¦       
 ¦   ¦   +---pillars
 ¦   ¦   ¦       RIDCRCCSRPage.tsx
@@ -343,6 +499,41 @@ C:.
 ¦   ¦   ¦       RIDCRCGOVPage.tsx
 ¦   ¦   ¦       RIDCRCPUBPage.tsx
 ¦   ¦   ¦       RIDCRCSGPPage.tsx
+¦   ¦   ¦       
+¦   ¦   +---placeholder
+¦   ¦   ¦       AustraliaComingSoon.tsx
+¦   ¦   ¦       ClinicFinderComingSoon.tsx
+¦   ¦   ¦       CountryComingSoon.tsx
+¦   ¦   ¦       IndiaComingSoon.tsx
+¦   ¦   ¦       JapanComingSoon.tsx
+¦   ¦   ¦       PhilippinesComingSoon.tsx
+¦   ¦   ¦       SpecialistComingSoon.tsx
+¦   ¦   ¦       
+¦   ¦   +---seo
+¦   ¦   ¦       australia-bowel-cancer-screening.tsx
+¦   ¦   ¦       BloodTestColorectalCancerPage.tsx
+¦   ¦   ¦       BowelCancerScreeningPage.tsx
+¦   ¦   ¦       ColonCancerTestAustraliaPage.tsx
+¦   ¦   ¦       ColonCancerTestIndiaPage.tsx
+¦   ¦   ¦       ColonCancerTestPhilippinesPage.tsx
+¦   ¦   ¦       ColonCancerTestSingaporePage.tsx
+¦   ¦   ¦       ColonoscopyIndiaCostPage.tsx
+¦   ¦   ¦       colorectal-cancer-screening-india.tsx
+¦   ¦   ¦       colorectal-cancer-screening-japan.tsx
+¦   ¦   ¦       colorectal-cancer-screening-philippines.tsx
+¦   ¦   ¦       ColorectalCancerScreeningAustraliaPage.tsx
+¦   ¦   ¦       ColorectalCancerScreeningIndiaPage.tsx
+¦   ¦   ¦       ColorectalCancerScreeningSingaporePage.tsx
+¦   ¦   ¦       DaChangAiShaZhaPage.tsx
+¦   ¦   ¦       EarlyDetectionColonCancerPage.tsx
+¦   ¦   ¦       FITTestSingaporePage.tsx
+¦   ¦   ¦       FOBTTestAustraliaPage.tsx
+¦   ¦   ¦       index.tsx
+¦   ¦   ¦       india-colorectal-screening.tsx
+¦   ¦   ¦       japan-colorectal-screening.tsx
+¦   ¦   ¦       philippines-colorectal-screening.tsx
+¦   ¦   ¦       SEOLandingTemplate.tsx
+¦   ¦   ¦       singapore-colorectal-screening.tsx
 ¦   ¦   ¦       
 ¦   ¦   +---signup
 ¦   ¦   ¦       ChampionSignUp.tsx
@@ -352,8 +543,18 @@ C:.
 ¦   ¦   ¦       SpecialistSignupSuccess.tsx
 ¦   ¦   ¦       
 ¦   ¦   +---sponsor-sign-up
-¦   ¦           CorporateSignUp.tsx
+¦   ¦   ¦       CorporateSignUp.tsx
+¦   ¦   ¦       
+¦   ¦   +---triage
+¦   ¦           index.tsx
 ¦   ¦           
+¦   +---scripts
+¦   ¦       dailyNewsFetch.ts
+¦   ¦       
+¦   +---services
+¦   ¦       clinicSchemaService.ts
+¦   ¦       newsFeed.ts
+¦   ¦       
 ¦   +---store
 ¦   ¦       championStore.ts
 ¦   ¦       
@@ -362,16 +563,25 @@ C:.
 ¦   ¦       
 ¦   +---types
 ¦   ¦       index.ts
+¦   ¦       news.ts
 ¦   ¦       
 ¦   +---utils
 ¦       ¦   adminPermissions.ts
 ¦       ¦   auth.ts
+¦       ¦   clinicSchemaGenerator.ts
 ¦       ¦   fuzzyMatch.ts
 ¦       ¦   getChatbotResponse.ts
+¦       ¦   hreflangGenerator.ts
 ¦       ¦   linkParser.tsx
+¦       ¦   medicalSchemaGenerator.ts
+¦       ¦   performanceOptimizer.ts
+¦       ¦   schemaGenerator.ts
+¦       ¦   schemaValidator.ts
+¦       ¦   seoMonitoringAgents.ts
 ¦       ¦   smartDisplayClinic.ts
 ¦       ¦   supabaseClient.ts
 ¦       ¦   toast.ts
+¦       ¦   translations.ts
 ¦       ¦   
 ¦       +---knowledge
 ¦               general.ts
@@ -380,11 +590,28 @@ C:.
 ¦               symptoms.ts
 ¦               
 +---supabase
+    ¦   config.toml
+    ¦   
+    +---.temp
+    ¦       cli-latest
+    ¦       gotrue-version
+    ¦       pooler-url
+    ¦       postgres-version
+    ¦       project-ref
+    ¦       rest-version
+    ¦       
     +---functions
     ¦   +---chatbot
     ¦   ¦       index.ts
     ¦   ¦       
+    ¦   +---fetch_rss
+    ¦   ¦       index.ts
+    ¦   ¦       
+    ¦   +---send-contact-email
+    ¦   ¦       index.ts
+    ¦   ¦       
     ¦   +---send-referral-email
+    ¦           .env
     ¦           index.ts
     ¦           
     +---migrations
@@ -409,4 +636,6 @@ C:.
             20250705114815_throbbing_darkness.sql
             20250705142251_frosty_spire.sql
             20250706_auth_fix.sql
+            20250804_create_crc_news_feed.sql
+            20250804_create_crc_news_skipped.sql
             

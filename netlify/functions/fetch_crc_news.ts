@@ -1,9 +1,13 @@
-import type { Handler } from "@netlify/functions";
+// @ts-nocheck
+
 import crypto from "crypto";
+// rss-parser doesn't ship perfect types; we ignore them for the function bundle.
 // @ts-ignore
 import Parser from "rss-parser";
 
-const parser: any = new (Parser as any)({ headers: { "User-Agent": "COLONAiVE/NewsFetcher" } });
+const parser: any = new (Parser as any)({
+  headers: { "User-Agent": "COLONAiVE/NewsFetcher" },
+});
 
 // Feeds (we'll limit when in "fast" mode)
 const FEEDS: { url: string; category: "Clinical Research" | "Screening & Policy" | "Awareness & Campaigns" }[] = [
@@ -17,12 +21,24 @@ const FEEDS: { url: string; category: "Clinical Research" | "Screening & Policy"
   { url: "https://www.cancer.org/feeds/newsroom.rss", category: "Awareness & Campaigns" },
 ];
 
-const CRC_KEYWORDS = ["colorectal","colon cancer","rectal cancer","crc","adenoma","advanced adenoma","polyp","polyps","colonoscopy","screening","sigmoidoscopy","fecal","stool test","ct colonography","blood-based","liquid biopsy","dna methylation","fit","fobt","mt-sdna"];
-const TRUSTED_DOMAINS = ["nejm.org","jamanetwork.com","thelancet.com","lancet.com","gut.bmj.com","bmj.com","ascopost.com","nccn.org","uspreventiveservicestaskforce.org","cancer.org","nature.com","annals.org","sciencedirect.com","cell.com"];
+const CRC_KEYWORDS = [
+  "colorectal","colon cancer","rectal cancer","crc","adenoma","advanced adenoma","polyp","polyps",
+  "colonoscopy","screening","sigmoidoscopy","fecal","stool test","ct colonography","blood-based",
+  "liquid biopsy","dna methylation","fit","fobt","mt-sdna"
+];
 
-const sha = (s:string)=>crypto.createHash("sha256").update(s).digest("hex");
-const domainOf = (u:string)=>{ try { return new URL(u).hostname.replace(/^www\./,""); } catch { return ""; } };
-const isCRC = (t?:string)=> (t||"").toLowerCase() && CRC_KEYWORDS.some(k => (t||"").toLowerCase().includes(k));
+const TRUSTED_DOMAINS = [
+  "nejm.org","jamanetwork.com","thelancet.com","lancet.com","gut.bmj.com","bmj.com","ascopost.com",
+  "nccn.org","uspreventiveservicestaskforce.org","cancer.org","nature.com","annals.org",
+  "sciencedirect.com","cell.com"
+];
+
+const sha = (s: string) => crypto.createHash("sha256").update(s).digest("hex");
+const domainOf = (u: string) => { try { return new URL(u).hostname.replace(/^www\./, ""); } catch { return ""; } };
+const isCRC = (t?: string) => {
+  const L = (t || "").toLowerCase();
+  return L && CRC_KEYWORDS.some(k => L.includes(k));
+};
 
 async function upsert(items: any[]) {
   if (!items.length) return;
@@ -30,39 +46,42 @@ async function upsert(items: any[]) {
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY!;
   const res = await fetch(`${url}/rest/v1/crc_news`, {
     method: "POST",
-    headers: { apikey: key, Authorization: `Bearer ${key}`, "Content-Type":"application/json", Prefer:"resolution=merge-duplicates" },
+    headers: {
+      apikey: key,
+      Authorization: `Bearer ${key}`,
+      "Content-Type": "application/json",
+      Prefer: "resolution=merge-duplicates",
+    },
     body: JSON.stringify(items),
   });
   if (!res.ok) throw new Error(`Supabase upsert failed: ${res.status} ${await res.text()}`);
 }
 
-async function aiSummary(title:string, text:string, useAI:boolean) {
+async function aiSummary(title: string, text: string, useAI: boolean) {
   if (!useAI || !process.env.OPENAI_API_KEY) {
-    const snippet = (text||"").split(/[\.\n]/).slice(0,3).join(". ").trim();
+    const snippet = (text || "").split(/[\.\n]/).slice(0, 3).join(". ").trim();
     return snippet || "Summary unavailable. Open the original article for details.";
   }
-  const r = await fetch("https://api.openai.com/v1/chat/completions",{
-    method:"POST",
-    headers:{Authorization:`Bearer ${process.env.OPENAI_API_KEY}`, "Content-Type":"application/json"},
-    body:JSON.stringify({
-      model:"gpt-4o-mini",
-      temperature:0.2,
-      messages:[
-        {role:"system",content:"Medical editor. Write a neutral 2–3 sentence summary for clinicians about colorectal cancer research or screening policy."},
-        {role:"user",content:`Title: ${title}\nText:\n${text}\n\nWrite the summary.`}
-      ]
-    })
+  const r = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${process.env.OPENAI_API_KEY}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "gpt-4o-mini",
+      temperature: 0.2,
+      messages: [
+        { role: "system", content: "Medical editor. Write a neutral 2–3 sentence summary for clinicians about colorectal cancer research or screening policy." },
+        { role: "user", content: `Title: ${title}\nText:\n${text}\n\nWrite the summary.` },
+      ],
+    }),
   });
   const j = await r.json();
   return j.choices?.[0]?.message?.content?.trim() || "Summary unavailable.";
 }
 
-export const handler: Handler = async (event) => {
+export async function handler(event: any) {
   const started = Date.now();
   const FAST = event.queryStringParameters?.fast === "1";
   const useAI = !FAST; // fast mode skips AI
-
-  // In fast mode, use fewer feeds and cap items
   const feeds = FAST ? FEEDS.slice(0, 4) : FEEDS;
 
   const collected: any[] = [];
@@ -70,7 +89,7 @@ export const handler: Handler = async (event) => {
   for (const f of feeds) {
     if (Date.now() - started > 23000) break; // safety to avoid 30s timeout
 
-    let out:any;
+    let out: any;
     try { out = await parser.parseURL(f.url); } catch { continue; }
     const sourceTitle = out.title || "";
 
@@ -78,6 +97,7 @@ export const handler: Handler = async (event) => {
       const title = it.title || "";
       const link = it.link || it.guid || "";
       if (!title || !link) continue;
+
       const dom = domainOf(link);
       if (!TRUSTED_DOMAINS.includes(dom)) continue;
 
@@ -105,6 +125,11 @@ export const handler: Handler = async (event) => {
     }
   }
 
-  try { await upsert(collected); } catch (e:any) { return { statusCode: 500, body: e.message || "upsert error" }; }
+  try {
+    await upsert(collected);
+  } catch (e: any) {
+    return { statusCode: 500, body: e.message || "upsert error" };
+  }
+
   return { statusCode: 200, body: JSON.stringify({ inserted_or_merged: collected.length, fast: FAST }) };
-};
+}

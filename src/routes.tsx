@@ -1,15 +1,19 @@
-import { AdminLogin } from './pages/admin/AdminLogin';
-import { ProtectedAdminRoute } from './components/ProtectedAdminRoute';
-import SuperAdminDashboard from './pages/admin/SuperAdminDashboard';
-import NewsLiveFeedPage from './pages/news/NewsLiveFeedPage';
-import NewsFeedAdminPage from './pages/admin/NewsFeedAdminPage';
-
+// src/routes.tsx
 import { Routes, Route, Navigate } from 'react-router-dom';
+
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { ScrollToTop } from './components/ScrollToTop';
 import { ProtectedRoute, PublicRoute } from './components/ProtectedRoute';
-import ReferFriendForm from './pages/ReferFriendForm';
+import { ProtectedAdminRoute } from './components/ProtectedAdminRoute';
+
+// Admin
+import { AdminLogin } from './pages/admin/AdminLogin';
+import SuperAdminDashboard from './pages/admin/SuperAdminDashboard';
+import NewsFeedAdminPage from './pages/admin/NewsFeedAdminPage';
+
+// ✅ Verified CRC News (two‑column, AI summaries)
+import LiveCRCNews from './pages/LiveCRCNews';
 
 // Pages
 import ChampionProfileSettings from './pages/ChampionProfileSettings';
@@ -25,20 +29,20 @@ import ShareYourStoryPage from './pages/share-your-story';
 import StoriesPage from './pages/stories';
 import HowItWorksPage from './pages/HowItWorksPage';
 
-// Registration Pages
+// Registration
 import GPClinicSignUp from './pages/signup/GPClinicSignUp';
 import SpecialistSignUp from './pages/signup/SpecialistSignUp';
 import CorporateSignUp from './pages/signup/CorporateSignUp';
 import ChampionSignUp from './pages/signup/ChampionSignUp';
 
-// Auth Pages
+// Auth
 import ChampionSignIn from './pages/auth/ChampionSignIn';
 import LoginForm from './components/auth/LoginForm';
 import ForgotPassword from './pages/auth/ForgotPassword';
 import ResetPassword from './pages/auth/ResetPassword';
 import LoginRedirectPage from './pages/LoginRedirectPage';
 
-// Education Pages
+// Education
 import EducationHub from './pages/education';
 import ArticlePage from './pages/education/article/[slug]';
 import PatientEducationHub from './pages/education/patients';
@@ -51,15 +55,14 @@ import ClinicianGuidelinesHub from './pages/education/clinicians/guidelines';
 import ClinicianResearchHub from './pages/education/clinicians/research';
 import ClinicianCaseStudiesHub from './pages/education/clinicians/case-studies';
 import ClinicianCMEHub from './pages/education/clinicians/cme-resources';
+
+// ✅ Newsroom (keep the foldered hub + subpages)
 import NewsroomHub from './pages/education/newsroom';
 import PressReleasesPage from './pages/education/newsroom/press-releases';
 import ResearchUpdatesPage from './pages/education/newsroom/research-updates';
-import FAQsPage from './pages/education/FAQsPage';
-import NewsroomPage from './pages/education/NewsroomPage';
-import ResourcesPage from './pages/education/ResourcesPage';
 
-// NEW public News page (approved items only)
-import NewsFeedPage from './pages/NewsFeedPage';
+import FAQsPage from './pages/education/FAQsPage';
+import ResourcesPage from './pages/education/ResourcesPage';
 
 // Individual Article Pages
 import UnderstandingColorectalCancer from './pages/education/patients/basics/understanding-colorectal-cancer';
@@ -68,7 +71,7 @@ import ColonoscopyPreparationGuide from './pages/education/patients/screening/co
 import EarlyWarningSigns from './pages/education/patients/symptoms/early-warning-signs';
 import ColonoscopyGoldStandard from './pages/education/patients/screening/colonoscopy-gold-standard';
 
-// Other Pages
+// Other
 import Vision2035Page from './pages/Vision2035Page';
 import CSRShowcasePage from './pages/CSRShowcasePage';
 import UpcomingEventsPage from './pages/UpcomingEventsPage';
@@ -104,13 +107,11 @@ import {
   SingaporeColorectalScreening,
   AustraliaBowelCancerScreening
 } from './pages/seo';
-
-// Import the new SEO pages
 import ColorectalCancerScreeningIndia from './pages/seo/colorectal-cancer-screening-india';
 import ColorectalCancerScreeningPhilippines from './pages/seo/colorectal-cancer-screening-philippines';
 import ColorectalCancerScreeningJapan from './pages/seo/colorectal-cancer-screening-japan';
 
-// Import placeholder pages
+// Placeholders
 import IndiaComingSoon from './pages/placeholder/IndiaComingSoon';
 import PhilippinesComingSoon from './pages/placeholder/PhilippinesComingSoon';
 import JapanComingSoon from './pages/placeholder/JapanComingSoon';
@@ -131,7 +132,7 @@ const MainRoutes = () => {
       <main className="flex-grow">
         <ScrollToTop />
         <Routes>
-          {/* Public Routes */}
+          {/* Public */}
           <Route path="/" element={<HomePage />} />
           <Route path="/about-us" element={<AboutUsPage />} />
           <Route path="/about" element={<AboutUsPage />} />
@@ -144,46 +145,46 @@ const MainRoutes = () => {
           <Route path="/join-movement" element={<JoinMovementPage />} />
           <Route path="/stories" element={<StoriesPage />} />
           <Route path="/how-it-works" element={<HowItWorksPage />} />
-          {/* NEW: Public news feed (approved items only) */}
-          <Route path="/news-live" element={<NewsLiveFeedPage />} />
-          <Route path="/news" element={<NewsFeedPage />} />
 
-          {/* Education routes */}
+          {/* ✅ CRC news */}
+          <Route path="/live-crc-news" element={<LiveCRCNews />} />
+          <Route path="/news" element={<Navigate to="/live-crc-news" replace />} />
+
+          {/* Education */}
           <Route path="/education" element={<EducationHub />} />
           <Route path="/education/article/:slug" element={<ArticlePage />} />
 
-          {/* Patient education routes */}
+          {/* Patient education */}
           <Route path="/education/patients" element={<PatientEducationHub />} />
           <Route path="/education/patients/basics" element={<PatientBasicsHub />} />
           <Route path="/education/patients/screening" element={<PatientScreeningHub />} />
           <Route path="/education/patients/symptoms" element={<PatientSymptomsHub />} />
           <Route path="/education/patients/prevention" element={<PatientPreventionHub />} />
 
-          {/* Individual Article Routes */}
+          {/* Individual articles */}
           <Route path="/education/article/understanding-colorectal-cancer" element={<UnderstandingColorectalCancer />} />
           <Route path="/education/article/how-crc-develops-from-polyps" element={<HowCrcDevelopsFromPolyps />} />
           <Route path="/education/article/colonoscopy-preparation-complete-guide" element={<ColonoscopyPreparationGuide />} />
           <Route path="/education/article/early-warning-signs" element={<EarlyWarningSigns />} />
           <Route path="/education/article/colonoscopy-gold-standard" element={<ColonoscopyGoldStandard />} />
 
-          {/* Clinician education routes */}
+          {/* Clinician education */}
           <Route path="/education/clinicians" element={<ClinicianEducationHub />} />
           <Route path="/education/clinicians/guidelines" element={<ClinicianGuidelinesHub />} />
           <Route path="/education/clinicians/research" element={<ClinicianResearchHub />} />
           <Route path="/education/clinicians/case-studies" element={<ClinicianCaseStudiesHub />} />
           <Route path="/education/clinicians/cme-resources" element={<ClinicianCMEHub />} />
 
-          {/* Newsroom (keep hub pages only) */}
+          {/* ✅ Newsroom hub + subpages */}
           <Route path="/education/newsroom" element={<NewsroomHub />} />
           <Route path="/education/newsroom/press-releases" element={<PressReleasesPage />} />
           <Route path="/education/newsroom/research-updates" element={<ResearchUpdatesPage />} />
 
-          {/* Redirect the two legacy CRC-news URLs to the new feed */}
-          <Route path="/newsroom/crc-news" element={<Navigate to="/news" replace />} />
-          <Route path="/newsroom/crc-news-feed" element={<Navigate to="/news" replace />} />
+          {/* Legacy CRC-news URLs → new feed */}
+          <Route path="/newsroom/crc-news" element={<Navigate to="/live-crc-news" replace />} />
+          <Route path="/newsroom/crc-news-feed" element={<Navigate to="/live-crc-news" replace />} />
 
           <Route path="/education/faqs" element={<FAQsPage />} />
-          <Route path="/education/newsroom" element={<NewsroomPage />} />
           <Route path="/education/resources" element={<ResourcesPage />} />
           <Route path="/upcoming-events" element={<UpcomingEventsPage />} />
           <Route path="/find-a-gp" element={<FindGPPage />} />
@@ -194,7 +195,7 @@ const MainRoutes = () => {
           <Route path="/support" element={<SupportPage />} />
           <Route path="/upcoming-clinics" element={<UpcomingClinicsPage />} />
 
-          {/* Missing Route Redirects */}
+          {/* Convenience redirects */}
           <Route path="/clinics" element={<Navigate to="/find-a-gp" replace />} />
           <Route path="/choose-screening" element={<Navigate to="/get-screened" replace />} />
           <Route path="/terms" element={<Navigate to="/terms-of-use" replace />} />
@@ -207,7 +208,7 @@ const MainRoutes = () => {
           <Route path="/pillars/rid-crc-edu" element={<RIDCRCEDUPage />} />
           <Route path="/clinical-trials" element={<ClinicalTrialsPage />} />
 
-          {/* Auth & Registration */}
+          {/* Auth & registration */}
           <Route path="/signup/champion" element={<ChampionSignUp />} />
           <Route path="/register/clinic" element={<GPClinicSignUp />} />
           <Route path="/register/specialist" element={<SpecialistSignUp />} />
@@ -219,27 +220,13 @@ const MainRoutes = () => {
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/champion-signup-success" element={<ChampionThankYouPage />} />
 
-          {/* Admin Routes */}
+          {/* Admin */}
           <Route path="/admin/login" element={<PublicRoute><AdminLogin /></PublicRoute>} />
-          <Route
-            path="/admin/dashboard"
-            element={
-              <ProtectedAdminRoute>
-                <SuperAdminDashboard />
-              </ProtectedAdminRoute>
-            }
-          />
-          <Route
-            path="/admin/news"
-            element={
-              <ProtectedAdminRoute>
-                <NewsFeedAdminPage />
-              </ProtectedAdminRoute>
-            }
-          />
+          <Route path="/admin/dashboard" element={<ProtectedAdminRoute><SuperAdminDashboard /></ProtectedAdminRoute>} />
+          <Route path="/admin/news" element={<ProtectedAdminRoute><NewsFeedAdminPage /></ProtectedAdminRoute>} />
 
-          {/* Protected Routes */}
-          <Route path="/refer-friend" element={<ProtectedRoute><ReferFriendForm /></ProtectedRoute>} />
+          {/* Protected */}
+          <Route path="/refer-friend" element={<ProtectedRoute><ShareYourStoryPage /></ProtectedRoute>} />
           <Route path="/share-your-story" element={<ProtectedRoute><ShareYourStoryPage /></ProtectedRoute>} />
           <Route path="/quiz" element={<ProtectedRoute><CRCQuiz /></ProtectedRoute>} />
           <Route path="/dashboard/champion" element={<ProtectedRoute><ChampionDashboard /></ProtectedRoute>} />
@@ -247,45 +234,35 @@ const MainRoutes = () => {
           <Route path="/dashboard/corporate" element={<ProtectedRoute><CorporateDashboard /></ProtectedRoute>} />
           <Route path="/dashboard/gp-clinic" element={<ProtectedRoute><GPClinicDashboard /></ProtectedRoute>} />
 
-          {/* Profile Pages */}
+          {/* Profiles */}
           <Route path="/profile/champion" element={<ProtectedRoute><ChampionProfileSettings /></ProtectedRoute>} />
           <Route path="/profile/specialist" element={<ProtectedRoute><SpecialistProfileSettings /></ProtectedRoute>} />
           <Route path="/profile/gp-clinic" element={<ProtectedRoute><GPClinicProfileSettings /></ProtectedRoute>} />
 
-          {/* Legal Pages */}
+          {/* Legal */}
           <Route path="/cookie-policy" element={<CookiePolicyPage />} />
           <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
           <Route path="/terms-of-use" element={<TermsOfUsePage />} />
 
-          {/* Dev Preview */}
+          {/* Dev */}
           <Route path="/dev-preview" element={<DevPreview />} />
           <Route path="/component-preview" element={<ComponentPreview />} />
           <Route path="/dynamic-page-preview" element={<DynamicPagePreview />} />
           <Route path="/schema-test" element={<SchemaTestPage />} />
 
-          {/* SEO Landing Pages */}
+          {/* SEO */}
           <Route path="/seo/singapore-colorectal-screening" element={<SingaporeColorectalScreening />} />
           <Route path="/seo/australia-bowel-cancer-screening" element={<AustraliaBowelCancerScreening />} />
           <Route path="/seo/colorectal-cancer-screening-india" element={<ColorectalCancerScreeningIndia />} />
           <Route path="/seo/colorectal-cancer-screening-philippines" element={<ColorectalCancerScreeningPhilippines />} />
           <Route path="/seo/colorectal-cancer-screening-japan" element={<ColorectalCancerScreeningJapan />} />
-
-          {/* Legacy SEO Routes */}
           <Route path="/seo/colorectal-cancer-screening-singapore" element={<ColorectalCancerScreeningSingaporePage />} />
           <Route path="/seo/colon-cancer-test-singapore" element={<ColonCancerTestSingaporePage />} />
           <Route path="/seo/blood-test-colorectal-cancer" element={<BloodTestColorectalCancerPage />} />
           <Route path="/seo/colorectal-cancer-screening-australia" element={<ColorectalCancerScreeningAustraliaPage />} />
           <Route path="/seo/da-chang-ai-sha-zha" element={<DaChangAiShaZhaPage />} />
 
-          {/* Placeholder Pages for International Markets */}
-          <Route path="/find-clinic" element={<ClinicFinderComingSoon />} />
-          <Route path="/specialists" element={<SpecialistComingSoon />} />
-          <Route path="/coming-soon/india" element={<IndiaComingSoon />} />
-          <Route path="/coming-soon/philippines" element={<PhilippinesComingSoon />} />
-          <Route path="/coming-soon/japan" element={<JapanComingSoon />} />
-          <Route path="/coming-soon/australia" element={<AustraliaComingSoon />} />
-
-          {/* Country-specific redirects */}
+          {/* Intl quick links */}
           <Route path="/education/in" element={<IndiaComingSoon />} />
           <Route path="/education/ph" element={<PhilippinesComingSoon />} />
           <Route path="/education/jp" element={<JapanComingSoon />} />
