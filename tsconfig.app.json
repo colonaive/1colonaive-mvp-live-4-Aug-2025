@@ -18,13 +18,13 @@
       "@/*": ["src/*"]
     },
 
-    "types": ["vite/client"],
-
+    
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
   "include": ["src"],
-  "exclude": ["node_modules", "dist", "supabase"]
+  "exclude": ["node_modules", "dist", "supabase", "netlify"]
+
 }
