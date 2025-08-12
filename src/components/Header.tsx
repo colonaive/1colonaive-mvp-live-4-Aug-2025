@@ -1,9 +1,8 @@
 // /src/components/Header.tsx
-import React, { useState, useRef } from "react";
+import React, { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Menu, X, ChevronDown, Search } from "lucide-react";
 import { Container } from "./ui/Container";
-import { Button } from "./ui/Button";
 import { useAuth } from "../contexts/AuthContext";
 import ColonaiveLogo from "./ColonaiveLogo";
 import { getDashboardRoute } from "./ProtectedRoute";
@@ -58,8 +57,8 @@ const aboutLinks: NavLink[] = [
   { label: "Contact Us", path: "/contact" },
 ];
 
-export const getJoinLinks = (isAuthenticated: boolean): NavLink[] => {
-  return isAuthenticated
+export const getJoinLinks = (isAuthenticated: boolean): NavLink[] =>
+  isAuthenticated
     ? [
         { label: "Share Your Story", path: "/share-your-story" },
         { label: "Read Real Stories", path: "/stories" },
@@ -72,7 +71,6 @@ export const getJoinLinks = (isAuthenticated: boolean): NavLink[] => {
         { label: "Sponsor/CSR Sign-Up", path: "/register/corporate" },
         { label: "Read Real Stories", path: "/stories" },
       ];
-};
 
 /** ---------- Component ---------- */
 export const Header = () => {
@@ -109,9 +107,7 @@ export const Header = () => {
   };
 
   const handleMenuLeave = () => {
-    menuLeaveTimeout.current = setTimeout(() => {
-      setActiveSubmenu(null);
-    }, 200);
+    menuLeaveTimeout.current = setTimeout(() => setActiveSubmenu(null), 200);
   };
 
   const handleSignOut = async () => {
@@ -199,7 +195,7 @@ export const Header = () => {
             <button
               type="submit"
               aria-label="Search"
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/70 hover:text-white"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-white/70 hover:text-white"
             >
               <Search className="h-4 w-4" />
             </button>
@@ -215,13 +211,9 @@ export const Header = () => {
       const dashboardPath = getDashboardRoute(userType);
 
       let profileSettingsPath = "/profile/champion";
-      if (userType === "gpclinic") {
-        profileSettingsPath = "/profile/gp-clinic";
-      } else if (userType === "specialist") {
-        profileSettingsPath = "/profile/specialist";
-      } else if (userType === "corporate_contact") {
-        profileSettingsPath = "/dashboard/corporate";
-      }
+      if (userType === "gpclinic") profileSettingsPath = "/profile/gp-clinic";
+      else if (userType === "specialist") profileSettingsPath = "/profile/specialist";
+      else if (userType === "corporate_contact") profileSettingsPath = "/dashboard/corporate";
 
       return (
         <div
@@ -235,11 +227,7 @@ export const Header = () => {
             className="bg-[#006BA6] hover:bg-[#005C8D] text-white rounded-full px-4 py-2 text-sm shadow-md flex items-center space-x-2"
           >
             <span>{userName?.split(" ")[0] || "User"}</span>
-            <ChevronDown
-              className={`w-4 h-4 transition-transform ${
-                activeSubmenu === "userMenu" ? "rotate-180" : ""
-              }`}
-            />
+            <ChevronDown className={`w-4 h-4 transition-transform ${activeSubmenu === "userMenu" ? "rotate-180" : ""}`} />
           </button>
 
           {activeSubmenu === "userMenu" && (
@@ -276,19 +264,19 @@ export const Header = () => {
           )}
         </div>
       );
-    } else {
-      return (
-        <Link to="/login">
-          <Button
-            variant="primary"
-            size="sm"
-            className="bg-[#006BA6] hover:bg-[#005C8D] text-white rounded-full px-5 py-2 shadow-md"
-          >
-            Champion Sign In
-          </Button>
-        </Link>
-      );
     }
+
+    // Not authenticated
+    return (
+      <Link to="/login" onClick={handleClose}>
+        <button
+          type="button"
+          className="bg-[#006BA6] hover:bg-[#005C8D] text-white rounded-full px-5 py-2 text-sm shadow-md"
+        >
+          Champion Sign In
+        </button>
+      </Link>
+    );
   };
 
   const renderMobileMenu = () => {
@@ -296,12 +284,12 @@ export const Header = () => {
       { label: "Education", links: educationLinks, key: "edu" },
       { label: "Get Screened", links: screeningLinks, key: "screen" },
       { label: "Movement Pillars", links: pillarLinks, key: "pillars" },
-      { label: "Join the Movement", links: joinLinks, key: "join" },
+      { label: "Join the Movement", links: getJoinLinks(isAuthenticated), key: "join" },
       { label: "About Us", links: aboutLinks, key: "about" },
     ];
 
     return (
-      <div className="absolute top-full left-0 w-full bg-[#0B1E3B] lg:hidden">
+      <div className="absolute top-full left-0 w-full bg-[#0B1E3B] lg:hidden z-[60]">
         <nav className="flex flex-col space-y-2 p-4">
           {groups.map((item) => (
             <div key={item.key} className="text-white">
@@ -331,11 +319,7 @@ export const Header = () => {
                           </div>
                         )
                       ) : (
-                        <Link
-                          to={link.path}
-                          onClick={handleClose}
-                          className="block py-2 text-sm hover:text-teal-300"
-                        >
+                        <Link to={link.path} onClick={handleClose} className="block py-2 text-sm hover:text-teal-300">
                           {link.label}
                         </Link>
                       )}
@@ -345,12 +329,8 @@ export const Header = () => {
               )}
             </div>
           ))}
-          {/* FIXED: point to /news instead of old CRCNewsFeed page */}
-          <Link
-            to="/news"
-            onClick={handleClose}
-            className="text-white font-semibold py-2 flex items-center"
-          >
+
+          <Link to="/news" onClick={handleClose} className="text-white font-semibold py-2 flex items-center">
             📰 Live CRC News
             <span className="ml-2 w-2 h-2 rounded-full bg-red-500 animate-pulse inline-block" />
           </Link>
@@ -364,16 +344,16 @@ export const Header = () => {
 
   return (
     <>
-      <header ref={headerRef} className="sticky top-0 z-50 shadow-sm">
-        <div className="bg-[#004F8C] py-1">
+      {/* Top slim bar (country + auth) — sticky and above everything */}
+      <header ref={headerRef} className="sticky top-0 z-50 bg-[#004F8C] shadow-sm">
+        <div className="py-1">
           <Container className="flex justify-between items-center h-10">
-            {/* Country selector on the left */}
             <CountrySelector className="mr-auto" />
-            {/* Champion button on the right */}
             {renderChampionButton()}
           </Container>
         </div>
 
+        {/* Main nav bar */}
         <div className="bg-[#0B1E3B]">
           <Container className="flex justify-between items-center h-[72px]">
             <div className="flex-1 flex justify-start">
@@ -394,6 +374,7 @@ export const Header = () => {
               {renderDropdown("Education", educationLinks, "edu")}
               {renderDropdown("Get Screened", screeningLinks, "screen")}
               {renderDropdown("Movement Pillars", pillarLinks, "pillars")}
+
               <Link
                 to="/news"
                 className="relative text-white hover:text-teal-300 flex items-center text-sm font-semibold px-3 h-full"
@@ -409,8 +390,10 @@ export const Header = () => {
                   }`}
                 />
               </Link>
+
               {renderDropdown("Join the Movement", joinLinks, "join")}
               {renderDropdown("About Us", aboutLinks, "about")}
+
               <Link
                 to="/clinical-trials"
                 className="relative text-white text-sm font-semibold px-3 h-full flex items-center hover:text-teal-300"
@@ -426,12 +409,10 @@ export const Header = () => {
               </Link>
             </nav>
 
-            <div className="flex-1 flex justify-end">
-              <div className="lg:hidden">
-                <button className="p-2 text-white" onClick={() => setIsOpen(!isOpen)}>
-                  {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-                </button>
-              </div>
+            <div className="flex-1 flex justify-end lg:hidden">
+              <button className="p-2 text-white" onClick={() => setIsOpen(!isOpen)} aria-label="Toggle menu">
+                {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              </button>
             </div>
           </Container>
 
