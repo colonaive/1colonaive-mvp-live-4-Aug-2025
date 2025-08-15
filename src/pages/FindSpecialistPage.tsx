@@ -100,8 +100,8 @@ const FindSpecialistPage: React.FC = () => {
                 ← Back to Triage Assessment
               </Link>
             </div>
-            <h1 className="text-4xl font-bold mb-4">Find a Project Partner Clinic</h1>
-            <p className="text-xl mb-8">Discover our approved specialist partners who provide colonoscopy and advanced colorectal cancer screening.</p>
+            <h1 className="text-4xl font-bold mb-4">Find a COLONAiVE Project Partner Specialist</h1>
+            <p className="text-xl mb-8">For all your colonoscopy and advanced colorectal cancer screening and Early CRC Treatment needs.</p>
             <div className="relative max-w-2xl mx-auto">
               <input
                 type="text"
@@ -123,8 +123,7 @@ const FindSpecialistPage: React.FC = () => {
             <div className="bg-blue-100 rounded-lg p-6 mb-4">
               <h3 className="text-lg font-semibold text-blue-800 mb-2">🏆 Approved Project Partners</h3>
               <p className="text-blue-700">
-                The clinics listed below are carefully selected Project Partners who have been vetted and approved by our medical team. 
-                These specialists demonstrate excellence in colorectal cancer screening and are committed to our mission of early detection.
+                Our Project Partners committed to our mission of early detection and treatment of colorectal cancer.
               </p>
             </div>
           </div>
