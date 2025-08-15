@@ -101,7 +101,7 @@ const FindSpecialistPage: React.FC = () => {
               </Link>
             </div>
             <h1 className="text-4xl font-bold mb-4">Find a COLONAiVE Project Partner Specialist</h1>
-            <p className="text-xl mb-8">For all your colonoscopy and advanced colorectal cancer screening and Early CRC Treatment needs.</p>
+            <p className="text-xl mb-8">For Colonoscopy, Early Detection, Polyps Removal and Early CRC Treatment needs.</p>
             <div className="relative max-w-2xl mx-auto">
               <input
                 type="text"
@@ -121,9 +121,9 @@ const FindSpecialistPage: React.FC = () => {
         <Container>
           <div className="max-w-4xl mx-auto text-center">
             <div className="bg-blue-100 rounded-lg p-6 mb-4">
-              <h3 className="text-lg font-semibold text-blue-800 mb-2">🏆 Approved Project Partners</h3>
+              <h3 className="text-lg font-semibold text-blue-800 mb-2">🏆 COLONAiVE Project Partners</h3>
               <p className="text-blue-700">
-                Our Project Partners committed to our mission of early detection and treatment of colorectal cancer.
+                Our Project Partners committed to our national mission of early detection and treatment of colorectal cancer.
               </p>
             </div>
           </div>
