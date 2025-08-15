@@ -29,8 +29,8 @@ const educationLinks: NavLink[] = [
 const screeningLinks: NavLink[] = [
   { label: "Colonoscopy (Gold Standard)", path: "/education/article/colonoscopy-gold-standard" },
   { label: "Screening Blood Test", path: "/get-screened" },
-  { label: "Find a GP", path: "/find-a-gp" },
-  { label: "Find a Project Partner Clinic", path: "/find-a-specialist" },
+  { label: "Find a Screening Center", path: "/find-a-gp" },
+  { label: "Find a COLONAiVE Specialist", path: "/find-a-specialist" },
   { label: "—————————", path: "#", isHeader: true },
   { label: "🌏 Explore by Country", path: "/seo", isHeader: true },
   { label: "🇸🇬 Singapore", path: "/seo/singapore-colorectal-screening" },
