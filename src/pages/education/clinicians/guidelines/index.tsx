@@ -129,9 +129,9 @@ const ClinicianGuidelinesHub: React.FC = () => {
                 Register Your Clinic
               </button>
             </Link>
-            <Link to="/register/specialist">
+            <Link to="/find-a-specialist">
               <button className="px-6 py-3 bg-white text-purple-600 font-medium rounded-lg border border-purple-600 hover:bg-purple-50 transition-colors">
-                Join as a Specialist
+                Find Project Partner Clinics
               </button>
             </Link>
           </div>

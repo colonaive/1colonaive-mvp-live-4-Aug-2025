@@ -5,7 +5,7 @@ import { Button } from '../../components/ui/Button';
 import { 
   Users, Calendar, FileText, Database, Settings, 
   BarChart3, Shield, Activity, AlertTriangle,
-  Download, RefreshCw, Search, Filter, Eye, Edit, Trash2
+  Download, RefreshCw, Search, Filter, Eye, Edit, Trash2, Stethoscope
 } from 'lucide-react';
 import { supabase } from '../../supabase';
 import { useAuth } from '../../contexts/AuthContext';
@@ -17,6 +17,17 @@ interface DashboardStats {
   totalSpecialists: number;
   totalClinics: number;
   recentActivity: any[];
+}
+
+interface Specialist {
+  id: string;
+  full_name: string;
+  email: string;
+  clinic_affiliation: string;
+  address: string;
+  specialties: string[];
+  is_approved: boolean;
+  created_at: string;
 }
 
 const SuperAdminDashboard: React.FC = () => {
@@ -31,10 +42,69 @@ const SuperAdminDashboard: React.FC = () => {
     recentActivity: []
   });
   const [loading, setLoading] = useState(true);
+  const [specialists, setSpecialists] = useState<Specialist[]>([]);
+  const [specialistsLoading, setSpecialistsLoading] = useState(false);
 
   useEffect(() => {
     fetchDashboardStats();
   }, []);
+
+  const fetchSpecialists = async () => {
+    try {
+      setSpecialistsLoading(true);
+      const { data, error } = await supabase
+        .from('specialists')
+        .select(`
+          id,
+          clinic_affiliation,
+          address,
+          specialties,
+          is_approved,
+          created_at,
+          profiles (
+            full_name,
+            email
+          )
+        `)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      const formattedSpecialists: Specialist[] = data?.map((item: any) => ({
+        id: item.id,
+        full_name: item.profiles?.full_name || 'N/A',
+        email: item.profiles?.email || 'N/A',
+        clinic_affiliation: item.clinic_affiliation,
+        address: item.address,
+        specialties: item.specialties || [],
+        is_approved: item.is_approved || false,
+        created_at: item.created_at,
+      })) || [];
+
+      setSpecialists(formattedSpecialists);
+    } catch (error) {
+      console.error('Error fetching specialists:', error);
+    } finally {
+      setSpecialistsLoading(false);
+    }
+  };
+
+  const toggleSpecialistApproval = async (specialistId: string, currentApproval: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('specialists')
+        .update({ is_approved: !currentApproval })
+        .eq('id', specialistId);
+
+      if (error) throw error;
+
+      // Refresh the specialists list
+      await fetchSpecialists();
+    } catch (error) {
+      console.error('Error updating specialist approval:', error);
+      alert('Failed to update specialist approval status');
+    }
+  };
 
   const fetchDashboardStats = async () => {
     try {
@@ -79,6 +149,7 @@ const SuperAdminDashboard: React.FC = () => {
   const tabs = [
     { id: 'overview', label: 'Overview', icon: <BarChart3 className="h-4 w-4" /> },
     { id: 'users', label: 'User Management', icon: <Users className="h-4 w-4" /> },
+    { id: 'specialists', label: 'Project Partners', icon: <Stethoscope className="h-4 w-4" /> },
     { id: 'content', label: 'Content Management', icon: <FileText className="h-4 w-4" /> },
     { id: 'events', label: 'Events', icon: <Calendar className="h-4 w-4" /> },
     { id: 'system', label: 'System Monitoring', icon: <Database className="h-4 w-4" /> },
@@ -248,6 +319,92 @@ const SuperAdminDashboard: React.FC = () => {
     </Card>
   );
 
+  const SpecialistsTab = () => {
+    // Load specialists when this tab is first accessed
+    React.useEffect(() => {
+      if (activeTab === 'specialists' && specialists.length === 0) {
+        fetchSpecialists();
+      }
+    }, [activeTab]);
+
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-semibold">Project Partner Management</h3>
+            <div className="flex items-center gap-3">
+              <Button size="sm" variant="outline" onClick={fetchSpecialists}>
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Refresh
+              </Button>
+            </div>
+          </div>
+          
+          {specialistsLoading ? (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading specialists...</p>
+            </div>
+          ) : specialists.length > 0 ? (
+            <div className="space-y-4">
+              {specialists.map((specialist) => (
+                <div key={specialist.id} className="border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <h4 className="text-lg font-semibold text-gray-900">{specialist.full_name}</h4>
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          specialist.is_approved 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {specialist.is_approved ? 'Approved' : 'Pending'}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-600 mb-1">{specialist.email}</p>
+                      <p className="text-sm text-gray-600 mb-1">{specialist.clinic_affiliation}</p>
+                      <p className="text-sm text-gray-600 mb-2">{specialist.address}</p>
+                      {specialist.specialties.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mb-2">
+                          {specialist.specialties.map((specialty, index) => (
+                            <span key={index} className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800">
+                              {specialty}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      <p className="text-xs text-gray-500">
+                        Applied: {new Date(specialist.created_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        size="sm"
+                        variant={specialist.is_approved ? "outline" : "default"}
+                        onClick={() => toggleSpecialistApproval(specialist.id, specialist.is_approved)}
+                        className={specialist.is_approved ? "text-red-600 hover:text-red-700" : ""}
+                      >
+                        {specialist.is_approved ? 'Remove Approval' : 'Approve'}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="bg-gray-50 p-8 rounded-lg text-center">
+              <Stethoscope className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h4 className="text-lg font-medium text-gray-900 mb-2">No Specialist Applications</h4>
+              <p className="text-gray-600">
+                No specialist applications have been submitted yet.
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    );
+  };
+
   const SettingsTab = () => (
     <Card>
       <CardContent className="p-6">
@@ -269,6 +426,8 @@ const SuperAdminDashboard: React.FC = () => {
         return <OverviewTab />;
       case 'users':
         return <UserManagementTab />;
+      case 'specialists':
+        return <SpecialistsTab />;
       case 'content':
         return <ContentManagementTab />;
       case 'events':

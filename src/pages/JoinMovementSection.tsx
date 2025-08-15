@@ -21,7 +21,7 @@ const JoinMovementSection: React.FC = () => {
             Be part of the national effort to outsmart colorectal cancer.
           </p>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 max-w-5xl mx-auto mb-12 lg:grid-cols-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 max-w-5xl mx-auto mb-12 lg:grid-cols-3">
             {/* Button 1: For GPs and Clinics */}
             <Link
               to="/register/clinic" 
@@ -30,15 +30,7 @@ const JoinMovementSection: React.FC = () => {
               For GPs and Clinics: Partner with us to offer screening services.
             </Link>
 
-            {/* Button 2: For Specialists */}
-            <Link
-              to="/register/specialist" 
-              className="flex p-4 items-center justify-center text-sm font-medium text-center bg-[#0284c7] text-white rounded-lg hover:bg-[#0369a1] transition-all duration-300 min-h-[100px] md:min-h-[120px]"
-            >
-              For Specialists: Provide screening services and colonoscopy.
-            </Link>
-
-            {/* Button 3: For Sponsors/CSR Partners */}
+            {/* Button 2: For Sponsors/CSR Partners */}
             <Link
               to="/register/corporate" 
               className="flex p-4 items-center justify-center text-sm font-medium text-center bg-[#0d9488] text-white rounded-lg hover:bg-[#0f766e] transition-all duration-300 min-h-[100px] md:min-h-[120px]"
@@ -46,7 +38,7 @@ const JoinMovementSection: React.FC = () => {
               For Sponsors/CSR Partners: Support public health.
             </Link>
 
-            {/* Button 4: For the Public */}
+            {/* Button 3: For the Public */}
             <Link
               to="/signup/champion" 
               className="flex p-4 items-center justify-center text-sm font-medium text-center bg-[#4f46e5] text-white rounded-lg hover:bg-[#4338ca] transition-all duration-300 min-h-[100px] md:min-h-[120px]"

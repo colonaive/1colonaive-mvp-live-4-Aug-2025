@@ -133,8 +133,8 @@ const ClinicianEducationHub: React.FC = () => {
             <Link to="/register/clinic">
               <Button>Register Your Clinic</Button>
             </Link>
-            <Link to="/register/specialist">
-              <Button variant="outline">Join as a Specialist</Button>
+            <Link to="/find-a-specialist">
+              <Button variant="outline">Find Project Partner Clinics</Button>
             </Link>
           </div>
         </div>

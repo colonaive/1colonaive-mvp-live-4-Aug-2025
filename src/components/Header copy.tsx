@@ -22,7 +22,7 @@ const screeningLinks = [
   { label: "Colonoscopy (Gold Standard)", path: "/education/patients/colonoscopy-gold-standard" },
   { label: "Screening Blood Test", path: "/get-screened" },
   { label: "Find a GP", path: "/find-a-gp" },
-  { label: "Find a Specialist", path: "/find-a-specialist" }
+  { label: "Find a Project Partner Clinic", path: "/find-a-specialist" }
 ];
 const pillarLinks = [
   { label: "RID-CRC PUB™", path: "/pillars/rid-crc-pub" },
@@ -48,7 +48,6 @@ export const getJoinLinks = (isAuthenticated: boolean) => {
     : [
         { label: "Member/Patient Sign-Up", path: "/signup/champion" },
         { label: "Clinic Sign-Up", path: "/register/clinic" },
-        { label: "Specialist Sign-Up", path: "/register/specialist" },
         { label: "Sponsor/CSR Sign-Up", path: "/register/corporate" },
         { label: "Read Real Stories", path: "/stories" }
       ];

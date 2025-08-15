@@ -420,9 +420,9 @@ const RIDCRCSGPPage: React.FC = () => {
                   Join as GP Partner
                 </Button>
               </Link>
-              <Link to="/register/specialist">
+              <Link to="/find-a-specialist">
                 <Button variant="teal" className="bg-teal-600 hover:bg-teal-700 text-white px-8 py-4 text-lg min-w-[220px]">
-                  Join as Specialist Partner
+                  Find Project Partner Clinics
                 </Button>
               </Link>
             </div>

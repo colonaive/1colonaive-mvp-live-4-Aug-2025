@@ -29,13 +29,12 @@ export const Footer: React.FC = () => {
     { label: '🌏 Explore by Country', path: '/seo' },
     { label: '🧠 Learn About COLONAiVE™', path: '/about' },
     { label: 'Find a GP Clinic', path: '/find-a-gp' },         // CORRECTED
-    { label: 'Find a Specialist Clinic', path: '/find-a-specialist' } // CORRECTED
+    { label: 'Find a Project Partner Clinic', path: '/find-a-specialist' } // CORRECTED
     // { label: 'Track Your Screening', path: '/track-screening' }, // Placeholder - add route if page exists
   ];
 
   const professionalPortalLinks = [
     { label: 'GP Portal', path: '/register/clinic' },       // Example: Re-using clinic sign-up, or create /gp-portal page
-    { label: 'Specialist Portal', path: '/register/specialist' }, // Example: Re-using specialist sign-up, or create /specialist-portal page
     { label: 'Corporate CSR', path: '/register/corporate' } // Links to existing CSR registration
   ];
 

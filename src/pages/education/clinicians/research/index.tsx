@@ -122,9 +122,9 @@ const ClinicianResearchHub: React.FC = () => {
                 Learn About Clinical Trials
               </button>
             </Link>
-            <Link to="/register/specialist">
+            <Link to="/find-a-specialist">
               <button className="px-6 py-3 bg-white text-blue-600 font-medium rounded-lg border border-blue-600 hover:bg-blue-50 transition-colors">
-                Join Research Network
+                Find Project Partner Clinics
               </button>
             </Link>
           </div>

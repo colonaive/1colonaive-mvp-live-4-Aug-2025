@@ -30,7 +30,7 @@ const screeningLinks: NavLink[] = [
   { label: "Colonoscopy (Gold Standard)", path: "/education/article/colonoscopy-gold-standard" },
   { label: "Screening Blood Test", path: "/get-screened" },
   { label: "Find a GP", path: "/find-a-gp" },
-  { label: "Find a Specialist", path: "/find-a-specialist" },
+  { label: "Find a Project Partner Clinic", path: "/find-a-specialist" },
   { label: "—————————", path: "#", isHeader: true },
   { label: "🌏 Explore by Country", path: "/seo", isHeader: true },
   { label: "🇸🇬 Singapore", path: "/seo/singapore-colorectal-screening" },
@@ -67,7 +67,6 @@ export const getJoinLinks = (isAuthenticated: boolean): NavLink[] =>
     : [
         { label: "Member/Patient Sign-Up", path: "/signup/champion" },
         { label: "Clinic Sign-Up", path: "/register/clinic" },
-        { label: "Specialist Sign-Up", path: "/register/specialist" },
         { label: "Sponsor/CSR Sign-Up", path: "/register/corporate" },
         { label: "Read Real Stories", path: "/stories" },
       ];

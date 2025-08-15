@@ -54,7 +54,8 @@ const FindSpecialistPage: React.FC = () => {
             full_name,
             phone_number
           )
-        `);
+        `)
+        .eq('is_approved', true);
 
       if (error) {
         console.error('Error fetching specialists:', error);
@@ -99,12 +100,12 @@ const FindSpecialistPage: React.FC = () => {
                 ← Back to Triage Assessment
               </Link>
             </div>
-            <h1 className="text-4xl font-bold mb-4">Find a Specialist Clinic</h1>
-            <p className="text-xl mb-8">Locate screening facilities and specialists near you.</p>
+            <h1 className="text-4xl font-bold mb-4">Find a Project Partner Clinic</h1>
+            <p className="text-xl mb-8">Discover our approved specialist partners who provide colonoscopy and advanced colorectal cancer screening.</p>
             <div className="relative max-w-2xl mx-auto">
               <input
                 type="text"
-                placeholder="Search by clinic, specialist, or location..."
+                placeholder="Search by clinic, partner specialist, or location..."
                 className="w-full py-4 px-5 pl-14 rounded-full text-gray-900 shadow-lg focus:outline-none focus:ring-4 focus:ring-blue-300"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -114,6 +115,21 @@ const FindSpecialistPage: React.FC = () => {
           </div>
         </Container>
       </div>
+
+      {/* Info Section */}
+      <section className="py-8 bg-blue-50 border-b border-blue-100">
+        <Container>
+          <div className="max-w-4xl mx-auto text-center">
+            <div className="bg-blue-100 rounded-lg p-6 mb-4">
+              <h3 className="text-lg font-semibold text-blue-800 mb-2">🏆 Approved Project Partners</h3>
+              <p className="text-blue-700">
+                The clinics listed below are carefully selected Project Partners who have been vetted and approved by our medical team. 
+                These specialists demonstrate excellence in colorectal cancer screening and are committed to our mission of early detection.
+              </p>
+            </div>
+          </div>
+        </Container>
+      </section>
 
       {/* Main Content Area */}
       <section className="py-16 bg-slate-50">
@@ -139,11 +155,11 @@ const FindSpecialistPage: React.FC = () => {
             {/* Specialist Listings */}
             <main className="lg:w-3/4">
               <div className="flex justify-between items-baseline mb-6">
-                <h2 className="text-2xl font-bold">{filteredSpecialists.length} {filteredSpecialists.length === 1 ? 'Clinic' : 'Clinics'} Found</h2>
+                <h2 className="text-2xl font-bold">{filteredSpecialists.length} {filteredSpecialists.length === 1 ? 'Partner Clinic' : 'Partner Clinics'} Found</h2>
               </div>
 
               {loading ? (
-                <p className="text-gray-600">Loading specialists...</p>
+                <p className="text-gray-600">Loading partner clinics...</p>
               ) : filteredSpecialists.length > 0 ? (
                 <div className="space-y-6">
                   {filteredSpecialists.map((specialist) => (
@@ -177,7 +193,7 @@ const FindSpecialistPage: React.FC = () => {
                   ))}
                 </div>
               ) : (
-                <Card><CardContent className="p-8 text-center text-gray-600">No specialists match your current search criteria. Please try a different search term or filter.</CardContent></Card>
+                <Card><CardContent className="p-8 text-center text-gray-600">No partner clinics match your current search criteria. Please try a different search term or filter.</CardContent></Card>
               )}
             </main>
           </div>

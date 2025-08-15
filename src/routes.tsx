@@ -31,7 +31,6 @@ import HowItWorksPage from './pages/HowItWorksPage';
 
 // Registration
 import GPClinicSignUp from './pages/signup/GPClinicSignUp';
-import SpecialistSignUp from './pages/signup/SpecialistSignUp';
 import CorporateSignUp from './pages/signup/CorporateSignUp';
 import ChampionSignUp from './pages/signup/ChampionSignUp';
 
@@ -211,7 +210,6 @@ const MainRoutes = () => {
           {/* Auth & registration */}
           <Route path="/signup/champion" element={<ChampionSignUp />} />
           <Route path="/register/clinic" element={<GPClinicSignUp />} />
-          <Route path="/register/specialist" element={<SpecialistSignUp />} />
           <Route path="/register/corporate" element={<CorporateSignUp />} />
           <Route path="/champion-sign-in" element={<PublicRoute><ChampionSignIn /></PublicRoute>} />
           <Route path="/login" element={<PublicRoute><LoginForm redirectTo="/login-redirect" /></PublicRoute>} />
