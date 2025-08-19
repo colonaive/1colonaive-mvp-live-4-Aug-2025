@@ -1,26 +1,26 @@
-// /home/project/src/pages/FindSpecialistPage.tsx
+// /src/pages/FindSpecialistPage.tsx
+import { Link } from "react-router-dom";
+import { Container } from "@/components/ui/Container";
+import { Card, CardContent } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+import { Search, MapPin, Phone, Globe } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { supabase } from "@/supabase";
 
-import { Link } from 'react-router-dom';
-import { Container } from '@/components/ui/Container';
-import { Card, CardContent } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
-import { Search, MapPin, Phone, Globe } from 'lucide-react';
-import { useEffect, useState, useMemo } from 'react';
-import { supabase } from '@/supabase';
-
-// Define the Specialist interface to match the combined data from the database query
-interface Specialist {
+type Specialist = {
   id: string;
-  full_name: string | null;
-  phone_number: string | null;
-  clinic_affiliation: string | null;
+  name: string;
+  clinic_name: string;
   address: string | null;
+  phone_number: string | null;
   website: string | null;
+  appointment_url: string | null;
+  region: string | null;
   specialties: string[] | null;
-  field_of_specialization: string | null;
-}
+  photo_url: string | null;
+  display_order: number | null;
+};
 
-// RESTORED: Helper component for the custom-styled ordered list from your original design
 const CustomListItem = ({ number, children }: { number: number; children: React.ReactNode }) => (
   <li className="flex items-start">
     <div className="flex-shrink-0 flex items-center justify-center w-6 h-6 bg-blue-600 text-white rounded-full font-bold text-sm mr-4 mt-1">
@@ -31,67 +31,57 @@ const CustomListItem = ({ number, children }: { number: number; children: React.
 );
 
 const FindSpecialistPage: React.FC = () => {
-  // CORRECT: State management for data, loading, and filters
-  const [specialists, setSpecialists] = useState<Specialist[]>([]);
+  const [rows, setRows] = useState<Specialist[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [selectedSpecialty, setSelectedSpecialty] = useState<string | null>(null);
 
-  // CORRECT: useEffect hook to fetch and join data from Supabase on component mount
   useEffect(() => {
-    const fetchSpecialists = async () => {
+    const run = async () => {
       setLoading(true);
       const { data, error } = await supabase
-        .from('specialists')
-        .select(`
-          id,
-          clinic_affiliation,
-          address,
-          website,
-          specialties,
-          field_of_specialization,
-          profiles (
-            full_name,
-            phone_number
-          )
-        `)
-        .eq('is_approved', true);
+        .from("partner_specialists")
+        .select("*")
+        .eq("is_active", true)
+        .order("display_order", { ascending: true })
+        .order("created_at", { ascending: true });
 
       if (error) {
-        console.error('Error fetching specialists:', error);
-      } else if (data) {
-        const formattedData: Specialist[] = data.map((item: any) => ({
-          id: item.id,
-          full_name: item.profiles?.full_name || 'N/A',
-          phone_number: item.profiles?.phone_number || null,
-          clinic_affiliation: item.clinic_affiliation,
-          address: item.address,
-          website: item.website,
-          specialties: item.specialties,
-          field_of_specialization: item.field_of_specialization,
-        }));
-        setSpecialists(formattedData);
+        console.error("Load error:", error);
+        setRows([]);
+      } else {
+        setRows((data || []) as unknown as Specialist[]);
       }
       setLoading(false);
     };
-
-    fetchSpecialists();
+    run();
   }, []);
 
-  // CORRECT: Memoized derived state for performance
-  const allSpecialties = useMemo(() => Array.from(new Set(specialists.flatMap((s) => s.specialties || []))).sort(), [specialists]);
-  const filteredSpecialists = useMemo(() => {
-    return specialists.filter((specialist) => {
-      const nameOrClinic = `${specialist.full_name || ''} ${specialist.clinic_affiliation || ''}`.toLowerCase();
-      const matchesSearch = searchTerm === '' || nameOrClinic.includes(searchTerm.toLowerCase()) || specialist.address?.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesSpecialty = selectedSpecialty === null || (specialist.specialties?.includes(selectedSpecialty) ?? false);
-      return matchesSearch && matchesSpecialty;
+  const allSpecialties = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          rows.flatMap((r) => (r.specialties || []).map((s) => s.trim()).filter(Boolean))
+        )
+      ).sort(),
+    [rows]
+  );
+
+  const filtered = useMemo(() => {
+    const q = searchTerm.trim().toLowerCase();
+    return rows.filter((r) => {
+      const blob = `${r.name} ${r.clinic_name} ${r.address ?? ""} ${r.region ?? ""}`.toLowerCase();
+      const matchQ = q === "" || blob.includes(q);
+      const matchSpec =
+        selectedSpecialty === null ||
+        (r.specialties || []).map((s) => s.toLowerCase()).includes(selectedSpecialty.toLowerCase());
+      return matchQ && matchSpec;
     });
-  }, [specialists, searchTerm, selectedSpecialty]);
+  }, [rows, searchTerm, selectedSpecialty]);
 
   return (
     <div className="pt-20">
-      {/* Hero Section */}
+      {/* Hero */}
       <div className="bg-gradient-to-r from-blue-600 to-teal-500 text-white py-24">
         <Container>
           <div className="max-w-3xl mx-auto text-center">
@@ -116,7 +106,7 @@ const FindSpecialistPage: React.FC = () => {
         </Container>
       </div>
 
-      {/* Info Section */}
+      {/* Info bar */}
       <section className="py-8 bg-blue-50 border-b border-blue-100">
         <Container>
           <div className="max-w-4xl mx-auto text-center">
@@ -130,81 +120,153 @@ const FindSpecialistPage: React.FC = () => {
         </Container>
       </section>
 
-      {/* Main Content Area */}
+      {/* Main */}
       <section className="py-16 bg-slate-50">
         <Container>
           <div className="flex flex-col lg:flex-row gap-12">
-            {/* Filter Sidebar */}
+            {/* Sidebar */}
             <aside className="lg:w-1/4">
               <div className="sticky top-24">
                 <h3 className="text-lg font-semibold mb-4 px-2">Filter By Specialty</h3>
                 <div className="space-y-2">
-                  <button onClick={() => setSelectedSpecialty(null)} className={`w-full text-left px-4 py-3 rounded-lg font-semibold transition-colors duration-200 ${selectedSpecialty === null ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>
+                  <button
+                    onClick={() => setSelectedSpecialty(null)}
+                    className={`w-full text-left px-4 py-3 rounded-lg font-semibold transition-colors duration-200 ${
+                      selectedSpecialty === null ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                    }`}
+                  >
                     All Specialties
                   </button>
-                  {allSpecialties.map((specialty) => (
-                    <button key={specialty} onClick={() => setSelectedSpecialty(specialty)} className={`w-full text-left px-4 py-3 rounded-lg font-semibold transition-colors duration-200 ${selectedSpecialty === specialty ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>
-                      {specialty}
+                  {allSpecialties.map((spec) => (
+                    <button
+                      key={spec}
+                      onClick={() => setSelectedSpecialty(spec)}
+                      className={`w-full text-left px-4 py-3 rounded-lg font-semibold transition-colors duration-200 ${
+                        selectedSpecialty === spec ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                      }`}
+                    >
+                      {spec}
                     </button>
                   ))}
                 </div>
               </div>
             </aside>
 
-            {/* Specialist Listings */}
+            {/* Listings */}
             <main className="lg:w-3/4">
               <div className="flex justify-between items-baseline mb-6">
-                <h2 className="text-2xl font-bold">{filteredSpecialists.length} {filteredSpecialists.length === 1 ? 'Partner Clinic' : 'Partner Clinics'} Found</h2>
+                <h2 className="text-2xl font-bold">
+                  {filtered.length} {filtered.length === 1 ? "Partner Clinic" : "Partner Clinics"} Found
+                </h2>
               </div>
 
               {loading ? (
                 <p className="text-gray-600">Loading partner clinics...</p>
-              ) : filteredSpecialists.length > 0 ? (
+              ) : filtered.length > 0 ? (
                 <div className="space-y-6">
-                  {filteredSpecialists.map((specialist) => (
-                    <Card key={specialist.id} className="bg-white shadow-md hover:shadow-xl transition-shadow duration-300">
+                  {filtered.map((s) => (
+                    <Card key={s.id} className="bg-white shadow-md hover:shadow-xl transition-shadow duration-300">
                       <CardContent className="p-6">
-                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div className="md:col-span-2">
-                                <h3 className="text-xl font-bold text-gray-800">{specialist.clinic_affiliation}</h3>
-                                <p className="text-md font-semibold text-blue-700 mb-3">{specialist.full_name}</p>
-                                <div className="space-y-2 mb-4 text-gray-600">
-                                <div className="flex items-center"><MapPin className="h-4 w-4 mr-3 flex-shrink-0 text-gray-400" />{specialist.address}</div>
-                                {specialist.phone_number && <div className="flex items-center"><Phone className="h-4 w-4 mr-3 flex-shrink-0 text-gray-400" />{specialist.phone_number}</div>}
-                                {specialist.website && <div className="flex items-center"><Globe className="h-4 w-4 mr-3 flex-shrink-0 text-gray-400" /><a href={specialist.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Visit Website</a></div>}
-                                </div>
-                                {specialist.specialties && specialist.specialties.length > 0 && (
-                                <div>
-                                    <h4 className="text-sm font-semibold text-gray-500 mb-2">Treatments & Specialties:</h4>
-                                    <div className="flex flex-wrap gap-2">
-                                    {specialist.specialties.map((spec, index) => (<span key={index} className="bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full">{spec}</span>))}
-                                    </div>
-                                </div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                          <div className="flex items-start gap-4 md:col-span-2">
+                            {s.photo_url ? (
+                              <img
+                                src={s.photo_url}
+                                alt={s.name}
+                                className="w-20 h-20 rounded-xl object-cover border border-gray-200"
+                              />
+                            ) : null}
+                            <div>
+                              <h3 className="text-xl font-bold text-gray-800">{s.clinic_name}</h3>
+                              <p className="text-md font-semibold text-blue-700 mb-3">{s.name}</p>
+                              <div className="space-y-2 mb-4 text-gray-600">
+                                {s.address && (
+                                  <div className="flex items-center">
+                                    <MapPin className="h-4 w-4 mr-3 flex-shrink-0 text-gray-400" />
+                                    {s.address}
+                                  </div>
                                 )}
+                                {s.phone_number && (
+                                  <div className="flex items-center">
+                                    <Phone className="h-4 w-4 mr-3 flex-shrink-0 text-gray-400" />
+                                    {s.phone_number}
+                                  </div>
+                                )}
+                                {s.website && (
+                                  <div className="flex items-center">
+                                    <Globe className="h-4 w-4 mr-3 flex-shrink-0 text-gray-400" />
+                                    <a
+                                      href={s.website}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-blue-600 hover:underline"
+                                    >
+                                      Visit Website
+                                    </a>
+                                  </div>
+                                )}
+                              </div>
+                              {s.specialties && s.specialties.length > 0 && (
+                                <div>
+                                  <h4 className="text-sm font-semibold text-gray-500 mb-2">Treatments & Specialties:</h4>
+                                  <div className="flex flex-wrap gap-2">
+                                    {s.specialties.map((tag, i) => (
+                                      <span
+                                        key={i}
+                                        className="bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full"
+                                      >
+                                        {tag}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
                             </div>
-                            <div className="flex flex-col justify-center items-start md:items-end space-y-3">
+                          </div>
+
+                          <div className="flex flex-col justify-center items-start md:items-end space-y-3">
+                            {s.appointment_url ? (
+                              <a href={s.appointment_url} target="_blank" rel="noopener noreferrer">
+                                <Button className="w-full md:w-auto">Book a Colonoscopy Now</Button>
+                              </a>
+                            ) : (
+                              <a href={s.website ?? "#"} target={s.website ? "_blank" : undefined} rel="noopener noreferrer">
                                 <Button className="w-full md:w-auto">Make Appointment</Button>
-                                <Button variant="outline" className="w-full md:w-auto">Learn More</Button>
-                            </div>
+                              </a>
+                            )}
+                            {s.website && (
+                              <a href={s.website} target="_blank" rel="noopener noreferrer">
+                                <Button variant="outline" className="w-full md:w-auto">
+                                  Learn More
+                                </Button>
+                              </a>
+                            )}
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
                   ))}
                 </div>
               ) : (
-                <Card><CardContent className="p-8 text-center text-gray-600">No partner clinics match your current search criteria. Please try a different search term or filter.</CardContent></Card>
+                <Card>
+                  <CardContent className="p-8 text-center text-gray-600">
+                    No partner clinics match your current search criteria. Please try a different search term or filter.
+                  </CardContent>
+                </Card>
               )}
             </main>
           </div>
         </Container>
       </section>
 
-      {/* RESTORED: The "Preparing for Your Visit" section with the original beautiful design */}
+      {/* Preparing for Your Visit */}
       <section className="py-20 bg-blue-50">
         <Container>
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-800">Preparing for Your Visit</h2>
-            <p className="text-gray-600 mt-3 max-w-2xl mx-auto">Knowing what to expect can help make your screening experience smoother.</p>
+            <p className="text-gray-600 mt-3 max-w-2xl mx-auto">
+              Knowing what to expect can help make your screening experience smoother.
+            </p>
           </div>
           <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
             <div className="bg-white p-8 rounded-lg shadow-sm">
@@ -228,7 +290,10 @@ const FindSpecialistPage: React.FC = () => {
           </div>
           <div className="mt-12 text-center bg-white p-8 rounded-lg max-w-3xl mx-auto border border-gray-200">
             <h3 className="font-bold text-xl mb-3 text-gray-800">Need Financial Assistance?</h3>
-            <p className="text-gray-600 mb-6">Several programs exist to help cover the cost of colorectal cancer screening for those who qualify. Don't let financial concerns prevent you from getting screened.</p>
+            <p className="text-gray-600 mb-6">
+              Several programs exist to help cover the cost of colorectal cancer screening for those who qualify. Don&apos;t let
+              financial concerns prevent you from getting screened.
+            </p>
             <Button size="lg">Explore Financial Assistance Options</Button>
           </div>
         </Container>

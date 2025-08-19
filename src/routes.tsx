@@ -11,6 +11,8 @@ import { ProtectedAdminRoute } from './components/ProtectedAdminRoute';
 import { AdminLogin } from './pages/admin/AdminLogin';
 import SuperAdminDashboard from './pages/admin/SuperAdminDashboard';
 import NewsFeedAdminPage from './pages/admin/NewsFeedAdminPage';
+import AdminPartnerSpecialistForm from './pages/admin/AdminPartnerSpecialistForm';
+
 
 // ✅ Verified CRC News (two‑column, AI summaries)
 import LiveCRCNews from './pages/LiveCRCNews';
@@ -222,6 +224,16 @@ const MainRoutes = () => {
           <Route path="/admin/login" element={<PublicRoute><AdminLogin /></PublicRoute>} />
           <Route path="/admin/dashboard" element={<ProtectedAdminRoute><SuperAdminDashboard /></ProtectedAdminRoute>} />
           <Route path="/admin/news" element={<ProtectedAdminRoute><NewsFeedAdminPage /></ProtectedAdminRoute>} />
+
+<Route
+  path="/admin/partner-specialists/new"
+  element={
+    <ProtectedAdminRoute>
+      <AdminPartnerSpecialistForm />
+    </ProtectedAdminRoute>
+  }
+/>
+
 
           {/* Protected */}
           <Route path="/refer-friend" element={<ProtectedRoute><ShareYourStoryPage /></ProtectedRoute>} />
