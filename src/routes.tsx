@@ -117,8 +117,6 @@ import IndiaComingSoon from './pages/placeholder/IndiaComingSoon';
 import PhilippinesComingSoon from './pages/placeholder/PhilippinesComingSoon';
 import JapanComingSoon from './pages/placeholder/JapanComingSoon';
 import AustraliaComingSoon from './pages/placeholder/AustraliaComingSoon';
-import ClinicFinderComingSoon from './pages/placeholder/ClinicFinderComingSoon';
-import SpecialistComingSoon from './pages/placeholder/SpecialistComingSoon';
 
 // Dashboards
 import ChampionDashboard from './pages/ChampionDashboard';

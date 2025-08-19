@@ -74,7 +74,7 @@ const FindSpecialistPage: React.FC = () => {
       const matchQ = q === "" || blob.includes(q);
       const matchSpec =
         selectedSpecialty === null ||
-        (r.specialties || []).map((s) => s.toLowerCase()).includes(selectedSpecialty.toLowerCase());
+        (r.specialties || []).map((s) => s.toLowerCase()).includes((selectedSpecialty || "").toLowerCase());
       return matchQ && matchSpec;
     });
   }, [rows, searchTerm, selectedSpecialty]);
@@ -99,6 +99,7 @@ const FindSpecialistPage: React.FC = () => {
                 className="w-full py-4 px-5 pl-14 rounded-full text-gray-900 shadow-lg focus:outline-none focus:ring-4 focus:ring-blue-300"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
+                aria-label="Search specialists by clinic, name, or location"
               />
               <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-6 w-6 text-gray-400" />
             </div>
@@ -225,19 +226,18 @@ const FindSpecialistPage: React.FC = () => {
                           </div>
 
                           <div className="flex flex-col justify-center items-start md:items-end space-y-3">
-                            {s.appointment_url ? (
-                              <a href={s.appointment_url} target="_blank" rel="noopener noreferrer">
-                                <Button className="w-full md:w-auto">Book a Colonoscopy Now</Button>
-                              </a>
-                            ) : (
-                              <a href={s.website ?? "#"} target={s.website ? "_blank" : undefined} rel="noopener noreferrer">
-                                <Button className="w-full md:w-auto">Make Appointment</Button>
-                              </a>
-                            )}
+                            <a
+                              href={s.appointment_url || s.website || "#"}
+                              target={s.appointment_url || s.website ? "_blank" : undefined}
+                              rel="noopener noreferrer"
+                            >
+                              <Button className="w-full md:w-auto">Book a Colonoscopy</Button>
+                            </a>
+
                             {s.website && (
                               <a href={s.website} target="_blank" rel="noopener noreferrer">
                                 <Button variant="outline" className="w-full md:w-auto">
-                                  Learn More
+                                  Consult for CRC Treatments
                                 </Button>
                               </a>
                             )}
