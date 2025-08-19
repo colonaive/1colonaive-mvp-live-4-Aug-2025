@@ -5,7 +5,7 @@ import { Card, CardContent } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import {
   Users, Calendar, FileText, Database, Settings,
-  BarChart3, Shield, Activity, Download, RefreshCw, Search, Filter, Eye, Stethoscope
+  BarChart3, Shield, Activity, Download, RefreshCw, Search, Filter, Eye, Stethoscope, Plus
 } from 'lucide-react';
 import { supabase } from '../../supabase';
 import { useAuth } from '../../contexts/AuthContext';
@@ -246,19 +246,7 @@ const SuperAdminDashboard: React.FC = () => {
   const ContentManagementTab = () => (
     <Card>
       <CardContent className="p-6">
-        {/* >>> Quick actions row with CSR link <<< */}
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-semibold">Content Management</h3>
-          <div className="flex items-center gap-3">
-            {/* Opens the CSR partners admin page */}
-            <a href="/admin/csr-partners">
-              <Button className="bg-teal-600 hover:bg-teal-700 text-white">
-                Manage CSR Partners
-              </Button>
-            </a>
-          </div>
-        </div>
-
+        <h3 className="text-lg font-semibold mb-6">Content Management</h3>
         <div className="bg-gray-50 p-8 rounded-lg text-center">
           <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
           <h4 className="text-lg font-medium text-gray-900 mb-2">Content Management System</h4>
@@ -306,18 +294,27 @@ const SuperAdminDashboard: React.FC = () => {
         <CardContent className="p-6">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-semibold">Project Partner Management</h3>
-            <div className="flex items-center gap-3">
-              {/* Admin-curated specialist entry form */}
+
+            {/* Quick actions */}
+            <div className="flex flex-wrap items-center gap-3">
               <Button
                 size="sm"
                 className="bg-teal-600 hover:bg-teal-700 text-white"
                 onClick={() => navigate('/admin/partner-specialists/new')}
               >
-                <Stethoscope className="h-4 w-4 mr-2" />
+                <Plus className="h-4 w-4 mr-2" />
                 Add Partner Specialist
               </Button>
 
-              {/* View public directory */}
+              <Button
+                size="sm"
+                className="bg-teal-600 hover:bg-teal-700 text-white"
+                onClick={() => navigate('/admin/csr/new')}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add Corporate Champion
+              </Button>
+
               <a href="/find-a-specialist" target="_blank" rel="noopener noreferrer">
                 <Button size="sm" variant="outline">
                   <Eye className="h-4 w-4 mr-2" />
@@ -325,7 +322,13 @@ const SuperAdminDashboard: React.FC = () => {
                 </Button>
               </a>
 
-              {/* Refresh */}
+              <a href="/csr-showcase" target="_blank" rel="noopener noreferrer">
+                <Button size="sm" variant="outline">
+                  <Eye className="h-4 w-4 mr-2" />
+                  View CSR Showcase
+                </Button>
+              </a>
+
               <Button size="sm" variant="outline" onClick={fetchSpecialists}>
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Refresh
@@ -373,6 +376,7 @@ const SuperAdminDashboard: React.FC = () => {
                         Applied: {new Date(specialist.created_at).toLocaleDateString()}
                       </p>
                     </div>
+
                     <div className="flex items-center gap-2">
                       {specialist.is_approved ? (
                         <Button
@@ -384,10 +388,7 @@ const SuperAdminDashboard: React.FC = () => {
                           Remove Approval
                         </Button>
                       ) : (
-                        <Button
-                          size="sm"
-                          onClick={() => toggleSpecialistApproval(specialist.id, false)}
-                        >
+                        <Button size="sm" onClick={() => toggleSpecialistApproval(specialist.id, false)}>
                           Approve
                         </Button>
                       )}

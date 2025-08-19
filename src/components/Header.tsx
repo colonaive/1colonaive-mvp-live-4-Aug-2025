@@ -280,26 +280,42 @@ export const Header = () => {
                   My Dashboard
                 </Link>
 
-                {/* Super Admin quick link to Project Partners */}
-                {isAdmin && (
-                  <Link
-                    to="/admin/partner-specialists/new"
-                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    onClick={handleClose}
-                  >
-                    Project Partners
-                  </Link>
-                )}
-
-                {/* Profile settings (hidden for super admin) */}
-                {profileSettingsPath && (
-                  <Link
-                    to={profileSettingsPath}
-                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    onClick={handleClose}
-                  >
-                    Profile Settings
-                  </Link>
+                {/* Super Admin quick actions */}
+                {isAdmin ? (
+                  <>
+                    <Link
+                      to="/admin/partner-specialists/new"
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      onClick={handleClose}
+                    >
+                      Add Partner Specialist
+                    </Link>
+                    <Link
+                      to="/admin/csr/new"
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      onClick={handleClose}
+                    >
+                      Add Corporate Champion
+                    </Link>
+                    <Link
+                      to="/csr-showcase"
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      onClick={handleClose}
+                    >
+                      View CSR Showcase
+                    </Link>
+                  </>
+                ) : (
+                  // Non-admin users: show profile settings
+                  profileSettingsPath && (
+                    <Link
+                      to={profileSettingsPath}
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      onClick={handleClose}
+                    >
+                      Profile Settings
+                    </Link>
+                  )
                 )}
 
                 <button
