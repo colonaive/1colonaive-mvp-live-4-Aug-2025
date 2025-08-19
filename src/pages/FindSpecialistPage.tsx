@@ -15,6 +15,8 @@ type Specialist = {
   phone_number: string | null;
   website: string | null;
   appointment_url: string | null;
+  /** NEW: dedicated doctor profile link (e.g., Dr page on clinic website) */
+  profile_url?: string | null;
   region: string | null;
   specialties: string[] | null;
   photo_url: string | null;
@@ -179,7 +181,23 @@ const FindSpecialistPage: React.FC = () => {
                             ) : null}
                             <div>
                               <h3 className="text-xl font-bold text-gray-800">{s.clinic_name}</h3>
-                              <p className="text-md font-semibold text-blue-700 mb-3">{s.name}</p>
+
+                              {/* Doctor name with optional hyperlink to profile_url (fallback to website) */}
+                              <p className="text-md font-semibold text-blue-700 mb-3">
+                                {s.profile_url || s.website ? (
+                                  <a
+                                    href={s.profile_url || s.website!}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="hover:underline"
+                                  >
+                                    {s.name}
+                                  </a>
+                                ) : (
+                                  s.name
+                                )}
+                              </p>
+
                               <div className="space-y-2 mb-4 text-gray-600">
                                 {s.address && (
                                   <div className="flex items-center">
@@ -207,6 +225,7 @@ const FindSpecialistPage: React.FC = () => {
                                   </div>
                                 )}
                               </div>
+
                               {s.specialties && s.specialties.length > 0 && (
                                 <div>
                                   <h4 className="text-sm font-semibold text-gray-500 mb-2">Treatments & Specialties:</h4>
@@ -225,18 +244,27 @@ const FindSpecialistPage: React.FC = () => {
                             </div>
                           </div>
 
-                          <div className="flex flex-col justify-center items-start md:items-end space-y-3">
+                          {/* Balanced CTAs */}
+                          <div className="flex flex-col md:items-end items-stretch justify-center gap-3">
                             <a
                               href={s.appointment_url || s.website || "#"}
                               target={s.appointment_url || s.website ? "_blank" : undefined}
                               rel="noopener noreferrer"
+                              className="w-full md:w-auto"
                             >
-                              <Button className="w-full md:w-auto">Book a Colonoscopy</Button>
+                              <Button className="w-full md:w-auto min-w-[220px] justify-center">
+                                Book a Colonoscopy
+                              </Button>
                             </a>
 
                             {s.website && (
-                              <a href={s.website} target="_blank" rel="noopener noreferrer">
-                                <Button variant="outline" className="w-full md:w-auto">
+                              <a
+                                href={s.website}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="w-full md:w-auto"
+                              >
+                                <Button variant="outline" className="w-full md:w-auto min-w-[220px] justify-center">
                                   Consult for CRC Treatments
                                 </Button>
                               </a>
@@ -289,7 +317,7 @@ const FindSpecialistPage: React.FC = () => {
             </div>
           </div>
           <div className="mt-12 text-center bg-white p-8 rounded-lg max-w-3xl mx-auto border border-gray-200">
-            <h3 className="font-bold text-xl mb-3 text-gray-800">Need Financial Assistance?</h3>
+            <h3 className="text-bold text-xl mb-3 text-gray-800">Need Financial Assistance?</h3>
             <p className="text-gray-600 mb-6">
               Several programs exist to help cover the cost of colorectal cancer screening for those who qualify. Don&apos;t let
               financial concerns prevent you from getting screened.

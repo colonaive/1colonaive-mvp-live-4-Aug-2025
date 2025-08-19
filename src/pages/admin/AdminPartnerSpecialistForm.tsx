@@ -16,6 +16,8 @@ type FormData = {
   phone_number: string;
   website: string;
   appointment_url: string;
+  /** NEW: dedicated Doctor profile page URL */
+  profile_url: string;
   region: string;
   specialties: string; // comma-separated; will be saved as string[]
   photo_url: string;
@@ -36,6 +38,7 @@ const AdminPartnerSpecialistForm: React.FC = () => {
     phone_number: "",
     website: "",
     appointment_url: "",
+    profile_url: "", // NEW
     region: "",
     specialties: "",
     photo_url: "",
@@ -78,6 +81,8 @@ const AdminPartnerSpecialistForm: React.FC = () => {
         website: form.website.trim() || null,
         appointment_url:
           form.appointment_url.trim() || form.website.trim() || null,
+        /** NEW: save profile_url (doctor bio page) */
+        profile_url: form.profile_url.trim() || null,
         region: form.region || null,
         specialties: form.specialties
           ? form.specialties
@@ -178,10 +183,19 @@ const AdminPartnerSpecialistForm: React.FC = () => {
                     onChange={onChange}
                     placeholder="Direct booking URL (if different from website)"
                   />
+                  <InputField
+                    name="profile_url"
+                    id="profile_url"
+                    label="Doctor Profile Page URL"
+                    value={form.profile_url}
+                    onChange={onChange}
+                    placeholder="https://www.colorectalcentre.com/profile/about-prof-seow"
+                  />
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Region
-                    </label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Region</label>
                     <select
                       name="region"
                       value={form.region}
@@ -196,16 +210,15 @@ const AdminPartnerSpecialistForm: React.FC = () => {
                       ))}
                     </select>
                   </div>
+                  <InputField
+                    name="address"
+                    id="address"
+                    label="Clinic Address"
+                    value={form.address}
+                    onChange={onChange}
+                    placeholder="Paragon Medical Centre, 290 Orchard Road #06‑06, Singapore 238859"
+                  />
                 </div>
-
-                <InputField
-                  name="address"
-                  id="address"
-                  label="Clinic Address"
-                  value={form.address}
-                  onChange={onChange}
-                  placeholder="Paragon Medical Centre, 290 Orchard Road #06‑06, Singapore 238859"
-                />
 
                 <div className="grid md:grid-cols-2 gap-6">
                   <InputField
@@ -222,7 +235,7 @@ const AdminPartnerSpecialistForm: React.FC = () => {
                     label="Photo URL"
                     value={form.photo_url}
                     onChange={onChange}
-                    placeholder="https://.../dr-seow.jpg"
+                    placeholder="https://.../doctor.jpg"
                   />
                 </div>
 
