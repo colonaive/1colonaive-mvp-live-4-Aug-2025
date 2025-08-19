@@ -15,7 +15,7 @@ import AdminPartnerSpecialistForm from './pages/admin/AdminPartnerSpecialistForm
 import AdminCSRPartnerForm from './pages/admin/AdminCSRPartnerForm';
 import CSRPartnersAdminPage from './pages/admin/CSRPartnersAdminPage';
 
-// ✅ Verified CRC News (two‑column, AI summaries)
+// ✅ Verified CRC News (two-column, AI summaries)
 import LiveCRCNews from './pages/LiveCRCNews';
 
 // Pages
@@ -221,27 +221,66 @@ const MainRoutes = () => {
 
           {/* Admin */}
           <Route path="/admin/login" element={<PublicRoute><AdminLogin /></PublicRoute>} />
-          <Route path="/admin/dashboard" element={<ProtectedAdminRoute><SuperAdminDashboard /></ProtectedAdminRoute>} />
-          <Route path="/admin/csr-partners" element={<CSRPartnersAdminPage />} />
-          <Route path="/admin/news" element={<ProtectedAdminRoute><NewsFeedAdminPage /></ProtectedAdminRoute>} />
           <Route
-  path="/admin/csr/new"
-  element={
-    <ProtectedAdminRoute>
-      <AdminCSRPartnerForm />
-    </ProtectedAdminRoute>
-  }
-/>
-
-<Route
-  path="/admin/partner-specialists/new"
-  element={
-    <ProtectedAdminRoute>
-      <AdminPartnerSpecialistForm />
-    </ProtectedAdminRoute>
-  }
-/>
-
+            path="/admin/dashboard"
+            element={
+              <ProtectedAdminRoute>
+                <SuperAdminDashboard />
+              </ProtectedAdminRoute>
+            }
+          />
+          {/* CSR list (protected) */}
+          <Route
+            path="/admin/csr-partners"
+            element={
+              <ProtectedAdminRoute>
+                <CSRPartnersAdminPage />
+              </ProtectedAdminRoute>
+            }
+          />
+          {/* Alias to the same CSR list */}
+          <Route
+            path="/admin/csr"
+            element={
+              <ProtectedAdminRoute>
+                <CSRPartnersAdminPage />
+              </ProtectedAdminRoute>
+            }
+          />
+          <Route
+            path="/admin/news"
+            element={
+              <ProtectedAdminRoute>
+                <NewsFeedAdminPage />
+              </ProtectedAdminRoute>
+            }
+          />
+          {/* CSR create & edit (protected) */}
+          <Route
+            path="/admin/csr/new"
+            element={
+              <ProtectedAdminRoute>
+                <AdminCSRPartnerForm />
+              </ProtectedAdminRoute>
+            }
+          />
+          <Route
+            path="/admin/csr/:id/edit"
+            element={
+              <ProtectedAdminRoute>
+                <AdminCSRPartnerForm />
+              </ProtectedAdminRoute>
+            }
+          />
+          {/* Partner specialist create (protected) */}
+          <Route
+            path="/admin/partner-specialists/new"
+            element={
+              <ProtectedAdminRoute>
+                <AdminPartnerSpecialistForm />
+              </ProtectedAdminRoute>
+            }
+          />
 
           {/* Protected */}
           <Route path="/refer-friend" element={<ProtectedRoute><ShareYourStoryPage /></ProtectedRoute>} />
