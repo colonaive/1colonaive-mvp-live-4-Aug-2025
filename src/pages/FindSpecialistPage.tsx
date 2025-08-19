@@ -2,7 +2,9 @@
 import { Link } from "react-router-dom";
 import { Container } from "@/components/ui/Container";
 import { Card, CardContent } from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/Button"; // <-- use default import if your Button exports default
+// If your Button is a named export, swap the line above with:
+// import { Button } from "@/components/ui/Button";
 import { Search, MapPin, Phone, Globe } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/supabase";
@@ -15,7 +17,7 @@ type Specialist = {
   phone_number: string | null;
   website: string | null;
   appointment_url: string | null;
-  /** NEW: dedicated doctor profile link (e.g., Dr page on clinic website) */
+  /** Dedicated doctor profile link (e.g., doctor bio page on clinic site) */
   profile_url?: string | null;
   region: string | null;
   specialties: string[] | null;
@@ -62,9 +64,7 @@ const FindSpecialistPage: React.FC = () => {
   const allSpecialties = useMemo(
     () =>
       Array.from(
-        new Set(
-          rows.flatMap((r) => (r.specialties || []).map((s) => s.trim()).filter(Boolean))
-        )
+        new Set(rows.flatMap((r) => (r.specialties || []).map((s) => s.trim()).filter(Boolean)))
       ).sort(),
     [rows]
   );
@@ -93,7 +93,9 @@ const FindSpecialistPage: React.FC = () => {
               </Link>
             </div>
             <h1 className="text-4xl font-bold mb-4">Find a COLONAiVE Project Partner Specialist</h1>
-            <p className="text-xl mb-8">For Colonoscopy, Early Detection, Polyps Removal and Early CRC Treatment needs.</p>
+            <p className="text-xl mb-8">
+              For Colonoscopy, Early Detection, Polyps Removal and Early CRC Treatment needs.
+            </p>
             <div className="relative max-w-2xl mx-auto">
               <input
                 type="text"
@@ -135,7 +137,9 @@ const FindSpecialistPage: React.FC = () => {
                   <button
                     onClick={() => setSelectedSpecialty(null)}
                     className={`w-full text-left px-4 py-3 rounded-lg font-semibold transition-colors duration-200 ${
-                      selectedSpecialty === null ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                      selectedSpecialty === null
+                        ? "bg-blue-600 text-white"
+                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                     }`}
                   >
                     All Specialties
@@ -145,7 +149,9 @@ const FindSpecialistPage: React.FC = () => {
                       key={spec}
                       onClick={() => setSelectedSpecialty(spec)}
                       className={`w-full text-left px-4 py-3 rounded-lg font-semibold transition-colors duration-200 ${
-                        selectedSpecialty === spec ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                        selectedSpecialty === spec
+                          ? "bg-blue-600 text-white"
+                          : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                       }`}
                     >
                       {spec}
@@ -168,7 +174,10 @@ const FindSpecialistPage: React.FC = () => {
               ) : filtered.length > 0 ? (
                 <div className="space-y-6">
                   {filtered.map((s) => (
-                    <Card key={s.id} className="bg-white shadow-md hover:shadow-xl transition-shadow duration-300">
+                    <Card
+                      key={s.id}
+                      className="bg-white shadow-md hover:shadow-xl transition-shadow duration-300"
+                    >
                       <CardContent className="p-6">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                           <div className="flex items-start gap-4 md:col-span-2">
@@ -182,7 +191,7 @@ const FindSpecialistPage: React.FC = () => {
                             <div>
                               <h3 className="text-xl font-bold text-gray-800">{s.clinic_name}</h3>
 
-                              {/* Doctor name with optional hyperlink to profile_url (fallback to website) */}
+                              {/* Doctor name → profile_url (fallback to website) */}
                               <p className="text-md font-semibold text-blue-700 mb-3">
                                 {s.profile_url || s.website ? (
                                   <a
@@ -228,7 +237,9 @@ const FindSpecialistPage: React.FC = () => {
 
                               {s.specialties && s.specialties.length > 0 && (
                                 <div>
-                                  <h4 className="text-sm font-semibold text-gray-500 mb-2">Treatments & Specialties:</h4>
+                                  <h4 className="text-sm font-semibold text-gray-500 mb-2">
+                                    Treatments & Specialties:
+                                  </h4>
                                   <div className="flex flex-wrap gap-2">
                                     {s.specialties.map((tag, i) => (
                                       <span
@@ -250,9 +261,9 @@ const FindSpecialistPage: React.FC = () => {
                               href={s.appointment_url || s.website || "#"}
                               target={s.appointment_url || s.website ? "_blank" : undefined}
                               rel="noopener noreferrer"
-                              className="w-full md:w-auto"
+                              className="w-full md:w-[248px] inline-block"
                             >
-                              <Button className="w-full md:w-auto min-w-[220px] justify-center">
+                              <Button className="w-full justify-center">
                                 Book a Colonoscopy
                               </Button>
                             </a>
@@ -262,9 +273,10 @@ const FindSpecialistPage: React.FC = () => {
                                 href={s.website}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="w-full md:w-auto"
+                                className="w-full md:w-[248px] inline-block"
                               >
-                                <Button variant="outline" className="w-full md:w-auto min-w-[220px] justify-center">
+                                {/* Teal secondary CTA */}
+                                <Button className="w-full justify-center bg-teal-600 hover:bg-teal-700 text-white border-transparent">
                                   Consult for CRC Treatments
                                 </Button>
                               </a>
@@ -278,7 +290,8 @@ const FindSpecialistPage: React.FC = () => {
               ) : (
                 <Card>
                   <CardContent className="p-8 text-center text-gray-600">
-                    No partner clinics match your current search criteria. Please try a different search term or filter.
+                    No partner clinics match your current search criteria. Please try a different search term or
+                    filter.
                   </CardContent>
                 </Card>
               )}
@@ -319,8 +332,8 @@ const FindSpecialistPage: React.FC = () => {
           <div className="mt-12 text-center bg-white p-8 rounded-lg max-w-3xl mx-auto border border-gray-200">
             <h3 className="text-bold text-xl mb-3 text-gray-800">Need Financial Assistance?</h3>
             <p className="text-gray-600 mb-6">
-              Several programs exist to help cover the cost of colorectal cancer screening for those who qualify. Don&apos;t let
-              financial concerns prevent you from getting screened.
+              Several programs exist to help cover the cost of colorectal cancer screening for those who qualify.
+              Don&apos;t let financial concerns prevent you from getting screened.
             </p>
             <Button size="lg">Explore Financial Assistance Options</Button>
           </div>

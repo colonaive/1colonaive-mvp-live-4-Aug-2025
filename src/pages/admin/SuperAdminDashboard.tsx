@@ -1,11 +1,11 @@
 // /home/project/src/pages/admin/SuperAdminDashboard.tsx
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { Card, CardContent } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
-import { 
-  Users, Calendar, FileText, Database, Settings, 
-  BarChart3, Shield, Activity, AlertTriangle,
-  Download, RefreshCw, Search, Filter, Eye, Edit, Trash2, Stethoscope
+import {
+  Users, Calendar, FileText, Database, Settings,
+  BarChart3, Shield, Activity, Download, RefreshCw, Search, Filter, Eye, Stethoscope
 } from 'lucide-react';
 import { supabase } from '../../supabase';
 import { useAuth } from '../../contexts/AuthContext';
@@ -98,7 +98,6 @@ const SuperAdminDashboard: React.FC = () => {
 
       if (error) throw error;
 
-      // Refresh the specialists list
       await fetchSpecialists();
     } catch (error) {
       console.error('Error updating specialist approval:', error);
@@ -109,8 +108,7 @@ const SuperAdminDashboard: React.FC = () => {
   const fetchDashboardStats = async () => {
     try {
       setLoading(true);
-      
-      // Fetch statistics from various tables
+
       const [
         usersResult,
         eventsResult,
@@ -215,7 +213,7 @@ const SuperAdminDashboard: React.FC = () => {
               Refresh
             </Button>
           </div>
-          
+
           <div className="space-y-3">
             {stats.recentActivity.length > 0 ? (
               stats.recentActivity.map((activity, index) => (
@@ -262,7 +260,7 @@ const SuperAdminDashboard: React.FC = () => {
             </Button>
           </div>
         </div>
-        
+
         <div className="bg-gray-50 p-8 rounded-lg text-center">
           <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
           <h4 className="text-lg font-medium text-gray-900 mb-2">User Management Interface</h4>
@@ -333,13 +331,30 @@ const SuperAdminDashboard: React.FC = () => {
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-semibold">Project Partner Management</h3>
             <div className="flex items-center gap-3">
+              {/* New Partner Specialist (admin-curated) */}
+              <Link to="/admin/partner-specialists/new">
+                <Button size="sm" className="bg-teal-600 hover:bg-teal-700 text-white">
+                  <Stethoscope className="h-4 w-4 mr-2" />
+                  Add Partner Specialist
+                </Button>
+              </Link>
+
+              {/* View public directory */}
+              <a href="/find-a-specialist" target="_blank" rel="noopener noreferrer">
+                <Button size="sm" variant="outline">
+                  <Eye className="h-4 w-4 mr-2" />
+                  View Public Directory
+                </Button>
+              </a>
+
+              {/* Refresh */}
               <Button size="sm" variant="outline" onClick={fetchSpecialists}>
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Refresh
               </Button>
             </div>
           </div>
-          
+
           {specialistsLoading ? (
             <div className="text-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
@@ -353,11 +368,13 @@ const SuperAdminDashboard: React.FC = () => {
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <h4 className="text-lg font-semibold text-gray-900">{specialist.full_name}</h4>
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          specialist.is_approved 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-yellow-100 text-yellow-800'
-                        }`}>
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            specialist.is_approved
+                              ? 'bg-green-100 text-green-800'
+                              : 'bg-yellow-100 text-yellow-800'
+                          }`}
+                        >
                           {specialist.is_approved ? 'Approved' : 'Pending'}
                         </span>
                       </div>
@@ -367,7 +384,10 @@ const SuperAdminDashboard: React.FC = () => {
                       {specialist.specialties.length > 0 && (
                         <div className="flex flex-wrap gap-1 mb-2">
                           {specialist.specialties.map((specialty, index) => (
-                            <span key={index} className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800">
+                            <span
+                              key={index}
+                              className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800"
+                            >
                               {specialty}
                             </span>
                           ))}
@@ -380,9 +400,9 @@ const SuperAdminDashboard: React.FC = () => {
                     <div className="flex items-center gap-2">
                       <Button
                         size="sm"
-                        variant={specialist.is_approved ? "outline" : "default"}
+                        variant={specialist.is_approved ? 'outline' : 'primary'}
                         onClick={() => toggleSpecialistApproval(specialist.id, specialist.is_approved)}
-                        className={specialist.is_approved ? "text-red-600 hover:text-red-700" : ""}
+                        className={specialist.is_approved ? 'text-red-600 hover:text-red-700' : ''}
                       >
                         {specialist.is_approved ? 'Remove Approval' : 'Approve'}
                       </Button>

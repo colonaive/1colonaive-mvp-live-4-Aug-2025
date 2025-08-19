@@ -71,6 +71,26 @@ export const getJoinLinks = (isAuthenticated: boolean): NavLink[] =>
         { label: "Read Real Stories", path: "/stories" },
       ];
 
+/** Small helper to pretty-print the account type */
+function prettyUserType(userType?: string | null) {
+  switch (userType) {
+    case "super_admin":
+      return "Super Admin Account";
+    case "admin":
+      return "Admin Account";
+    case "gpclinic":
+      return "GP Clinic Account";
+    case "specialist":
+      return "Specialist Account";
+    case "corporate_contact":
+      return "Corporate Account";
+    case "champion":
+      return "Member Account";
+    default:
+      return "Account";
+  }
+}
+
 /** ---------- Component ---------- */
 export const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -83,6 +103,7 @@ export const Header = () => {
   const headerRef = useRef<HTMLElement>(null);
   const { user, isAuthenticated, signOut, userType } = useAuth();
 
+  const isAdmin = userType === "super_admin" || userType === "admin";
   const joinLinks = getJoinLinks(isAuthenticated);
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
@@ -206,13 +227,20 @@ export const Header = () => {
 
   const renderChampionButton = () => {
     if (isAuthenticated && user) {
-      const userName = user.user_metadata?.full_name || user.email?.split("@")[0] || "User";
-      const dashboardPath = getDashboardRoute(userType);
+      const userName =
+        user.user_metadata?.full_name || user.email?.split("@")[0] || "User";
 
-      let profileSettingsPath = "/profile/champion";
+      // Default dashboard based on user type
+      let dashboardPath = getDashboardRoute(userType);
+      // Admin override
+      if (isAdmin) dashboardPath = "/admin/dashboard";
+
+      // Default profile-settings paths (none for Admin)
+      let profileSettingsPath: string | undefined = "/profile/champion";
       if (userType === "gpclinic") profileSettingsPath = "/profile/gp-clinic";
       else if (userType === "specialist") profileSettingsPath = "/profile/specialist";
       else if (userType === "corporate_contact") profileSettingsPath = "/dashboard/corporate";
+      else if (isAdmin) profileSettingsPath = undefined; // hide for super admin
 
       return (
         <div
@@ -226,7 +254,11 @@ export const Header = () => {
             className="bg-[#006BA6] hover:bg-[#005C8D] text-white rounded-full px-4 py-2 text-sm shadow-md flex items-center space-x-2"
           >
             <span>{userName?.split(" ")[0] || "User"}</span>
-            <ChevronDown className={`w-4 h-4 transition-transform ${activeSubmenu === "userMenu" ? "rotate-180" : ""}`} />
+            <ChevronDown
+              className={`w-4 h-4 transition-transform ${
+                activeSubmenu === "userMenu" ? "rotate-180" : ""
+              }`}
+            />
           </button>
 
           {activeSubmenu === "userMenu" && (
@@ -236,8 +268,10 @@ export const Header = () => {
                   <p className="text-sm font-semibold text-gray-900 truncate" title={userName}>
                     {userName}
                   </p>
-                  <p className="text-xs text-gray-500 capitalize">{userType?.replace(/_/g, " ")} Account</p>
+                  <p className="text-xs text-gray-500">{prettyUserType(userType)}</p>
                 </div>
+
+                {/* Dashboard (admin goes to /admin/dashboard) */}
                 <Link
                   to={dashboardPath}
                   className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -245,13 +279,29 @@ export const Header = () => {
                 >
                   My Dashboard
                 </Link>
-                <Link
-                  to={profileSettingsPath}
-                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  onClick={handleClose}
-                >
-                  Profile Settings
-                </Link>
+
+                {/* Super Admin quick link to Project Partners */}
+                {isAdmin && (
+                  <Link
+                    to="/admin/partner-specialists/new"
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    onClick={handleClose}
+                  >
+                    Project Partners
+                  </Link>
+                )}
+
+                {/* Profile settings (hidden for super admin) */}
+                {profileSettingsPath && (
+                  <Link
+                    to={profileSettingsPath}
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    onClick={handleClose}
+                  >
+                    Profile Settings
+                  </Link>
+                )}
+
                 <button
                   onClick={handleSignOut}
                   className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 hover:text-red-700"
