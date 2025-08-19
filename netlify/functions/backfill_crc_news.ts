@@ -2,9 +2,10 @@
 // Backfills 6 months (or ?months=N) of CRC news from Google CSE + PubMed into public.crc_news
 
 import crypto from "crypto";
+import { createClient } from '@supabase/supabase-js';
 
-const SUPABASE_URL = (process.env.SUPABASE_URL || "").trim();
-const SUPABASE_SERVICE_ROLE_KEY = (process.env.SUPABASE_SERVICE_ROLE_KEY || "").trim();
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const GOOGLE_CSE_ID = (process.env.GOOGLE_CSE_ID || "").trim();
 const GOOGLE_API_KEY = (process.env.GOOGLE_API_KEY || "").trim();
 
@@ -33,17 +34,25 @@ function mapCategory(text: string) {
 
 async function upsert(items: any[]) {
   if (!items.length) return;
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/crc_news`, {
-    method: "POST",
-    headers: {
-      apikey: SUPABASE_SERVICE_ROLE_KEY,
-      Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-      "Content-Type": "application/json",
-      Prefer: "resolution=merge-duplicates",
-    },
-    body: JSON.stringify(items),
-  });
-  if (!res.ok) throw new Error(`Supabase upsert failed: ${res.status} ${await res.text()}`);
+  
+  if (!SUPABASE_URL) {
+    throw new Error('SUPABASE_URL environment variable is required');
+  }
+  
+  if (!SUPABASE_SERVICE_ROLE_KEY) {
+    throw new Error('SUPABASE_SERVICE_ROLE_KEY environment variable is required');
+  }
+
+  // Create server-side client with service role key
+  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+  const { error } = await supabase
+    .from('crc_news')
+    .upsert(items, { onConflict: 'hash' });
+
+  if (error) {
+    throw new Error(`Supabase upsert failed: ${error.message}`);
+  }
 }
 
 function iso(date: any) {
@@ -186,6 +195,7 @@ export const handler = async (event: any) => {
 
     return {
       statusCode: 200,
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         inserted_or_merged: combined.length,
         months,
@@ -194,6 +204,11 @@ export const handler = async (event: any) => {
       }),
     };
   } catch (e: any) {
-    return { statusCode: 500, body: e?.message || "backfill error" };
+    console.error("News function error:", e?.message);
+    return { 
+      statusCode: 500, 
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ok: false, error: "server_error" }) 
+    };
   }
 };

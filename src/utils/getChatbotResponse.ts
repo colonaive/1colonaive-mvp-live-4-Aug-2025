@@ -13,14 +13,22 @@ interface ChatbotResult {
   error?: string;
 }
 
-const SUPABASE_FUNCTION_URL = "https://irkfrlvddkyjziuvrisb.supabase.co/functions/v1/chatbot";
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz..."; // Replace with your actual anon key
+const SUPABASE_FUNCTION_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chatbot`;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 export async function getChatbotResponse(
   message: string, 
   conversationHistory: string[] = []
 ): Promise<ChatbotResult> {
   try {
+    // Check for missing environment variables
+    if (!import.meta.env.VITE_SUPABASE_URL || !SUPABASE_ANON_KEY) {
+      return {
+        response: "Chatbot service is temporarily unavailable. Please contact support.",
+        error: "Configuration error"
+      };
+    }
+
     console.log("Sending message to chatbot:", message);
     console.log("With history:", conversationHistory);
 

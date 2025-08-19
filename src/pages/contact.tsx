@@ -110,8 +110,8 @@ const ContactPage: React.FC = () => {
         throw new Error('Contact endpoint not configured');
       }
 
-      // Temporarily use service role key for testing - should be replaced with correct anon key
-      const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY;
+      // Use anon key for contact form submissions
+      const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
       
       if (!supabaseKey) {
         throw new Error('Supabase configuration missing');

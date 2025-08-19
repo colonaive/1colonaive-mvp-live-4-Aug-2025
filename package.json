@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "dev:clean": "rimraf node_modules package-lock.json && npm i && npm run dev"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.7",
@@ -42,6 +43,7 @@
     "eslint-plugin-react-refresh": "^0.4.11",
     "globals": "^15.9.0",
     "postcss": "^8.4.35",
+    "rimraf": "^5.0.5",
     "supabase": "^2.24.3",
     "tailwindcss": "^3.4.1",
     "typescript": "^5.5.3",

@@ -1,6 +1,6 @@
 // src/pages/admin/NewsFeedAdminPage.tsx
 import React, { useEffect, useState } from "react";
-import { createClient } from "@supabase/supabase-js";
+import { supabase } from "../../supabase";
 import { Container } from "../../components/ui/Container";
 import { Button } from "../../components/ui/Button";
 
@@ -21,10 +21,7 @@ interface NewsItem {
   updated_at: string;
 }
 
-const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL!,
-  import.meta.env.VITE_SUPABASE_ANON_KEY!
-);
+// Using shared supabase client from import
 
 const AdminRow: React.FC<{
   item: NewsItem;

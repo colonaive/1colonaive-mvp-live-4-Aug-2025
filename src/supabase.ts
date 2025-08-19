@@ -1,8 +1,16 @@
 import { createClient } from '@supabase/supabase-js'
-// Your ACTUAL Supabase project credentials 
-const supabaseUrl = 'https://irkfrlvddkyjziuvrisb.supabase.co'
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlya2ZybHZkZGt5anppdXZyaXNiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEzNDk0NjgsImV4cCI6MjA2NjkyNTQ2OH0.5yUxCnz_kHlEMX7caL4dGsF22F6YKlVUDWUyIY6L_Cc'
 
+// Frontend client using environment variables (build-time)
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL!
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY!
+
+if (!supabaseUrl) {
+  throw new Error('VITE_SUPABASE_URL environment variable is required')
+}
+
+if (!supabaseAnonKey) {
+  throw new Error('VITE_SUPABASE_ANON_KEY environment variable is required')
+}
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 

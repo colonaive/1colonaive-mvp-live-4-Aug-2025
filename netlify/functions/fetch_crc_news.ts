@@ -1,6 +1,7 @@
 // @ts-nocheck
 
 import crypto from "crypto";
+import { createClient } from '@supabase/supabase-js';
 // rss-parser types are messy for functions; ignore them.
 // @ts-ignore
 import Parser from "rss-parser";
@@ -75,23 +76,27 @@ function mapCategory(text: string, fallback: "Clinical Research" | "Screening & 
 
 async function upsert(items: any[]) {
   if (!items.length) return;
-  const url = (process.env.SUPABASE_URL || "").trim();
-  const key = (process.env.SUPABASE_SERVICE_ROLE_KEY || "").trim();
+  
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  
+  if (!url) {
+    throw new Error('SUPABASE_URL environment variable is required');
+  }
+  
+  if (!key) {
+    throw new Error('SUPABASE_SERVICE_ROLE_KEY environment variable is required');
+  }
 
-  const res = await fetch(`${url}/rest/v1/crc_news`, {
-    method: "POST",
-    headers: {
-      apikey: key,
-      Authorization: `Bearer ${key}`,
-      "Content-Type": "application/json",
-      Prefer: "resolution=merge-duplicates",
-    },
-    body: JSON.stringify(items),
-  });
+  // Create server-side client with service role key
+  const supabase = createClient(url, key);
 
-  if (!res.ok) {
-    const txt = await res.text();
-    throw new Error(`Supabase upsert failed: ${res.status} ${txt}`);
+  const { error } = await supabase
+    .from('crc_news')
+    .upsert(items, { onConflict: 'hash' });
+
+  if (error) {
+    throw new Error(`Supabase upsert failed: ${error.message}`);
   }
 }
 
@@ -183,8 +188,17 @@ export async function handler(event: any) {
   try {
     await upsert(collected);
   } catch (e: any) {
-    return { statusCode: 500, body: e?.message || "upsert error" };
+    console.error("News function error:", e?.message);
+    return { 
+      statusCode: 500, 
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ok: false, error: "server_error" }) 
+    };
   }
 
-  return { statusCode: 200, body: JSON.stringify({ inserted_or_merged: collected.length, fast: FAST }) };
+  return { 
+    statusCode: 200, 
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ inserted_or_merged: collected.length, fast: FAST }) 
+  };
 }

@@ -74,7 +74,7 @@ const ReferFriendForm: React.FC = () => {
           // Try to send email via edge function
           try {
             const endpoint = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-referral-email`;
-            const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY;
+            const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
             
             if (!endpoint || !supabaseKey) {
               throw new Error('Email service configuration missing');

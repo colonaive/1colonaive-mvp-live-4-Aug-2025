@@ -2,18 +2,27 @@
   command = "npm run build"
   publish = "dist"
 
-[[redirects]]
-  from = "/api/*"
-  to = "https://irkfrlvddkyjziuvrisb.supabase.co/functions/v1/:splat"
-  status = 200
-  force = true
-  headers = { Authorization = "Bearer YOUR_SUPABASE_ANON_KEY" }
+# Vite SPA configuration - no framework plugin needed
 
-# netlify.toml
 [functions]
   node_bundler = "esbuild"
   external_node_modules = ["rss-parser"]
 
+# Environment variables for functions are set in Netlify Dashboard
+# SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, OPENAI_API_KEY, etc.
+
+[[redirects]]
+  from = "/.netlify/functions/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
+# SPA fallback - serve index.html for all routes not matching files or functions
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Scheduled function for fetching CRC news
 [[scheduled.functions]]
   name = "fetch_crc_news"
-  cron = "0 * * * *"   # hourly
+  cron = "0 */2 * * *"   # every 2 hours

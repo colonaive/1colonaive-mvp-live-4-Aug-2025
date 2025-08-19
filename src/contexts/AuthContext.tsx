@@ -113,6 +113,12 @@ useEffect(() => {
   async function signIn(email: string, password: string) {
     try {
       console.log('[AuthContext] Signing in user:', email)
+      
+      // Check for missing environment variables
+      if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+        return { success: false, error: 'System configuration error. Please contact support.' }
+      }
+      
       const result = await authApi.signIn(email, password)
       
       if (result.error) {
@@ -120,7 +126,17 @@ useEffect(() => {
         
         // Check if the error is due to email confirmation
         if (result.error.message.includes('Email not confirmed')) {
-          return { success: false, error: result.error.message, requiresEmailConfirmation: true }
+          return { success: false, error: 'Please verify your email to continue.', requiresEmailConfirmation: true }
+        }
+        
+        // Check for invalid credentials
+        if (result.error.message.includes('Invalid login credentials') || result.error.message.includes('invalid_credentials')) {
+          return { success: false, error: 'Email or password is incorrect.' }
+        }
+        
+        // Check for API key errors
+        if (result.error.message.includes('Invalid API key')) {
+          return { success: false, error: 'System configuration error. Please contact support.' }
         }
         
         return { success: false, error: result.error.message }
@@ -137,24 +153,44 @@ useEffect(() => {
   async function signUp(email: string, password: string, userData = {}) {
     try {
       console.log('[AuthContext] Signing up user:', email)
+      
+      // Check for missing environment variables
+      if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+        return { success: false, error: 'System configuration error. Please contact support.' }
+      }
+      
       const result = await authApi.signUp(email, password, userData)
       
       if (result.error) {
         console.error('[AuthContext] Sign up error:', result.error)
-       // Provide more detailed error message for debugging
-       const errorMessage = result.error.message || 'Unknown error';
-       console.error('[AuthContext] Detailed error:', errorMessage);
-       return { success: false, error: errorMessage }
+        
+        // Check for email already registered
+        if (result.error.message.includes('already registered') || result.error.message.includes('User already registered')) {
+          return { success: false, error: 'This email is already registered. Try logging in instead.' }
+        }
+        
+        // Check for invalid email
+        if (result.error.message.includes('Invalid email')) {
+          return { success: false, error: 'Please enter a valid email address.' }
+        }
+        
+        // Check for API key errors
+        if (result.error.message.includes('Invalid API key')) {
+          return { success: false, error: 'System configuration error. Please contact support.' }
+        }
+        
+        const errorMessage = result.error.message || 'Unknown error';
+        console.error('[AuthContext] Detailed error:', errorMessage);
+        return { success: false, error: errorMessage }
       }
       
       console.log('[AuthContext] Sign up successful')
       return { success: true }
     } catch (error: any) {
       console.error('[AuthContext] Sign up exception:', error)
-     // Provide more detailed error message for debugging
-     const errorMessage = error.message || 'An unexpected error occurred';
-     console.error('[AuthContext] Detailed exception:', errorMessage);
-     return { success: false, error: errorMessage }
+      const errorMessage = error.message || 'An unexpected error occurred';
+      console.error('[AuthContext] Detailed exception:', errorMessage);
+      return { success: false, error: errorMessage }
     }
   }
 
