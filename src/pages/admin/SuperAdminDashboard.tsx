@@ -1,6 +1,6 @@
-// /home/project/src/pages/admin/SuperAdminDashboard.tsx
+// /src/pages/admin/SuperAdminDashboard.tsx
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import {
@@ -31,8 +31,9 @@ interface Specialist {
 }
 
 const SuperAdminDashboard: React.FC = () => {
+  const navigate = useNavigate();
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'specialists' | 'content' | 'events' | 'system' | 'settings'>('overview');
   const [stats, setStats] = useState<DashboardStats>({
     totalUsers: 0,
     totalEvents: 0,
@@ -70,20 +71,20 @@ const SuperAdminDashboard: React.FC = () => {
 
       if (error) throw error;
 
-      const formattedSpecialists: Specialist[] = data?.map((item: any) => ({
+      const formatted: Specialist[] = (data || []).map((item: any) => ({
         id: item.id,
         full_name: item.profiles?.full_name || 'N/A',
         email: item.profiles?.email || 'N/A',
         clinic_affiliation: item.clinic_affiliation,
         address: item.address,
         specialties: item.specialties || [],
-        is_approved: item.is_approved || false,
+        is_approved: !!item.is_approved,
         created_at: item.created_at,
-      })) || [];
+      }));
 
-      setSpecialists(formattedSpecialists);
-    } catch (error) {
-      console.error('Error fetching specialists:', error);
+      setSpecialists(formatted);
+    } catch (err) {
+      console.error('Error fetching specialists:', err);
     } finally {
       setSpecialistsLoading(false);
     }
@@ -97,10 +98,9 @@ const SuperAdminDashboard: React.FC = () => {
         .eq('id', specialistId);
 
       if (error) throw error;
-
       await fetchSpecialists();
-    } catch (error) {
-      console.error('Error updating specialist approval:', error);
+    } catch (err) {
+      console.error('Error updating specialist approval:', err);
       alert('Failed to update specialist approval status');
     }
   };
@@ -108,7 +108,6 @@ const SuperAdminDashboard: React.FC = () => {
   const fetchDashboardStats = async () => {
     try {
       setLoading(true);
-
       const [
         usersResult,
         eventsResult,
@@ -137,8 +136,8 @@ const SuperAdminDashboard: React.FC = () => {
         totalClinics: clinicsResult.count || 0,
         recentActivity: activityResult.data || []
       });
-    } catch (error) {
-      console.error('Error fetching dashboard stats:', error);
+    } catch (err) {
+      console.error('Error fetching dashboard stats:', err);
     } finally {
       setLoading(false);
     }
@@ -152,7 +151,7 @@ const SuperAdminDashboard: React.FC = () => {
     { id: 'events', label: 'Events', icon: <Calendar className="h-4 w-4" /> },
     { id: 'system', label: 'System Monitoring', icon: <Database className="h-4 w-4" /> },
     { id: 'settings', label: 'Settings', icon: <Settings className="h-4 w-4" /> },
-  ];
+  ] as const;
 
   const StatCard = ({ title, value, icon, trend }: any) => (
     <Card>
@@ -161,13 +160,9 @@ const SuperAdminDashboard: React.FC = () => {
           <div>
             <p className="text-sm font-medium text-gray-600">{title}</p>
             <p className="text-2xl font-bold text-gray-900">{value}</p>
-            {trend && (
-              <p className="text-sm text-green-600">+{trend}% from last month</p>
-            )}
+            {trend && <p className="text-sm text-green-600">+{trend}% from last month</p>}
           </div>
-          <div className="p-3 bg-blue-100 rounded-full">
-            {icon}
-          </div>
+          <div className="p-3 bg-blue-100 rounded-full">{icon}</div>
         </div>
       </CardContent>
     </Card>
@@ -175,35 +170,13 @@ const SuperAdminDashboard: React.FC = () => {
 
   const OverviewTab = () => (
     <div className="space-y-6">
-      {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard
-          title="Total Users"
-          value={stats.totalUsers.toLocaleString()}
-          icon={<Users className="h-6 w-6 text-blue-600" />}
-          trend={12}
-        />
-        <StatCard
-          title="Active Champions"
-          value={stats.activeChampions.toLocaleString()}
-          icon={<Shield className="h-6 w-6 text-green-600" />}
-          trend={8}
-        />
-        <StatCard
-          title="Total Events"
-          value={stats.totalEvents.toLocaleString()}
-          icon={<Calendar className="h-6 w-6 text-purple-600" />}
-          trend={15}
-        />
-        <StatCard
-          title="System Health"
-          value="98.5%"
-          icon={<Activity className="h-6 w-6 text-emerald-600" />}
-          trend={2}
-        />
+        <StatCard title="Total Users" value={stats.totalUsers.toLocaleString()} icon={<Users className="h-6 w-6 text-blue-600" />} trend={12} />
+        <StatCard title="Active Champions" value={stats.activeChampions.toLocaleString()} icon={<Shield className="h-6 w-6 text-green-600" />} trend={8} />
+        <StatCard title="Total Events" value={stats.totalEvents.toLocaleString()} icon={<Calendar className="h-6 w-6 text-purple-600" />} trend={15} />
+        <StatCard title="System Health" value="98.5%" icon={<Activity className="h-6 w-6 text-emerald-600" />} trend={2} />
       </div>
 
-      {/* Recent Activity */}
       <Card>
         <CardContent className="p-6">
           <div className="flex items-center justify-between mb-4">
@@ -220,9 +193,7 @@ const SuperAdminDashboard: React.FC = () => {
                 <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <div>
                     <p className="font-medium">{activity.action}</p>
-                    <p className="text-sm text-gray-600">
-                      {new Date(activity.created_at).toLocaleString()}
-                    </p>
+                    <p className="text-sm text-gray-600">{new Date(activity.created_at).toLocaleString()}</p>
                   </div>
                   <span className="text-sm text-blue-600">Admin</span>
                 </div>
@@ -243,7 +214,7 @@ const SuperAdminDashboard: React.FC = () => {
           <h3 className="text-lg font-semibold">User Management</h3>
           <div className="flex items-center gap-3">
             <div className="relative">
-              <Search className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
                 placeholder="Search users..."
@@ -275,13 +246,23 @@ const SuperAdminDashboard: React.FC = () => {
   const ContentManagementTab = () => (
     <Card>
       <CardContent className="p-6">
-        <h3 className="text-lg font-semibold mb-6">Content Management</h3>
+        {/* >>> Quick actions row with CSR link <<< */}
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-lg font-semibold">Content Management</h3>
+          <div className="flex items-center gap-3">
+            {/* Opens the CSR partners admin page */}
+            <a href="/admin/csr-partners">
+              <Button className="bg-teal-600 hover:bg-teal-700 text-white">
+                Manage CSR Partners
+              </Button>
+            </a>
+          </div>
+        </div>
+
         <div className="bg-gray-50 p-8 rounded-lg text-center">
           <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
           <h4 className="text-lg font-medium text-gray-900 mb-2">Content Management System</h4>
-          <p className="text-gray-600">
-            Manage stories, educational content, and approve user submissions.
-          </p>
+          <p className="text-gray-600">Manage stories, educational content, and approve user submissions.</p>
         </div>
       </CardContent>
     </Card>
@@ -294,9 +275,7 @@ const SuperAdminDashboard: React.FC = () => {
         <div className="bg-gray-50 p-8 rounded-lg text-center">
           <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
           <h4 className="text-lg font-medium text-gray-900 mb-2">Events Dashboard</h4>
-          <p className="text-gray-600">
-            Create, manage, and monitor all COLONAiVE events and webinars.
-          </p>
+          <p className="text-gray-600">Create, manage, and monitor all COLONAiVE events and webinars.</p>
         </div>
       </CardContent>
     </Card>
@@ -309,17 +288,14 @@ const SuperAdminDashboard: React.FC = () => {
         <div className="bg-gray-50 p-8 rounded-lg text-center">
           <Database className="h-12 w-12 text-gray-400 mx-auto mb-4" />
           <h4 className="text-lg font-medium text-gray-900 mb-2">System Health Monitor</h4>
-          <p className="text-gray-600">
-            Monitor system performance, database status, and security logs.
-          </p>
+          <p className="text-gray-600">Monitor system performance, database status, and security logs.</p>
         </div>
       </CardContent>
     </Card>
   );
 
   const SpecialistsTab = () => {
-    // Load specialists when this tab is first accessed
-    React.useEffect(() => {
+    useEffect(() => {
       if (activeTab === 'specialists' && specialists.length === 0) {
         fetchSpecialists();
       }
@@ -331,13 +307,15 @@ const SuperAdminDashboard: React.FC = () => {
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-semibold">Project Partner Management</h3>
             <div className="flex items-center gap-3">
-              {/* New Partner Specialist (admin-curated) */}
-              <Link to="/admin/partner-specialists/new">
-                <Button size="sm" className="bg-teal-600 hover:bg-teal-700 text-white">
-                  <Stethoscope className="h-4 w-4 mr-2" />
-                  Add Partner Specialist
-                </Button>
-              </Link>
+              {/* Admin-curated specialist entry form */}
+              <Button
+                size="sm"
+                className="bg-teal-600 hover:bg-teal-700 text-white"
+                onClick={() => navigate('/admin/partner-specialists/new')}
+              >
+                <Stethoscope className="h-4 w-4 mr-2" />
+                Add Partner Specialist
+              </Button>
 
               {/* View public directory */}
               <a href="/find-a-specialist" target="_blank" rel="noopener noreferrer">
@@ -370,9 +348,7 @@ const SuperAdminDashboard: React.FC = () => {
                         <h4 className="text-lg font-semibold text-gray-900">{specialist.full_name}</h4>
                         <span
                           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            specialist.is_approved
-                              ? 'bg-green-100 text-green-800'
-                              : 'bg-yellow-100 text-yellow-800'
+                            specialist.is_approved ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
                           }`}
                         >
                           {specialist.is_approved ? 'Approved' : 'Pending'}
@@ -398,14 +374,23 @@ const SuperAdminDashboard: React.FC = () => {
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Button
-                        size="sm"
-                        variant={specialist.is_approved ? 'outline' : 'primary'}
-                        onClick={() => toggleSpecialistApproval(specialist.id, specialist.is_approved)}
-                        className={specialist.is_approved ? 'text-red-600 hover:text-red-700' : ''}
-                      >
-                        {specialist.is_approved ? 'Remove Approval' : 'Approve'}
-                      </Button>
+                      {specialist.is_approved ? (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-red-600 hover:text-red-700"
+                          onClick={() => toggleSpecialistApproval(specialist.id, true)}
+                        >
+                          Remove Approval
+                        </Button>
+                      ) : (
+                        <Button
+                          size="sm"
+                          onClick={() => toggleSpecialistApproval(specialist.id, false)}
+                        >
+                          Approve
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -415,9 +400,7 @@ const SuperAdminDashboard: React.FC = () => {
             <div className="bg-gray-50 p-8 rounded-lg text-center">
               <Stethoscope className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h4 className="text-lg font-medium text-gray-900 mb-2">No Specialist Applications</h4>
-              <p className="text-gray-600">
-                No specialist applications have been submitted yet.
-              </p>
+              <p className="text-gray-600">No specialist applications have been submitted yet.</p>
             </div>
           )}
         </CardContent>
@@ -432,9 +415,7 @@ const SuperAdminDashboard: React.FC = () => {
         <div className="bg-gray-50 p-8 rounded-lg text-center">
           <Settings className="h-12 w-12 text-gray-400 mx-auto mb-4" />
           <h4 className="text-lg font-medium text-gray-900 mb-2">Administration Settings</h4>
-          <p className="text-gray-600">
-            Configure system settings, security parameters, and administrative preferences.
-          </p>
+          <p className="text-gray-600">Configure system settings, security parameters, and administrative preferences.</p>
         </div>
       </CardContent>
     </Card>
@@ -502,7 +483,7 @@ const SuperAdminDashboard: React.FC = () => {
             {tabs.map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => setActiveTab(tab.id as typeof activeTab)}
                 className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm ${
                   activeTab === tab.id
                     ? 'border-blue-500 text-blue-600'
@@ -518,9 +499,7 @@ const SuperAdminDashboard: React.FC = () => {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {renderTabContent()}
-      </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">{renderTabContent()}</div>
     </div>
   );
 };

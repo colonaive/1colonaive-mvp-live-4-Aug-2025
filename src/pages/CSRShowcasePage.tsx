@@ -1,103 +1,130 @@
-import React, { useState, useEffect } from 'react';
-import { Container } from '../components/ui/Container';
-import { Card, CardContent } from '../components/ui/Card';
-import { Link } from 'react-router-dom';
-import { Building2, Users, Heart, Loader2 } from 'lucide-react';
-import { supabase } from '../supabase'; // Make sure this path is correct
+// /src/pages/CSRShowcasePage.tsx
+import React, { useEffect, useState } from "react";
+import { Container } from "@/components/ui/Container";
+import { Card, CardContent } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+import { supabase } from "@/supabase";
 
-// Define a type for the showcase data
-interface ShowcaseSponsor {
+type CSRPartner = {
   id: string;
-  company_name: string;
-  sponsorship_tier: string;
-}
-
-// Helper to get tier details
-const getTierDetails = (tier: string) => {
-    if (tier.toLowerCase().includes('diamond')) {
-        return { icon: <Building2 className="mx-auto h-12 w-12 text-blue-600 mb-4" />, borderColor: 'border-blue-600', tierName: 'Diamond Tier' };
-    }
-    if (tier.toLowerCase().includes('platinum')) {
-        return { icon: <Users className="mx-auto h-12 w-12 text-teal-600 mb-4" />, borderColor: 'border-teal-500', tierName: 'Platinum Tier' };
-    }
-    return { icon: <Heart className="mx-auto h-12 w-12 text-pink-600 mb-4" />, borderColor: 'border-yellow-500', tierName: 'Gold Tier' };
+  name: string;
+  website: string | null;
+  blurb: string | null;
+  donation_tier: string | null;
+  tribute: string | null;
+  brands: string[] | null;
+  logo_url: string | null;
+  hero_image_url: string | null;
 };
 
 const CSRShowcasePage: React.FC = () => {
-    const [sponsors, setSponsors] = useState<ShowcaseSponsor[]>([]);
-    const [loading, setLoading] = useState(true);
+  const [rows, setRows] = useState<CSRPartner[]>([]);
+  const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        const fetchSponsors = async () => {
-            setLoading(true);
-            const { data, error } = await supabase
-              .from('corporate_sponsorships')
-              .select(`
-                id,
-                sponsorship_tier,
-                corporates ( company_name )
-              `)
-              .eq('status', 'active') // Only show active sponsors
-              .eq('is_publicly_visible', true) // Only show sponsors who agreed to be public
-              .limit(6); // Show up to 6 sponsors
+  useEffect(() => {
+    const run = async () => {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("csr_partners")
+        .select("*")
+        .eq("is_active", true)
+        .order("is_featured", { ascending: false })
+        .order("display_order", { ascending: true })
+        .order("created_at", { ascending: true });
 
-            if (error) {
-                console.error("Error fetching showcase sponsors:", error);
-            } else if (data) {
-                const formattedData = data
-                    .filter(item => item.corporates) // Ensure corporate data exists
-                    .map(item => ({
-                        id: item.id,
-                        sponsorship_tier: item.sponsorship_tier || 'Partner',
-                        company_name: item.corporates!.company_name
-                    }));
-                setSponsors(formattedData);
-            }
-            setLoading(false);
-        };
-        fetchSponsors();
-    }, []);
+      if (!error && data) setRows(data as CSRPartner[]);
+      setLoading(false);
+    };
+    run();
+  }, []);
 
   return (
-    <div className="pt-32">
-      {/* Hero Banner */}
-      <div className="bg-gradient-to-r from-blue-600 to-teal-600 text-white py-20">
-        <Container><div className="text-center max-w-4xl mx-auto"><h1 className="text-4xl md:text-5xl font-bold mb-4">Corporate Champions</h1><p className="text-xl mb-6">Recognizing organizations that lead Singapore's fight against colorectal cancer through their commitment to screening and prevention.</p><Link to="/signup/corporate"><button className="bg-white text-blue-600 font-medium px-6 py-3 rounded-md shadow hover:bg-blue-50 transition">Become a Corporate Champion →</button></Link></div></Container>
+    <div className="pt-20">
+      {/* Hero */}
+      <div className="bg-gradient-to-r from-blue-600 to-teal-500 text-white py-20">
+        <Container>
+          <div className="text-center max-w-3xl mx-auto">
+            <h1 className="text-4xl font-bold mb-3">Corporate Champions</h1>
+            <p className="text-white/90 text-lg">
+              Recognizing organizations that lead the fight against colorectal cancer through their
+              commitment to screening and prevention.
+            </p>
+            <div className="mt-6">
+              <a href="/register/corporate">
+                <Button>Become a Corporate Champion →</Button>
+              </a>
+            </div>
+          </div>
+        </Container>
       </div>
 
-      {/* CSR Sample Showcase */}
-      <section className="py-20 bg-white">
+      {/* Grid */}
+      <section className="py-14 bg-slate-50">
         <Container>
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-2">Our Esteemed Partners</h2>
-            <p className="text-lg text-gray-600">We are proud to partner with organizations committed to creating a healthier Singapore.</p>
-          </div>
-          
           {loading ? (
-            <div className="flex justify-center items-center gap-3 text-lg"><Loader2 className="h-8 w-8 animate-spin" />Loading Partners...</div>
-          ) : sponsors.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {sponsors.map((sponsor) => {
-                  const tierDetails = getTierDetails(sponsor.sponsorship_tier);
-                  return (
-                      <Card key={sponsor.id} className={`border-t-4 ${tierDetails.borderColor}`}>
-                          <CardContent className="p-8 text-center">
-                              {tierDetails.icon}
-                              <h3 className="text-xl font-semibold">{sponsor.company_name}</h3>
-                              <p className="text-sm text-gray-500 mb-4">{tierDetails.tierName}</p>
-                              {/* You can add a description here if you add it to your table */}
-                          </CardContent>
-                      </Card>
-                  );
-              })}
-            </div>
+            <p className="text-gray-600">Loading partners…</p>
+          ) : rows.length === 0 ? (
+            <Card>
+              <CardContent className="p-8 text-center text-gray-600">
+                Partners will appear here once added.
+              </CardContent>
+            </Card>
           ) : (
-            <div className="text-center text-gray-500">
-                <p>Our partnership program is just getting started.</p>
-                <p className="mt-2 font-semibold">Your company could be the first to be featured here!</p>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {rows.map((p) => (
+                <Card key={p.id} className="bg-white shadow hover:shadow-lg transition-shadow">
+                  <CardContent className="p-6">
+                    {p.hero_image_url ? (
+                      <img
+                        src={p.hero_image_url}
+                        alt={`${p.name} hero`}
+                        className="w-full h-40 object-cover rounded-md mb-4"
+                      />
+                    ) : null}
+                    <div className="flex items-center gap-3 mb-3">
+                      {p.logo_url ? (
+                        <img
+                          src={p.logo_url}
+                          alt={`${p.name} logo`}
+                          className="w-12 h-12 object-contain rounded"
+                        />
+                      ) : null}
+                      <div>
+                        <h3 className="text-lg font-bold">{p.name}</h3>
+                        {p.donation_tier ? (
+                          <p className="text-xs text-teal-700 font-semibold">{p.donation_tier}</p>
+                        ) : null}
+                      </div>
+                    </div>
+
+                    {p.blurb ? <p className="text-gray-700 mb-3">{p.blurb}</p> : null}
+                    {p.tribute ? (
+                      <p className="text-sm text-gray-500 italic mb-3">Tribute: {p.tribute}</p>
+                    ) : null}
+
+                    {p.brands && p.brands.length > 0 ? (
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {p.brands.map((b, i) => (
+                          <span
+                            key={i}
+                            className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full"
+                          >
+                            {b}
+                          </span>
+                        ))}
+                      </div>
+                    ) : null}
+
+                    {p.website ? (
+                      <a href={p.website} target="_blank" rel="noopener noreferrer">
+                        <Button className="w-full">Visit Website</Button>
+                      </a>
+                    ) : null}
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           )}
-
         </Container>
       </section>
     </div>
