@@ -47,7 +47,7 @@ const AdminCSRPartnerForm: React.FC = () => {
     if (!file) return null;
 
     // Ensure bucket exists in Supabase storage (public)
-    const { data, error } = await supabase.storage.from(bucket).upload(path, file, {
+    const { error } = await supabase.storage.from(bucket).upload(path, file, {
       cacheControl: "3600",
       upsert: true,
     });

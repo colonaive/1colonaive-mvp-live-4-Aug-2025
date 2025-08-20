@@ -5,7 +5,7 @@ import { Card, CardContent } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import {
   Users, Calendar, FileText, Database, Settings,
-  BarChart3, Shield, Activity, Download, RefreshCw, Search, Filter, Eye, Stethoscope, Plus
+  BarChart3, Shield, Activity, Download, RefreshCw, Search, Filter, Eye, Stethoscope, Plus, Building2
 } from 'lucide-react';
 import { supabase } from '../../supabase';
 import { useAuth } from '../../contexts/AuthContext';
@@ -204,6 +204,52 @@ const SuperAdminDashboard: React.FC = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Admin Tools & Editors */}
+      <Card>
+        <CardContent className="p-6">
+          <h3 className="text-lg font-semibold mb-6">Admin Tools & Editors</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="flex items-start justify-between rounded-xl border border-gray-200 p-5">
+              <div className="flex items-start gap-3">
+                <div className="rounded-lg bg-blue-50 p-3">
+                  <Building2 className="h-6 w-6 text-blue-600" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-900">CSR Partners Admin</h4>
+                  <p className="text-sm text-gray-600">Add, edit, and manage Corporate Champions and sponsors.</p>
+                </div>
+              </div>
+              <Button
+                size="sm"
+                onClick={() => navigate('/admin/csr')}
+                className="whitespace-nowrap"
+              >
+                Open
+              </Button>
+            </div>
+
+            <div className="flex items-start justify-between rounded-xl border border-gray-200 p-5">
+              <div className="flex items-start gap-3">
+                <div className="rounded-lg bg-emerald-50 p-3">
+                  <Stethoscope className="h-6 w-6 text-emerald-600" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-900">Partner Specialists Admin</h4>
+                  <p className="text-sm text-gray-600">Manage colorectal specialists listed in the public directory.</p>
+                </div>
+              </div>
+              <Button
+                size="sm"
+                onClick={() => navigate('/admin/partner-specialists')}
+                className="whitespace-nowrap"
+              >
+                Open
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 
@@ -313,6 +359,25 @@ const SuperAdminDashboard: React.FC = () => {
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Add Corporate Champion
+              </Button>
+
+              {/* NEW: direct links to the admin list pages */}
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => navigate('/admin/partner-specialists')}
+              >
+                <Stethoscope className="h-4 w-4 mr-2" />
+                Manage Specialists (Admin)
+              </Button>
+
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => navigate('/admin/csr')}
+              >
+                <Building2 className="h-4 w-4 mr-2" />
+                Manage CSR Partners (Admin)
               </Button>
 
               <a href="/find-a-specialist" target="_blank" rel="noopener noreferrer">
