@@ -14,7 +14,7 @@ const AdminCSRPartnerForm: React.FC = () => {
   const [name, setName] = useState("");
   const [website, setWebsite] = useState("");
   const [blurb, setBlurb] = useState(
-    "We’re proud to recognize this partner for championing early detection and treatment access in our RID-CRC™ movement."
+    "We’re proud to recognize this partner for championing early detection and treatment access as our COLONAiVE RID-CRC CSR™ sponsor."
   );
   const [donationTier, setDonationTier] = useState("Champion ($35k+)");
   const [tribute, setTribute] = useState("");
