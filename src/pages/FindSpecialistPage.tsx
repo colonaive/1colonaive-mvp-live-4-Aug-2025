@@ -2,12 +2,18 @@
 import { Link } from "react-router-dom";
 import { Container } from "@/components/ui/Container";
 import { Card, CardContent } from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button"; // <-- use default import if your Button exports default
-// If your Button is a named export, swap the line above with:
-// import { Button } from "@/components/ui/Button";
-import { Search, MapPin, Phone, Globe } from "lucide-react";
+import { Button } from "@/components/ui/Button";
+import { Search } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/supabase";
+
+/** ───────────────── Types ───────────────── */
+type LocationItem = {
+  label?: string;
+  address?: string;
+  phone?: string;
+  booking_url?: string;
+};
 
 type Specialist = {
   id: string;
@@ -23,8 +29,11 @@ type Specialist = {
   specialties: string[] | null;
   photo_url: string | null;
   display_order: number | null;
+  /** Optional multi-location JSONB (if you add it in the DB) */
+  locations?: LocationItem[] | null;
 };
 
+/** Small numbered list bullet used later */
 const CustomListItem = ({ number, children }: { number: number; children: React.ReactNode }) => (
   <li className="flex items-start">
     <div className="flex-shrink-0 flex items-center justify-center w-6 h-6 bg-blue-600 text-white rounded-full font-bold text-sm mr-4 mt-1">
@@ -34,6 +43,87 @@ const CustomListItem = ({ number, children }: { number: number; children: React.
   </li>
 );
 
+/** ───────────────── Address Scroller (handles multi-locations + fallback) ───────────────── */
+const AddressScroller: React.FC<{
+  locations?: LocationItem[] | null;
+  fallback?: { address?: string | null; phone?: string | null; booking_url?: string | null };
+}> = ({ locations, fallback }) => {
+  const prepared: LocationItem[] =
+    locations && locations.length
+      ? locations
+      : (fallback && (fallback.address || fallback.phone || fallback.booking_url)
+          ? [{ label: "Main clinic", address: fallback.address ?? undefined, phone: fallback.phone ?? undefined, booking_url: fallback.booking_url ?? undefined }]
+          : []);
+
+  const [i, setI] = useState(0);
+
+  // Auto-rotate every 4s
+  useEffect(() => {
+    if (prepared.length <= 1) return;
+    const t = setInterval(() => setI((x) => (x + 1) % prepared.length), 4000);
+    return () => clearInterval(t);
+  }, [prepared.length]);
+
+  if (!prepared.length) return null;
+  const loc = prepared[i];
+
+  return (
+    <div className="mt-2 rounded-md border border-gray-200 p-3 bg-white/60">
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-medium text-gray-700">
+          {loc.label || `Location ${i + 1}`}
+        </span>
+        {prepared.length > 1 && (
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              className="text-gray-500 hover:text-gray-800"
+              aria-label="Previous location"
+              onClick={(e) => {
+                e.stopPropagation();
+                setI((x) => (x - 1 + prepared.length) % prepared.length);
+              }}
+            >
+              ‹
+            </button>
+            <button
+              type="button"
+              className="text-gray-500 hover:text-gray-800"
+              aria-label="Next location"
+              onClick={(e) => {
+                e.stopPropagation();
+                setI((x) => (x + 1) % prepared.length);
+              }}
+            >
+              ›
+            </button>
+          </div>
+        )}
+      </div>
+
+      {loc.address && <div className="mt-1 text-sm text-gray-800 leading-snug">{loc.address}</div>}
+      {loc.phone && <div className="mt-1 text-sm text-gray-600">{loc.phone}</div>}
+      {loc.booking_url && (
+        <a
+          href={loc.booking_url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-2 inline-block text-sm text-blue-700 hover:underline"
+        >
+          Book appointment →
+        </a>
+      )}
+
+      {prepared.length > 1 && (
+        <div className="mt-2 text-[11px] text-gray-500">
+          {i + 1} / {prepared.length}
+        </div>
+      )}
+    </div>
+  );
+};
+
+/** ───────────────── Page ───────────────── */
 const FindSpecialistPage: React.FC = () => {
   const [rows, setRows] = useState<Specialist[]>([]);
   const [loading, setLoading] = useState(true);
@@ -45,7 +135,7 @@ const FindSpecialistPage: React.FC = () => {
       setLoading(true);
       const { data, error } = await supabase
         .from("partner_specialists")
-        .select("*")
+        .select("*") // safe whether or not 'locations' exists
         .eq("is_active", true)
         .order("display_order", { ascending: true })
         .order("created_at", { ascending: true });
@@ -207,38 +297,20 @@ const FindSpecialistPage: React.FC = () => {
                                 )}
                               </p>
 
-                              <div className="space-y-2 mb-4 text-gray-600">
-                                {s.address && (
-                                  <div className="flex items-center">
-                                    <MapPin className="h-4 w-4 mr-3 flex-shrink-0 text-gray-400" />
-                                    {s.address}
-                                  </div>
-                                )}
-                                {s.phone_number && (
-                                  <div className="flex items-center">
-                                    <Phone className="h-4 w-4 mr-3 flex-shrink-0 text-gray-400" />
-                                    {s.phone_number}
-                                  </div>
-                                )}
-                                {s.website && (
-                                  <div className="flex items-center">
-                                    <Globe className="h-4 w-4 mr-3 flex-shrink-0 text-gray-400" />
-                                    <a
-                                      href={s.website}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="text-blue-600 hover:underline"
-                                    >
-                                      Visit Website
-                                    </a>
-                                  </div>
-                                )}
-                              </div>
+                              {/* Address/locations box with tiny scroller */}
+                              <AddressScroller
+                                locations={s.locations}
+                                fallback={{
+                                  address: s.address,
+                                  phone: s.phone_number,
+                                  booking_url: s.appointment_url,
+                                }}
+                              />
 
                               {s.specialties && s.specialties.length > 0 && (
-                                <div>
+                                <div className="mt-4">
                                   <h4 className="text-sm font-semibold text-gray-500 mb-2">
-                                    Treatments & Specialties:
+                                    Treatments &amp; Specialties:
                                   </h4>
                                   <div className="flex flex-wrap gap-2">
                                     {s.specialties.map((tag, i) => (
@@ -275,7 +347,6 @@ const FindSpecialistPage: React.FC = () => {
                                 rel="noopener noreferrer"
                                 className="w-full md:w-[248px] inline-block"
                               >
-                                {/* Teal secondary CTA */}
                                 <Button className="w-full justify-center bg-teal-600 hover:bg-teal-700 text-white border-transparent">
                                   Consult for CRC Treatments
                                 </Button>
