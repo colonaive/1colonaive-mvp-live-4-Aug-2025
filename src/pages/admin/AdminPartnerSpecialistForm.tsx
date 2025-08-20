@@ -7,6 +7,21 @@ import { Container } from "../../components/ui/Container";
 import { supabase } from "../../supabase";
 import { ArrowLeft, Plus, Trash2, RefreshCw, Link as LinkIcon, Phone } from "lucide-react";
 
+/** ---------- Controlled list of common CRC specialties ---------- */
+const SPECIALTY_OPTIONS = [
+  "Colorectal surgery",
+  "Robotic colorectal surgery",
+  "Laparoscopic colorectal surgery",
+  "Transanal minimally invasive surgery (TAMIS)",
+  "Endoscopic mucosal resection (EMR)",
+  "Endoscopic submucosal dissection (ESD)",
+  "Endoscopic pilonidal sinus treatment (EPSiT)",
+  "Endorectal ultrasound (ERUS)",
+  "Polypectomy",
+  "Hemorrhoid treatment",
+  "Anal fistula treatment",
+];
+
 type LocationItem = {
   label?: string;
   address?: string;
@@ -15,32 +30,43 @@ type LocationItem = {
 };
 
 type SpecialistForm = {
-  doctor_name: string;
+  /** DB columns */
+  name: string;               // doctor's name
   clinic_name: string;
-  contact_number?: string;
-  clinic_website?: string;
-  profile_page_url?: string;
-  booking_url?: string;
-  region?: string;
-  specialties?: string;     // comma-separated input; we’ll split before save
-  clinic_address?: string;  // legacy single-address (optional)
-  photo_url?: string;
-  is_approved: boolean;     // UI flag; saved as is_active in DB
-  locations: LocationItem[]; // kept for future JSONB column, not saved yet
+  phone_number?: string | null;
+  website?: string | null;
+  appointment_url?: string | null;
+  profile_url?: string | null;
+  region?: string | null;
+  photo_url?: string | null;
+  is_active: boolean;
+  display_order?: number | null;
+  address?: string | null;    // legacy single address
+
+  /** UI-only -> saved into DB columns above */
+  specialtiesSelected: string[]; // from checklist
+  specialtiesOther: string;      // comma-separated extra tags
+  credentials?: string | null;   // new DB column
+
+  /** future-proof UI */
+  locations: LocationItem[];
 };
 
 const emptyForm: SpecialistForm = {
-  doctor_name: "",
+  name: "",
   clinic_name: "",
-  contact_number: "",
-  clinic_website: "",
-  profile_page_url: "",
-  booking_url: "",
+  phone_number: "",
+  website: "",
+  appointment_url: "",
+  profile_url: "",
   region: "",
-  specialties: "",
-  clinic_address: "",
   photo_url: "",
-  is_approved: true,
+  is_active: true,
+  display_order: 100,
+  address: "",
+  specialtiesSelected: [],
+  specialtiesOther: "",
+  credentials: "",
   locations: [{ label: "Main clinic", address: "", phone: "", booking_url: "" }],
 };
 
@@ -49,36 +75,33 @@ const AdminPartnerSpecialistForm: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<SpecialistForm>({ ...emptyForm });
 
-  // Prefill helper (optional)
+  /** Quick demo fill */
   const seedDr = () => {
     setForm((f) => ({
       ...f,
-      doctor_name: "Dr Daniel Lee Jin Keat",
-      clinic_name: "Seow-Choen Colorectal Centre Pte Ltd",
-      clinic_website: "https://www.colorectalsurgeon.com",
-      profile_page_url: "https://www.colorectalclinic.com/dr-daniel-lee",
-      contact_number: "+65 6738 6887",
+      name: "Dr Daniel Lee Jin Keat",
+      clinic_name: "Colorectal Clinic Associates",
+      phone_number: "+65 6643 9922",
+      website: "https://www.colorectalclinic.com/",
+      appointment_url: "https://www.colorectalclinic.com/#contact-form",
+      profile_url: "https://www.colorectalclinic.com/dr-daniel-lee",
       region: "Central",
-      specialties: "Colorectal surgery, Robotic surgery, Colonoscopy",
+      photo_url: "",
+      specialtiesSelected: ["Colorectal surgery", "Robotic colorectal surgery"],
+      specialtiesOther: "Geriatric colorectal care",
+      credentials: "MD, MMed (S’pore), FRCS (Edin), FAMS",
       locations: [
         {
-          label: "Paragon",
+          label: "Main clinic",
           address: "Paragon Medical Centre, 290 Orchard Road #06-06, Singapore",
-          phone: "+65 6738 6887",
-          booking_url: "",
-        },
-        {
-          label: "Novena",
-          address:
-            "38 Irrawaddy Road #06-30, Mount Elizabeth Novena Specialist Centre, Singapore",
-          phone: "+65 6738 6887",
-          booking_url: "",
+          phone: "+65 6643 9922",
+          booking_url: "https://www.colorectalclinic.com/#contact-form",
         },
       ],
     }));
   };
 
-  // Locations helpers
+  /** Locations helpers */
   const addLocation = () =>
     setForm((f) => ({
       ...f,
@@ -89,7 +112,10 @@ const AdminPartnerSpecialistForm: React.FC = () => {
     }));
 
   const removeLocation = (idx: number) =>
-    setForm((f) => ({ ...f, locations: f.locations.filter((_, i) => i !== idx) }));
+    setForm((f) => ({
+      ...f,
+      locations: f.locations.filter((_, i) => i !== idx),
+    }));
 
   const updateLocation = (idx: number, patch: Partial<LocationItem>) =>
     setForm((f) => {
@@ -99,57 +125,67 @@ const AdminPartnerSpecialistForm: React.FC = () => {
     });
 
   const onSave = async () => {
-    if (!form.doctor_name.trim() || !form.clinic_name.trim()) {
+    if (!form.name.trim() || !form.clinic_name.trim()) {
       alert("Doctor’s name and clinic name are required.");
       return;
     }
+
     try {
       setSaving(true);
 
-      // Split specialties into text[]
-      const specialtiesArray =
-        (form.specialties || "")
-          .split(",")
-          .map((s) => s.trim())
-          .filter(Boolean);
+      // Build final specialties array
+      const other = (form.specialtiesOther || "")
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
 
-      // Prefer first location’s address; fall back to legacy clinic_address
-      const primaryAddress =
-        form.locations?.[0]?.address?.trim() || form.clinic_address?.trim() || null;
+      const specialties = Array.from(new Set([...(form.specialtiesSelected || []), ...other]));
 
-      // Map UI fields to your table columns
+      // Always write first location to legacy single columns
+      const first = form.locations[0] || {};
+      const legacyAddress = first.address?.trim() || form.address || null;
+      const legacyPhone = first.phone?.trim() || form.phone_number || null;
+      const legacyAppt = first.booking_url?.trim() || form.appointment_url || null;
+
+      // Base payload aligned with your actual columns
       const payload: any = {
-        // DB: name (doctor’s name)
-        name: form.doctor_name.trim(),
+        name: form.name.trim(),
         clinic_name: form.clinic_name.trim(),
-
-        // DB: phone_number, website, appointment_url, profile_url
-        phone_number: form.contact_number?.trim() || null,
-        website: form.clinic_website?.trim() || null,
-        appointment_url: form.booking_url?.trim() || null,
-        profile_url: form.profile_page_url?.trim() || null,
-
+        phone_number: legacyPhone || null,
+        website: form.website?.trim() || null,
+        appointment_url: legacyAppt || null,
+        profile_url: form.profile_url?.trim() || null,
         region: form.region || null,
-        specialties: specialtiesArray.length ? specialtiesArray : null,
         photo_url: form.photo_url?.trim() || null,
-
-        // DB: is_active
-        is_active: form.is_approved,
-
-        // DB: address (single)
-        address: primaryAddress,
+        is_active: !!form.is_active,
+        display_order: form.display_order ?? 100,
+        address: legacyAddress,
+        specialties: specialties.length ? specialties : null,
+        credentials: form.credentials?.trim() || null, // new column
       };
 
-      // NOTE: We are NOT sending `locations` because your table
-      // doesn’t have a JSONB `locations` column yet.
-      // Add it later, then you can include `locations: form.locations`.
+      // If you’ve added the JSONB column `locations`, try to save the full array as well.
+      // If the column doesn’t exist yet, Supabase will error — that’s fine, we’ll ignore it.
+      let saveLocations = true;
+      try {
+        const { error: locErr } = await supabase
+          .from("partner_specialists")
+          .insert([{ ...payload, locations: form.locations }]); // attempt with locations
+        if (locErr) {
+          // fall back: insert without the JSONB column
+          saveLocations = false;
+          throw locErr;
+        }
+      } catch {
+        const { error } = await supabase
+          .from("partner_specialists")
+          .insert([{ ...payload }]); // no locations column
+        if (error) throw error;
+      }
 
-      const { error } = await supabase.from("partner_specialists").insert(payload);
-      if (error) throw error;
-
-      alert("Saved.");
+      alert(`Saved.${saveLocations ? "" : " (Locations saved only to first address/phone/appointment.)"}`);
       setForm({ ...emptyForm });
-      // nav("/admin/partner-specialists"); // enable if you have the list page
+      // nav("/admin/dashboard"); // optional
     } catch (e: any) {
       console.error(e);
       alert(`Save failed: ${e.message || e}`);
@@ -157,6 +193,14 @@ const AdminPartnerSpecialistForm: React.FC = () => {
       setSaving(false);
     }
   };
+
+  /** Toggle a checklist item */
+  const toggleSpecialty = (value: string) =>
+    setForm((f) => {
+      const set = new Set(f.specialtiesSelected);
+      set.has(value) ? set.delete(value) : set.add(value);
+      return { ...f, specialtiesSelected: Array.from(set) };
+    });
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -193,62 +237,62 @@ const AdminPartnerSpecialistForm: React.FC = () => {
             <div className="grid md:grid-cols-2 gap-6">
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1">Doctor’s Name *</label>
-                  <input
-                    className="w-full border rounded-md px-3 py-2"
-                    value={form.doctor_name}
-                    onChange={(e) => setForm((f) => ({ ...f, doctor_name: e.target.value }))}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1">Clinic / Centre Name *</label>
-                  <input
-                    className="w-full border rounded-md px-3 py-2"
-                    value={form.clinic_name}
-                    onChange={(e) => setForm((f) => ({ ...f, clinic_name: e.target.value }))}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1">Contact Number</label>
-                  <div className="flex items-center">
-                    <span className="inline-flex items-center px-3 h-10 bg-gray-100 rounded-l-md border border-r-0">
-                      <Phone className="h-4 w-4" />
-                    </span>
+                    <label className="block text-sm font-medium mb-1">Doctor’s Name *</label>
                     <input
-                      className="w-full border rounded-r-md px-3 py-2 h-10"
-                      value={form.contact_number || ""}
-                      onChange={(e) => setForm((f) => ({ ...f, contact_number: e.target.value }))}
+                      className="w-full border rounded-md px-3 py-2"
+                      value={form.name}
+                      onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Clinic / Centre Name *</label>
+                    <input
+                      className="w-full border rounded-md px-3 py-2"
+                      value={form.clinic_name}
+                      onChange={(e) => setForm((f) => ({ ...f, clinic_name: e.target.value }))}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Contact Number</label>
+                    <div className="flex items-center">
+                      <span className="inline-flex items-center px-3 h-10 bg-gray-100 rounded-l-md border border-r-0">
+                        <Phone className="h-4 w-4" />
+                      </span>
+                      <input
+                        className="w-full border rounded-r-md px-3 py-2 h-10"
+                        value={form.phone_number || ""}
+                        onChange={(e) => setForm((f) => ({ ...f, phone_number: e.target.value }))}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Clinic Website</label>
+                    <div className="flex items-center">
+                      <span className="inline-flex items-center px-3 h-10 bg-gray-100 rounded-l-md border border-r-0">
+                        <LinkIcon className="h-4 w-4" />
+                      </span>
+                      <input
+                        className="w-full border rounded-r-md px-3 py-2 h-10"
+                        placeholder="https://example.com"
+                        value={form.website || ""}
+                        onChange={(e) => setForm((f) => ({ ...f, website: e.target.value }))}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Doctor Profile Page URL</label>
+                    <input
+                      className="w-full border rounded-md px-3 py-2"
+                      placeholder="Clinic bio page for this doctor"
+                      value={form.profile_url || ""}
+                      onChange={(e) => setForm((f) => ({ ...f, profile_url: e.target.value }))}
                     />
                   </div>
                 </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1">Clinic Website</label>
-                  <div className="flex items-center">
-                    <span className="inline-flex items-center px-3 h-10 bg-gray-100 rounded-l-md border border-r-0">
-                      <LinkIcon className="h-4 w-4" />
-                    </span>
-                    <input
-                      className="w-full border rounded-r-md px-3 py-2 h-10"
-                      placeholder="https://example.com"
-                      value={form.clinic_website || ""}
-                      onChange={(e) => setForm((f) => ({ ...f, clinic_website: e.target.value }))}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1">Doctor Profile Page URL</label>
-                  <input
-                    className="w-full border rounded-md px-3 py-2"
-                    placeholder="Clinic bio page for this doctor"
-                    value={form.profile_page_url || ""}
-                    onChange={(e) => setForm((f) => ({ ...f, profile_page_url: e.target.value }))}
-                  />
-                </div>
-              </div>
 
               <div className="space-y-4">
                 <div>
@@ -256,8 +300,8 @@ const AdminPartnerSpecialistForm: React.FC = () => {
                   <input
                     className="w-full border rounded-md px-3 py-2"
                     placeholder="Direct booking link if available"
-                    value={form.booking_url || ""}
-                    onChange={(e) => setForm((f) => ({ ...f, booking_url: e.target.value }))}
+                    value={form.appointment_url || ""}
+                    onChange={(e) => setForm((f) => ({ ...f, appointment_url: e.target.value }))}
                   />
                 </div>
 
@@ -277,13 +321,14 @@ const AdminPartnerSpecialistForm: React.FC = () => {
                   </select>
                 </div>
 
+                {/* Credentials / academic achievements */}
                 <div>
-                  <label className="block text-sm font-medium mb-1">Specialties (comma-separated)</label>
-                  <input
-                    className="w-full border rounded-md px-3 py-2"
-                    placeholder="e.g., Colorectal surgery, Robotic surgery"
-                    value={form.specialties || ""}
-                    onChange={(e) => setForm((f) => ({ ...f, specialties: e.target.value }))}
+                  <label className="block text-sm font-medium mb-1">Credentials / Academic Achievements</label>
+                  <textarea
+                    className="w-full border rounded-md px-3 py-2 min-h-[72px]"
+                    placeholder="e.g., MD, MMed (S’pore), FRCS (Edin), FAMS"
+                    value={form.credentials || ""}
+                    onChange={(e) => setForm((f) => ({ ...f, credentials: e.target.value }))}
                   />
                 </div>
 
@@ -299,19 +344,49 @@ const AdminPartnerSpecialistForm: React.FC = () => {
 
                 <div className="flex items-center gap-2 pt-2">
                   <input
-                    id="approved"
+                    id="active"
                     type="checkbox"
-                    checked={form.is_approved}
-                    onChange={(e) => setForm((f) => ({ ...f, is_approved: e.target.checked }))}
+                    checked={form.is_active}
+                    onChange={(e) => setForm((f) => ({ ...f, is_active: e.target.checked }))}
                   />
-                  <label htmlFor="approved" className="text-sm">
-                    Approved
+                  <label htmlFor="active" className="text-sm">
+                    Active
                   </label>
                 </div>
               </div>
             </div>
 
-            {/* Multi-location block */}
+            {/* Specialties */}
+            <div className="mt-8">
+              <h2 className="text-lg font-semibold mb-3">Specialties</h2>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                {SPECIALTY_OPTIONS.map((opt) => {
+                  const checked = form.specialtiesSelected.includes(opt);
+                  return (
+                    <label key={opt} className="flex items-center gap-2 bg-white border rounded-md px-3 py-2">
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={() => toggleSpecialty(opt)}
+                      />
+                      <span className="text-sm">{opt}</span>
+                    </label>
+                  );
+                })}
+              </div>
+
+              <div className="mt-3">
+                <label className="block text-sm font-medium mb-1">Other (comma-separated)</label>
+                <input
+                  className="w-full border rounded-md px-3 py-2"
+                  placeholder="e.g., Geriatric colorectal care, Genetic counseling"
+                  value={form.specialtiesOther}
+                  onChange={(e) => setForm((f) => ({ ...f, specialtiesOther: e.target.value }))}
+                />
+              </div>
+            </div>
+
+            {/* Locations */}
             <div className="mt-8">
               <div className="flex items-center justify-between mb-3">
                 <h2 className="text-lg font-semibold">Locations</h2>
@@ -323,7 +398,7 @@ const AdminPartnerSpecialistForm: React.FC = () => {
 
               <div className="space-y-4">
                 {form.locations.map((loc, idx) => (
-                  <div key={idx} className="border rounded-lg p-4">
+                  <div key={idx} className="border rounded-lg p-4 bg-white">
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm font-medium mb-1">Label</label>
@@ -360,6 +435,7 @@ const AdminPartnerSpecialistForm: React.FC = () => {
                         />
                       </div>
                     </div>
+
                     {form.locations.length > 1 && (
                       <div className="mt-3">
                         <Button

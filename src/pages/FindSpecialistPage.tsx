@@ -29,6 +29,8 @@ type Specialist = {
   specialties: string[] | null;
   photo_url: string | null;
   display_order: number | null;
+  /** NEW: academic credentials (optional) */
+  credentials?: string | null;
   /** Optional multi-location JSONB (if you add it in the DB) */
   locations?: LocationItem[] | null;
 };
@@ -135,7 +137,7 @@ const FindSpecialistPage: React.FC = () => {
       setLoading(true);
       const { data, error } = await supabase
         .from("partner_specialists")
-        .select("*") // safe whether or not 'locations' exists
+        .select("*") // safe whether or not 'locations' / 'credentials' exist
         .eq("is_active", true)
         .order("display_order", { ascending: true })
         .order("created_at", { ascending: true });
@@ -282,7 +284,7 @@ const FindSpecialistPage: React.FC = () => {
                               <h3 className="text-xl font-bold text-gray-800">{s.clinic_name}</h3>
 
                               {/* Doctor name → profile_url (fallback to website) */}
-                              <p className="text-md font-semibold text-blue-700 mb-3">
+                              <p className="text-md font-semibold text-blue-700 mb-1">
                                 {s.profile_url || s.website ? (
                                   <a
                                     href={s.profile_url || s.website!}
@@ -296,6 +298,11 @@ const FindSpecialistPage: React.FC = () => {
                                   s.name
                                 )}
                               </p>
+
+                              {/* NEW: credentials / academic achievements */}
+                              {s.credentials && (
+                                <p className="text-sm text-gray-500 mb-3">{s.credentials}</p>
+                              )}
 
                               {/* Address/locations box with tiny scroller */}
                               <AddressScroller
