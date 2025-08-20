@@ -184,7 +184,9 @@ const FindSpecialistPage: React.FC = () => {
                 ← Back to Triage Assessment
               </Link>
             </div>
-            <h1 className="text-4xl font-bold mb-4">Find a COLONAiVE Project Partner Specialist</h1>
+            <h1 className="text-4xl font-bold mb-4">
+  Find a COLONAiVE<sup className="text-sm align-super">™</sup> Partner Specialist
+</h1>
             <p className="text-xl mb-8">
               For Colonoscopy, Early Detection, Polyps Removal and Early CRC Treatment needs.
             </p>
