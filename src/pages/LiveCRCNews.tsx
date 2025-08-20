@@ -142,11 +142,15 @@ const ColumnBox: React.FC<{
 }> = ({ title, items }) => {
   const accent = accents[title];
   return (
-    <section className="flex flex-col rounded-2xl bg-white border border-gray-200 overflow-hidden shadow-sm">
+    // Create a local stacking context and keep it below the site header
+    <section className="relative z-0 flex flex-col rounded-2xl bg-white border border-gray-200 overflow-hidden shadow-sm">
       <div className={`px-4 py-3 ${accent.headerBg} ${accent.headerText} text-sm font-semibold tracking-wide`}>
         {title.toUpperCase()}
       </div>
-      <div className={`p-4 space-y-3 max-h-[900px] md:max-h-[700px] lg:max-h-[800px] overflow-y-auto ${accent.ring}`}>
+      {/* Contained scroll; never “bleeds” into the page or header */}
+      <div
+        className={`p-4 space-y-3 max-h-[900px] md:max-h-[700px] lg:max-h-[800px] overflow-y-auto overscroll-contain ${accent.ring}`}
+      >
         {items.length === 0 ? (
           <EmptyBox label={title} />
         ) : (
@@ -203,7 +207,8 @@ const LiveCRCNews: React.FC = () => {
   }, [items]);
 
   return (
-    <main className="bg-gray-50">
+    // isolate = new stacking context for this page; z-0 keeps it under the header
+    <main className="relative z-0 isolate bg-gray-50">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
         <header className="mb-6">
           <h1 className="text-3xl font-bold tracking-tight text-gray-900">Latest in Colorectal Cancer</h1>
@@ -265,7 +270,9 @@ const LiveCRCNews: React.FC = () => {
           </div>
         </div>
 
-        <div className="mt-10 text-xs text-gray-400">Tip: click “Search” with an empty box to refresh. Items are ordered by priority and date.</div>
+        <div className="mt-10 text-xs text-gray-400">
+          Tip: click “Search” with an empty box to refresh. Items are ordered by priority and date.
+        </div>
       </div>
     </main>
   );
