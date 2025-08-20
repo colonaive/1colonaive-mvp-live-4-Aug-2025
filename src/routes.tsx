@@ -14,6 +14,8 @@ import NewsFeedAdminPage from './pages/admin/NewsFeedAdminPage';
 import AdminPartnerSpecialistForm from './pages/admin/AdminPartnerSpecialistForm';
 import AdminCSRPartnerForm from './pages/admin/AdminCSRPartnerForm';
 import CSRPartnersAdminPage from './pages/admin/CSRPartnersAdminPage';
+import PartnerSpecialistsAdminPage from './pages/admin/PartnerSpecialistsAdminPage';
+
 
 // ✅ Verified CRC News (two-column, AI summaries)
 import LiveCRCNews from './pages/LiveCRCNews';
@@ -255,6 +257,16 @@ const MainRoutes = () => {
               </ProtectedAdminRoute>
             }
           />
+<Route
+  path="/admin/partner-specialists"
+  element={
+    <ProtectedAdminRoute>
+      <PartnerSpecialistsAdminPage />
+    </ProtectedAdminRoute>
+  }
+/>
+
+
           {/* CSR create & edit (protected) */}
           <Route
             path="/admin/csr/new"
