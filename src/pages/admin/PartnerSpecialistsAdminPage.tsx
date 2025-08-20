@@ -1,4 +1,15 @@
 // /src/pages/admin/PartnerSpecialistsAdminPage.tsx
+// ----------------------------------------------------------------------------
+// Optional migration (run once if you don't yet have specialists.locations):
+// ----------------------------------------------------------------------------
+// ALTER TABLE public.partner_specialists ADD COLUMN IF NOT EXISTS locations text[];
+// UPDATE public.partner_specialists
+// SET locations = CASE
+//   WHEN locations IS NULL AND address IS NOT NULL THEN ARRAY[address]
+//   ELSE locations
+// END;
+// ----------------------------------------------------------------------------
+
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "../../components/ui/Card";
@@ -14,25 +25,29 @@ import {
   Link as LinkIcon,
   Globe,
   Search as SearchIcon,
+  MapPin,
+  PlusCircle,
+  X as XIcon,
 } from "lucide-react";
 import { supabase } from "../../supabase";
 
 /** ---- Types (tolerant to small schema differences) ---- */
 type Row = {
   id: string;
-  name: string;                    // doctor's name
+  name: string; // doctor's name
   clinic_name: string;
   address?: string | null;
+  locations?: string[] | null; // NEW
   phone_number?: string | null;
   website?: string | null;
   appointment_url?: string | null;
-  profile_url?: string | null;     // if your table uses this
+  profile_url?: string | null; // if your table uses this
   profile_page_url?: string | null; // (some projects used this name)
   region?: string | null;
   specialties?: string[] | string | null;
   photo_url?: string | null;
-  is_active?: boolean;             // in your table listing this exists
-  is_approved?: boolean | null;    // some legacy code used this
+  is_active?: boolean; // in your table listing this exists
+  is_approved?: boolean | null; // some legacy code used this
   display_order?: number | null;
   created_at?: string;
 };
@@ -48,6 +63,8 @@ type EditForm = {
   photo_url: string;
   is_active: boolean;
   display_order: number;
+  // NEW
+  locations: string[];
 };
 
 const emptyForm: EditForm = {
@@ -61,6 +78,7 @@ const emptyForm: EditForm = {
   photo_url: "",
   is_active: true,
   display_order: 100,
+  locations: [""],
 };
 
 const PartnerSpecialistsAdminPage: React.FC = () => {
@@ -73,10 +91,12 @@ const PartnerSpecialistsAdminPage: React.FC = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<EditForm>({ ...emptyForm });
 
-  // Discover which optional columns actually exist (profile_url vs profile_page_url, etc.)
+  // Discover which optional columns actually exist (locations, profile_url vs profile_page_url, etc.)
   const columnSupport = useMemo(() => {
     const sample = rows[0] || ({} as Row);
     return {
+      hasLocations: "locations" in sample,
+      hasAddress: "address" in sample,
       hasProfileUrl: "profile_url" in sample,
       hasProfilePageUrl: "profile_page_url" in sample,
       hasIsActive: "is_active" in sample,
@@ -107,6 +127,15 @@ const PartnerSpecialistsAdminPage: React.FC = () => {
 
   // Start editing a row
   const startEdit = (r: Row) => {
+    // derive locations[]: prefer existing locations; fallback to [address] if present
+    const locs =
+  Array.isArray(r.locations) && r.locations.length > 0
+    ? r.locations
+    : r.address
+    ? [r.address]
+    : [];
+    const safeLocs = locs.length > 0 ? locs : [""];
+
     setEditingId(r.id);
     setForm({
       name: r.name || "",
@@ -124,12 +153,33 @@ const PartnerSpecialistsAdminPage: React.FC = () => {
         (!columnSupport.hasIsActive && !!r.is_approved),
       display_order:
         typeof r.display_order === "number" ? r.display_order : 100,
+      locations: safeLocs,
     });
   };
 
   const cancelEdit = () => {
     setEditingId(null);
     setForm({ ...emptyForm });
+  };
+
+  // ---- Locations repeater helpers ----
+  const updateLocation = (idx: number, value: string) => {
+    setForm((f) => {
+      const next = [...f.locations];
+      next[idx] = value;
+      return { ...f, locations: next };
+    });
+  };
+
+  const addLocation = () => {
+    setForm((f) => ({ ...f, locations: [...f.locations, ""] }));
+  };
+
+  const removeLocation = (idx: number) => {
+    setForm((f) => {
+      const next = f.locations.filter((_, i) => i !== idx);
+      return { ...f, locations: next.length ? next : [""] };
+    });
   };
 
   const onSave = async () => {
@@ -148,6 +198,11 @@ const PartnerSpecialistsAdminPage: React.FC = () => {
         .map((s) => s.trim())
         .filter(Boolean);
 
+      // Clean locations: trim, drop empties, de-dup
+      const cleanedLocations = Array.from(
+        new Set(form.locations.map((l) => l.trim()).filter(Boolean))
+      );
+
       // Build update payload based on columns that actually exist
       const updateFields: any = {
         name: form.name.trim(),
@@ -165,6 +220,16 @@ const PartnerSpecialistsAdminPage: React.FC = () => {
         updateFields.profile_url = form.profile_url.trim() || null;
       } else if (columnSupport.hasProfilePageUrl) {
         updateFields.profile_page_url = form.profile_url.trim() || null;
+      }
+
+      // Handle locations + address (backward compatibility)
+      const firstLocation = cleanedLocations[0] ?? null;
+      if (columnSupport.hasLocations) {
+        updateFields.locations = cleanedLocations.length ? cleanedLocations : null;
+      }
+      if (columnSupport.hasAddress) {
+        // Keep address in sync with the first location for legacy reads
+        updateFields.address = firstLocation;
       }
 
       // Handle status column name
@@ -207,10 +272,11 @@ const PartnerSpecialistsAdminPage: React.FC = () => {
   };
 
   const onToggleActive = async (row: Row) => {
-    const next = !(
+    const isOnNow =
       (columnSupport.hasIsActive && row.is_active) ||
-      (!columnSupport.hasIsActive && row.is_approved)
-    );
+      (!columnSupport.hasIsActive && row.is_approved);
+
+    const next = !isOnNow;
 
     const patch: any = {};
     if (columnSupport.hasIsActive) patch.is_active = next;
@@ -247,7 +313,8 @@ const PartnerSpecialistsAdminPage: React.FC = () => {
     const q = search.trim().toLowerCase();
     if (!q) return rows;
     return rows.filter((r) => {
-      const blob = `${r.name} ${r.clinic_name} ${r.address ?? ""} ${
+      const locText = Array.isArray(r.locations) ? r.locations.join(" ") : "";
+      const blob = `${r.name} ${r.clinic_name} ${r.address ?? ""} ${locText} ${
         r.region ?? ""
       }`.toLowerCase();
       return blob.includes(q);
@@ -429,35 +496,47 @@ const PartnerSpecialistsAdminPage: React.FC = () => {
                       }
                     />
                   </div>
+                </div>
+              </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium mb-1">
-                        Display Order (rank)
-                      </label>
+              {/* Locations repeater */}
+              <div className="mt-8">
+                <h3 className="font-semibold text-sm mb-2 inline-flex items-center gap-2">
+                  <MapPin className="h-4 w-4" />
+                  Clinic Addresses (multiple)
+                </h3>
+
+                <div className="space-y-3">
+                  {form.locations.map((loc, idx) => (
+                    <div key={idx} className="flex items-center gap-2">
                       <input
-                        type="number"
-                        className="w-full border rounded-md px-3 py-2"
-                        value={form.display_order}
-                        onChange={(e) =>
-                          setForm((f) => ({
-                            ...f,
-                            display_order: Number(e.target.value || 0),
-                          }))
-                        }
+                        className="flex-1 border rounded-md px-3 py-2"
+                        placeholder="e.g., 1 Orchard Blvd #03-01, Singapore 238890"
+                        value={loc}
+                        onChange={(e) => updateLocation(idx, e.target.value)}
                       />
+                      <Button
+                        variant="outline"
+                        className="px-3"
+                        onClick={() => removeLocation(idx)}
+                        disabled={form.locations.length === 1}
+                        title="Remove address"
+                      >
+                        <XIcon className="h-4 w-4" />
+                      </Button>
                     </div>
-                    <label className="flex items-center gap-2 mt-6">
-                      <input
-                        type="checkbox"
-                        checked={form.is_active}
-                        onChange={(e) =>
-                          setForm((f) => ({ ...f, is_active: e.target.checked }))
-                        }
-                      />
-                      <span className="text-sm">Active</span>
-                    </label>
-                  </div>
+                  ))}
+                </div>
+
+                <div className="mt-3">
+                  <Button variant="outline" onClick={addLocation}>
+                    <PlusCircle className="h-4 w-4 mr-2" />
+                    Add another address
+                  </Button>
+                  <p className="text-xs text-gray-500 mt-2">
+                    We’ll save all addresses to <code>locations[]</code>. The first address will also be saved
+                    to the legacy <code>address</code> column for backward compatibility.
+                  </p>
                 </div>
               </div>
 
@@ -479,7 +558,7 @@ const PartnerSpecialistsAdminPage: React.FC = () => {
             <SearchIcon className="h-4 w-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               className="pl-9 pr-3 py-2 border rounded-md w-[320px]"
-              placeholder="Search by doctor, clinic, or region…"
+              placeholder="Search by doctor, clinic, address, or region…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -503,6 +582,12 @@ const PartnerSpecialistsAdminPage: React.FC = () => {
                     (columnSupport.hasIsActive && !!r.is_active) ||
                     (!columnSupport.hasIsActive && !!r.is_approved);
 
+                  const locs = Array.isArray(r.locations)
+                    ? r.locations
+                    : r.address
+                    ? [r.address]
+                    : [];
+
                   return (
                     <div
                       key={r.id}
@@ -520,9 +605,7 @@ const PartnerSpecialistsAdminPage: React.FC = () => {
 
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <h3 className="font-semibold truncate">
-                            {r.name}
-                          </h3>
+                          <h3 className="font-semibold truncate">{r.name}</h3>
                           {isOn ? (
                             <span className="inline-flex items-center text-green-700 bg-green-100 rounded-full px-2 py-0.5 text-xs">
                               <CheckCircle2 className="h-3 w-3 mr-1" />
@@ -536,15 +619,20 @@ const PartnerSpecialistsAdminPage: React.FC = () => {
                           )}
                         </div>
 
-                        <div className="text-sm text-gray-700">
-                          {r.clinic_name}
-                        </div>
+                        <div className="text-sm text-gray-700">{r.clinic_name}</div>
+
+                        {/* Addresses preview */}
+                        {locs.length > 0 && (
+                          <ul className="mt-2 text-xs text-gray-600 list-disc pl-4 space-y-1">
+                            {locs.map((l, i) => (
+                              <li key={i} className="truncate">{l}</li>
+                            ))}
+                          </ul>
+                        )}
 
                         {/* Quick rank + actions */}
                         <div className="mt-3 flex items-center gap-2 flex-wrap">
-                          <label className="text-xs text-gray-500">
-                            Rank:
-                          </label>
+                          <label className="text-xs text-gray-500">Rank:</label>
                           <input
                             type="number"
                             defaultValue={
@@ -560,15 +648,12 @@ const PartnerSpecialistsAdminPage: React.FC = () => {
                               )
                             }
                           />
-                          <Button
-                            variant="outline"
-                            onClick={() => startEdit(r)}
-                          >
+                          <Button variant="outline" onClick={() => startEdit(r)}>
                             Edit
                           </Button>
                           <Button
                             variant={isOn ? "outline" : "primary"}
-                            className={isOn ? "bg-slate-600 hover:bg-slate-700" : ""}
+                            className={isOn ? "bg-slate-600 hover:bg-slate-700 text-white" : ""}
                             onClick={() => onToggleActive(r)}
                           >
                             {isOn ? "Deactivate" : "Activate"}

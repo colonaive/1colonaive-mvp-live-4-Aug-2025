@@ -1,456 +1,456 @@
 // /src/pages/admin/CSRPartnersAdminPage.tsx
-import React, { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Card, CardContent } from "../../components/ui/Card";
-import { Button } from "../../components/ui/Button";
-import { Container } from "../../components/ui/Container";
-import {
-  Plus,
-  Upload,
-  Globe,
-  Link as LinkIcon,
-  CheckCircle2,
-  XCircle,
-  ArrowLeft,
-  RefreshCw,
-} from "lucide-react";
-import { supabase } from "../../supabase";
+import React, { useEffect, useState } from 'react';
+import { supabase } from '../../supabase';
+import { Card, CardContent } from '../../components/ui/Card';
+import { Button } from '../../components/ui/Button';
+import { Plus, RefreshCw, Eye, Trash2, Loader2, Crown } from 'lucide-react';
 
-type CSRPartner = {
+type Partner = {
   id: string;
-  name: string;
+  company_name: string;
+  slug: string | null;
   website: string | null;
-  blurb: string | null;
-  tribute: string | null;               // e.g., “In honor of …”
-  donation_level: string | null;        // e.g., “Seed”, “Patron”, etc.
-  logo_url: string | null;              // from bucket csr-logos
-  hero_image_url: string | null;        // from bucket csr-hero  ✅ USE THIS COLUMN
-  is_active: boolean;
+  blurb_short: string | null;
+  pledge_amount: number | null;
+  donation_tier: string | null;
+  donation_tier_override: string | null;
+  brands_csv: string | null;
+  tribute: string | null;
+  logo_url: string | null;
+  hero_image_url: string | null;
+  featured: boolean;
+  active: boolean;
   display_order: number | null;
-  created_at: string;
+  status: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
 };
 
-const slugify = (s: string) =>
-  s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "");
-
-const emptyForm = {
-  name: "",
-  website: "",
-  blurb:
-    "Recognizing organizations that lead the fight against colorectal cancer through screening & prevention.",
-  tribute: "",
-  donation_level: "Champion",
-  is_active: true,
-  display_order: 100,
+const EMPTY_PARTNER: Partner = {
+  id: '',
+  company_name: '',
+  slug: null,
+  website: null,
+  blurb_short: null,
+  pledge_amount: null,
+  donation_tier: null,
+  donation_tier_override: null,
+  brands_csv: null,
+  tribute: null,
+  logo_url: null,
+  hero_image_url: null,
+  featured: false,
+  active: true,
+  display_order: 999,
+  status: 'draft',
 };
+
+const TIER_OPTIONS = ['', 'Supporter', 'Gold', 'Platinum', 'Diamond'];
 
 const CSRPartnersAdminPage: React.FC = () => {
-  const nav = useNavigate();
-  const [rows, setRows] = useState<CSRPartner[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [rows, setRows] = useState<Partner[]>([]);
+  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [logoFile, setLogoFile] = useState<File | null>(null);
-  const [heroFile, setHeroFile] = useState<File | null>(null);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [form, setForm] = useState({ ...emptyForm });
+  const [deleting, setDeleting] = useState<string | null>(null);
+  const [editing, setEditing] = useState<Partner>(EMPTY_PARTNER);
+  const [filter, setFilter] = useState<string>('');
 
-  const load = async () => {
+  const fetchRows = async () => {
     setLoading(true);
     const { data, error } = await supabase
-      .from("csr_partners")
-      .select("*")
-      .order("display_order", { ascending: true })
-      .order("created_at", { ascending: true });
+      .from<Partner>('csr_partners')
+      .select('*')
+      .order('display_order', { ascending: true })
+      .order('company_name', { ascending: true });
+
     if (error) {
-      console.error(error);
-      setRows([]);
+      console.error('Fetch partners failed:', error.message);
     } else {
-      setRows((data || []) as CSRPartner[]);
+      setRows(data || []);
     }
     setLoading(false);
   };
 
   useEffect(() => {
-    load();
+    fetchRows();
   }, []);
 
-  const selected = useMemo(
-    () => rows.find((r) => r.id === editingId) || null,
-    [editingId, rows]
+  const startCreate = () => {
+    setEditing({ ...EMPTY_PARTNER, id: crypto.randomUUID() });
+    window.scrollTo(0, 0);
+  };
+
+  const startEdit = (p: Partner) => {
+    setEditing({ ...p });
+    window.scrollTo(0, 0);
+  };
+
+  const resetForm = () => setEditing(EMPTY_PARTNER);
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const { name, value, type, checked } = e.target as HTMLInputElement;
+    setEditing((prev) => ({
+      ...prev,
+      [name]:
+        type === 'checkbox'
+          ? checked
+          : name === 'display_order'
+          ? (value === '' ? null : Number(value))
+          : name === 'pledge_amount'
+          ? (value === '' ? null : Number(value))
+          : value === '' ? null : value,
+    }));
+  };
+
+  const save = async () => {
+    setSaving(true);
+
+    const payload: Partial<Partner> & { id: string } = {
+      id: editing.id || crypto.randomUUID(),
+      company_name: editing.company_name,
+      website: editing.website ?? null,
+      blurb_short: editing.blurb_short ?? null,
+      pledge_amount: editing.pledge_amount ?? null,
+      donation_tier_override: editing.donation_tier_override ?? null,
+      brands_csv: editing.brands_csv ?? null,
+      tribute: editing.tribute ?? null,
+      logo_url: editing.logo_url ?? null,
+      hero_image_url: editing.hero_image_url ?? null,
+      featured: !!editing.featured,
+      active: !!editing.active,
+      display_order: editing.display_order ?? null,
+      status: editing.status ?? 'draft',
+    };
+
+    const { data, error } = await supabase
+      .from('csr_partners')
+      .upsert(payload, { onConflict: 'id' })
+      .select()
+      .single();
+
+    setSaving(false);
+
+    if (error) {
+      console.error('Save failed:', error.message);
+      alert('Save failed: ' + error.message);
+      return;
+    }
+
+    await fetchRows();
+    if (data) setEditing(data as Partner);
+  };
+
+  const remove = async (id: string) => {
+    if (!confirm('Delete this CSR partner?')) return;
+    setDeleting(id);
+    const { error } = await supabase.from('csr_partners').delete().eq('id', id);
+    setDeleting(null);
+    if (error) {
+      console.error('Delete failed:', error.message);
+      alert('Delete failed: ' + error.message);
+      return;
+    }
+    if (editing.id === id) resetForm();
+    fetchRows();
+  };
+
+  const filtered = rows.filter((r) =>
+    [r.company_name, r.slug ?? '', r.donation_tier ?? '', r.status ?? '']
+      .join(' ')
+      .toLowerCase()
+      .includes(filter.toLowerCase())
   );
 
-  useEffect(() => {
-    if (selected) {
-      setForm({
-        name: selected.name || "",
-        website: selected.website || "",
-        blurb: selected.blurb || "",
-        tribute: selected.tribute || "",
-        donation_level: selected.donation_level || "Champion",
-        is_active: !!selected.is_active,
-        display_order: selected.display_order ?? 100,
-      });
-    } else {
-      setForm({ ...emptyForm });
-      setLogoFile(null);
-      setHeroFile(null);
-    }
-  }, [selected]);
-
-  const uploadIfNeeded = async (
-    bucket: "csr-logos" | "csr-hero",
-    file: File | null,
-    partnerName: string
-  ): Promise<string | null> => {
-    if (!file) return null;
-    const key = `${slugify(partnerName)}/${Date.now()}-${file.name}`;
-    const { error: upErr } = await supabase.storage.from(bucket).upload(key, file, {
-      cacheControl: "3600",
-      upsert: true,
-    });
-    if (upErr) throw upErr;
-    const { data } = supabase.storage.from(bucket).getPublicUrl(key);
-    return data.publicUrl ?? null;
-  };
-
-  const onSave = async () => {
-    if (!form.name.trim()) {
-      alert("Please enter a partner name.");
-      return;
-    }
-    try {
-      setSaving(true);
-
-      // Uploads first (only if chosen this session)
-      const [logoUrl, heroUrl] = await Promise.all([
-        uploadIfNeeded("csr-logos", logoFile, form.name),
-        uploadIfNeeded("csr-hero", heroFile, form.name),
-      ]);
-
-      if (editingId) {
-        const updateFields: any = {
-          name: form.name.trim(),
-          website: form.website?.trim() || null,
-          blurb: form.blurb?.trim() || null,
-          tribute: form.tribute?.trim() || null,
-          donation_level: form.donation_level?.trim() || null,
-          is_active: form.is_active,
-          display_order: Number(form.display_order ?? 100),
-        };
-        if (logoUrl) updateFields.logo_url = logoUrl;
-        if (heroUrl) updateFields.hero_image_url = heroUrl; // ✅ correct column
-
-        const { error } = await supabase
-          .from("csr_partners")
-          .update(updateFields)
-          .eq("id", editingId);
-
-        if (error) throw error;
-      } else {
-        const { error } = await supabase.from("csr_partners").insert({
-          name: form.name.trim(),
-          website: form.website?.trim() || null,
-          blurb: form.blurb?.trim() || null,
-          tribute: form.tribute?.trim() || null,
-          donation_level: form.donation_level?.trim() || null,
-          is_active: form.is_active,
-          display_order: Number(form.display_order ?? 100),
-          logo_url: logoUrl ?? null,
-          hero_image_url: heroUrl ?? null, // ✅ correct column
-        } as Partial<CSRPartner>);
-        if (error) throw error;
-      }
-
-      await load();
-      setEditingId(null);
-      setForm({ ...emptyForm });
-      setLogoFile(null);
-      setHeroFile(null);
-      alert("Saved.");
-    } catch (err: any) {
-      console.error(err);
-      alert(`Save failed: ${err.message ?? err}`);
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const onToggleActive = async (row: CSRPartner) => {
-    const { error } = await supabase
-      .from("csr_partners")
-      .update({ is_active: !row.is_active })
-      .eq("id", row.id);
-    if (error) {
-      console.error(error);
-      alert("Failed to update status.");
-      return;
-    }
-    await load();
-  };
-
-  const seedJasonCopy = () => {
-    setForm({
-      name: "Jason Lim Group (NY Grill / Old Street / KKO KKO NARA / OMMA / 8Carat / The Cafe Lobby / The Kopi Lobby)",
-      website: "https://www.instagram.com/ommakoreancharcoalbbq/",
-      blurb:
-        "We celebrate Jason Lim’s family of F&B brands for championing early detection and prevention. Thank you for standing with COLONAiVE™ to save lives.",
-      tribute:
-        "In honor of the late Mr. Toh Cher Lek — for friendship, courage, and community.",
-      donation_level: "Founding Champion",
-      is_active: true,
-      display_order: 1,
-    });
-  };
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="bg-white border-b">
-        <Container className="py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Button
-                className="bg-slate-100 text-slate-700 hover:bg-slate-200"
-                onClick={() => nav("/admin/dashboard")}
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Admin
-              </Button>
-              <h1 className="text-xl font-semibold">CSR Partners Management</h1>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" onClick={load}>
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Refresh
-              </Button>
-              <a href="/csr-showcase" target="_blank" rel="noopener noreferrer">
-                <Button variant="outline">
-                  <Globe className="h-4 w-4 mr-2" />
-                  View Public Page
-                </Button>
-              </a>
-            </div>
-          </div>
-        </Container>
+    <div className="px-4 py-8 max-w-6xl mx-auto">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold">Manage CSR Partners</h1>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={fetchRows}>
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Refresh
+          </Button>
+          <Button onClick={startCreate}>
+            <Plus className="h-4 w-4 mr-2" />
+            New Partner
+          </Button>
+        </div>
       </div>
 
-      <Container className="py-8">
-        {/* Editor */}
-        <Card className="mb-8">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="font-semibold text-lg">
-                {editingId ? "Edit Partner" : "Add New Partner"}
-              </h2>
-              <div className="flex gap-2">
-                <Button variant="outline" onClick={seedJasonCopy} title="Prefill sample copy">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Use Sample Copy
-                </Button>
-              </div>
+      <Card className="mb-8">
+        <CardContent className="p-6 space-y-4">
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Company Name *</label>
+              <input
+                name="company_name"
+                value={editing.company_name}
+                onChange={handleChange}
+                className="w-full border rounded-md px-3 py-2"
+                placeholder="ACME Pte Ltd"
+              />
             </div>
 
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Partner Name *</label>
-                  <input
-                    value={form.name}
-                    onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                    className="w-full border rounded-md px-3 py-2"
-                    placeholder="Company or Group Name"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1">Website</label>
-                  <div className="flex items-center">
-                    <span className="inline-flex items-center px-3 h-10 bg-gray-100 rounded-l-md border border-r-0">
-                      <LinkIcon className="h-4 w-4" />
-                    </span>
-                    <input
-                      value={form.website || ""}
-                      onChange={(e) => setForm((f) => ({ ...f, website: e.target.value }))}
-                      className="w-full border rounded-r-md px-3 py-2 h-10"
-                      placeholder="https://example.com"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1">Donation Level</label>
-                  <input
-                    value={form.donation_level || ""}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, donation_level: e.target.value }))
-                    }
-                    className="w-full border rounded-md px-3 py-2"
-                    placeholder="Founding Champion / Patron / Seed"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Display Order</label>
-                    <input
-                      type="number"
-                      value={form.display_order ?? 100}
-                      onChange={(e) =>
-                        setForm((f) => ({ ...f, display_order: Number(e.target.value) }))
-                      }
-                      className="w-full border rounded-md px-3 py-2"
-                    />
-                  </div>
-                  <div className="flex items-center gap-3 pt-6">
-                    <input
-                      id="active"
-                      type="checkbox"
-                      checked={form.is_active}
-                      onChange={(e) =>
-                        setForm((f) => ({ ...f, is_active: e.target.checked }))
-                      }
-                    />
-                    <label htmlFor="active" className="text-sm">
-                      Active
-                    </label>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Blurb</label>
-                <textarea
-                    value={form.blurb || ""}
-                    onChange={(e) => setForm((f) => ({ ...f, blurb: e.target.value }))}
-                    className="w-full border rounded-md px-3 py-2 min-h-[96px]"
-                    placeholder="Short public note to honor the partner."
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1">Tribute (optional)</label>
-                  <input
-                    value={form.tribute || ""}
-                    onChange={(e) => setForm((f) => ({ ...f, tribute: e.target.value }))}
-                    className="w-full border rounded-md px-3 py-2"
-                    placeholder='e.g., "In honor of the late Mr. Toh Cher Lek"'
-                  />
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Upload Logo / Collage</label>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => setLogoFile(e.target.files?.[0] || null)}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Upload Hero (wide)</label>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => setHeroFile(e.target.files?.[0] || null)}
-                    />
-                  </div>
-                </div>
-              </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Website</label>
+              <input
+                name="website"
+                value={editing.website ?? ''}
+                onChange={handleChange}
+                className="w-full border rounded-md px-3 py-2"
+                placeholder="https://example.com"
+              />
             </div>
 
-            <div className="mt-6 flex gap-3">
-              <Button onClick={onSave} disabled={saving}>
-                <Upload className="h-4 w-4 mr-2" />
-                {saving ? "Saving..." : editingId ? "Save Changes" : "Create Partner"}
-              </Button>
-              {editingId && (
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setEditingId(null);
-                    setForm({ ...emptyForm });
-                    setLogoFile(null);
-                    setHeroFile(null);
-                  }}
-                >
-                  Cancel
-                </Button>
-              )}
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium mb-1">Short Blurb</label>
+              <textarea
+                name="blurb_short"
+                value={editing.blurb_short ?? ''}
+                onChange={handleChange}
+                className="w-full border rounded-md px-3 py-2"
+                rows={2}
+                placeholder="One-line description for showcase"
+              />
             </div>
-          </CardContent>
-        </Card>
 
-        {/* List */}
-        <Card>
-          <CardContent className="p-6">
-            <h2 className="font-semibold text-lg mb-4">Partners</h2>
-            {loading ? (
-              <p className="text-gray-600">Loading…</p>
-            ) : rows.length === 0 ? (
-              <p className="text-gray-600">No partners yet.</p>
-            ) : (
-              <div className="grid md:grid-cols-2 gap-6">
-                {rows.map((r) => (
-                  <div
-                    key={r.id}
-                    className="border rounded-lg p-4 flex gap-4 items-center"
-                  >
-                    <img
-                      src={r.hero_image_url || r.logo_url || ""}
-                      alt={r.name}
-                      className="w-24 h-24 object-cover rounded-md border"
-                    />
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-semibold">{r.name}</h3>
-                        {r.is_active ? (
-                          <span className="inline-flex items-center text-green-700 bg-green-100 rounded-full px-2 py-0.5 text-xs">
-                            <CheckCircle2 className="h-3 w-3 mr-1" />
-                            Active
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center text-gray-700 bg-gray-100 rounded-full px-2 py-0.5 text-xs">
-                            <XCircle className="h-3 w-3 mr-1" />
-                            Inactive
-                          </span>
-                        )}
-                      </div>
-                      {r.website && (
-                        <a
-                          href={r.website}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 text-sm hover:underline"
-                        >
-                          {r.website}
-                        </a>
-                      )}
-                      {r.blurb && (
-                        <p className="text-sm text-gray-700 mt-1 line-clamp-2">{r.blurb}</p>
-                      )}
-                      {r.tribute && (
-                        <p className="text-xs text-gray-500 mt-1 italic">{r.tribute}</p>
-                      )}
-                      <div className="mt-3 flex gap-2">
-                        <Button variant="outline" onClick={() => setEditingId(r.id)}>
-                          Edit
-                        </Button>
-                        <Button
-                          className={r.is_active ? "bg-slate-600 hover:bg-slate-700" : ""}
-                          variant={r.is_active ? "outline" : "primary"}
-                          onClick={() => onToggleActive(r)}
-                        >
-                          {r.is_active ? "Deactivate" : "Activate"}
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Pledge Amount (S$)</label>
+              <input
+                name="pledge_amount"
+                type="number"
+                min={0}
+                step="100"
+                value={editing.pledge_amount ?? ''}
+                onChange={handleChange}
+                className="w-full border rounded-md px-3 py-2"
+                placeholder="35500"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Tier is computed automatically from current unit cost.
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Tier Override (optional)</label>
+              <select
+                name="donation_tier_override"
+                value={editing.donation_tier_override ?? ''}
+                onChange={handleChange}
+                className="w-full border rounded-md px-3 py-2"
+              >
+                {TIER_OPTIONS.map((t) => (
+                  <option key={t} value={t || ''}>
+                    {t || '(none)'}
+                  </option>
                 ))}
-              </div>
+              </select>
+              <p className="text-xs text-gray-500 mt-1">
+                If set, this will display instead of the computed tier.
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Brands (CSV)</label>
+              <input
+                name="brands_csv"
+                value={editing.brands_csv ?? ''}
+                onChange={handleChange}
+                className="w-full border rounded-md px-3 py-2"
+                placeholder="Brand1,Brand2"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Tribute</label>
+              <input
+                name="tribute"
+                value={editing.tribute ?? ''}
+                onChange={handleChange}
+                className="w-full border rounded-md px-3 py-2"
+                placeholder="In memory of..."
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Logo URL</label>
+              <input
+                name="logo_url"
+                value={editing.logo_url ?? ''}
+                onChange={handleChange}
+                className="w-full border rounded-md px-3 py-2"
+                placeholder="https://..."
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Hero Image URL</label>
+              <input
+                name="hero_image_url"
+                value={editing.hero_image_url ?? ''}
+                onChange={handleChange}
+                className="w-full border rounded-md px-3 py-2"
+                placeholder="https://..."
+              />
+            </div>
+
+            <div className="flex items-center gap-3">
+              <label className="text-sm font-medium">Featured</label>
+              <input
+                type="checkbox"
+                name="featured"
+                checked={!!editing.featured}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className="flex items-center gap-3">
+              <label className="text-sm font-medium">Active</label>
+              <input
+                type="checkbox"
+                name="active"
+                checked={!!editing.active}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Display Order</label>
+              <input
+                name="display_order"
+                type="number"
+                value={editing.display_order ?? ''}
+                onChange={handleChange}
+                className="w-full border rounded-md px-3 py-2"
+                placeholder="1"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Status</label>
+              <select
+                name="status"
+                value={editing.status ?? 'draft'}
+                onChange={handleChange}
+                className="w-full border rounded-md px-3 py-2"
+              >
+                {['draft', 'pending', 'approved', 'rejected'].map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 pt-2">
+            <Button onClick={save} disabled={saving || !editing.company_name}>
+              {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
+              Save Partner
+            </Button>
+            <Button variant="outline" onClick={resetForm}>
+              Clear
+            </Button>
+            {editing.slug ? (
+              <a
+                href={`/csr/${editing.slug}`}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center text-sm text-blue-600 hover:underline"
+              >
+                <Eye className="h-4 w-4 mr-1" />
+                Preview
+              </a>
+            ) : null}
+            {editing.donation_tier || editing.donation_tier_override ? (
+              <span className="ml-auto inline-flex items-center text-sm px-2 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                <Crown className="h-4 w-4 mr-1" />
+                {(editing.donation_tier_override || editing.donation_tier || '').toString()}
+              </span>
+            ) : null}
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="flex items-center justify-between mb-2">
+        <h2 className="text-lg font-semibold">All Partners</h2>
+        <input
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+          placeholder="Filter by name, slug, tier, status..."
+          className="border rounded-md px-3 py-2 w-64"
+        />
+      </div>
+
+      <div className="overflow-auto border rounded-lg">
+        <table className="min-w-full text-sm">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="text-left px-3 py-2 w-12">#</th>
+              <th className="text-left px-3 py-2">Company</th>
+              <th className="text-left px-3 py-2">Slug</th>
+              <th className="text-left px-3 py-2">Tier</th>
+              <th className="text-left px-3 py-2">Override</th>
+              <th className="text-left px-3 py-2">Featured</th>
+              <th className="text-left px-3 py-2">Active</th>
+              <th className="text-left px-3 py-2">Order</th>
+              <th className="text-left px-3 py-2">Status</th>
+              <th className="text-right px-3 py-2 w-40">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {loading ? (
+              <tr>
+                <td colSpan={10} className="px-3 py-6 text-center text-gray-500">
+                  <Loader2 className="h-5 w-5 inline-block mr-2 animate-spin" />
+                  Loading partners…
+                </td>
+              </tr>
+            ) : filtered.length === 0 ? (
+              <tr>
+                <td colSpan={10} className="px-3 py-6 text-center text-gray-500">
+                  No partners found.
+                </td>
+              </tr>
+            ) : (
+              filtered.map((p, idx) => (
+                <tr key={p.id} className="border-t">
+                  <td className="px-3 py-2">{idx + 1}</td>
+                  <td className="px-3 py-2 font-medium">{p.company_name}</td>
+                  <td className="px-3 py-2">{p.slug}</td>
+                  <td className="px-3 py-2">{p.donation_tier}</td>
+                  <td className="px-3 py-2">{p.donation_tier_override}</td>
+                  <td className="px-3 py-2">{p.featured ? 'Yes' : 'No'}</td>
+                  <td className="px-3 py-2">{p.active ? 'Yes' : 'No'}</td>
+                  <td className="px-3 py-2">{p.display_order}</td>
+                  <td className="px-3 py-2">{p.status}</td>
+                  <td className="px-3 py-2">
+                    <div className="flex justify-end gap-2">
+                      <Button variant="outline" onClick={() => startEdit(p)}>
+                        Edit
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => remove(p.id)}
+                        className="border-red-300 text-red-600 hover:bg-red-50"
+                        disabled={deleting === p.id}
+                      >
+                        {deleting === p.id ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Trash2 className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ))
             )}
-          </CardContent>
-        </Card>
-      </Container>
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };
