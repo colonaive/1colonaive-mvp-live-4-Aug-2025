@@ -2,7 +2,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "../../components/ui/Card";
-import { Button } from "../../components/ui/Button"; // default import in your project
+import { Button } from "../../components/ui/Button";
 import { Container } from "../../components/ui/Container";
 import {
   Plus,
@@ -21,20 +21,17 @@ type CSRPartner = {
   name: string;
   website: string | null;
   blurb: string | null;
-  tribute: string | null;                  // e.g., “In honor of …”
-  donation_level: string | null;           // e.g., “Seed”, “Patron”, etc.
-  logo_url: string | null;                 // from bucket csr-logos
-  hero_url: string | null;                 // from bucket csr-hero
+  tribute: string | null;               // e.g., “In honor of …”
+  donation_level: string | null;        // e.g., “Seed”, “Patron”, etc.
+  logo_url: string | null;              // from bucket csr-logos
+  hero_image_url: string | null;        // from bucket csr-hero  ✅ USE THIS COLUMN
   is_active: boolean;
   display_order: number | null;
   created_at: string;
 };
 
 const slugify = (s: string) =>
-  s
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)+/g, "");
+  s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "");
 
 const emptyForm = {
   name: "",
@@ -57,7 +54,6 @@ const CSRPartnersAdminPage: React.FC = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState({ ...emptyForm });
 
-  // Load list
   const load = async () => {
     setLoading(true);
     const { data, error } = await supabase
@@ -125,7 +121,7 @@ const CSRPartnersAdminPage: React.FC = () => {
     try {
       setSaving(true);
 
-      // Uploads first (use provided files only)
+      // Uploads first (only if chosen this session)
       const [logoUrl, heroUrl] = await Promise.all([
         uploadIfNeeded("csr-logos", logoFile, form.name),
         uploadIfNeeded("csr-hero", heroFile, form.name),
@@ -142,7 +138,7 @@ const CSRPartnersAdminPage: React.FC = () => {
           display_order: Number(form.display_order ?? 100),
         };
         if (logoUrl) updateFields.logo_url = logoUrl;
-        if (heroUrl) updateFields.hero_url = heroUrl;
+        if (heroUrl) updateFields.hero_image_url = heroUrl; // ✅ correct column
 
         const { error } = await supabase
           .from("csr_partners")
@@ -159,8 +155,8 @@ const CSRPartnersAdminPage: React.FC = () => {
           donation_level: form.donation_level?.trim() || null,
           is_active: form.is_active,
           display_order: Number(form.display_order ?? 100),
-          logo_url: logoUrl,
-          hero_url: heroUrl,
+          logo_url: logoUrl ?? null,
+          hero_image_url: heroUrl ?? null, // ✅ correct column
         } as Partial<CSRPartner>);
         if (error) throw error;
       }
@@ -195,7 +191,7 @@ const CSRPartnersAdminPage: React.FC = () => {
   const seedJasonCopy = () => {
     setForm({
       name: "Jason Lim Group (NY Grill / Old Street / KKO KKO NARA / OMMA / 8Carat / The Cafe Lobby / The Kopi Lobby)",
-      website: "https://www.instagram.com/ommakoreancharcoalbbq/", // placeholder
+      website: "https://www.instagram.com/ommakoreancharcoalbbq/",
       blurb:
         "We celebrate Jason Lim’s family of F&B brands for championing early detection and prevention. Thank you for standing with COLONAiVE™ to save lives.",
       tribute:
@@ -226,11 +222,7 @@ const CSRPartnersAdminPage: React.FC = () => {
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Refresh
               </Button>
-              <a
-                href="/csr-showcase"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <a href="/csr-showcase" target="_blank" rel="noopener noreferrer">
                 <Button variant="outline">
                   <Globe className="h-4 w-4 mr-2" />
                   View Public Page
@@ -327,7 +319,7 @@ const CSRPartnersAdminPage: React.FC = () => {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium mb-1">Blurb</label>
-                  <textarea
+                <textarea
                     value={form.blurb || ""}
                     onChange={(e) => setForm((f) => ({ ...f, blurb: e.target.value }))}
                     className="w-full border rounded-md px-3 py-2 min-h-[96px]"
@@ -404,7 +396,7 @@ const CSRPartnersAdminPage: React.FC = () => {
                     className="border rounded-lg p-4 flex gap-4 items-center"
                   >
                     <img
-                      src={r.logo_url || r.hero_url || ""}
+                      src={r.hero_image_url || r.logo_url || ""}
                       alt={r.name}
                       className="w-24 h-24 object-cover rounded-md border"
                     />
@@ -440,10 +432,7 @@ const CSRPartnersAdminPage: React.FC = () => {
                         <p className="text-xs text-gray-500 mt-1 italic">{r.tribute}</p>
                       )}
                       <div className="mt-3 flex gap-2">
-                        <Button
-                          variant="outline"
-                          onClick={() => setEditingId(r.id)}
-                        >
+                        <Button variant="outline" onClick={() => setEditingId(r.id)}>
                           Edit
                         </Button>
                         <Button
