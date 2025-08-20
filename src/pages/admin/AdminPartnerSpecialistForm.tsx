@@ -20,6 +20,9 @@ const SPECIALTY_OPTIONS = [
   "Polypectomy",
   "Hemorrhoid treatment",
   "Anal fistula treatment",
+  "Colonoscopy",
+  "Gastroscopy",
+  
 ];
 
 type LocationItem = {
