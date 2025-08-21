@@ -1,4 +1,4 @@
-// Preview-only: Upgraded HeroSection (CRC alert, refined sizing & layout)
+// HeroSection (CRC alert & taglines larger, balanced spacing)
 import React from "react";
 
 // Lightweight stubs so canvas can render without your app context
@@ -25,49 +25,52 @@ const HeroPreview: React.FC = () => {
       <div className="absolute -top-32 -left-24 h-[60vh] w-[60vh] rounded-full bg-emerald-300/20 blur-3xl" />
       <div className="absolute -bottom-24 -right-24 h-[60vh] w-[60vh] rounded-full bg-sky-300/25 blur-3xl" />
 
-      {/* Centered content */}
       <Container className="relative z-10 flex min-h-[92vh] items-center justify-center px-4">
         <div className="w-full max-w-6xl mx-auto text-center">
 
-          {/* CRC ALERT BANNER */}
-          <div className="mb-5 flex justify-center">
+          {/* CRC ALERT — bigger */}
+          <div className="mb-4 flex justify-center">
             <span
               aria-label="Colorectal Cancer"
-              className="inline-flex items-center gap-2 rounded-full bg-red-600 px-4 py-2 text-white text-xs sm:text-sm font-extrabold tracking-widest uppercase shadow"
+              className="inline-flex items-center gap-3 rounded-full bg-red-600 px-5 sm:px-6 py-2.5 sm:py-3
+                         text-sm sm:text-base text-white font-extrabold tracking-[0.18em] uppercase
+                         shadow-lg ring-2 ring-red-700/40"
             >
-              <span className="inline-block h-2 w-2 rounded-full bg-white" />
+              <span className="inline-block h-2.5 w-2.5 rounded-full bg-white" />
               Colorectal Cancer
-              <span className="inline-block h-2 w-2 rounded-full bg-white" />
+              <span className="inline-block h-2.5 w-2.5 rounded-full bg-white" />
             </span>
           </div>
 
-          {/* Taglines (top row) */}
-          <div className="flex flex-wrap justify-center items-center gap-3 mb-5">
-            <span className="inline-flex items-center rounded-full bg-emerald-100 text-emerald-900 px-4 py-2 text-[11px] sm:text-xs font-semibold tracking-wide">
+          {/* Taglines — bigger */}
+          <div className="flex flex-wrap justify-center items-center gap-3 mb-4">
+            <span className="inline-flex items-center rounded-full bg-emerald-100 text-emerald-900
+                              px-4 sm:px-5 py-2 sm:py-2.5 text-sm sm:text-base font-semibold tracking-wide">
               Where Treatment Begins While Screening
             </span>
-            <span className="inline-flex items-center rounded-full bg-blue-50 text-blue-900 px-4 py-2 text-[11px] sm:text-xs font-semibold tracking-wide">
+            <span className="inline-flex items-center rounded-full bg-blue-50 text-blue-900
+                              px-4 sm:px-5 py-2 sm:py-2.5 text-sm sm:text-base font-semibold tracking-wide">
               SCOPED IN TIME | SAVED IN TIME
             </span>
           </div>
 
-          {/* Headline (reduced size & tighter leading) */}
-          <h1 className="mx-auto max-w-[22ch] text-[32px] sm:text-5xl md:text-6xl lg:text-[56px] font-extrabold leading-[1.1] tracking-tight">
+          {/* Headline (slightly tighter to compensate for larger chips) */}
+          <h1 className="mx-auto max-w-[22ch] text-[30px] sm:text-5xl md:text-6xl lg:text-[54px] font-extrabold leading-[1.08] tracking-tight">
             <span className="block">SCREENING SAVES LIVES.</span>
-            <span className="mt-2 block text-emerald-700 text-[26px] sm:text-4xl md:text-5xl lg:text-[44px] font-extrabold">
+            <span className="mt-2 block text-emerald-700 text-[24px] sm:text-4xl md:text-5xl lg:text-[42px] font-extrabold">
               New study shows 26 lives saved per 1,000 screened.
             </span>
           </h1>
 
           {/* Subhead */}
-          <p className="mt-5 mx-auto max-w-3xl text-base sm:text-lg md:text-xl text-gray-800 leading-relaxed">
+          <p className="mt-4 mx-auto max-w-3xl text-base sm:text-lg md:text-xl text-gray-800 leading-relaxed">
             Every day, <span className="font-bold text-red-700">3 Singaporeans</span> are diagnosed with
             late-stage colorectal cancer. Early screening and timely colonoscopy offer up to a
             <span className="font-bold text-emerald-700"> 95% survival chance</span>.
           </p>
 
           {/* CTAs */}
-          <div className="mt-8 flex flex-wrap justify-center items-center gap-4">
+          <div className="mt-7 flex flex-wrap justify-center items-center gap-4">
             <a href="/get-screened" aria-label="Get screened now">
               <Button className="px-7 py-4 text-base sm:text-lg bg-gradient-to-r from-sky-600 to-indigo-600 text-white shadow-xl hover:from-sky-700 hover:to-indigo-700 hover:scale-[1.02]">
                 Get Screened Now
@@ -85,15 +88,15 @@ const HeroPreview: React.FC = () => {
             </a>
           </div>
 
-          {/* Clinician-led badge moved below CTAs */}
-          <div className="mt-4 flex justify-center">
+          {/* Clinician-led badge below CTAs */}
+          <div className="mt-3 flex justify-center">
             <span className="inline-flex items-center rounded-full bg-blue-100 text-blue-900 px-4 py-2 text-[11px] sm:text-xs font-semibold tracking-wide">
-              Clinician‑Led National Movement
+              Clinician-Led National Movement
             </span>
           </div>
 
           {/* Impact strip */}
-          <div className="mt-8 grid w-full max-w-5xl mx-auto grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="mt-7 grid w-full max-w-5xl mx-auto grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="rounded-2xl border border-gray-200 bg-white px-5 py-4 shadow">
               <p className="text-[11px] uppercase tracking-wider text-gray-500">National Targets</p>
               <p className="mt-1 text-2xl font-extrabold">
@@ -109,7 +112,7 @@ const HeroPreview: React.FC = () => {
             <div className="rounded-2xl border border-gray-200 bg-white px-5 py-4 shadow">
               <p className="text-[11px] uppercase tracking-wider text-gray-500">Our Approach</p>
               <p className="mt-1 text-base font-semibold leading-snug text-gray-800">
-                Colonoscopy is the gold standard. Validated blood‑based tests help increase screening uptake and triage more patients to timely scoping.
+                Colonoscopy is the gold standard. Validated blood-based tests help increase screening uptake and triage more patients to timely scoping.
               </p>
             </div>
           </div>
