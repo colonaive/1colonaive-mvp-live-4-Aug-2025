@@ -39,6 +39,25 @@ type Partner = {
 const chunk = <T,>(arr: T[], size: number) =>
   arr.reduce<T[][]>((acc, _, i) => (i % size ? acc : [...acc, arr.slice(i, i + size)]), []);
 
+/** Normalize tiers to public-friendly labels */
+const normalizeTier = (tier: string | null): string | null => {
+  if (!tier) return null;
+  const t = tier.trim().toLowerCase();
+  if (t.startsWith("diamond")) return "Diamond Champion";
+  if (t.startsWith("platinum")) return "Platinum Champion";
+  if (t.startsWith("gold")) return "Gold Champion";
+  if (t.startsWith("support")) return "Supporter";
+  return tier; // leave custom labels as-is
+};
+
+/** If tribute already contains 'honour'/'memory', show as-is; else prefix gracefully */
+const formatTribute = (text: string): string => {
+  const v = text.trim();
+  const lower = v.toLowerCase();
+  if (lower.includes("honour") || lower.includes("honor") || lower.includes("memory")) return v;
+  return `In honour of ${v}`;
+};
+
 const TierBadge: React.FC<{ tier: string | null }> = ({ tier }) => {
   if (!tier) return null;
   const color =
@@ -59,14 +78,12 @@ const CSRShowcasePage: React.FC = () => {
   const [itemsPerSlide, setItemsPerSlide] = useState(window.innerWidth >= 1024 ? 2 : 1);
   const [loading, setLoading] = useState(true);
 
-  // responsive cards per slide
   useEffect(() => {
     const onResize = () => setItemsPerSlide(window.innerWidth >= 1024 ? 2 : 1);
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
-  // load partners
   useEffect(() => {
     const load = async () => {
       setLoading(true);
@@ -79,7 +96,7 @@ const CSRShowcasePage: React.FC = () => {
           display_order, featured, status, active
         `)
         .eq("active", true)
-        .in("status", ["approved", "draft"]) // show drafts for internal preview; change to ['approved'] for strict public
+        .in("status", ["approved", "draft"])
         .order("featured", { ascending: false })
         .order("display_order", { ascending: true })
         .order("updated_at", { ascending: false });
@@ -95,12 +112,12 @@ const CSRShowcasePage: React.FC = () => {
         name: r.company_name,
         website: r.website,
         blurb: r.blurb_short,
-        tier: r.donation_tier_override || r.donation_tier,
+        tier: normalizeTier(r.donation_tier_override || r.donation_tier),
         brands: (r.brands_csv || "")
           .split(",")
           .map((s) => s.trim())
           .filter(Boolean),
-        tribute: r.tribute,
+        tribute: r.tribute ? formatTribute(r.tribute) : null,
         logo: r.logo_url,
         hero: r.hero_image_url,
         order: r.display_order ?? 100,
@@ -114,7 +131,6 @@ const CSRShowcasePage: React.FC = () => {
     load();
   }, []);
 
-  // auto-advance the carousel
   useEffect(() => {
     if (partners.length <= itemsPerSlide) return;
     const t = setInterval(
@@ -233,10 +249,13 @@ const CSRShowcasePage: React.FC = () => {
 
                           {p.blurb && <p className="text-sm text-gray-700">{p.blurb}</p>}
 
+                          {/* Tribute — highlighted softly, centered, italic */}
                           {p.tribute && (
-                            <p className="text-xs text-gray-600 mt-2 italic">
-                              In honour of {p.tribute}
-                            </p>
+                            <div className="mt-3">
+                              <div className="bg-indigo-50 border border-indigo-100 text-indigo-800 text-sm italic rounded-lg px-3 py-2 text-center">
+                                {p.tribute}
+                              </div>
+                            </div>
                           )}
 
                           <div className="mt-4 flex items-center gap-2">
@@ -259,11 +278,11 @@ const CSRShowcasePage: React.FC = () => {
           </div>
         )}
 
-        {/* Movement dedication block (optional storytelling) */}
+        {/* Movement dedication block */}
         <Card className="mt-10">
           <CardContent className="p-6 md:p-8">
             <h3 className="text-lg md:text-xl font-semibold text-gray-900 mb-2">
-              In honour of our dear classmate and friend, Toh Cher Lek
+              In loving memory of our dear friend, the late Mr. Toh Cher Lek
             </h3>
             <p className="text-gray-700">
               COLONAiVE™ is a national movement built on compassion and action. Each Corporate Champion helps
