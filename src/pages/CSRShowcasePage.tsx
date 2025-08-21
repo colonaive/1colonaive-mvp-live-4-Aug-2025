@@ -5,50 +5,121 @@ import { Card, CardContent } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
 import { supabase } from "../supabase";
 
-type CSRPartner = {
+type Row = {
+  id: string;
+  company_name: string;
+  website: string | null;
+  blurb_short: string | null;
+  donation_tier: string | null;
+  donation_tier_override: string | null;
+  brands_csv: string | null;
+  tribute: string | null;
+  logo_url: string | null;
+  hero_image_url: string | null;
+  display_order: number | null;
+  featured: boolean | null;
+  status?: string | null;
+  active?: boolean | null;
+};
+
+type Partner = {
   id: string;
   name: string;
   website: string | null;
   blurb: string | null;
-  donation_level: string | null;
-  logo_url: string | null;
-  hero_image_url: string | null; // ✅ read correct column
-  display_order: number | null;
+  tier: string | null;
+  brands: string[];
+  tribute: string | null;
+  logo: string | null;
+  hero: string | null;
+  order: number;
+  featured: boolean;
 };
 
 const chunk = <T,>(arr: T[], size: number) =>
   arr.reduce<T[][]>((acc, _, i) => (i % size ? acc : [...acc, arr.slice(i, i + size)]), []);
 
+const TierBadge: React.FC<{ tier: string | null }> = ({ tier }) => {
+  if (!tier) return null;
+  const color =
+    tier.startsWith("Diamond") ? "bg-blue-100 text-blue-800" :
+    tier.startsWith("Platinum") ? "bg-gray-100 text-gray-800" :
+    tier.startsWith("Gold") ? "bg-yellow-100 text-yellow-800" :
+    "bg-emerald-100 text-emerald-800";
+  return (
+    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${color}`}>
+      {tier}
+    </span>
+  );
+};
+
 const CSRShowcasePage: React.FC = () => {
-  const [partners, setPartners] = useState<CSRPartner[]>([]);
+  const [partners, setPartners] = useState<Partner[]>([]);
   const [index, setIndex] = useState(0);
   const [itemsPerSlide, setItemsPerSlide] = useState(window.innerWidth >= 1024 ? 2 : 1);
+  const [loading, setLoading] = useState(true);
 
+  // responsive cards per slide
   useEffect(() => {
     const onResize = () => setItemsPerSlide(window.innerWidth >= 1024 ? 2 : 1);
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
+  // load partners
   useEffect(() => {
     const load = async () => {
+      setLoading(true);
       const { data, error } = await supabase
         .from("csr_partners")
-        .select("id,name,website,blurb,donation_level,logo_url,hero_image_url,display_order")
-        .eq("is_active", true)
+        .select(`
+          id, company_name, website, blurb_short,
+          donation_tier, donation_tier_override,
+          brands_csv, tribute, logo_url, hero_image_url,
+          display_order, featured, status, active
+        `)
+        .eq("active", true)
+        .in("status", ["approved", "draft"]) // show drafts for internal preview; change to ['approved'] for strict public
+        .order("featured", { ascending: false })
         .order("display_order", { ascending: true })
-        .order("created_at", { ascending: true });
+        .order("updated_at", { ascending: false });
 
-      if (!error) setPartners((data || []) as CSRPartner[]);
+      if (error) {
+        console.error(error);
+        setLoading(false);
+        return;
+      }
+
+      const mapped: Partner[] = (data || []).map((r: Row) => ({
+        id: r.id,
+        name: r.company_name,
+        website: r.website,
+        blurb: r.blurb_short,
+        tier: r.donation_tier_override || r.donation_tier,
+        brands: (r.brands_csv || "")
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean),
+        tribute: r.tribute,
+        logo: r.logo_url,
+        hero: r.hero_image_url,
+        order: r.display_order ?? 100,
+        featured: !!r.featured,
+      }));
+
+      setPartners(mapped);
+      setLoading(false);
     };
+
     load();
   }, []);
 
+  // auto-advance the carousel
   useEffect(() => {
     if (partners.length <= itemsPerSlide) return;
     const t = setInterval(
       () => setIndex((i) => (i + 1) % Math.ceil(partners.length / itemsPerSlide)),
-      5000
+      7000
     );
     return () => clearInterval(t);
   }, [partners, itemsPerSlide]);
@@ -57,12 +128,13 @@ const CSRShowcasePage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Hero header */}
       <div className="bg-gradient-to-r from-blue-600 to-teal-500 py-12 text-white">
         <Container>
           <h1 className="text-3xl font-bold mb-2">Corporate Champions</h1>
-          <p className="opacity-90">
-            Recognizing organizations that lead the fight against colorectal cancer through their
-            commitment to screening and prevention.
+          <p className="opacity-90 max-w-3xl">
+            Recognizing organizations that lead the fight against colorectal cancer by expanding access to screening,
+            prevention and early detection in Singapore.
           </p>
           <a href="/register/corporate">
             <Button className="mt-6">Become a Corporate Champion →</Button>
@@ -70,21 +142,41 @@ const CSRShowcasePage: React.FC = () => {
         </Container>
       </div>
 
-      <Container className="py-8">
+      <Container className="py-10">
+        {/* Impact pitch band for $35k Gold */}
+        <Card className="mb-8">
+          <CardContent className="p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center gap-6">
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-2">
+                <TierBadge tier="Gold Champion" />
+                <span className="text-sm text-gray-600">S$35,500 suggested entry</span>
+              </div>
+              <h2 className="text-xl md:text-2xl font-semibold text-gray-900 mb-2">
+                Fund life‑saving CRC screening access — join as a Gold Champion.
+              </h2>
+              <p className="text-gray-700">
+                A Gold commitment helps under‑served Singaporeans access screening now. We proudly recognise your leadership across our movement platforms.
+              </p>
+            </div>
+            <a href="/register/corporate">
+              <Button className="whitespace-nowrap">Start at S$35,500</Button>
+            </a>
+          </CardContent>
+        </Card>
+
         {/* Carousel */}
-        {slides.length > 0 && (
+        {loading ? (
+          <div className="text-center text-gray-500 py-16">Loading partners…</div>
+        ) : slides.length === 0 ? (
+          <div className="text-center text-gray-500 py-16">Partners coming soon.</div>
+        ) : (
           <div>
             <div className="flex items-center justify-between mb-4">
               <div className="text-sm text-gray-600">
-                Showing {itemsPerSlide} per slide • {partners.length} partners
+                Showing {itemsPerSlide} per slide • {partners.length} partner{partners.length !== 1 ? "s" : ""}
               </div>
               <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() =>
-                    setIndex((i) => (i - 1 + slides.length) % slides.length)
-                  }
-                >
+                <Button variant="outline" onClick={() => setIndex((i) => (i - 1 + slides.length) % slides.length)}>
                   ‹ Prev
                 </Button>
                 <Button variant="outline" onClick={() => setIndex((i) => (i + 1) % slides.length)}>
@@ -103,35 +195,59 @@ const CSRShowcasePage: React.FC = () => {
                     {group.map((p) => (
                       <Card key={p.id}>
                         <CardContent className="p-5">
-                          {/* HERO image if present */}
-                          {p.hero_image_url ? (
+                          {/* Media: prefer hero; fallback to logo */}
+                          {p.hero ? (
                             <img
-                              src={p.hero_image_url}
+                              src={p.hero}
                               alt={`${p.name} brands`}
                               className="w-full h-56 object-contain bg-white rounded-xl border mb-4"
                               loading="lazy"
                             />
-                          ) : (
+                          ) : p.logo ? (
                             <div className="mb-4">
-                              {p.logo_url && (
-                                <img
-                                  src={p.logo_url}
-                                  alt={`${p.name} logo`}
-                                  className="w-14 h-14 object-contain rounded-md border bg-white"
-                                />
-                              )}
+                              <img
+                                src={p.logo}
+                                alt={`${p.name} logo`}
+                                className="w-16 h-16 object-contain rounded-md border bg-white"
+                              />
+                            </div>
+                          ) : null}
+
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-semibold text-gray-900">{p.name}</h3>
+                            <TierBadge tier={p.tier} />
+                          </div>
+
+                          {p.brands.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mb-2">
+                              {p.brands.map((b, i) => (
+                                <span
+                                  key={`${p.id}-brand-${i}`}
+                                  className="px-2 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-800"
+                                >
+                                  {b}
+                                </span>
+                              ))}
                             </div>
                           )}
 
-                          <h3 className="font-semibold text-gray-900">{p.name}</h3>
-                          {p.blurb && <p className="text-sm text-gray-700 mt-2">{p.blurb}</p>}
+                          {p.blurb && <p className="text-sm text-gray-700">{p.blurb}</p>}
 
-                          <div className="mt-4">
+                          {p.tribute && (
+                            <p className="text-xs text-gray-600 mt-2 italic">
+                              In honour of {p.tribute}
+                            </p>
+                          )}
+
+                          <div className="mt-4 flex items-center gap-2">
                             {p.website && (
                               <a href={p.website} target="_blank" rel="noopener noreferrer">
                                 <Button variant="outline">Visit Website</Button>
                               </a>
                             )}
+                            <a href="/register/corporate">
+                              <Button variant="outline">Join as a Champion</Button>
+                            </a>
                           </div>
                         </CardContent>
                       </Card>
@@ -142,6 +258,19 @@ const CSRShowcasePage: React.FC = () => {
             </div>
           </div>
         )}
+
+        {/* Movement dedication block (optional storytelling) */}
+        <Card className="mt-10">
+          <CardContent className="p-6 md:p-8">
+            <h3 className="text-lg md:text-xl font-semibold text-gray-900 mb-2">
+              In honour of our dear classmate and friend, Toh Cher Lek
+            </h3>
+            <p className="text-gray-700">
+              COLONAiVE™ is a national movement built on compassion and action. Each Corporate Champion helps
+              ensure that more families catch colorectal cancer early—when it’s most treatable.
+            </p>
+          </CardContent>
+        </Card>
       </Container>
     </div>
   );
