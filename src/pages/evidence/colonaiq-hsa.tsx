@@ -112,12 +112,7 @@ export default function ColonAiQHSAEvidencePage() {
 
             {/* neutral handoff */}
             <div className="mt-6 flex flex-col sm:flex-row gap-3">
-              <a
-                href="/downloads/COLONAiVE_Evidence_Brief.pdf"
-                className="inline-flex items-center justify-center rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-50"
-              >
-                Download Evidence Brief
-              </a>
+              
               <a
                 href="https://www.colonaiq-asia.com"
                 target="_blank" rel="noopener noreferrer"
