@@ -58,7 +58,7 @@ const CSRPartnersAdminPage: React.FC = () => {
   const fetchRows = async () => {
     setLoading(true);
     const { data, error } = await supabase
-      .from<Partner>('csr_partners')
+      .from('csr_partners')
       .select('*')
       .order('display_order', { ascending: true })
       .order('company_name', { ascending: true });
