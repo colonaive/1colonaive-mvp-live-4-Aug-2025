@@ -1,9 +1,8 @@
-// HeroSection (evidence-forward, clinically safe)
-// Drop-in replacement for your HeroPreview component
+// components/HeroSection.tsx (drop-in)
+// Uses Tailwind only and a11y-safe links
 
 import React from "react";
 
-// minimal stubs so it renders outside your app
 const Container: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ className = "", children, ...props }) => (
   <div {...props} className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ${className}`}>{children}</div>
 );
@@ -11,18 +10,14 @@ const Button: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement>> = ({ class
   <button {...props} className={`inline-flex items-center justify-center rounded-2xl font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 ${className}`}>{children}</button>
 );
 
-const HeroPreview: React.FC = () => {
+export default function HeroSection() {
   return (
     <section
       className="relative w-full min-h-[92vh] overflow-hidden text-gray-900"
       aria-label="Colorectal cancer screening call to action"
-      style={{
-        backgroundImage: `url(/assets/hero-bg-v2.jpg)`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }}
+      style={{ backgroundImage: `url(/assets/hero-bg-v2.jpg)`, backgroundSize: "cover", backgroundPosition: "center" }}
     >
-      {/* soft contrast overlays */}
+      {/* soft overlays */}
       <div className="absolute inset-0 bg-white/65" />
       <div className="absolute inset-0 bg-gradient-to-b from-white/70 via-white/60 to-white/85" />
       <div className="absolute -top-32 -left-24 h-[60vh] w-[60vh] rounded-full bg-emerald-300/20 blur-3xl" />
@@ -33,10 +28,7 @@ const HeroPreview: React.FC = () => {
 
           {/* CRC alert */}
           <div className="mb-4 flex justify-center">
-            <span
-              aria-label="Colorectal Cancer"
-              className="inline-flex items-center gap-3 rounded-full bg-red-600 px-5 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base text-white font-extrabold tracking-[0.18em] uppercase shadow-lg ring-2 ring-red-700/40"
-            >
+            <span className="inline-flex items-center gap-3 rounded-full bg-red-600 px-5 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base text-white font-extrabold tracking-[0.18em] uppercase shadow-lg ring-2 ring-red-700/40">
               <span className="inline-block h-2.5 w-2.5 rounded-full bg-white" />
               Colorectal Cancer
               <span className="inline-block h-2.5 w-2.5 rounded-full bg-white" />
@@ -73,7 +65,6 @@ const HeroPreview: React.FC = () => {
               href="https://divisionofresearch.kaiserpermanente.org/colorectal-cancer-screen-program/"
               target="_blank" rel="noopener noreferrer"
               className="group rounded-2xl border border-gray-200 bg-white px-4 py-3 shadow focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              aria-label="Kaiser Permanente real-world program results"
             >
               <p className="text-xs uppercase tracking-wide text-gray-500">Real-World Program</p>
               <p className="mt-1 text-sm font-semibold">Kaiser Permanente (1.1M): screening doubled; mortality halved.</p>
@@ -84,17 +75,15 @@ const HeroPreview: React.FC = () => {
               href="https://academic.oup.com/jnci/advance-article/doi/10.1093/jnci/djaf202/8219467"
               target="_blank" rel="noopener noreferrer"
               className="group rounded-2xl border border-gray-200 bg-white px-4 py-3 shadow focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              aria-label="JNCI 2025 triple-effect modeling study"
             >
               <p className="text-xs uppercase tracking-wide text-gray-500">Peer-Reviewed Modeling</p>
-              <p className="mt-1 text-sm font-semibold">JNCI 2025: “Triple Effect” — saves lives, reduces costs, narrows gaps.</p>
+              <p className="mt-1 text-sm font-semibold">JNCI 2025: “Triple Effect”—saves lives, reduces costs, narrows gaps.</p>
               <span className="mt-1 inline-block text-xs text-emerald-700 group-hover:underline">Read article ↗</span>
             </a>
 
             <a
               href="/evidence/colonaivq-hsa"
               className="group rounded-2xl border border-gray-200 bg-white px-4 py-3 shadow focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              aria-label="ColonAiQ regulatory status and performance"
             >
               <p className="text-xs uppercase tracking-wide text-gray-500">Singapore-Ready</p>
               <p className="mt-1 text-sm font-semibold">ColonAiQ®: HSA Class C listed (DE0510590); high patient acceptability.</p>
@@ -114,21 +103,21 @@ const HeroPreview: React.FC = () => {
                 Join the Movement
               </Button>
             </a>
-            <a href="/how-it-works" aria-label="How it works">
+            <a href="/evidence/colonaivq-hsa" aria-label="See evidence">
               <Button className="px-5 py-3.5 text-sm bg-white border border-gray-300 text-gray-900 hover:bg-gray-100 focus:ring-gray-400">
-                How It Works
+                See Evidence
               </Button>
             </a>
           </div>
 
-          {/* clinician-led badge */}
+          {/* movement badge */}
           <div className="mt-3 flex justify-center">
             <span className="inline-flex items-center rounded-full bg-blue-100 text-blue-900 px-4 py-2 text-[11px] sm:text-xs font-semibold tracking-wide">
               Clinician-Led National Movement
             </span>
           </div>
 
-          {/* impact tiles (numbers kept conservative & aspirational) */}
+          {/* impact tiles */}
           <div className="mt-7 grid w-full max-w-5xl mx-auto grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="rounded-2xl border border-gray-200 bg-white px-5 py-4 shadow">
               <p className="text-[11px] uppercase tracking-wider text-gray-500">National Target</p>
@@ -157,7 +146,7 @@ const HeroPreview: React.FC = () => {
             </div>
           </div>
 
-          {/* tiny legal/evidence footnote */}
+          {/* footnote */}
           <p className="mt-4 text-xs text-gray-500">
             * Estimate from peer-reviewed modeling (JNCI 2025). Real-world impact depends on screening uptake and timely colonoscopy follow-up.
           </p>
@@ -167,6 +156,4 @@ const HeroPreview: React.FC = () => {
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-white" />
     </section>
   );
-};
-
-export default HeroPreview;
+}
