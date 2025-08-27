@@ -16,7 +16,6 @@ import AdminCSRPartnerForm from './pages/admin/AdminCSRPartnerForm';
 import CSRPartnersAdminPage from './pages/admin/CSRPartnersAdminPage';
 import PartnerSpecialistsAdminPage from './pages/admin/PartnerSpecialistsAdminPage';
 
-
 // ✅ Verified CRC News (two-column, AI summaries)
 import LiveCRCNews from './pages/LiveCRCNews';
 
@@ -59,6 +58,9 @@ import ClinicianGuidelinesHub from './pages/education/clinicians/guidelines';
 import ClinicianResearchHub from './pages/education/clinicians/research';
 import ClinicianCaseStudiesHub from './pages/education/clinicians/case-studies';
 import ClinicianCMEHub from './pages/education/clinicians/cme-resources';
+// Evidence (new)
+import ColonAiQHSAEvidencePage from './pages/evidence/colonaivq-hsa';
+
 
 // ✅ Newsroom (keep the foldered hub + subpages)
 import NewsroomHub from './pages/education/newsroom';
@@ -127,6 +129,9 @@ import CorporateDashboard from './pages/CorporateDashboard';
 import SpecialistDashboard from './pages/SpecialistDashboard';
 import GPClinicDashboard from './pages/GPClinicDashboard';
 
+// ✅ NEW: Evidence page
+import ColonAiQHSAEvidencePage from './pages/evidence/colonaivq-hsa';
+
 const MainRoutes = () => {
   return (
     <div className="flex flex-col min-h-screen">
@@ -147,6 +152,10 @@ const MainRoutes = () => {
           <Route path="/join-movement" element={<JoinMovementPage />} />
           <Route path="/stories" element={<StoriesPage />} />
           <Route path="/how-it-works" element={<HowItWorksPage />} />
+
+          {/* ✅ Evidence routes */}
+          <Route path="/evidence" element={<Navigate to="/evidence/colonaivq-hsa" replace />} />
+          <Route path="/evidence/colonaivq-hsa" element={<ColonAiQHSAEvidencePage />} />
 
           {/* ✅ CRC news */}
           <Route path="/live-crc-news" element={<LiveCRCNews />} />
@@ -225,73 +234,40 @@ const MainRoutes = () => {
           <Route path="/admin/login" element={<PublicRoute><AdminLogin /></PublicRoute>} />
           <Route
             path="/admin/dashboard"
-            element={
-              <ProtectedAdminRoute>
-                <SuperAdminDashboard />
-              </ProtectedAdminRoute>
-            }
+            element={<ProtectedAdminRoute><SuperAdminDashboard /></ProtectedAdminRoute>}
           />
           {/* CSR list (protected) */}
           <Route
             path="/admin/csr-partners"
-            element={
-              <ProtectedAdminRoute>
-                <CSRPartnersAdminPage />
-              </ProtectedAdminRoute>
-            }
+            element={<ProtectedAdminRoute><CSRPartnersAdminPage /></ProtectedAdminRoute>}
           />
           {/* Alias to the same CSR list */}
           <Route
             path="/admin/csr"
-            element={
-              <ProtectedAdminRoute>
-                <CSRPartnersAdminPage />
-              </ProtectedAdminRoute>
-            }
+            element={<ProtectedAdminRoute><CSRPartnersAdminPage /></ProtectedAdminRoute>}
           />
           <Route
             path="/admin/news"
-            element={
-              <ProtectedAdminRoute>
-                <NewsFeedAdminPage />
-              </ProtectedAdminRoute>
-            }
+            element={<ProtectedAdminRoute><NewsFeedAdminPage /></ProtectedAdminRoute>}
           />
-<Route
-  path="/admin/partner-specialists"
-  element={
-    <ProtectedAdminRoute>
-      <PartnerSpecialistsAdminPage />
-    </ProtectedAdminRoute>
-  }
-/>
-
+          <Route
+            path="/admin/partner-specialists"
+            element={<ProtectedAdminRoute><PartnerSpecialistsAdminPage /></ProtectedAdminRoute>}
+          />
 
           {/* CSR create & edit (protected) */}
           <Route
             path="/admin/csr/new"
-            element={
-              <ProtectedAdminRoute>
-                <AdminCSRPartnerForm />
-              </ProtectedAdminRoute>
-            }
+            element={<ProtectedAdminRoute><AdminCSRPartnerForm /></ProtectedAdminRoute>}
           />
           <Route
             path="/admin/csr/:id/edit"
-            element={
-              <ProtectedAdminRoute>
-                <AdminCSRPartnerForm />
-              </ProtectedAdminRoute>
-            }
+            element={<ProtectedAdminRoute><AdminCSRPartnerForm /></ProtectedAdminRoute>}
           />
           {/* Partner specialist create (protected) */}
           <Route
             path="/admin/partner-specialists/new"
-            element={
-              <ProtectedAdminRoute>
-                <AdminPartnerSpecialistForm />
-              </ProtectedAdminRoute>
-            }
+            element={<ProtectedAdminRoute><AdminPartnerSpecialistForm /></ProtectedAdminRoute>}
           />
 
           {/* Protected */}
