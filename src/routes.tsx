@@ -59,7 +59,6 @@ import ClinicianResearchHub from './pages/education/clinicians/research';
 import ClinicianCaseStudiesHub from './pages/education/clinicians/case-studies';
 import ClinicianCMEHub from './pages/education/clinicians/cme-resources';
 // Evidence (new)
-import ColonAiQHSAEvidencePage from './pages/evidence/colonaivq-hsa';
 
 
 // ✅ Newsroom (keep the foldered hub + subpages)
@@ -130,7 +129,7 @@ import SpecialistDashboard from './pages/SpecialistDashboard';
 import GPClinicDashboard from './pages/GPClinicDashboard';
 
 // ✅ NEW: Evidence page
-import ColonAiQHSAEvidencePage from './pages/evidence/colonaivq-hsa';
+import ColonAiQHSAEvidencePage from './pages/evidence/colonaiq-hsa';
 
 const MainRoutes = () => {
   return (
@@ -154,8 +153,8 @@ const MainRoutes = () => {
           <Route path="/how-it-works" element={<HowItWorksPage />} />
 
           {/* ✅ Evidence routes */}
-          <Route path="/evidence" element={<Navigate to="/evidence/colonaivq-hsa" replace />} />
-          <Route path="/evidence/colonaivq-hsa" element={<ColonAiQHSAEvidencePage />} />
+          <Route path="/evidence" element={<Navigate to="/evidence/colonaiq-hsa" replace />} />
+          <Route path="/evidence/colonaiq-hsa" element={<ColonAiQHSAEvidencePage />} />
 
           {/* ✅ CRC news */}
           <Route path="/live-crc-news" element={<LiveCRCNews />} />

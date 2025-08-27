@@ -82,7 +82,7 @@ export default function HeroSection() {
             </a>
 
             <a
-              href="/evidence/colonaivq-hsa"
+              href="/evidence/colonaiq-hsa"
               className="group rounded-2xl border border-gray-200 bg-white px-4 py-3 shadow focus:outline-none focus:ring-2 focus:ring-emerald-500"
             >
               <p className="text-xs uppercase tracking-wide text-gray-500">Singapore-Ready</p>
@@ -103,7 +103,7 @@ export default function HeroSection() {
                 Join the Movement
               </Button>
             </a>
-            <a href="/evidence/colonaivq-hsa" aria-label="See evidence">
+            <a href="/evidence/colonaiq-hsa" aria-label="See evidence">
               <Button className="px-5 py-3.5 text-sm bg-white border border-gray-300 text-gray-900 hover:bg-gray-100 focus:ring-gray-400">
                 See Evidence
               </Button>
