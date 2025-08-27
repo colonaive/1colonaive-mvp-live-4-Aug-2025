@@ -1,6 +1,6 @@
 // src/pages/evidence/colonaivq-hsa.tsx
 import React from "react";
-import Link from "next/link";
+import { Link } from 'react-router-dom';
 
 const Pill: React.FC<React.HTMLAttributes<HTMLSpanElement>> = ({ className = "", children, ...props }) => (
   <span {...props} className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ${className}`}>{children}</span>
@@ -13,9 +13,9 @@ export default function ColonAiQHSAEvidencePage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
           <nav aria-label="Breadcrumb" className="text-sm text-gray-500">
             <ol className="flex items-center gap-2">
-              <li><Link href="/" className="hover:underline">Home</Link></li>
+              <li><Link to="/" className="hover:underline">Home</Link></li>
               <li aria-hidden>›</li>
-              <li><Link href="/evidence" className="hover:underline">Evidence</Link></li>
+              <li><Link to="/evidence" className="hover:underline">Evidence</Link></li>
               <li aria-hidden>›</li>
               <li className="text-gray-700 font-medium">ColonAiQ® – HSA & Evidence</li>
             </ol>
