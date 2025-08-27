@@ -63,7 +63,7 @@ const HeroPreview: React.FC = () => {
 
           {/* subhead */}
           <p className="mt-4 mx-auto max-w-3xl text-base sm:text-lg md:text-xl text-gray-800 leading-relaxed">
-            Every day, <span className="font-bold text-red-700">Singaporeans are diagnosed late</span>.
+            Every day, <span className="font-bold text-red-700">3 Singaporeans are diagnosed late</span>.
             Early screening with timely colonoscopy can shift detection earlier and improve survival.
           </p>
 
