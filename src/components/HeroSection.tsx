@@ -24,7 +24,7 @@ export default function HeroSection() {
       <div className="absolute -bottom-24 -right-24 h-[60vh] w-[60vh] rounded-full bg-sky-300/25 blur-3xl" />
 
       {/* CHANGED: added top padding so the red chip sits lower under the header */}
-      <Container className="relative z-10 flex min-h-[92vh] items-center justify-center pt-6 sm:pt-8 md:pt-10">
+      <Container className="relative z-10 flex min-h-[92vh] items-center justify-center pt-4 sm:pt-6 md:pt-8">
         <div className="w-full max-w-6xl mx-auto text-center">
 
           {/* CRC alert */}
