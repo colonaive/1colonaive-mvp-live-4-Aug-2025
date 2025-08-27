@@ -1,4 +1,4 @@
-// components/HeroSection.tsx (drop-in)
+// components/HeroSection.tsx
 // Uses Tailwind only and a11y-safe links
 
 import React from "react";
@@ -23,12 +23,22 @@ export default function HeroSection() {
       <div className="absolute -top-32 -left-24 h-[60vh] w-[60vh] rounded-full bg-emerald-300/20 blur-3xl" />
       <div className="absolute -bottom-24 -right-24 h-[60vh] w-[60vh] rounded-full bg-sky-300/25 blur-3xl" />
 
-      <Container className="relative z-10 flex min-h-[92vh] items-center justify-center">
+      {/* CHANGED: added top padding so the red chip sits lower under the header */}
+      <Container className="relative z-10 flex min-h-[92vh] items-center justify-center pt-6 sm:pt-8 md:pt-10">
         <div className="w-full max-w-6xl mx-auto text-center">
 
           {/* CRC alert */}
           <div className="mb-4 flex justify-center">
-            <span className="inline-flex items-center gap-3 rounded-full bg-red-600 px-5 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base text-white font-extrabold tracking-[0.18em] uppercase shadow-lg ring-2 ring-red-700/40">
+            {/* 
+              CHANGED:
+              - grew padding: px-5→px-6 (sm:px-6→sm:px-8), py-2.5→py-3 (sm:py-3→sm:py-3.5)
+              - grew text: text-sm→text-base (sm:text-base→sm:text-lg)
+              - added ring-offset to create a visible “border gap” from background (ring-offset-2 ring-offset-white)
+              - slightly stronger ring color (ring-red-700/50) and shadow
+            */}
+            <span className="inline-flex items-center gap-3 rounded-full bg-red-600 px-6 sm:px-8 py-3 sm:py-3.5
+                             text-base sm:text-lg text-white font-extrabold tracking-[0.18em] uppercase
+                             shadow-lg ring-2 ring-red-700/50 ring-offset-2 ring-offset-white">
               <span className="inline-block h-2.5 w-2.5 rounded-full bg-white" />
               Colorectal Cancer
               <span className="inline-block h-2.5 w-2.5 rounded-full bg-white" />
