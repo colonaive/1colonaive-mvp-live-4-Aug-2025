@@ -1,4 +1,4 @@
-// src/pages/evidence/colonaivq-hsa.tsx
+// src/pages/evidence/colonaiq-hsa.tsx
 import React from "react";
 import { Link } from 'react-router-dom';
 
@@ -25,13 +25,11 @@ export default function ColonAiQHSAEvidencePage() {
             <h1 id="page-title" className="text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900">
               ColonAiQ® – Regulatory Status & Clinical Evidence (Singapore)
             </h1>
-            <Pill className="bg-blue-50 text-blue-900 border border-blue-100">Clinician-Led Movement • Non-Commercial Page</Pill>
+            <Pill className="bg-blue-50 text-blue-900 border border-blue-100">Clinician-Led Movement</Pill>
           </div>
 
           <p className="mt-2 max-w-3xl text-gray-700">
-            This page provides citation-backed information on ColonAiQ® relevant to Singapore’s screening ecosystem.
-            COLONAiVE™ remains a clinician-led national movement; detailed product enquiries are handled by the manufacturer.
-          </p>
+            This page provides citation-backed information on ColonAiQ® relevant to Singapore’s screening ecosystem, in support of COLONAiVE™ - a clinician-led national movement.</p>
         </div>
       </section>
 
