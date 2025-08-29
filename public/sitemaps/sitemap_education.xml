@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset 
+  xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://www.colonaive.ai/education</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2025-08-30</lastmod>
+  </url>
+
+  <!-- Patient education -->
+  <url>
+    <loc>https://www.colonaive.ai/education/patients/colorectal-cancer</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2025-08-30</lastmod>
+  </url>
+  <url>
+    <loc>https://www.colonaive.ai/education/patients/screening</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2025-08-30</lastmod>
+  </url>
+  <url>
+    <loc>https://www.colonaive.ai/education/patients/symptoms</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2025-08-30</lastmod>
+  </url>
+
+  <!-- Regional education -->
+  <url>
+    <loc>https://www.colonaive.ai/education/sg</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2025-08-30</lastmod>
+  </url>
+  <url>
+    <loc>https://www.colonaive.ai/education/au</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2025-08-30</lastmod>
+  </url>
+  <url>
+    <loc>https://www.colonaive.ai/education/in</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2025-08-30</lastmod>
+  </url>
+  <url>
+    <loc>https://www.colonaive.ai/education/ph</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2025-08-30</lastmod>
+  </url>
+  <url>
+    <loc>https://www.colonaive.ai/education/jp</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2025-08-30</lastmod>
+  </url>
+
+  <!-- Clinician education -->
+  <url>
+    <loc>https://www.colonaive.ai/education/clinicians</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2025-08-30</lastmod>
+  </url>
+  <url>
+    <loc>https://www.colonaive.ai/education/clinicians/guidelines</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2025-08-30</lastmod>
+  </url>
+  <url>
+    <loc>https://www.colonaive.ai/education/clinicians/case-studies</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2025-08-30</lastmod>
+  </url>
+</urlset>
