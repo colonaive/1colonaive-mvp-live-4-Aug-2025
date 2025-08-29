@@ -1,16 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset 
-  xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://www.colonaive.ai/education</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <lastmod>2025-08-30</lastmod>
   </url>
-
   <!-- Patient education -->
   <url>
-    <loc>https://www.colonaive.ai/education/patients/colorectal-cancer</loc>
+    <loc>https://www.colonaive.ai/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <lastmod>2025-08-30</lastmod>
@@ -27,7 +25,6 @@
     <priority>0.8</priority>
     <lastmod>2025-08-30</lastmod>
   </url>
-
   <!-- Regional education -->
   <url>
     <loc>https://www.colonaive.ai/education/sg</loc>
@@ -59,7 +56,6 @@
     <priority>0.8</priority>
     <lastmod>2025-08-30</lastmod>
   </url>
-
   <!-- Clinician education -->
   <url>
     <loc>https://www.colonaive.ai/education/clinicians</loc>
