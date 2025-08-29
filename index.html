@@ -1,9 +1,7 @@
-<!-- trigger netlify -->
-<!doctype html>
+<!-- trigger netlify --><!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
-
     <!-- === FAVICON LINKS === -->
     <!-- These links assume your favicon files are directly in the 'public' folder -->
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
@@ -12,10 +10,86 @@
     <link rel="manifest" href="/site.webmanifest">
     <link rel="shortcut icon" href="/favicon.ico">
     <!-- === END FAVICON LINKS === -->
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Project COLONAiVE™ - SCOPED IN TIME SAVED IN TIME</title>
     <meta name="description" content="Join Singapore's National Movement to Outsmart Colorectal Cancer. Learn, Screen, Act — and Save Lives.">
+    
+    <!-- JSON-LD Schema: MedicalOrganization -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "MedicalOrganization",
+      "name": "Project COLONAiVE",
+      "description": "Singapore's National Movement to Outsmart Colorectal Cancer. Learn, Screen, Act — and Save Lives.",
+      "url": "https://colonaive.com",
+      "medicalSpecialty": "Oncology",
+      "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "Colorectal Cancer Screening and Prevention Services",
+        "itemListElement": [
+          {
+            "@type": "MedicalService",
+            "name": "Colorectal Cancer Screening",
+            "description": "Comprehensive screening services for early detection of colorectal cancer"
+          },
+          {
+            "@type": "MedicalService",
+            "name": "Cancer Prevention Education",
+            "description": "Educational programs and resources for colorectal cancer prevention"
+          }
+        ]
+      },
+      "address": {
+        "@type": "PostalAddress",
+        "addressCountry": "SG",
+        "addressRegion": "Singapore"
+      },
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "customer service",
+        "availableLanguage": ["English", "Chinese", "Malay", "Tamil"]
+      }
+    }
+    </script>
+    
+    <!-- JSON-LD Schema: WebSite -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Project COLONAiVE",
+      "alternateName": "COLONAiVE",
+      "url": "https://colonaive.com",
+      "description": "Singapore's National Movement to Outsmart Colorectal Cancer. Learn, Screen, Act — and Save Lives.",
+      "inLanguage": "en-SG",
+      "isPartOf": {
+        "@type": "Organization",
+        "name": "Project COLONAiVE",
+        "url": "https://colonaive.com"
+      },
+      "about": {
+        "@type": "MedicalCondition",
+        "name": "Colorectal Cancer",
+        "alternateName": "Colon Cancer",
+        "description": "Cancer that occurs in the colon or rectum"
+      },
+      "audience": {
+        "@type": "PeopleAudience",
+        "geographicArea": {
+          "@type": "Country",
+          "name": "Singapore"
+        }
+      },
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://colonaive.com/search?q={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
     
     <!-- Your existing style block -->
     <style>
