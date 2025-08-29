@@ -17,7 +17,7 @@ Allow: /images/
 Allow: /favicon.ico
 
 # Sitemap
-Sitemap: https://colonaive.com/sitemap.xml
+Sitemap: https://www.colonaive.ai/sitemap.xml
 
 # Crawl delay for politeness
 Crawl-delay: 1
