@@ -75,6 +75,7 @@ import HowCrcDevelopsFromPolyps from './pages/education/patients/basics/how-crc-
 import ColonoscopyPreparationGuide from './pages/education/patients/screening/colonoscopy-preparation-complete-guide';
 import EarlyWarningSigns from './pages/education/patients/symptoms/early-warning-signs';
 import ColonoscopyGoldStandard from './pages/education/patients/screening/colonoscopy-gold-standard';
+import ColorectalCancerPage from './pages/education/patients/colorectal-cancer';
 
 // Other
 import Vision2035Page from './pages/Vision2035Page';
@@ -170,7 +171,10 @@ const MainRoutes = () => {
           <Route path="/education/patients/screening" element={<PatientScreeningHub />} />
           <Route path="/education/patients/symptoms" element={<PatientSymptomsHub />} />
           <Route path="/education/patients/prevention" element={<PatientPreventionHub />} />
-
+<Route
+  path="/education/patients/colorectal-cancer"
+  element={<ColorectalCancerPage />}
+/>
           {/* Individual articles */}
           <Route path="/education/article/understanding-colorectal-cancer" element={<UnderstandingColorectalCancer />} />
           <Route path="/education/article/how-crc-develops-from-polyps" element={<HowCrcDevelopsFromPolyps />} />
