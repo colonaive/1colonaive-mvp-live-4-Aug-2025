@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset 
-  xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://www.colonaive.ai/seo</loc>
@@ -8,12 +7,11 @@
     <priority>0.9</priority>
     <lastmod>2025-08-30</lastmod>
   </url>
-
   <!-- Regional -->
   <url>
     <loc>https://www.colonaive.ai/seo/singapore-colorectal-screening</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
+    <priority>0.8</priority>
     <lastmod>2025-08-30</lastmod>
     <xhtml:link rel="alternate" hreflang="en" href="https://www.colonaive.ai/seo/singapore-colorectal-screening"/>
     <xhtml:link rel="alternate" hreflang="zh-CN" href="https://www.colonaive.ai/seo/da-chang-ai-sha-zha"/>
@@ -42,7 +40,6 @@
     <priority>0.9</priority>
     <lastmod>2025-08-30</lastmod>
   </url>
-
   <!-- Test-specific -->
   <url>
     <loc>https://www.colonaive.ai/seo/colon-cancer-test-singapore</loc>
@@ -74,7 +71,6 @@
     <priority>0.8</priority>
     <lastmod>2025-08-30</lastmod>
   </url>
-
   <!-- Legacy -->
   <url>
     <loc>https://www.colonaive.ai/seo/colorectal-cancer-screening-singapore</loc>
@@ -94,7 +90,6 @@
     <priority>0.7</priority>
     <lastmod>2025-08-30</lastmod>
   </url>
-
   <!-- Specialized -->
   <url>
     <loc>https://www.colonaive.ai/seo/fit-test-singapore</loc>
@@ -114,7 +109,6 @@
     <priority>0.7</priority>
     <lastmod>2025-08-30</lastmod>
   </url>
-
   <!-- General SEO -->
   <url>
     <loc>https://www.colonaive.ai/seo/early-detection-colon-cancer</loc>
