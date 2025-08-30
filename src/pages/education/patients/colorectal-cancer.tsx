@@ -12,13 +12,13 @@ const ColorectalCancerPage: React.FC = () => {
         <meta name="description" content="COLONAiVE™ is a clinician-led movement to outsmart colorectal cancer by promoting timely colonoscopy, education, and access to HSA-cleared blood-based screening. Learn how to take action early." />
         <meta name="keywords" content="colorectal cancer, symptoms, risk factors, prevention, early detection, COLONAiVE" />
         <meta name="robots" content="index, follow" />
-        <link rel="canonical" href="https://colonaive.ai/education/patients/colorectal-cancer" />
+        <link rel="canonical" href="https://www.colonaive.ai/education/patients/colorectal-cancer" />
         
         {/* Open Graph */}
         <meta property="og:title" content="Understanding Colorectal Cancer | COLONAiVE™ Patient Education" />
         <meta property="og:description" content="COLONAiVE™ is a clinician-led movement to outsmart colorectal cancer by promoting timely colonoscopy, education, and access to HSA-cleared blood-based screening. Learn how to take action early." />
         <meta property="og:type" content="article" />
-        <meta property="og:url" content="https://colonaive.ai/education/patients/colorectal-cancer" />
+        <meta property="og:url" content="https://www.colonaive.ai/education/patients/colorectal-cancer" />
         
         {/* Twitter Card */}
         <meta name="twitter:card" content="summary_large_image" />
