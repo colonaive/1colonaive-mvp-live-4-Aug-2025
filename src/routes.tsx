@@ -24,6 +24,7 @@ import ChampionProfileSettings from './pages/ChampionProfileSettings';
 import SpecialistProfileSettings from './pages/SpecialistProfileSettings';
 import GPClinicProfileSettings from './pages/GPClinicProfileSettings';
 import HomePage from './pages/HomePage';
+import SpecialistSelfSignup from "./pages/public/SpecialistSelfSignup";
 import AboutUsPage from './pages/AboutUsPage';
 import ContactPage from './pages/contact';
 import AdvisorsPage from './pages/about/AdvisorsPage';
@@ -154,6 +155,9 @@ const MainRoutes = () => {
           <Route path="/stories" element={<StoriesPage />} />
           <Route path="/how-it-works" element={<HowItWorksPage />} />
 
+          {/* ✅ Public self-signup form for specialists */}
+          <Route path="/partner-specialist/apply" element={<SpecialistSelfSignup />} />
+
           {/* ✅ Evidence routes */}
           <Route path="/evidence" element={<Navigate to="/evidence/colonaiq-hsa" replace />} />
           <Route path="/evidence/colonaiq-hsa" element={<ColonAiQHSAEvidencePage />} />
@@ -172,10 +176,10 @@ const MainRoutes = () => {
           <Route path="/education/patients/screening" element={<PatientScreeningHub />} />
           <Route path="/education/patients/symptoms" element={<PatientSymptomsHub />} />
           <Route path="/education/patients/prevention" element={<PatientPreventionHub />} />
-<Route
-  path="/education/patients/colorectal-cancer"
-  element={<ColorectalCancerPage />}
-/>
+          <Route
+            path="/education/patients/colorectal-cancer"
+            element={<ColorectalCancerPage />}
+          />
           {/* Individual articles */}
           <Route path="/education/article/understanding-colorectal-cancer" element={<UnderstandingColorectalCancer />} />
           <Route path="/education/article/how-crc-develops-from-polyps" element={<HowCrcDevelopsFromPolyps />} />
