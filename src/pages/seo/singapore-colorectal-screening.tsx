@@ -1,291 +1,135 @@
-// SEO Landing Page: Colorectal Cancer Screening Singapore
-import React from 'react';
-import { Container } from '../../components/ui/Container';
-import { Button } from '../../components/ui/Button';
-import { Card, CardContent } from '../../components/ui/Card';
-import { Shield, Users, Clock, TrendingUp, CheckCircle, ArrowRight, Target } from 'lucide-react';
-import { generateMedicalOrganizationSchema } from '../../utils/medicalSchemaGenerator';
-import { HreflangGenerator } from '../../utils/hreflangGenerator';
-import ScreeningEligibilityWizard from '../../components/ScreeningEligibilityWizard';
+import React from "react";
+import { Helmet } from "react-helmet-async";
+import { Link } from "react-router-dom";
 
-const SingaporeColorectalScreening: React.FC = () => {
-  const schema = generateMedicalOrganizationSchema('Singapore');
-  const hreflangTags = HreflangGenerator.generateHreflangTags(
-    '/seo/singapore-colorectal-screening',
-    'en',
-    'Singapore',
-    'colorectal cancer screening singapore'
-  );
-
+export default function SingaporeColorectalScreening() {
+  const url = "https://www.colonaive.ai/seo/singapore-colorectal-screening";
   return (
-    <>
-      {/* JSON-LD Schema */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-      />
-      
-      {/* Hreflang Tags */}
-      {hreflangTags.map((tag, index) => (
-        <link
-          key={`hreflang-${index}`}
-          rel="alternate"
-          hrefLang={tag.hreflang}
-          href={tag.url}
+    <main className="pt-28">
+      <Helmet>
+        <title>Colorectal Cancer Screening in Singapore | COLONAiVE</title>
+        <meta
+          name="description"
+          content="Who should be screened, screening options available in Singapore (FIT/FOBT stool tests, colonoscopy, and blood-based tests), how to get started, and access considerations."
         />
-      ))}
-      
-      <div className="pt-20 min-h-screen bg-gray-50">
-        {/* Hero Section */}
-        <section className="bg-gradient-to-r from-blue-900 via-blue-800 to-teal-700 text-white py-16">
-          <Container>
-            <div className="max-w-4xl mx-auto text-center">
-              <h1 className="text-4xl md:text-5xl font-bold mb-6">
-                Colorectal Cancer Screening in Singapore
-              </h1>
-              <p className="text-xl text-blue-100 mb-8 max-w-3xl mx-auto">
-                Early detection saves lives. Get HSA-cleared blood-based screening for colorectal cancer 
-                with 94% accuracy. No colonoscopy required for initial screening.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="/get-screened">
-                  <Button size="lg" className="bg-orange-500 hover:bg-orange-600">
-                    Book Screening Test
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                </a>
-                <a href="/education/patients/colorectal-cancer">
-                  <Button size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-blue-800">
-                    Learn More About CRC
-                  </Button>
-                </a>
-              </div>
-            </div>
-          </Container>
-        </section>
+        <link rel="canonical" href={url} />
+        {/* MedicalWebPage */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "MedicalWebPage",
+            "url": url,
+            "inLanguage": "en"
+          })}
+        </script>
+        {/* FAQPage */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "What age should I start screening?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text":
+                    "In Singapore, average-risk adults are generally advised to start screening at age 45. Higher-risk individuals—such as those with a strong family history or certain medical conditions—may need earlier and/or more frequent screening as advised by their clinician."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Which tests are available?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text":
+                    "Common options include FIT/FOBT stool tests (non-invasive annual checks), colonoscopy (gold standard that can also remove precancerous polyps), and newer blood-based tests. Your clinician can help match the approach to your risk and preferences."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Is a blood test enough?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text":
+                    "Blood-based tests can improve participation and detect risk signals, but colonoscopy remains the gold standard for detecting and removing polyps. Positive non-invasive tests typically require a follow-up colonoscopy."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "How often should I screen if results are normal?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text":
+                    "Intervals depend on the test and your risk profile. FIT is commonly annual when normal; colonoscopy intervals are often 10 years after a normal exam, per clinician guidance."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "When should I see a specialist?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text":
+                    "If you have symptoms such as rectal bleeding, unexplained weight loss, persistent changes in bowel habits, or a positive screening result, seek specialist evaluation."
+                }
+              }
+            ]
+          })}
+        </script>
+      </Helmet>
 
-        {/* Key Benefits */}
-        <section className="py-16 bg-white">
-          <Container>
-            <div className="max-w-6xl mx-auto">
-              <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
-                Why Choose Our CRC Screening Program?
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <Card className="text-center">
-                  <CardContent className="p-6">
-                    <Shield className="h-12 w-12 text-blue-600 mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold mb-3">HSA-Cleared Technology</h3>
-                    <p className="text-gray-600">
-                      Our blood-based screening test is HSA-cleared with 94% sensitivity 
-                      for detecting colorectal cancer and advanced adenomas.
-                    </p>
-                  </CardContent>
-                </Card>
-                
-                <Card className="text-center">
-                  <CardContent className="p-6">
-                    <Users className="h-12 w-12 text-green-600 mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold mb-3">Non-Invasive Testing</h3>
-                    <p className="text-gray-600">
-                      Simple blood test - no bowel preparation, no sedation, no discomfort. 
-                      Results available within 7-10 business days.
-                    </p>
-                  </CardContent>
-                </Card>
-                
-                <Card className="text-center">
-                  <CardContent className="p-6">
-                    <Clock className="h-12 w-12 text-purple-600 mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold mb-3">Early Detection Saves Lives</h3>
-                    <p className="text-gray-600">
-                      When detected early, colorectal cancer has a 90% survival rate. 
-                      Our screening helps catch cancer before symptoms appear.
-                    </p>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-          </Container>
-        </section>
+      <section className="bg-gradient-to-r from-blue-600 to-teal-600 text-white py-16">
+        <div className="container mx-auto px-4 max-w-4xl">
+          <h1 className="text-3xl sm:text-4xl font-bold mb-4">
+            Colorectal Cancer Screening in Singapore
+          </h1>
+          <p className="text-lg opacity-95">
+            Early detection saves lives. This guide outlines who should get screened,
+            the screening options available locally, and how to take the next step.
+          </p>
+        </div>
+      </section>
 
-        {/* Singapore-Specific Information */}
-        <section className="py-16 bg-gray-50">
-          <Container>
-            <div className="max-w-6xl mx-auto">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                <div>
-                  <h2 className="text-3xl font-bold text-gray-900 mb-6">
-                    Colorectal Cancer in Singapore
-                  </h2>
-                  <div className="space-y-4 text-gray-700">
-                    <div className="flex items-start">
-                      <CheckCircle className="h-5 w-5 text-green-500 mt-1 mr-3 flex-shrink-0" />
-                      <p>
-                        <strong>Most Common Cancer:</strong> Colorectal cancer is the most common cancer 
-                        in Singapore for men and second most common for women.
-                      </p>
-                    </div>
-                    <div className="flex items-start">
-                      <CheckCircle className="h-5 w-5 text-green-500 mt-1 mr-3 flex-shrink-0" />
-                      <p>
-                        <strong>Rising Incidence:</strong> Cases have increased by 25% over the past decade, 
-                        particularly in younger adults aged 45-54.
-                      </p>
-                    </div>
-                    <div className="flex items-start">
-                      <CheckCircle className="h-5 w-5 text-green-500 mt-1 mr-3 flex-shrink-0" />
-                      <p>
-                        <strong>Screening Gap:</strong> Only 60% of eligible Singaporeans undergo regular 
-                        CRC screening, below the WHO recommended 75%.
-                      </p>
-                    </div>
-                    <div className="flex items-start">
-                      <CheckCircle className="h-5 w-5 text-green-500 mt-1 mr-3 flex-shrink-0" />
-                      <p>
-                        <strong>Government Support:</strong> MOH recommends screening starting at age 50, 
-                        or earlier with family history.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="bg-white rounded-lg shadow-lg p-8">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-6">Screening Options in Singapore</h3>
-                  <div className="space-y-6">
-                    <div className="border-l-4 border-blue-500 pl-4">
-                      <h4 className="font-semibold text-gray-900">Blood-Based Test (Recommended)</h4>
-                      <p className="text-gray-600 text-sm mt-1">
-                        HSA-cleared, 94% accuracy, no preparation required
-                      </p>
-                      <p className="text-blue-600 font-medium mt-2">$200 - $300</p>
-                    </div>
-                    
-                    <div className="border-l-4 border-green-500 pl-4">
-                      <h4 className="font-semibold text-gray-900">FIT Test (Stool-Based)</h4>
-                      <p className="text-gray-600 text-sm mt-1">
-                        Home collection, 70-80% accuracy, annual testing needed
-                      </p>
-                      <p className="text-green-600 font-medium mt-2">$30 - $50</p>
-                    </div>
-                    
-                    <div className="border-l-4 border-purple-500 pl-4">
-                      <h4 className="font-semibold text-gray-900">Colonoscopy</h4>
-                      <p className="text-gray-600 text-sm mt-1">
-                        Gold standard, requires bowel prep and sedation
-                      </p>
-                      <p className="text-purple-600 font-medium mt-2">$800 - $1,500</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </Container>
-        </section>
+      <section className="container mx-auto px-4 max-w-4xl py-12 prose prose-lg">
+        <h2>Who should get screened?</h2>
+        <p>
+          Average-risk adults are generally advised to begin screening at age 45.
+          Individuals with higher risk—such as a family history of colorectal cancer
+          or certain inherited conditions—may need to start earlier and screen more
+          frequently. Screening is intended for people without symptoms; anyone with
+          symptoms should seek medical evaluation promptly.
+        </p>
 
-        {/* Statistics Section */}
-        <section className="py-16 bg-white">
-          <Container>
-            <div className="max-w-6xl mx-auto text-center">
-              <h2 className="text-3xl font-bold text-gray-900 mb-12">
-                The Impact of Early Detection
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-                <div className="bg-blue-50 rounded-lg p-6">
-                  <div className="text-3xl font-bold text-blue-600 mb-2">90%</div>
-                  <p className="text-gray-700">Survival rate when detected early</p>
-                </div>
-                <div className="bg-green-50 rounded-lg p-6">
-                  <div className="text-3xl font-bold text-green-600 mb-2">94%</div>
-                  <p className="text-gray-700">Accuracy of blood-based screening</p>
-                </div>
-                <div className="bg-purple-50 rounded-lg p-6">
-                  <div className="text-3xl font-bold text-purple-600 mb-2">50%</div>
-                  <p className="text-gray-700">Reduction in CRC deaths with screening</p>
-                </div>
-                <div className="bg-orange-50 rounded-lg p-6">
-                  <div className="text-3xl font-bold text-orange-600 mb-2">45+</div>
-                  <p className="text-gray-700">Recommended screening age</p>
-                </div>
-              </div>
-            </div>
-          </Container>
-        </section>
+        <h2>Screening options in Singapore (stool / colonoscopy / blood-based)</h2>
+        <p>
+          <strong>FIT/FOBT stool tests</strong> are non-invasive, quick, and typically
+          performed yearly when results are normal. A positive result usually leads to
+          <strong>colonoscopy</strong>, the gold standard that can detect and remove
+          precancerous polyps in the same procedure. <strong>Blood-based</strong>
+          screening can improve participation and detect risk signals for people who
+          may avoid stool-based testing; however, it does not replace colonoscopy.
+          Discuss the right approach with your clinician.
+        </p>
 
-        {/* Embedded Screening Eligibility Wizard */}
-        <section className="py-16 bg-gradient-to-br from-gray-50 to-blue-50" id="eligibility-check">
-          <Container>
-            <div className="max-w-6xl mx-auto">
-              <div className="text-center mb-12">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-6">
-                  <Target className="h-8 w-8 text-blue-600" />
-                </div>
-                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                  Check Your Risk for CRC in Singapore
-                </h2>
-                <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                  Take our personalized assessment to determine if you're eligible for colorectal cancer screening in Singapore. 
-                  Get recommendations based on MOH guidelines and your individual risk profile.
-                </p>
-              </div>
-              
-              <ScreeningEligibilityWizard />
-            </div>
-          </Container>
-        </section>
+        <h2>How to get started</h2>
+        <p>
+          Speak with your GP or a screening clinic to select a suitable option based on
+          your age, risk profile, and preferences. Public polyclinics and private providers
+          can help arrange stool testing or colonoscopy, and guide follow-up if results
+          are positive. Learn more in our{" "}
+          <Link to="/education/patients/screening">screening guide</Link> and{" "}
+          <Link to="/education/patients/colorectal-cancer">Colorectal Cancer 101</Link>. Visit the{" "}
+          <Link to="/seo">SEO hub</Link> for location-specific resources.
+        </p>
 
-        {/* CTA Section */}
-        <section className="py-16 bg-gradient-to-r from-blue-800 to-teal-700 text-white">
-          <Container>
-            <div className="max-w-4xl mx-auto text-center">
-              <h2 className="text-3xl font-bold mb-6">
-                Take Control of Your Health Today
-              </h2>
-              <p className="text-xl text-blue-100 mb-8">
-                Early detection is your best defense against colorectal cancer. 
-                Book your HSA-cleared blood screening test now.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="/get-screened">
-                  <Button size="lg" className="bg-orange-500 hover:bg-orange-600">
-                    Schedule Your Test
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                </a>
-                <a href="/specialists">
-                  <Button size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-blue-800">
-                    Speak with a Specialist
-                  </Button>
-                </a>
-              </div>
-              
-              {/* Internal Links */}
-              <div className="mt-12 pt-8 border-t border-blue-700">
-                <p className="text-blue-200 mb-4">Learn More:</p>
-                <div className="flex flex-wrap justify-center gap-4 text-sm">
-                  <a href="/education/sg" className="text-blue-200 hover:text-white underline">
-                    Singapore CRC Education
-                  </a>
-                  <a href="/education/patients/colorectal-cancer" className="text-blue-200 hover:text-white underline">
-                    Understanding Colorectal Cancer
-                  </a>
-                  <a href="/get-screened" className="text-blue-200 hover:text-white underline">
-                    Get Screened
-                  </a>
-                  <a href="/specialists" className="text-blue-200 hover:text-white underline">
-                    Find Specialists
-                  </a>
-                  <a href="/movement-pillars" className="text-blue-200 hover:text-white underline">
-                    Movement Pillars
-                  </a>
-                </div>
-              </div>
-            </div>
-          </Container>
-        </section>
-      </div>
-    </>
+        <h2>Costs & access</h2>
+        <p>
+          Access pathways include public polyclinics and private clinics. Financial support
+          mechanisms may apply for eligible patients; speak to your provider about what is
+          available for your situation. Costs vary by test type, facility, and clinical needs—
+          your clinician can advise which route is most appropriate.
+        </p>
+      </section>
+    </main>
   );
-};
-
-export default SingaporeColorectalScreening;
+}
