@@ -26,36 +26,61 @@ type Specialist = {
   /** Dedicated doctor profile link (e.g., doctor bio page on clinic site) */
   profile_url?: string | null;
   region: string | null;
-  specialties: string[] | null;
+  specialties: string[] | string | null;
   photo_url: string | null;
   display_order: number | null;
   /** NEW: academic credentials (optional) */
   credentials?: string | null;
-  /** Optional multi-location JSONB (if you add it in the DB) */
-  locations?: LocationItem[] | null;
+  /** Can be text[] or JSON[] depending on DB — we normalize at runtime */
+  locations?: any[] | null;
 };
 
-/** Small numbered list bullet used later */
-const CustomListItem = ({ number, children }: { number: number; children: React.ReactNode }) => (
-  <li className="flex items-start">
-    <div className="flex-shrink-0 flex items-center justify-center w-6 h-6 bg-blue-600 text-white rounded-full font-bold text-sm mr-4 mt-1">
-      {number}
-    </div>
-    <span className="text-gray-700">{children}</span>
-  </li>
-);
+/** ───────────────── Utils ───────────────── */
+const toTagArray = (val: string[] | string | null | undefined) => {
+  if (!val) return [] as string[];
+  if (Array.isArray(val)) return val.map((s) => String(s).trim()).filter(Boolean);
+  return val
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+};
 
-/** ───────────────── Address Scroller (handles multi-locations + fallback) ───────────────── */
+/** ───────────────── Address Scroller (normalizes any shape) ───────────────── */
 const AddressScroller: React.FC<{
-  locations?: LocationItem[] | null;
+  locations?: any[] | null;
   fallback?: { address?: string | null; phone?: string | null; booking_url?: string | null };
 }> = ({ locations, fallback }) => {
+  // Normalize: accept text[] or JSON objects
+  const normalizedFromLocations: LocationItem[] = Array.isArray(locations)
+    ? locations
+        .map((l: any) => {
+          if (!l) return null;
+          if (typeof l === "string") return { address: l } as LocationItem; // text[]
+          if (typeof l === "object")
+            return {
+              label: l.label ?? undefined,
+              address: l.address ?? (typeof l === "string" ? l : undefined),
+              phone: l.phone ?? undefined,
+              booking_url: l.booking_url ?? undefined,
+            } as LocationItem;
+          return null;
+        })
+        .filter(Boolean) as LocationItem[]
+    : [];
+
   const prepared: LocationItem[] =
-    locations && locations.length
-      ? locations
-      : (fallback && (fallback.address || fallback.phone || fallback.booking_url)
-          ? [{ label: "Main clinic", address: fallback.address ?? undefined, phone: fallback.phone ?? undefined, booking_url: fallback.booking_url ?? undefined }]
-          : []);
+    normalizedFromLocations.length > 0
+      ? normalizedFromLocations
+      : fallback && (fallback.address || fallback.phone || fallback.booking_url)
+      ? [
+          {
+            label: "Main clinic",
+            address: fallback.address ?? undefined,
+            phone: fallback.phone ?? undefined,
+            booking_url: fallback.booking_url ?? undefined,
+          },
+        ]
+      : [];
 
   const [i, setI] = useState(0);
 
@@ -72,9 +97,7 @@ const AddressScroller: React.FC<{
   return (
     <div className="mt-2 rounded-md border border-gray-200 p-3 bg-white/60">
       <div className="flex items-center justify-between">
-        <span className="text-xs font-medium text-gray-700">
-          {loc.label || `Location ${i + 1}`}
-        </span>
+        <span className="text-xs font-medium text-gray-700">{loc.label || `Location ${i + 1}`}</span>
         {prepared.length > 1 && (
           <div className="flex items-center gap-2">
             <button
@@ -137,7 +160,7 @@ const FindSpecialistPage: React.FC = () => {
       setLoading(true);
       const { data, error } = await supabase
         .from("partner_specialists")
-        .select("*") // safe whether or not 'locations' / 'credentials' exist
+        .select("*")
         .eq("is_active", true)
         .order("display_order", { ascending: true })
         .order("created_at", { ascending: true });
@@ -153,22 +176,22 @@ const FindSpecialistPage: React.FC = () => {
     run();
   }, []);
 
-  const allSpecialties = useMemo(
-    () =>
-      Array.from(
-        new Set(rows.flatMap((r) => (r.specialties || []).map((s) => s.trim()).filter(Boolean)))
-      ).sort(),
-    [rows]
-  );
+  const allSpecialties = useMemo(() => {
+    return Array.from(
+      new Set(rows.flatMap((r) => toTagArray(r.specialties)))
+    )
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .sort();
+  }, [rows]);
 
   const filtered = useMemo(() => {
     const q = searchTerm.trim().toLowerCase();
     return rows.filter((r) => {
       const blob = `${r.name} ${r.clinic_name} ${r.address ?? ""} ${r.region ?? ""}`.toLowerCase();
       const matchQ = q === "" || blob.includes(q);
-      const matchSpec =
-        selectedSpecialty === null ||
-        (r.specialties || []).map((s) => s.toLowerCase()).includes((selectedSpecialty || "").toLowerCase());
+      const tags = toTagArray(r.specialties).map((s) => s.toLowerCase());
+      const matchSpec = selectedSpecialty === null || tags.includes((selectedSpecialty || "").toLowerCase());
       return matchQ && matchSpec;
     });
   }, [rows, searchTerm, selectedSpecialty]);
@@ -185,11 +208,9 @@ const FindSpecialistPage: React.FC = () => {
               </Link>
             </div>
             <h1 className="text-4xl font-bold mb-4">
-  Find a COLONAiVE<sup className="text-sm align-super">™</sup> Partner Specialist
-</h1>
-            <p className="text-xl mb-8">
-              For Colonoscopy, Early Detection, Polyps Removal and Early CRC Treatment needs.
-            </p>
+              Find a COLONAiVE<sup className="text-sm align-super">™</sup> Partner Specialist
+            </h1>
+            <p className="text-xl mb-8">For Colonoscopy, Early Detection, Polyps Removal and Early CRC Treatment needs.</p>
             <div className="relative max-w-2xl mx-auto">
               <input
                 type="text"
@@ -231,9 +252,7 @@ const FindSpecialistPage: React.FC = () => {
                   <button
                     onClick={() => setSelectedSpecialty(null)}
                     className={`w-full text-left px-4 py-3 rounded-lg font-semibold transition-colors duration-200 ${
-                      selectedSpecialty === null
-                        ? "bg-blue-600 text-white"
-                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                      selectedSpecialty === null ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                     }`}
                   >
                     All Specialties
@@ -243,9 +262,7 @@ const FindSpecialistPage: React.FC = () => {
                       key={spec}
                       onClick={() => setSelectedSpecialty(spec)}
                       className={`w-full text-left px-4 py-3 rounded-lg font-semibold transition-colors duration-200 ${
-                        selectedSpecialty === spec
-                          ? "bg-blue-600 text-white"
-                          : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                        selectedSpecialty === spec ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                       }`}
                     >
                       {spec}
@@ -268,10 +285,7 @@ const FindSpecialistPage: React.FC = () => {
               ) : filtered.length > 0 ? (
                 <div className="space-y-6">
                   {filtered.map((s) => (
-                    <Card
-                      key={s.id}
-                      className="bg-white shadow-md hover:shadow-xl transition-shadow duration-300"
-                    >
+                    <Card key={s.id} className="bg-white shadow-md hover:shadow-xl transition-shadow duration-300">
                       <CardContent className="p-6">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                           <div className="flex items-start gap-4 md:col-span-2">
@@ -301,10 +315,8 @@ const FindSpecialistPage: React.FC = () => {
                                 )}
                               </p>
 
-                              {/* NEW: credentials / academic achievements */}
-                              {s.credentials && (
-                                <p className="text-sm text-gray-500 mb-3">{s.credentials}</p>
-                              )}
+                              {/* credentials */}
+                              {s.credentials && <p className="text-sm text-gray-500 mb-3">{s.credentials}</p>}
 
                               {/* Address/locations box with tiny scroller */}
                               <AddressScroller
@@ -316,13 +328,13 @@ const FindSpecialistPage: React.FC = () => {
                                 }}
                               />
 
-                              {s.specialties && s.specialties.length > 0 && (
+                              {toTagArray(s.specialties).length > 0 && (
                                 <div className="mt-4">
                                   <h4 className="text-sm font-semibold text-gray-500 mb-2">
                                     Treatments &amp; Specialties:
                                   </h4>
                                   <div className="flex flex-wrap gap-2">
-                                    {s.specialties.map((tag, i) => (
+                                    {toTagArray(s.specialties).map((tag, i) => (
                                       <span
                                         key={i}
                                         className="bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full"
@@ -336,7 +348,7 @@ const FindSpecialistPage: React.FC = () => {
                             </div>
                           </div>
 
-                          {/* Balanced CTAs */}
+                          {/* CTAs */}
                           <div className="flex flex-col md:items-end items-stretch justify-center gap-3">
                             <a
                               href={s.appointment_url || s.website || "#"}
@@ -344,9 +356,7 @@ const FindSpecialistPage: React.FC = () => {
                               rel="noopener noreferrer"
                               className="w-full md:w-[248px] inline-block"
                             >
-                              <Button className="w-full justify-center">
-                                Book a Colonoscopy
-                              </Button>
+                              <Button className="w-full justify-center">Book a Colonoscopy</Button>
                             </a>
 
                             {s.website && (
@@ -370,8 +380,7 @@ const FindSpecialistPage: React.FC = () => {
               ) : (
                 <Card>
                   <CardContent className="p-8 text-center text-gray-600">
-                    No partner clinics match your current search criteria. Please try a different search term or
-                    filter.
+                    No partner clinics match your current search criteria. Please try a different search term or filter.
                   </CardContent>
                 </Card>
               )}
@@ -393,27 +402,67 @@ const FindSpecialistPage: React.FC = () => {
             <div className="bg-white p-8 rounded-lg shadow-sm">
               <h3 className="font-bold text-xl mb-6 text-gray-800">Before Your Appointment</h3>
               <ol className="space-y-4">
-                <CustomListItem number={1}>Check with your insurance provider about coverage.</CustomListItem>
-                <CustomListItem number={2}>Bring your medical history and any previous screening results.</CustomListItem>
-                <CustomListItem number={3}>Prepare a list of questions you may have.</CustomListItem>
-                <CustomListItem number={4}>Follow any preparation instructions provided by the clinic.</CustomListItem>
+                <li className="flex items-start">
+                  <div className="flex-shrink-0 flex items-center justify-center w-6 h-6 bg-blue-600 text-white rounded-full font-bold text-sm mr-4 mt-1">
+                    1
+                  </div>
+                  <span className="text-gray-700">Check with your insurance provider about coverage.</span>
+                </li>
+                <li className="flex items-start">
+                  <div className="flex-shrink-0 flex items-center justify-center w-6 h-6 bg-blue-600 text-white rounded-full font-bold text-sm mr-4 mt-1">
+                    2
+                  </div>
+                  <span className="text-gray-700">Bring your medical history and any previous screening results.</span>
+                </li>
+                <li className="flex items-start">
+                  <div className="flex-shrink-0 flex items-center justify-center w-6 h-6 bg-blue-600 text-white rounded-full font-bold text-sm mr-4 mt-1">
+                    3
+                  </div>
+                  <span className="text-gray-700">Prepare a list of questions you may have.</span>
+                </li>
+                <li className="flex items-start">
+                  <div className="flex-shrink-0 flex items-center justify-center w-6 h-6 bg-blue-600 text-white rounded-full font-bold text-sm mr-4 mt-1">
+                    4
+                  </div>
+                  <span className="text-gray-700">Follow any preparation instructions provided by the clinic.</span>
+                </li>
               </ol>
             </div>
             <div className="bg-white p-8 rounded-lg shadow-sm">
               <h3 className="font-bold text-xl mb-6 text-gray-800">Questions to Ask</h3>
               <ol className="space-y-4">
-                <CustomListItem number={1}>Which screening test is right for me and why?</CustomListItem>
-                <CustomListItem number={2}>How do I prepare for the screening?</CustomListItem>
-                <CustomListItem number={3}>What are the risks and benefits of this screening method?</CustomListItem>
-                <CustomListItem number={4}>How will I receive my results and what happens next?</CustomListItem>
+                <li className="flex items-start">
+                  <div className="flex-shrink-0 flex items-center justify-center w-6 h-6 bg-blue-600 text-white rounded-full font-bold text-sm mr-4 mt-1">
+                    1
+                  </div>
+                  <span className="text-gray-700">Which screening test is right for me and why?</span>
+                </li>
+                <li className="flex items-start">
+                  <div className="flex-shrink-0 flex items-center justify-center w-6 h-6 bg-blue-600 text-white rounded-full font-bold text-sm mr-4 mt-1">
+                    2
+                  </div>
+                  <span className="text-gray-700">How do I prepare for the screening?</span>
+                </li>
+                <li className="flex items-start">
+                  <div className="flex-shrink-0 flex items-center justify-center w-6 h-6 bg-blue-600 text-white rounded-full font-bold text-sm mr-4 mt-1">
+                    3
+                  </div>
+                  <span className="text-gray-700">What are the risks and benefits of this screening method?</span>
+                </li>
+                <li className="flex items-start">
+                  <div className="flex-shrink-0 flex items-center justify-center w-6 h-6 bg-blue-600 text-white rounded-full font-bold text-sm mr-4 mt-1">
+                    4
+                  </div>
+                  <span className="text-gray-700">How will I receive my results and what happens next?</span>
+                </li>
               </ol>
             </div>
           </div>
           <div className="mt-12 text-center bg-white p-8 rounded-lg max-w-3xl mx-auto border border-gray-200">
             <h3 className="text-bold text-xl mb-3 text-gray-800">Need Financial Assistance?</h3>
             <p className="text-gray-600 mb-6">
-              Several programs exist to help cover the cost of colorectal cancer screening for those who qualify.
-              Don&apos;t let financial concerns prevent you from getting screened.
+              Several programs exist to help cover the cost of colorectal cancer screening for those who qualify. Don&apos;t
+              let financial concerns prevent you from getting screened.
             </p>
             <Button size="lg">Explore Financial Assistance Options</Button>
           </div>
