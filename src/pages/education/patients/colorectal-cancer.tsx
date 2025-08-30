@@ -24,6 +24,38 @@ const ColorectalCancerPage: React.FC = () => {
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Understanding Colorectal Cancer | COLONAiVE™ Patient Education" />
         <meta name="twitter:description" content="COLONAiVE™ is a clinician-led movement to outsmart colorectal cancer by promoting timely colonoscopy, education, and access to HSA-cleared blood-based screening. Learn how to take action early." />
+      
+      <script type="application/ld+json">
+{JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "MedicalWebPage",
+  "name": "Colorectal Cancer: Overview",
+  "url": "https://www.colonaive.ai/education/patients/colorectal-cancer",
+  "about": [{
+    "@type": "MedicalCondition",
+    "name": "Colorectal cancer"
+  }],
+  "publisher": {
+    "@type": "Organization",
+    "name": "Project COLONAiVE",
+    "url": "https://www.colonaive.ai"
+  }
+}, null, 2)}
+</script>
+
+<script type="application/ld+json">
+{JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Education", "item": "https://www.colonaive.ai/education" },
+    { "@type": "ListItem", "position": 2, "name": "Patients",  "item": "https://www.colonaive.ai/education/patients" },
+    { "@type": "ListItem", "position": 3, "name": "Colorectal Cancer" }
+  ]
+}, null, 2)}
+</script>
+
+
       </Helmet>
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-blue-600 to-teal-600 text-white py-24">
