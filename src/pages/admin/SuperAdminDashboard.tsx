@@ -1,11 +1,12 @@
 // /src/pages/admin/SuperAdminDashboard.tsx
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import {
   Users, Calendar, FileText, Database, Settings,
-  BarChart3, Shield, Activity, Download, RefreshCw, Search, Filter, Eye, Stethoscope, Plus, Building2
+  BarChart3, Shield, Activity, Download, RefreshCw, Search, Filter, Eye, Stethoscope, Plus, Building2,
+  Mail, Copy
 } from 'lucide-react';
 import { supabase } from '../../supabase';
 import { useAuth } from '../../contexts/AuthContext';
@@ -30,7 +31,7 @@ interface Specialist {
   created_at: string;
 }
 
-const SuperAdminDashboard: React.FC = () => {
+const SuperAdminDashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'specialists' | 'content' | 'events' | 'system' | 'settings'>('overview');
@@ -45,6 +46,64 @@ const SuperAdminDashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [specialists, setSpecialists] = useState<Specialist[]>([]);
   const [specialistsLoading, setSpecialistsLoading] = useState(false);
+
+  // ───────── Invite state ─────────
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteName, setInviteName] = useState('');
+  const [inviteMsg, setInviteMsg] = useState('Dear Doctor, please use the link below to submit or update your listing on the COLONAiVE Partner Specialists directory.');
+  const publicFormUrl = (() => {
+    const base = typeof window !== 'undefined' ? window.location.origin : 'https://www.colonaive.ai';
+    const params = new URLSearchParams();
+    if (inviteEmail) params.set('email', inviteEmail);
+    if (inviteName) params.set('name', inviteName);
+    return `${base}/specialist-submission?${params.toString()}`;
+  })();
+  const copyLink = async () => {
+    await navigator.clipboard.writeText(publicFormUrl);
+    alert('Invite link copied to clipboard.');
+  };
+  const sendInvite = async () => {
+    if (!inviteEmail.trim()) {
+      alert('Enter recipient email.');
+      return;
+    }
+    const subject = 'COLONAiVE – Partner Specialist Listing Invitation';
+    const html = `
+      <div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;color:#111">
+        <p>${inviteMsg}</p>
+        <p><strong>Submit your details here:</strong><br/>
+          <a href="${publicFormUrl}" target="_blank" rel="noopener">${publicFormUrl}</a>
+        </p>
+        <hr/>
+        <p style="color:#555;margin-top:12px">
+          If you prefer, you may reply to this email with your clinic details and our admin will assist to complete the listing.
+        </p>
+        <p style="margin-top:20px">— COLONAiVE Admin Team</p>
+      </div>
+    `;
+    try {
+      const res = await fetch('/.netlify/functions/notify-admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to: inviteEmail.trim(),
+          subject,
+          html,
+          text: `${inviteMsg}\n\nLink: ${publicFormUrl}`
+        })
+      });
+      if (!res.ok) {
+        const msg = await res.text();
+        throw new Error(msg);
+      }
+      alert('Invitation sent.');
+      setInviteEmail('');
+      setInviteName('');
+    } catch (e: any) {
+      console.error(e);
+      alert(`Failed to send: ${e.message || e}`);
+    }
+  };
 
   useEffect(() => {
     fetchDashboardStats();
@@ -220,13 +279,7 @@ const SuperAdminDashboard: React.FC = () => {
                   <p className="text-sm text-gray-600">Add, edit, and manage Corporate Champions and sponsors.</p>
                 </div>
               </div>
-              <Button
-                size="sm"
-                onClick={() => navigate('/admin/csr')}
-                className="whitespace-nowrap"
-              >
-                Open
-              </Button>
+              <Button size="sm" onClick={() => navigate('/admin/csr')} className="whitespace-nowrap">Open</Button>
             </div>
 
             <div className="flex items-start justify-between rounded-xl border border-gray-200 p-5">
@@ -239,13 +292,7 @@ const SuperAdminDashboard: React.FC = () => {
                   <p className="text-sm text-gray-600">Manage colorectal specialists listed in the public directory.</p>
                 </div>
               </div>
-              <Button
-                size="sm"
-                onClick={() => navigate('/admin/partner-specialists')}
-                className="whitespace-nowrap"
-              >
-                Open
-              </Button>
+              <Button size="sm" onClick={() => navigate('/admin/partner-specialists')} className="whitespace-nowrap">Open</Button>
             </div>
           </div>
         </CardContent>
@@ -267,23 +314,15 @@ const SuperAdminDashboard: React.FC = () => {
                 className="pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-            <Button size="sm" variant="outline">
-              <Filter className="h-4 w-4 mr-2" />
-              Filter
-            </Button>
-            <Button size="sm" variant="outline">
-              <Download className="h-4 w-4 mr-2" />
-              Export
-            </Button>
+            <Button size="sm" variant="outline"><Filter className="h-4 w-4 mr-2" />Filter</Button>
+            <Button size="sm" variant="outline"><Download className="h-4 w-4 mr-2" />Export</Button>
           </div>
         </div>
 
         <div className="bg-gray-50 p-8 rounded-lg text-center">
           <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
           <h4 className="text-lg font-medium text-gray-900 mb-2">User Management Interface</h4>
-          <p className="text-gray-600">
-            Advanced user management features will be displayed here, including user roles, permissions, and account status.
-          </p>
+          <p className="text-gray-600">Advanced user management features will be displayed here, including user roles, permissions, and account status.</p>
         </div>
       </CardContent>
     </Card>
@@ -343,63 +382,59 @@ const SuperAdminDashboard: React.FC = () => {
 
             {/* Quick actions */}
             <div className="flex flex-wrap items-center gap-3">
-              <Button
-                size="sm"
-                className="bg-teal-600 hover:bg-teal-700 text-white"
-                onClick={() => navigate('/admin/partner-specialists/new')}
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Add Partner Specialist
+              <Button size="sm" className="bg-teal-600 hover:bg-teal-700 text-white" onClick={() => navigate('/admin/partner-specialists/new')}>
+                <Plus className="h-4 w-4 mr-2" /> Add Partner Specialist
               </Button>
-
-              <Button
-                size="sm"
-                className="bg-teal-600 hover:bg-teal-700 text-white"
-                onClick={() => navigate('/admin/csr/new')}
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Add Corporate Champion
+              <Button size="sm" className="bg-teal-600 hover:bg-teal-700 text-white" onClick={() => navigate('/admin/csr/new')}>
+                <Plus className="h-4 w-4 mr-2" /> Add Corporate Champion
               </Button>
-
-              {/* NEW: direct links to the admin list pages */}
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => navigate('/admin/partner-specialists')}
-              >
-                <Stethoscope className="h-4 w-4 mr-2" />
-                Manage Specialists (Admin)
+              <Button size="sm" variant="outline" onClick={() => navigate('/admin/partner-specialists')}>
+                <Stethoscope className="h-4 w-4 mr-2" /> Manage Specialists (Admin)
               </Button>
-
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => navigate('/admin/csr')}
-              >
-                <Building2 className="h-4 w-4 mr-2" />
-                Manage CSR Partners (Admin)
+              <Button size="sm" variant="outline" onClick={() => navigate('/admin/csr')}>
+                <Building2 className="h-4 w-4 mr-2" /> Manage CSR Partners (Admin)
               </Button>
-
               <a href="/find-a-specialist" target="_blank" rel="noopener noreferrer">
-                <Button size="sm" variant="outline">
-                  <Eye className="h-4 w-4 mr-2" />
-                  View Public Directory
-                </Button>
+                <Button size="sm" variant="outline"><Eye className="h-4 w-4 mr-2" /> View Public Directory</Button>
               </a>
-
               <a href="/csr-showcase" target="_blank" rel="noopener noreferrer">
-                <Button size="sm" variant="outline">
-                  <Eye className="h-4 w-4 mr-2" />
-                  View CSR Showcase
-                </Button>
+                <Button size="sm" variant="outline"><Eye className="h-4 w-4 mr-2" /> View CSR Showcase</Button>
               </a>
-
-              <Button size="sm" variant="outline" onClick={fetchSpecialists}>
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Refresh
-              </Button>
+              <Button size="sm" variant="outline" onClick={fetchSpecialists}><RefreshCw className="h-4 w-4 mr-2" /> Refresh</Button>
             </div>
           </div>
+
+          {/* ───────── Invite block ───────── */}
+          <div className="mb-6 border rounded-lg p-4 bg-white">
+            <div className="flex items-center justify-between">
+              <h4 className="text-md font-semibold">Invite a Specialist to self-submit their listing</h4>
+              <div className="flex gap-2">
+                <Button size="sm" variant="outline" onClick={copyLink}><Copy className="h-4 w-4 mr-2" /> Copy Link</Button>
+                <Button size="sm" onClick={sendInvite}><Mail className="h-4 w-4 mr-2" /> Send Invite</Button>
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-3 mt-4">
+              <div>
+                <label className="block text-sm text-gray-600 mb-1">Doctor’s Name (optional)</label>
+                <input className="w-full border rounded-md px-3 py-2" value={inviteName} onChange={(e) => setInviteName(e.target.value)} placeholder="Dr Jane Doe" />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-600 mb-1">Doctor/Clinic Email (to send)</label>
+                <input className="w-full border rounded-md px-3 py-2" value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} placeholder="doctor@clinic.com" />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-600 mb-1">Public form link (auto-generated)</label>
+                <input className="w-full border rounded-md px-3 py-2 bg-gray-50" value={publicFormUrl} readOnly />
+              </div>
+            </div>
+
+            <div className="mt-3">
+              <label className="block text-sm text-gray-600 mb-1">Short message (optional)</label>
+              <textarea className="w-full border rounded-md px-3 py-2 min-h-[70px]" value={inviteMsg} onChange={(e) => setInviteMsg(e.target.value)} />
+            </div>
+          </div>
+          {/* ───────── End invite block ───────── */}
 
           {specialistsLoading ? (
             <div className="text-center py-8">
@@ -414,11 +449,7 @@ const SuperAdminDashboard: React.FC = () => {
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <h4 className="text-lg font-semibold text-gray-900">{specialist.full_name}</h4>
-                        <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            specialist.is_approved ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                          }`}
-                        >
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${specialist.is_approved ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
                           {specialist.is_approved ? 'Approved' : 'Pending'}
                         </span>
                       </div>
@@ -428,34 +459,20 @@ const SuperAdminDashboard: React.FC = () => {
                       {specialist.specialties.length > 0 && (
                         <div className="flex flex-wrap gap-1 mb-2">
                           {specialist.specialties.map((specialty, index) => (
-                            <span
-                              key={index}
-                              className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800"
-                            >
+                            <span key={index} className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800">
                               {specialty}
                             </span>
                           ))}
                         </div>
                       )}
-                      <p className="text-xs text-gray-500">
-                        Applied: {new Date(specialist.created_at).toLocaleDateString()}
-                      </p>
+                      <p className="text-xs text-gray-500">Applied: {new Date(specialist.created_at).toLocaleDateString()}</p>
                     </div>
 
                     <div className="flex items-center gap-2">
                       {specialist.is_approved ? (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="text-red-600 hover:text-red-700"
-                          onClick={() => toggleSpecialistApproval(specialist.id, true)}
-                        >
-                          Remove Approval
-                        </Button>
+                        <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700" onClick={() => toggleSpecialistApproval(specialist.id, true)}>Remove Approval</Button>
                       ) : (
-                        <Button size="sm" onClick={() => toggleSpecialistApproval(specialist.id, false)}>
-                          Approve
-                        </Button>
+                        <Button size="sm" onClick={() => toggleSpecialistApproval(specialist.id, false)}>Approve</Button>
                       )}
                     </div>
                   </div>
@@ -489,22 +506,14 @@ const SuperAdminDashboard: React.FC = () => {
 
   const renderTabContent = () => {
     switch (activeTab) {
-      case 'overview':
-        return <OverviewTab />;
-      case 'users':
-        return <UserManagementTab />;
-      case 'specialists':
-        return <SpecialistsTab />;
-      case 'content':
-        return <ContentManagementTab />;
-      case 'events':
-        return <EventsTab />;
-      case 'system':
-        return <SystemMonitoringTab />;
-      case 'settings':
-        return <SettingsTab />;
-      default:
-        return <OverviewTab />;
+      case 'overview': return <OverviewTab />;
+      case 'users': return <UserManagementTab />;
+      case 'specialists': return <SpecialistsTab />;
+      case 'content': return <ContentManagementTab />;
+      case 'events': return <EventsTab />;
+      case 'system': return <SystemMonitoringTab />;
+      case 'settings': return <SettingsTab />;
+      default: return <OverviewTab />;
     }
   };
 
