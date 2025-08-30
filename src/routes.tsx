@@ -37,6 +37,7 @@ import HowItWorksPage from './pages/HowItWorksPage';
 import GPClinicSignUp from './pages/signup/GPClinicSignUp';
 import CorporateSignUp from './pages/signup/CorporateSignUp';
 import ChampionSignUp from './pages/signup/ChampionSignUp';
+import SpecialistPublicForm from "./pages/SpecialistPublicForm";
 
 // Auth
 import ChampionSignIn from './pages/auth/ChampionSignIn';
@@ -272,6 +273,7 @@ const MainRoutes = () => {
             path="/admin/partner-specialists/new"
             element={<ProtectedAdminRoute><AdminPartnerSpecialistForm /></ProtectedAdminRoute>}
           />
+          <Route path="/specialist-submission" element={<SpecialistPublicForm />} />
 
           {/* Protected */}
           <Route path="/refer-friend" element={<ProtectedRoute><ShareYourStoryPage /></ProtectedRoute>} />
