@@ -6,18 +6,18 @@ export async function handler(event) {
     const { subject, message } = JSON.parse(event.body);
 
     const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,          // e.g. smtp.office365.com
+      host: process.env.SMTP_HOST,          // smtp.sendgrid.net
       port: Number(process.env.SMTP_PORT),  // 587
-      secure: false,                        // use STARTTLS (Office365)
+      secure: false,                        // TLS upgrade
       auth: {
-        user: process.env.NOTIFY_USER,      // info@colonaive.ai
-        pass: process.env.NOTIFY_PASS,      // your Outlook/GoDaddy password or App Password
+        user: process.env.NOTIFY_USER,      // always "apikey" for SendGrid
+        pass: process.env.NOTIFY_PASS,      // your SendGrid API key
       },
     });
 
     await transporter.sendMail({
-      from: `"Project COLONAiVE" <${process.env.NOTIFY_USER}>`,
-      to: "info@colonaive.ai",              // where notifications are received
+      from: `"Project COLONAiVE" <info@colonaive.ai>`,  // verified sender
+      to: "info@colonaive.ai",                          // admin inbox
       subject: subject || "New Specialist Submission",
       text: message || "A new specialist form was submitted.",
     });
