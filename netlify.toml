@@ -6,13 +6,14 @@
 
 [functions]
   node_bundler = "esbuild"
-  external_node_modules = ["rss-parser"]
+  external_node_modules = ["rss-parser", "nodemailer"]
 
 # Environment variables for functions are set in Netlify Dashboard
 # SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, OPENAI_API_KEY, etc.
 
+# Route API calls to functions
 [[redirects]]
-  from = "/.netlify/functions/*"
+  from = "/api/*"
   to = "/.netlify/functions/:splat"
   status = 200
 
