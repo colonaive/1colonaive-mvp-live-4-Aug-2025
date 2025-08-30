@@ -128,12 +128,13 @@ const PartnerSpecialistsAdminPage: React.FC = () => {
   // Start editing a row
   const startEdit = (r: Row) => {
     // derive locations[]: prefer existing locations; fallback to [address] if present
-    const locs =
-  Array.isArray(r.locations) && r.locations.length > 0
-    ? r.locations
-    : r.address
-    ? [r.address]
-    : [];
+    const locs = Array.isArray(r.locations)
+  ? r.locations
+  : r.address
+  ? [r.address]
+  : [];
+
+
     const safeLocs = locs.length > 0 ? locs : [""];
 
     setEditingId(r.id);
