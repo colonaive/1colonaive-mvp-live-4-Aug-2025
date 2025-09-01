@@ -1,6 +1,6 @@
 // src/services/crcNewsFeedService.ts
-// Minimal stub so dailyNewsFetch.ts compiles and runs.
-// Replace the TODO section with your real fetch logic when ready.
+// Minimal, compile-safe stub that matches the usage
+//   crcNewsFeedService.fetchAndStoreNews()
 
 export type Article = {
   id: string;
@@ -11,11 +11,29 @@ export type Article = {
   summary?: string;
 };
 
-// Named export (and default) so either import style works.
-export async function crcNewsFeedService(): Promise<Article[]> {
-  // TODO: pull latest CRC research/news here, e.g. fetch from RSS/HTTP
-  // Return an empty list for now — keeps build green.
+// Internal: pretend to fetch latest CRC news
+async function fetchArticles(): Promise<Article[]> {
+  // TODO: implement real fetch (RSS/API) and mapping to Article[]
   return [];
 }
+
+// Internal: pretend to store/save articles somewhere (DB, file, etc.)
+async function storeArticles(_articles: Article[]): Promise<void> {
+  // TODO: write to Supabase, filesystem, etc.
+  return;
+}
+
+// Public API expected by dailyNewsFetch.ts
+async function fetchAndStoreNews(): Promise<void> {
+  const articles = await fetchArticles();
+  await storeArticles(articles);
+}
+
+// Exported as an object with the expected method
+export const crcNewsFeedService = {
+  fetchAndStoreNews,
+  // Optional: expose fetchArticles if other scripts need it later
+  fetchArticles,
+};
 
 export default crcNewsFeedService;
