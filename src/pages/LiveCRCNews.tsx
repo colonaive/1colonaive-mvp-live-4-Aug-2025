@@ -147,7 +147,7 @@ const ColumnBox: React.FC<{
       <div className={`px-4 py-3 ${accent.headerBg} ${accent.headerText} text-sm font-semibold tracking-wide`}>
         {title.toUpperCase()}
       </div>
-      {/* Contained scroll; never "bleeds" into the page or header */}
+      {/* Contained scroll; never “bleeds” into the page or header */}
       <div
         className={`p-4 space-y-3 max-h-[900px] md:max-h-[700px] lg:max-h-[800px] overflow-y-auto overscroll-contain ${accent.ring}`}
       >
@@ -271,7 +271,7 @@ const LiveCRCNews: React.FC = () => {
         </div>
 
         <div className="mt-10 text-xs text-gray-400">
-          Tip: click "Search" with an empty box to refresh. Items are ordered by priority and date.
+          Tip: click “Search” with an empty box to refresh. Items are ordered by priority and date.
         </div>
       </div>
     </main>

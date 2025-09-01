@@ -245,7 +245,7 @@ const UnderstandingColorectalCancer: React.FC = () => {
           "Colorectal cancer is largely preventable. By understanding your risk factors and getting screened 
           at the right time, you can significantly reduce your chances of developing this disease."
           <footer className="text-sm text-gray-600 mt-3 not-italic">
-            - American Cancer Society Guidelines
+            — American Cancer Society Guidelines
           </footer>
         </blockquote>
 

@@ -18,7 +18,7 @@ const ScreeningPage: React.FC = () => {
           <div className="max-w-3xl mx-auto text-center">
             <h1 className="text-4xl font-bold mb-6">Get Screened for Colorectal Cancer</h1>
             <p className="text-xl mb-0">
-              Choose the screening option that suits you best - blood test or colonoscopy. Early action saves lives.
+              Choose the screening option that suits you best — blood test or colonoscopy. Early action saves lives.
             </p>
           </div>
         </Container>
@@ -34,7 +34,7 @@ const ScreeningPage: React.FC = () => {
                   If you're aged 50 or older, or have symptoms or risk indicators, it's important to go straight to a specialist for colonoscopy consultation. Colonoscopy remains the gold standard for early detection and prevention.
                 </p>
                 <p>
-                  If you're not due for a colonoscopy - or if you're younger but have risk factors - a blood-based screening test may be right for you. It's a modern, non-invasive option approved for early triage.
+                  If you're not due for a colonoscopy — or if you're younger but have risk factors — a blood-based screening test may be right for you. It's a modern, non-invasive option approved for early triage.
                 </p>
               </div>
             </CardContent>

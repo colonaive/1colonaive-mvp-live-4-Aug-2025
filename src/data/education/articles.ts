@@ -99,7 +99,7 @@ export const educationArticles: Article[] = [
       {
         id: 'ref-003',
         authors: ['National Cancer Institute'],
-        title: 'Colorectal Cancer Prevention (PDQ®)-Patient Version',
+        title: 'Colorectal Cancer Prevention (PDQ®)–Patient Version',
         year: 2024,
         url: 'https://www.cancer.gov/types/colorectal/patient/colorectal-prevention-pdq',
         type: 'guideline'
@@ -391,7 +391,7 @@ export const educationArticles: Article[] = [
     {
       id: 'ref-005',
       authors: ['National Cancer Institute'],
-      title: 'Colorectal Cancer Screening (PDQ®)-Health Professional Version',
+      title: 'Colorectal Cancer Screening (PDQ®)–Health Professional Version',
       year: 2024,
       url: 'https://www.cancer.gov/types/colorectal/hp/colorectal-screening-pdq',
       type: 'guideline'

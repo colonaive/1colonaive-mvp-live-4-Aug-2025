@@ -27,7 +27,7 @@ const quizData: QuizQuestion[] = [
       "A type of brain cancer"
     ],
     correctAnswer: "Cancer that starts in the colon or rectum",
-    explanation: "Colorectal cancer (CRC) begins in the colon or rectum, parts of the large intestine. It's one of the most common cancers worldwide."
+    explanation: "Colorectal cancer (CRC) begins in the colon or rectum, parts of the large intestine. It’s one of the most common cancers worldwide."
   },
   {
     id: 2,
@@ -200,7 +200,7 @@ const CRCQuiz: React.FC = () => {
               <CardContent className="p-6 text-center">
                 <h1 className="text-2xl font-bold text-gray-800 mb-4">Quiz Completed!</h1>
                 <p className="text-lg text-gray-600 mb-2">Your Score: <span className="font-bold text-blue-600">{score}%</span></p>
-                <p className="text-gray-600 mb-6">Thank you for taking the CRC Knowledge Quiz. Early detection saves lives-consider scheduling a screening if you haven't already.</p>
+                <p className="text-gray-600 mb-6">Thank you for taking the CRC Knowledge Quiz. Early detection saves lives—consider scheduling a screening if you haven’t already.</p>
                 <Button onClick={handleReturnToDashboard} className="mt-4">
                   Return to Dashboard
                 </Button>

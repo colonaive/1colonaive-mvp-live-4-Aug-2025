@@ -18,7 +18,7 @@ const RIDCRCSGPPage: React.FC = () => {
               Specialist & GP Engagement Pillar
             </p>
             <p className="text-xl opacity-90">
-              Clinician Leadership Against Colorectal Cancer - The Backbone of Our National Mission
+              Clinician Leadership Against Colorectal Cancer — The Backbone of Our National Mission
             </p>
             <div className="mt-8 flex items-center justify-center space-x-2">
               <Heart className="h-6 w-6 text-red-300" />
@@ -96,7 +96,7 @@ const RIDCRCSGPPage: React.FC = () => {
               <h3 className="text-2xl font-bold mb-4 text-amber-800">The Foundation Years (1989)</h3>
               <p className="text-lg text-gray-700 leading-relaxed mb-4">
                 In 1989, a visionary decision was made that would forever change Singapore's medical landscape. 
-                The Department of Colorectal Surgery was established at Singapore General Hospital - a strategic move 
+                The Department of Colorectal Surgery was established at Singapore General Hospital — a strategic move 
                 that recognized the growing threat of colorectal cancer and the need for specialized expertise to combat it.
               </p>
               <p className="text-lg text-gray-700 leading-relaxed">
@@ -113,7 +113,7 @@ const RIDCRCSGPPage: React.FC = () => {
                     <div className="border-l-4 border-blue-500 pl-4">
                       <h4 className="text-xl font-semibold text-blue-700">Dr. Goh Hak Su</h4>
                       <p className="text-gray-700">
-                        <strong>Pioneer Leader (1989-1997)</strong> - Led the first generation of colorectal surgeons, 
+                        <strong>Pioneer Leader (1989-1997)</strong> — Led the first generation of colorectal surgeons, 
                         laying the foundation for what would become world-class colorectal care in Singapore.
                       </p>
                     </div>
@@ -121,7 +121,7 @@ const RIDCRCSGPPage: React.FC = () => {
                     <div className="border-l-4 border-teal-500 pl-4">
                       <h4 className="text-xl font-semibold text-teal-700">Dr. Francis Seow Choen</h4>
                       <p className="text-gray-700">
-                        <strong>Expansion Era (1997-2003)</strong> - Advanced the department's clinical excellence and 
+                        <strong>Expansion Era (1997-2003)</strong> — Advanced the department's clinical excellence and 
                         began establishing Singapore's reputation in the international colorectal surgery community.
                       </p>
                     </div>
@@ -129,7 +129,7 @@ const RIDCRCSGPPage: React.FC = () => {
                     <div className="border-l-4 border-purple-500 pl-4">
                       <h4 className="text-xl font-semibold text-purple-700">Prof. Eu Kong Weng</h4>
                       <p className="text-gray-700">
-                        <strong>Academic Excellence Era (2003-present)</strong> - Elevated the field by integrating 
+                        <strong>Academic Excellence Era (2003-present)</strong> — Elevated the field by integrating 
                         research and academic excellence with clinical services, forging international collaborations 
                         that have made Singapore proud.
                       </p>
@@ -142,7 +142,7 @@ const RIDCRCSGPPage: React.FC = () => {
                       they have moved colorectal surgery to higher levels, adding research and academic excellence to clinical services, 
                       while forging important ties and research collaborations internationally. They have done Singapore proud."
                     </p>
-                    <p className="text-sm text-gray-600 mt-2">- Minister Khaw Boon Wan, 2009</p>
+                    <p className="text-sm text-gray-600 mt-2">— Minister Khaw Boon Wan, 2009</p>
                   </div>
                 </CardContent>
               </Card>

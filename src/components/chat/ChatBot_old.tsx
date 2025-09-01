@@ -242,7 +242,7 @@ Remember: Early symptoms are often subtle. Don't wait for severe symptoms to see
 
 **Key message**: Prevention is multifaceted. Screening remains the most effective intervention, complemented by healthy lifestyle choices.`,
 
-  FAMILY_HISTORY: `👨👩👧👦 **Family History and CRC Risk**
+  FAMILY_HISTORY: `👨‍👩‍👧‍👦 **Family History and CRC Risk**
 
 **Understanding inherited risk:**
 
@@ -536,7 +536,7 @@ export const ChatBot: React.FC = () => {
       if (!timeoutMessageSent) {
         setMessages(prev => [...prev, {
           id: Date.now().toString(),
-          text: "Hi Champion, just checking in 🌟 - If you're still around and have any more questions about colorectal health, I'm here to support you with evidence-based information.",
+          text: "Hi Champion, just checking in 🌟 — If you're still around and have any more questions about colorectal health, I'm here to support you with evidence-based information.",
           sender: 'bot'
         }]);
         setTimeoutMessageSent(true);
@@ -1086,7 +1086,7 @@ Your proactive approach to learning about CRC prevention is truly commendable!`,
             <div className="px-4 py-2 bg-gray-50 text-xs text-gray-500 text-center border-t">
               <div className="flex items-center justify-center space-x-1">
                 <Shield className="h-3 w-3" />
-                <span>Project COLONAiVE™ - Evidence-based CRC education & screening</span>
+                <span>Project COLONAiVE™ — Evidence-based CRC education & screening</span>
               </div>
             </div>
 

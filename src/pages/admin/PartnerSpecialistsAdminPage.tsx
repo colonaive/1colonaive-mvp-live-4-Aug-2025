@@ -186,7 +186,7 @@ const PartnerSpecialistsAdminPage: React.FC = () => {
   const onSave = async () => {
     if (!editingId) return;
     if (!form.name.trim() || !form.clinic_name.trim()) {
-      alert("Doctor's name and clinic name are required.");
+      alert("Doctor’s name and clinic name are required.");
       return;
     }
 
@@ -380,7 +380,7 @@ const PartnerSpecialistsAdminPage: React.FC = () => {
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium mb-1">
-                      Doctor's Name *
+                      Doctor’s Name *
                     </label>
                     <input
                       className="w-full border rounded-md px-3 py-2"
@@ -535,7 +535,7 @@ const PartnerSpecialistsAdminPage: React.FC = () => {
                     Add another address
                   </Button>
                   <p className="text-xs text-gray-500 mt-2">
-                    We'll save all addresses to <code>locations[]</code>. The first address will also be saved
+                    We’ll save all addresses to <code>locations[]</code>. The first address will also be saved
                     to the legacy <code>address</code> column for backward compatibility.
                   </p>
                 </div>

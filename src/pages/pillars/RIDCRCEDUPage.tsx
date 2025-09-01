@@ -18,7 +18,7 @@ const RIDCRCEDUPage: React.FC = () => {
             <BookOpen className="h-12 w-12 text-white mx-auto mb-6" />
             <h1 className="text-4xl font-bold mb-6">RID-CRC EDU™</h1>
             <p className="text-xl mb-4">
-              Education That Saves Lives - For Patients, Clinicians, and the Nation
+              Education That Saves Lives — For Patients, Clinicians, and the Nation
             </p>
             <p className="text-lg opacity-90">
               Knowledge is the first line of defense against Singapore's #1 cancer
@@ -36,7 +36,7 @@ const RIDCRCEDUPage: React.FC = () => {
               <div>
                 <h2 className="text-2xl font-bold text-red-800 mb-4">The Silent Crisis That Education Can Stop</h2>
                 <p className="text-red-700 mb-4 text-lg">
-                  <strong>Every day in Singapore, lives are lost not because colorectal cancer cannot be treated - but because people don't know what to look out for, when to screen, or where to go.</strong>
+                  <strong>Every day in Singapore, lives are lost not because colorectal cancer cannot be treated — but because people don't know what to look out for, when to screen, or where to go.</strong>
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
                   <div className="text-center">
@@ -208,7 +208,7 @@ const RIDCRCEDUPage: React.FC = () => {
                     <AlertTriangle className="h-8 w-8 text-orange-600 mr-4 flex-shrink-0 mt-1" />
                     <div>
                       <h3 className="text-xl font-semibold mb-2">Early Warning Signs</h3>
-                      <p className="text-gray-600">Don't ignore the signs - even mild symptoms may be warning flags that save lives.</p>
+                      <p className="text-gray-600">Don't ignore the signs — even mild symptoms may be warning flags that save lives.</p>
                     </div>
                   </div>
                 </CardContent>
@@ -234,7 +234,7 @@ const RIDCRCEDUPage: React.FC = () => {
                     <TrendingUp className="h-8 w-8 text-purple-600 mr-4 flex-shrink-0 mt-1" />
                     <div>
                       <h3 className="text-xl font-semibold mb-2">From Polyps to Cancer</h3>
-                      <p className="text-gray-600">See how early polyps become dangerous - and how intervention stops the progression.</p>
+                      <p className="text-gray-600">See how early polyps become dangerous — and how intervention stops the progression.</p>
                     </div>
                   </div>
                 </CardContent>

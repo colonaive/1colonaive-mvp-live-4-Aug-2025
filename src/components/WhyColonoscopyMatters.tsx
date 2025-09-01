@@ -262,7 +262,7 @@ const WhyColonoscopyMatters = () => {
               }}
             >
               <p className="text-lg md:text-xl text-white/90 leading-relaxed">
-                This is our national contribution - powered by doctors, supported by sponsors, embraced by citizens.
+                This is our national contribution — powered by doctors, supported by sponsors, embraced by citizens.
                 <span className="ml-2 text-white">🇸🇬</span>
               </p>
             </div>

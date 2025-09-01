@@ -70,7 +70,7 @@ const BloodScreeningSection: React.FC = () => {
           {/* Kaiser Permanente research paragraph */}
           <div className="max-w-xl text-base lg:text-lg text-slate-600 leading-relaxed mb-6 bg-white/50 rounded-lg p-4 border border-slate-200">
             <p>
-              Studies like those by <strong>Kaiser Permanente</strong> show that non-invasive blood tests can significantly increase screening uptake. These tests lower barriers, reach younger and under-screened groups, and lead to earlier referrals for colonoscopy - when it still matters most.
+              Studies like those by <strong>Kaiser Permanente</strong> show that non-invasive blood tests can significantly increase screening uptake. These tests lower barriers, reach younger and under-screened groups, and lead to earlier referrals for colonoscopy — when it still matters most.
             </p>
           </div>
 

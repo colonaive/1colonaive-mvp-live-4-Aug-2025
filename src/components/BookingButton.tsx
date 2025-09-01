@@ -20,12 +20,12 @@ const BookingButton: React.FC<BookingButtonProps> = ({
   const getPopupContent = () => {
     if (mode === 'gp') {
       return {
-        title: "Champion, before we proceed -",
+        title: "Champion, before we proceed —",
         message: "Do you already have a trusted family doctor (GP) who can guide you through your CRC screening journey?"
       };
     }
     return {
-      title: "Champion, before we proceed -",
+      title: "Champion, before we proceed —",
       message: "Do you already have a trusted specialist who can guide you through your CRC screening journey?"
     };
   };

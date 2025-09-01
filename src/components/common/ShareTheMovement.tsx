@@ -7,10 +7,10 @@ const ShareTheMovement: React.FC = () => {
   
   const shareContent = {
     facebook: `I'm supporting Project COLONAiVE™, Singapore's national movement to outsmart colorectal cancer. Early detection is key, and it can save the lives of people we love. #ColorectalCancer #COLONAiVE #GetScreenedSG #HealthierSG`,
-    twitter: `Just referred friends to get screened for colorectal cancer with Project COLONAiVE™.\n\nCRC is the #1 cancer in SG - but early detection saves lives.\n\n👉 ${shareUrl}\n\n#COLONAiVE #ColorectalCancer #OutsmartCRC #GetScreenedSG`,
-    whatsApp: `Hey! I just referred my friends to get screened for colorectal cancer through Project COLONAiVE™ - a national movement to outsmart CRC.\n\nIt's easy, fast, and could save a life.\n\n👉 ${shareUrl}`,
-    instagram: `Just referred friends to get screened for colorectal cancer - because early detection mean early treatment.… it's lifesaving.\n\nColorectal cancer is the #1 cancer in Singapore, but it's also one of the most preventable.\n\nJoin the movement. Refer someone you care about.\n\n👉 www.colonaive.ai\n\n#COLONAiVE #ColorectalCancer #ScopedInTimeSavedInTime #GetScreenedSG #OutsmartCRC #SingaporeHealth #CancerAwareness #HealthierSG`,
-    linkedInTitle: `Project COLONAiVE™ - Outsmart Colorectal Cancer`,
+    twitter: `Just referred friends to get screened for colorectal cancer with Project COLONAiVE™.\n\nCRC is the #1 cancer in SG — but early detection saves lives.\n\n👉 ${shareUrl}\n\n#COLONAiVE #ColorectalCancer #OutsmartCRC #GetScreenedSG`,
+    whatsApp: `Hey! I just referred my friends to get screened for colorectal cancer through Project COLONAiVE™ — a national movement to outsmart CRC.\n\nIt's easy, fast, and could save a life.\n\n👉 ${shareUrl}`,
+    instagram: `Just referred friends to get screened for colorectal cancer — because early detection mean early treatment.… it's lifesaving.\n\nColorectal cancer is the #1 cancer in Singapore, but it's also one of the most preventable.\n\nJoin the movement. Refer someone you care about.\n\n👉 www.colonaive.ai\n\n#COLONAiVE #ColorectalCancer #ScopedInTimeSavedInTime #GetScreenedSG #OutsmartCRC #SingaporeHealth #CancerAwareness #HealthierSG`,
+    linkedInTitle: `Project COLONAiVE™ – Outsmart Colorectal Cancer`,
     linkedInSummary: `I'm supporting Project COLONAiVE, a national movement to outsmart colorectal cancer in Singapore. Join me to spread awareness and save lives! Early detection is key.`,
   };
 

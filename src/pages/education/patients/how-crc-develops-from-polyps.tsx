@@ -109,7 +109,7 @@ const HowCRCDevelopsFromPolyps: React.FC = () => {
                       <h3 className="text-xl font-bold mb-4">The Progression Timeline</h3>
                       <p className="text-gray-700 mb-4">
                         The transformation from a benign polyp to a cancerous tumor typically takes
-                        <span className="font-semibold"> 5-10 years</span> - providing a critical
+                        <span className="font-semibold"> 5-10 years</span> — providing a critical
                         window for early detection and prevention.
                       </p>
                       <div className="bg-white rounded-lg p-4 border border-blue-100">

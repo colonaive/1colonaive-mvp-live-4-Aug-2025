@@ -64,13 +64,13 @@ const StatsSection: React.FC = () => {
               </p>
               <p className="text-gray-600">
                 By the time symptoms appear, the cancer may have advanced. That's why regular screening 
-                is essential-it can detect cancer before symptoms develop, when treatment is most effective.
+                is essential—it can detect cancer before symptoms develop, when treatment is most effective.
               </p>
             </div>
             <div className="md:w-1/3 flex justify-center">
               <div className="h-48 w-48 rounded-full bg-blue-50 flex items-center justify-center border-4 border-blue-100">
                 <div className="text-center px-4">
-                  <div className="text-4xl font-bold text-blue-600 mb-2">4-6%</div>
+                  <div className="text-4xl font-bold text-blue-600 mb-2">4–6%</div>
                   <div className="text-gray-700 text-sm leading-tight">
                     Lifetime risk of developing colorectal cancer
                   </div>

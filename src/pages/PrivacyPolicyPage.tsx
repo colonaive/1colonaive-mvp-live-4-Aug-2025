@@ -3,7 +3,7 @@ export default function PrivacyPolicyPage() {
     <div className="max-w-4xl mx-auto py-12 px-4 pt-48">
       <h1 className="text-3xl font-bold mb-6">Privacy Policy</h1>
       <p className="text-gray-700 leading-relaxed mb-4">
-        Project COLONAiVE™ is committed to protecting your privacy. This Privacy Policy outlines how we collect, use, store, and protect your personal data in accordance with Singapore's Personal Data Protection Act (PDPA) and other applicable laws.
+        Project COLONAiVE™ is committed to protecting your privacy. This Privacy Policy outlines how we collect, use, store, and protect your personal data in accordance with Singapore’s Personal Data Protection Act (PDPA) and other applicable laws.
       </p>
       <h2 className="text-xl font-semibold mt-6 mb-2">1. What We Collect</h2>
       <p className="text-gray-700 leading-relaxed mb-2">

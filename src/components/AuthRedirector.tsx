@@ -58,7 +58,7 @@ const AuthRedirector = () => {
  
       navigate(dashboardPath, { replace: true });
     } else {
-      // Don't redirect anywhere yet - just wait until userType is ready
+      // Don’t redirect anywhere yet — just wait until userType is ready
       console.log("[AuthRedirector] ⏳ userType is not ready yet. Waiting...");
     }
   }, [user, authLoading, userType, isSuperAdmin, profile, navigate]);
