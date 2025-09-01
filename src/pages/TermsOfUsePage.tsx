@@ -11,7 +11,7 @@ export default function TermsOfUsePage() {
       </p>
       <h2 className="text-xl font-semibold mt-6 mb-2">2. Use of Content</h2>
       <p className="text-gray-700 leading-relaxed mb-2">
-        All content, including articles, logos, and visuals, are owned by Saver's Med Pte Ltd or licensed appropriately. You may not reuse or distribute them without permission.
+        All content, including articles, logos, and visuals, are owned by Saver’s Med Pte Ltd or licensed appropriately. You may not reuse or distribute them without permission.
       </p>
       <h2 className="text-xl font-semibold mt-6 mb-2">3. Disclaimer</h2>
       <p className="text-gray-700 leading-relaxed mb-2">

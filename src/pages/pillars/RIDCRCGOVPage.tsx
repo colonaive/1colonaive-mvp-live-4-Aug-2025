@@ -44,7 +44,7 @@ const RIDCRCGOVPage: React.FC = () => {
                     "Early screening is still best... but in Singapore, 60% of CRC cases are still diagnosed late."
                   </blockquote>
                   <div className="text-lg text-red-700 font-semibold">
-                    - Health Minister Khaw Boon Wan, 2009
+                    — Health Minister Khaw Boon Wan, 2009
                   </div>
                   <div className="text-sm text-gray-600 mt-2">
                     <a href="https://www.moh.gov.sg/newsroom/early-screening-is-still-best" 
@@ -120,7 +120,7 @@ const RIDCRCGOVPage: React.FC = () => {
               
               <p className="text-gray-700 text-lg leading-relaxed">
                 Despite Singapore's exemplary policy framework and generous funding, screening uptake has remained suboptimal. 
-                The challenge was never inadequate commitment from our health leadership - it was the inherent limitations 
+                The challenge was never inadequate commitment from our health leadership — it was the inherent limitations 
                 of the screening tools available until now.
               </p>
 
@@ -150,7 +150,7 @@ const RIDCRCGOVPage: React.FC = () => {
                 <h3 className="font-semibold text-green-800 mb-2">The COLONAiVE™ Opportunity</h3>
                 <p className="text-green-700 text-sm">
                   With validated blood-based CRC screening now available (CE-marked, HSA-cleared), we can finally 
-                  bridge the gap between policy intention and population participation - directing high-risk individuals 
+                  bridge the gap between policy intention and population participation — directing high-risk individuals 
                   to timely colonoscopy when it matters most.
                 </p>
               </div>
@@ -203,7 +203,7 @@ const RIDCRCGOVPage: React.FC = () => {
               A Partnership Ready to Succeed
             </h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              RID-CRC GOV™ welcomes alignment with MOH, HPB, AIC, SCRS, and academic partners - 
+              RID-CRC GOV™ welcomes alignment with MOH, HPB, AIC, SCRS, and academic partners — 
               not to replace existing frameworks, but to amplify their impact through enhanced tools and unified messaging.
             </p>
           </div>
@@ -217,7 +217,7 @@ const RIDCRCGOVPage: React.FC = () => {
                 </div>
                 <p className="text-gray-700 text-sm mb-4">
                   Singapore's health institutions have established robust screening frameworks and generous subsidies. 
-                  COLONAiVE™ now provides the missing piece - more acceptable screening tools that can finally 
+                  COLONAiVE™ now provides the missing piece — more acceptable screening tools that can finally 
                   translate policy into population participation.
                 </p>
                 <div className="text-xs text-blue-600 space-y-1">
@@ -236,8 +236,8 @@ const RIDCRCGOVPage: React.FC = () => {
                   <h3 className="font-semibold text-xl text-purple-800">Clinician-Led Credibility</h3>
                 </div>
                 <p className="text-gray-700 text-sm mb-4">
-                  This movement is guided by Singapore's most respected colorectal specialists - 
-                  Dr. Francis Seow-Choen, Prof. Eu Kong Weng, and Prof. Lawrence Ho - who've dedicated 
+                  This movement is guided by Singapore's most respected colorectal specialists — 
+                  Dr. Francis Seow-Choen, Prof. Eu Kong Weng, and Prof. Lawrence Ho — who've dedicated 
                   decades to preventing and treating CRC. Their endorsement ensures clinical rigor and public trust.
                 </p>
                 <div className="text-xs text-purple-600 space-y-1">

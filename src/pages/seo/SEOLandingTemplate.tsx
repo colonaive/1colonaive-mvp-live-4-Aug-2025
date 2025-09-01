@@ -256,7 +256,7 @@ const SEOLandingTemplate: React.FC<SEOLandingTemplateProps> = ({
               Ready to Take Control of Your Health?
             </h2>
             <p className="text-xl mb-8 text-white/90">
-              Don't wait - early detection saves lives.
+              Don't wait – early detection saves lives.
             </p>
             {region === 'Singapore' ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">

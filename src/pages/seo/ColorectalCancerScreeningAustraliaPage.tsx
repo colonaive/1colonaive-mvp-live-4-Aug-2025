@@ -4,7 +4,7 @@ import SEOLandingTemplate from './SEOLandingTemplate';
 const ColorectalCancerScreeningAustraliaPage: React.FC = () => {
   const content = {
     title: 'Colorectal Cancer Screening Australia | National Bowel Cancer Screening Program',
-    metaDescription: 'Access Australia\'s National Bowel Cancer Screening Program. Free FOBT tests, Medicare rebates for colonoscopy. Early detection saves lives - get screened today.',
+    metaDescription: 'Access Australia\'s National Bowel Cancer Screening Program. Free FOBT tests, Medicare rebates for colonoscopy. Early detection saves lives – get screened today.',
     heroTitle: 'Colorectal Cancer Screening in Australia',
     heroSubtitle: 'Take advantage of Australia\'s comprehensive bowel cancer screening program. Free screening tests and Medicare support available.',
     benefitsList: [
@@ -31,11 +31,11 @@ const ColorectalCancerScreeningAustraliaPage: React.FC = () => {
       },
       {
         question: 'What happens if my FOBT test is positive?',
-        answer: 'A positive FOBT result doesn\'t mean you have cancer - about 1 in 14 people get a positive result. You\'ll be referred for colonoscopy, which is covered by Medicare. This diagnostic procedure will determine if further investigation or treatment is needed.'
+        answer: 'A positive FOBT result doesn\'t mean you have cancer – about 1 in 14 people get a positive result. You\'ll be referred for colonoscopy, which is covered by Medicare. This diagnostic procedure will determine if further investigation or treatment is needed.'
       },
       {
         question: 'Should I get screened if I have no symptoms?',
-        answer: 'Yes, absolutely. Bowel cancer often develops without symptoms, especially in early stages. The NBCSP is designed for people without symptoms. If you have symptoms like bleeding, pain, or bowel changes, see your GP immediately - don\'t wait for routine screening.'
+        answer: 'Yes, absolutely. Bowel cancer often develops without symptoms, especially in early stages. The NBCSP is designed for people without symptoms. If you have symptoms like bleeding, pain, or bowel changes, see your GP immediately – don\'t wait for routine screening.'
       }
     ],
     localizedContent: {

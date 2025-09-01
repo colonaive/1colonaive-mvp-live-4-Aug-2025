@@ -61,8 +61,8 @@ const ClinicProfilePage: React.FC = () => {
                   <Clock className="h-5 w-5 text-teal-600 mt-1" />
                   <div>
                     <h3 className="font-semibold mb-2">Opening Hours</h3>
-                    <p className="text-gray-600">Mon-Fri: 8am - 6pm</p>
-                    <p className="text-gray-600">Sat: 8am - 1pm</p>
+                    <p className="text-gray-600">Mon–Fri: 8am – 6pm</p>
+                    <p className="text-gray-600">Sat: 8am – 1pm</p>
                     <p className="text-gray-600">Sun & PH: Closed</p>
                   </div>
                 </div>

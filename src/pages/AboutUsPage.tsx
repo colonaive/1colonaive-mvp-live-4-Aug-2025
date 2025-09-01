@@ -58,7 +58,7 @@ const AboutUsPage: React.FC = () => {
                   COLON<span className="text-teal-600">AiVE</span>™
                 </div>
                 <p className="text-lg text-gray-700 font-medium">
-                  More than just a name - it's our mission statement
+                  More than just a name — it's our mission statement
                 </p>
               </div>
 
@@ -118,7 +118,7 @@ const AboutUsPage: React.FC = () => {
                   <Heart className="w-12 h-12 mx-auto mb-4" />
                   <h3 className="text-2xl font-bold mb-4">Saved In Time</h3>
                   <p className="text-orange-100">
-                    Where screening meets treatment in a single procedure - the ultimate in preventive medicine
+                    Where screening meets treatment in a single procedure — the ultimate in preventive medicine
                   </p>
                 </div>
               </div>
@@ -136,11 +136,11 @@ const AboutUsPage: React.FC = () => {
               COLONAiVE™ is a national movement to outsmart colorectal cancer and reduce CRC-related
               mortality through early detection, inclusive education, and access to clinically validated
               screening technologies. Founded in Singapore, the movement champions colonoscopy as the
-              gold standard - the only screening method that both detects and removes precancerous
+              gold standard — the only screening method that both detects and removes precancerous
               polyps, making it the only true preventive option. COLONAiVE™ also supports HSA-cleared,
               blood-based screening tools to help more people get tested before symptoms appear. Guided
               by leading specialists and driven by partnerships across Asia-Pacific, the initiative
-              empowers individuals to know when and how to screen - turning awareness into life-saving
+              empowers individuals to know when and how to screen — turning awareness into life-saving
               action. Its foundation is built on clinical evidence, real-world health impact, and
               multilingual tools that reach underserved and younger populations.
             </p>
@@ -154,7 +154,7 @@ const AboutUsPage: React.FC = () => {
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="text-3xl font-bold mb-6">Our Vision</h2>
             <p className="text-xl text-gray-700 leading-relaxed">
-              A Singapore where colorectal cancer is no longer a life-threatening disease, through screening and timely referral to colonoscopy for early detection and polyp removal - united by national action.
+              A Singapore where colorectal cancer is no longer a life-threatening disease, through screening and timely referral to colonoscopy for early detection and polyp removal — united by national action.
             </p>
           </div>
         </Container>
@@ -169,7 +169,7 @@ const AboutUsPage: React.FC = () => {
               In the fight against colorectal cancer (CRC), no single group can achieve victory alone. Clinicians, with all their skill and knowledge, can only treat patients who come forward. Patients, no matter how informed, can only take action if they have access to the right screening options and understand the life-saving value of early detection. Governments can set guidelines and allocate funds, but they cannot enforce healthy habits or ensure every individual gets screened.
             </p>
             <p className="text-xl text-gray-700 leading-relaxed mb-8">
-              This is why Project COLONAiVE™ is built on five interconnected pillars - a unified, nationwide movement where every stakeholder has a role to play:
+              This is why Project COLONAiVE™ is built on five interconnected pillars — a unified, nationwide movement where every stakeholder has a role to play:
             </p>
             <ul className="space-y-4 text-left">
               <li><strong>RID-CRC PUB™ (Public Awareness):</strong> Empowering the public with clear, accurate information on CRC, dispelling fears, and motivating them to take action.</li>

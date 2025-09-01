@@ -18,7 +18,7 @@ const PillarsSection = () => {
   return (
     <section className="bg-slate-50 dark:bg-slate-800/50 py-16 md:py-20 px-6" id="pillars">
       <h2 className="text-center text-3xl md:text-4xl font-extrabold text-blue-800 dark:text-blue-300 mb-4">
-        RID-CRC™ - Our National Strategy to Outsmart Colorectal Cancer
+        RID-CRC™ — Our National Strategy to Outsmart Colorectal Cancer
       </h2>
       <p className="text-center text-lg text-gray-600 dark:text-gray-400 mb-8 max-w-3xl mx-auto">
         Project COLONAiVE™ is powered by five strategic pillars under the unified RID-CRC™ mission: Ready, Identify, and Detect (RID) so that we can eradicate Colorectal Cancer (CRC) at every level of society.

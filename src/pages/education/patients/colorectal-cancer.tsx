@@ -109,7 +109,7 @@ const ColorectalCancerPage: React.FC = () => {
               <h2>Importance of Early Detection</h2>
               <p>
                 When detected early, colorectal cancer is highly treatable and often curable.
-                Routine screening helps identify cancer at an earlier stage - or even before it develops -
+                Routine screening helps identify cancer at an earlier stage — or even before it develops —
                 significantly improving treatment outcomes and survival rates.
               </p>
 
@@ -125,11 +125,11 @@ const ColorectalCancerPage: React.FC = () => {
                 COLONAiVE™ is a national movement to outsmart colorectal cancer and reduce CRC-related
                 mortality through early detection, inclusive education, and access to clinically validated
                 screening technologies. Founded in Singapore, the movement champions colonoscopy as the
-                gold standard - the only screening method that both detects and removes precancerous
+                gold standard — the only screening method that both detects and removes precancerous
                 polyps, making it the only true preventive option. COLONAiVE™ also supports HSA-cleared,
                 blood-based screening tools to help more people get tested before symptoms appear. Guided
                 by leading specialists and driven by partnerships across Asia-Pacific, the initiative
-                empowers individuals to know when and how to screen - turning awareness into life-saving
+                empowers individuals to know when and how to screen — turning awareness into life-saving
                 action. Its foundation is built on clinical evidence, real-world health impact, and
                 multilingual tools that reach underserved and younger populations.
               </p>
@@ -137,7 +137,7 @@ const ColorectalCancerPage: React.FC = () => {
               <h2>Support & Resources</h2>
               <p>
                 Project COLONAiVE™ is committed to supporting individuals with information, access to screening,
-                and connections to trusted clinicians. You're not alone - whether you're learning, screening, or recovering,
+                and connections to trusted clinicians. You're not alone — whether you're learning, screening, or recovering,
                 we're with you every step of the way.
               </p>
 

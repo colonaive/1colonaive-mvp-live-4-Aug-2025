@@ -33,7 +33,7 @@ export default function HeroSection() {
               CHANGED:
               - grew padding: px-5→px-6 (sm:px-6→sm:px-8), py-2.5→py-3 (sm:py-3→sm:py-3.5)
               - grew text: text-sm→text-base (sm:text-base→sm:text-lg)
-              - added ring-offset to create a visible "border gap" from background (ring-offset-2 ring-offset-white)
+              - added ring-offset to create a visible “border gap” from background (ring-offset-2 ring-offset-white)
               - slightly stronger ring color (ring-red-700/50) and shadow
             */}
             <span className="inline-flex items-center gap-3 rounded-full bg-red-600 px-6 sm:px-8 py-3 sm:py-3.5
@@ -57,7 +57,7 @@ export default function HeroSection() {
 
           {/* headline */}
           <h1 className="mx-auto max-w-[22ch] text-[30px] sm:text-5xl md:text-6xl lg:text-[54px] font-extrabold leading-[1.08] tracking-tight">
-            <span className="block">SCREENING SAVES LIVES - EVIDENCE PROVES IT.</span>
+            <span className="block">SCREENING SAVES LIVES — EVIDENCE PROVES IT.</span>
             <span className="mt-2 block text-emerald-700 text-[24px] sm:text-4xl md:text-5xl lg:text-[42px] font-extrabold">
               Modeling shows ~26 lives saved per 1,000 screened.*
             </span>
@@ -87,7 +87,7 @@ export default function HeroSection() {
               className="group rounded-2xl border border-gray-200 bg-white px-4 py-3 shadow focus:outline-none focus:ring-2 focus:ring-emerald-500"
             >
               <p className="text-xs uppercase tracking-wide text-gray-500">Peer-Reviewed Modeling</p>
-              <p className="mt-1 text-sm font-semibold">JNCI 2025: "Triple Effect"-saves lives, reduces costs, narrows gaps.</p>
+              <p className="mt-1 text-sm font-semibold">JNCI 2025: “Triple Effect”—saves lives, reduces costs, narrows gaps.</p>
               <span className="mt-1 inline-block text-xs text-emerald-700 group-hover:underline">Read article ↗</span>
             </a>
 
@@ -152,7 +152,7 @@ export default function HeroSection() {
               🔍 <span className="font-semibold text-gray-900">Transparent evidence:</span> see sources above and our full Evidence Brief.
             </div>
             <div className="rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 shadow">
-              ✅ Public-private collaboration • Led by Singapore clinicians
+              ✅ Public–private collaboration • Led by Singapore clinicians
             </div>
           </div>
 

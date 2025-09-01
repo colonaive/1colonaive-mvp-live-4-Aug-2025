@@ -168,7 +168,7 @@ const CSRShowcasePage: React.FC = () => {
                 <span className="text-sm text-gray-600">S$35,500 suggested entry</span>
               </div>
               <h2 className="text-xl md:text-2xl font-semibold text-gray-900 mb-2">
-                Fund life‑saving CRC screening access - join as a Gold Champion.
+                Fund life‑saving CRC screening access — join as a Gold Champion.
               </h2>
               <p className="text-gray-700">
                 A Gold commitment helps under‑served Singaporeans access screening now. We proudly recognise your leadership across our movement platforms.
@@ -249,7 +249,7 @@ const CSRShowcasePage: React.FC = () => {
 
                           {p.blurb && <p className="text-sm text-gray-700">{p.blurb}</p>}
 
-                          {/* Tribute - highlighted softly, centered, italic */}
+                          {/* Tribute — highlighted softly, centered, italic */}
                           {p.tribute && (
                             <div className="mt-3">
                               <div className="bg-indigo-50 border border-indigo-100 text-indigo-800 text-sm italic rounded-lg px-3 py-2 text-center">
@@ -286,7 +286,7 @@ const CSRShowcasePage: React.FC = () => {
             </h3>
             <p className="text-gray-700">
               COLONAiVE™ is a national movement built on compassion and action. Each Corporate Champion helps
-              ensure that more families catch colorectal cancer early-when it's most treatable.
+              ensure that more families catch colorectal cancer early—when it’s most treatable.
             </p>
           </CardContent>
         </Card>

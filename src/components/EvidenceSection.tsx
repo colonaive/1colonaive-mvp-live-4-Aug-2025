@@ -71,7 +71,7 @@ const EvidenceSection = () => {
                   Singapore's Opportunity: Go Further, Sooner
                 </h3>
                 <p className="text-sky-800 dark:text-sky-300 mb-5">
-                  Project COLONAiVE™ builds upon this proven foundation - and advances it with:
+                  Project COLONAiVE™ builds upon this proven foundation — and advances it with:
                 </p>
                 <ul className="space-y-3 text-sky-800 dark:text-sky-300">
                    <li className="flex items-start">
@@ -92,7 +92,7 @@ const EvidenceSection = () => {
                   </li>
                 </ul>
                 <p className="mt-6 text-sky-900 dark:text-sky-200 font-semibold">
-                  With the right coordination, Singapore can achieve - and surpass - U.S. outcomes.
+                  With the right coordination, Singapore can achieve — and surpass — U.S. outcomes.
                 </p>
               </CardContent>
             </Card>

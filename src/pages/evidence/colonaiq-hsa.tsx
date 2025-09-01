@@ -17,19 +17,19 @@ export default function ColonAiQHSAEvidencePage() {
               <li aria-hidden>›</li>
               <li><Link to="/evidence" className="hover:underline">Evidence</Link></li>
               <li aria-hidden>›</li>
-              <li className="text-gray-700 font-medium">ColonAiQ® - HSA & Evidence</li>
+              <li className="text-gray-700 font-medium">ColonAiQ® – HSA & Evidence</li>
             </ol>
           </nav>
 
           <div className="mt-4 flex items-center justify-between flex-wrap gap-3">
             <h1 id="page-title" className="text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900">
-              ColonAiQ® - Regulatory Status & Clinical Evidence (Singapore)
+              ColonAiQ® – Regulatory Status & Clinical Evidence (Singapore)
             </h1>
             <Pill className="bg-blue-50 text-blue-900 border border-blue-100">Clinician-Led Movement</Pill>
           </div>
 
           <p className="mt-2 max-w-3xl text-gray-700">
-            This page provides citation-backed information on ColonAiQ® relevant to Singapore's screening ecosystem, in support of COLONAiVE™ - a clinician-led national movement.</p>
+            This page provides citation-backed information on ColonAiQ® relevant to Singapore’s screening ecosystem, in support of COLONAiVE™ - a clinician-led national movement.</p>
         </div>
       </section>
 
@@ -98,7 +98,7 @@ export default function ColonAiQHSAEvidencePage() {
                   <a className="underline" href="https://divisionofresearch.kaiserpermanente.org/colorectal-cancer-screen-program/" target="_blank" rel="noopener noreferrer">View</a>
                 </li>
                 <li>
-                  • JNCI 2025 "Triple Effect" microsimulation: lives saved, costs reduced, disparities narrowed.{" "}
+                  • JNCI 2025 “Triple Effect” microsimulation: lives saved, costs reduced, disparities narrowed.{" "}
                   <a className="underline" href="https://academic.oup.com/jnci/advance-article/doi/10.1093/jnci/djaf202/8219467" target="_blank" rel="noopener noreferrer">Read</a>
                 </li>
                 <li>

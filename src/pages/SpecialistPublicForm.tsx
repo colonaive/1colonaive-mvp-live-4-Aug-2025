@@ -23,7 +23,7 @@ const SpecialistPublicForm: React.FC = () => {
 
   const onSubmit = async () => {
     if (!form.name.trim() || !form.clinic_name.trim()) {
-      alert("Doctor's name and clinic name are required.");
+      alert("Doctor’s name and clinic name are required.");
       return;
     }
     try {
@@ -76,7 +76,7 @@ const SpecialistPublicForm: React.FC = () => {
           </h1>
 
           {[
-            ["name", "Doctor's Name *"],
+            ["name", "Doctor’s Name *"],
             ["clinic_name", "Clinic / Centre Name *"],
             ["phone_number", "Contact Number"],
             ["website", "Clinic Website"],

@@ -55,7 +55,7 @@ const ChampionPopup: React.FC<ChampionPopupProps> = ({
   };
 
 
-  const title = "Champion, before we proceed -";
+  const title = "Champion, before we proceed —";
   const message = type === 'gp'
     ? "Do you already have a trusted family doctor (GP) who can guide you through your CRC screening journey?"
     : "Do you already have a trusted specialist who can guide you through your CRC screening journey?";

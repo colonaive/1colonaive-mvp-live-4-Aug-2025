@@ -217,8 +217,8 @@ const CorporateSignUp: React.FC = () => {
     {
       name: 'Gold Champion',
       icon: <Award className="h-8 w-8" />,
-      livesReached: '100-499',
-      budgetRange: `S$${(100 * unitCost).toLocaleString()}-S$${(499 * unitCost).toLocaleString()}`,
+      livesReached: '100–499',
+      budgetRange: `S$${(100 * unitCost).toLocaleString()}–S$${(499 * unitCost).toLocaleString()}`,
       perks: [
         'Logo placement on COLONAiVE™ website',
         'Quarterly impact reports with metrics',
@@ -233,8 +233,8 @@ const CorporateSignUp: React.FC = () => {
     {
       name: 'Platinum Champion',
       icon: <Star className="h-8 w-8" />,
-      livesReached: '500-999',
-      budgetRange: `S$${(500 * unitCost).toLocaleString()}-S$${(999 * unitCost).toLocaleString()}`,
+      livesReached: '500–999',
+      budgetRange: `S$${(500 * unitCost).toLocaleString()}–S$${(999 * unitCost).toLocaleString()}`,
       perks: [
         'Homepage feature + impact story',
         'Media mentions in press releases',
@@ -969,7 +969,7 @@ const CorporateSignUp: React.FC = () => {
                     <blockquote className="text-lg italic text-gray-700 mb-4">
                       "Corporate leadership in healthcare isn't just about profit margins, it's about saving lives and building a healthier Singapore for everyone."
                     </blockquote>
-                    <cite className="text-sm text-gray-500">- COLONAiVE™ Corporate Partnership Team</cite>
+                    <cite className="text-sm text-gray-500">— COLONAiVE™ Corporate Partnership Team</cite>
                   </div>
 
                   <div className="text-center pt-4">

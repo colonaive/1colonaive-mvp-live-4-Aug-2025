@@ -19,7 +19,7 @@ const Vision2045Page: React.FC = () => {
         <Container>
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
-              Our 10-Year National Vision - RID-CRC by 2035
+              Our 10-Year National Vision — RID-CRC by 2035
             </h1>
             <p className="text-xl md:text-2xl">
               Project COLONAiVE™ is accelerating the fight with a 10-year target to eliminate colorectal cancer as a major public health threat in Singapore.
@@ -52,7 +52,7 @@ const Vision2045Page: React.FC = () => {
         <Container>
           <div className="text-center max-w-3xl mx-auto">
             <h2 className="text-3xl md:text-4xl font-bold mb-6">
-              Let's Outsmart Colorectal Cancer - Together.
+              Let's Outsmart Colorectal Cancer — Together.
             </h2>
             <p className="text-xl mb-8">
               Be part of Singapore's national effort to eliminate colorectal cancer through awareness, action, and access.

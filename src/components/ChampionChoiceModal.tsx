@@ -59,7 +59,7 @@ export const ChampionChoiceModal: React.FC<ChampionChoiceModalProps> = ({
 
         <div className="p-8">
           <h2 className="text-2xl font-bold text-gray-800 mb-6">
-            Champion, before we proceed -
+            Champion, before we proceed —
           </h2>
           <p className="text-lg text-gray-700 mb-8">
             {getMessage()}
