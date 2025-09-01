@@ -85,7 +85,7 @@ const CRCSingaporeStory: React.FC = () => {
             <p>Early detection saves lives. Begin screening at age 50, or earlier if you have risk factors.</p>
 
             <h2>Disclaimer</h2>
-            <p>The above statistics are based on Singapore’s national cancer data (Singapore Cancer Registry Annual Report 2022) covering the years up to 2022.</p>
+            <p>The above statistics are based on Singapore's national cancer data (Singapore Cancer Registry Annual Report 2022) covering the years up to 2022.</p>
           </div>
         </Container>
       </section>

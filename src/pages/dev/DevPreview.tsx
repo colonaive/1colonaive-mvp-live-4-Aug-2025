@@ -1,6 +1,6 @@
 import React from 'react';
 
-// Components to preview — import only those that exist
+// Components to preview - import only those that exist
 import AboutMovementSection from '../../components/AboutMovementSection';
 import BookingButton from '../../components/BookingButton';
 import BookingPopup from '../../components/BookingPopup';

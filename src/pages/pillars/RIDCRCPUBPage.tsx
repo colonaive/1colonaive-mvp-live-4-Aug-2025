@@ -96,7 +96,7 @@ const RIDCRCPUBPage: React.FC = () => {
             <Activity className="h-12 w-12 text-white mx-auto mb-6" />
             <h1 className="text-4xl font-bold mb-6">RID-CRC PUB™</h1>
             <p className="text-xl">
-              A national movement by people, for people — raising awareness, sharing stories, and saving lives through early detection of colorectal cancer.
+              A national movement by people, for people - raising awareness, sharing stories, and saving lives through early detection of colorectal cancer.
             </p>
           </div>
         </Container>
@@ -107,13 +107,13 @@ const RIDCRCPUBPage: React.FC = () => {
         <div className="py-16 max-w-4xl mx-auto text-left">
           <h2 className="text-3xl font-bold mb-6">Colorectal Cancer in Singapore: A Silent Crisis</h2>
           <p className="text-gray-700 mb-4">
-            Colorectal cancer (CRC) is the most common cancer in Singapore — yet most people remain unaware of the danger it poses. Every day, lives are lost to this disease not because we lack treatment options, but because we detect it too late.
+            Colorectal cancer (CRC) is the most common cancer in Singapore - yet most people remain unaware of the danger it poses. Every day, lives are lost to this disease not because we lack treatment options, but because we detect it too late.
           </p>
           <p className="text-gray-700 mb-4">
-            Only about <strong>30–40% of eligible individuals</strong> are screened on time. That means tens of thousands are walking around with early-stage disease or precancerous polyps — unaware, and untreated. More than <strong>60% of CRC diagnoses in Singapore happen at Stage 3 or 4</strong>, when treatment becomes harder and outcomes worse.
+            Only about <strong>30-40% of eligible individuals</strong> are screened on time. That means tens of thousands are walking around with early-stage disease or precancerous polyps - unaware, and untreated. More than <strong>60% of CRC diagnoses in Singapore happen at Stage 3 or 4</strong>, when treatment becomes harder and outcomes worse.
           </p>
           <p className="text-gray-700 mb-4">
-            The COLONAiVE™ movement was launched to change this — not just through new tools, but by building a nationwide culture of awareness, action, and shared responsibility.
+            The COLONAiVE™ movement was launched to change this - not just through new tools, but by building a nationwide culture of awareness, action, and shared responsibility.
           </p>
         </div>
          {/* Dr. Francis Seow-Choen Quote Section - Moved up for better visibility */}
@@ -151,7 +151,7 @@ const RIDCRCPUBPage: React.FC = () => {
         <div className="py-16 max-w-4xl mx-auto text-center">
           <h2 className="text-2xl font-bold mb-6">Why Screening Saves Lives</h2>
           <p className="text-gray-600 mb-6">
-            Watch this short video to understand how early detection through screening — including colonoscopy or non-invasive options — can prevent unnecessary deaths.
+            Watch this short video to understand how early detection through screening - including colonoscopy or non-invasive options - can prevent unnecessary deaths.
           </p>
           <div className="aspect-w-16 aspect-h-9 mb-6">
             <iframe
@@ -172,7 +172,7 @@ const RIDCRCPUBPage: React.FC = () => {
             Your Story Can Save Someone's Life
           </h2>
           <p className="text-gray-600 mb-6">
-            Have you or your loved ones been impacted by colorectal cancer? As a survivor, caregiver, or concerned citizen, your voice matters. Share your story — it could inspire someone to go for screening today.
+            Have you or your loved ones been impacted by colorectal cancer? As a survivor, caregiver, or concerned citizen, your voice matters. Share your story - it could inspire someone to go for screening today.
           </p>
           
           {loading ? (
@@ -260,7 +260,7 @@ const RIDCRCPUBPage: React.FC = () => {
               <Card>
                 <CardContent className="p-6">
                   <h3 className="text-xl font-semibold mb-2">What is Colorectal Cancer?</h3>
-                  <p className="text-gray-600">Understand the basics of CRC — causes, risk factors, symptoms, and treatment.</p>
+                  <p className="text-gray-600">Understand the basics of CRC - causes, risk factors, symptoms, and treatment.</p>
                 </CardContent>
               </Card>
             </Link>
@@ -276,7 +276,7 @@ const RIDCRCPUBPage: React.FC = () => {
               <Card>
                 <CardContent className="p-6">
                   <h3 className="text-xl font-semibold mb-2">How CRC Develops From Polyps</h3>
-                  <p className="text-gray-600">Prevention starts with understanding — see how early polyps can become dangerous.</p>
+                  <p className="text-gray-600">Prevention starts with understanding - see how early polyps can become dangerous.</p>
                 </CardContent>
               </Card>
             </Link>

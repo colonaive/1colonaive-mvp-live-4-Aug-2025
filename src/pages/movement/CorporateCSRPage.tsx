@@ -19,7 +19,7 @@ const RIDCRCCSRPage: React.FC = () => {
             </p>
             <p className="text-md max-w-xl mx-auto">
               Partner with us to help outsmart colorectal cancer in Singapore.
-              Through our CSR program, your company can sponsor modern blood-based screening for employees or underprivileged communities — and be recognised as a national health champion.
+              Through our CSR program, your company can sponsor modern blood-based screening for employees or underprivileged communities - and be recognised as a national health champion.
             </p>
           </div>
         </Container>
@@ -45,12 +45,12 @@ const RIDCRCCSRPage: React.FC = () => {
                   <tbody>
                     <tr>
                       <td className="border px-4 py-2 font-semibold text-blue-900">Gold</td>
-                      <td className="border px-4 py-2">100–499 tests</td>
+                      <td className="border px-4 py-2">100-499 tests</td>
                       <td className="border px-4 py-2">Logo on showcase + CSR page link</td>
                     </tr>
                     <tr>
                       <td className="border px-4 py-2 font-semibold text-indigo-900">Platinum</td>
-                      <td className="border px-4 py-2">500–999 tests</td>
+                      <td className="border px-4 py-2">500-999 tests</td>
                       <td className="border px-4 py-2">Homepage badge + event highlight + employee story</td>
                     </tr>
                     <tr>

@@ -61,7 +61,7 @@ export default function ShareYourStoryForm({ onSubmit }: { onSubmit: (data: any)
         {/* Group related fields for better structure */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label htmlFor="storyType" className="block text-sm font-medium text-gray-700 mb-1">I’m sharing as a…</label>
+            <label htmlFor="storyType" className="block text-sm font-medium text-gray-700 mb-1">I'm sharing as a…</label>
             <select id="storyType" name="storyType" value={formData.storyType} onChange={handleChange} required className="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
               <option value="">Select an option</option>
               <option>Patient / Survivor</option>

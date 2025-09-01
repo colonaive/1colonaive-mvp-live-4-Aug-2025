@@ -59,7 +59,7 @@ const ClinicalTrialsPage: React.FC = () => {
                   <h3 className="font-semibold text-lg">Upcoming Trials</h3>
                 </div>
                 <p className="text-gray-700 text-sm">
-                  Coming soon — blood-based screening studies and colonoscopy comparison trials across selected Singapore hospitals.
+                  Coming soon - blood-based screening studies and colonoscopy comparison trials across selected Singapore hospitals.
                 </p>
               </CardContent>
             </Card>

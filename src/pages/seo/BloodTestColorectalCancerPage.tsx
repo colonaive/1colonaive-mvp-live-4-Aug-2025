@@ -6,7 +6,7 @@ const BloodTestColorectalCancerPage: React.FC = () => {
     title: 'Blood Test for Colorectal Cancer | Non-Invasive CRC Screening Singapore',
     metaDescription: 'Revolutionary blood test for colorectal cancer screening. 94% accuracy, HSA-cleared, non-invasive alternative to colonoscopy. Book your CRC blood test in Singapore today.',
     heroTitle: 'Revolutionary Blood Test for Colorectal Cancer',
-    heroSubtitle: 'Skip the prep, skip the procedure. Get reliable colorectal cancer screening with a simple blood test – now available in Singapore.',
+    heroSubtitle: 'Skip the prep, skip the procedure. Get reliable colorectal cancer screening with a simple blood test - now available in Singapore.',
     benefitsList: [
       '94% accuracy in detecting colorectal cancer',
       'No bowel preparation or dietary restrictions required',

@@ -31,7 +31,7 @@ const screeningLinks: NavLink[] = [
   { label: "Screening Blood Test", path: "/get-screened" },
   { label: "Find a Screening Center", path: "/find-a-gp" },
   { label: "Find a COLONAiVE Specialist", path: "/find-a-specialist" },
-  { label: "—————————", path: "#", isHeader: true },
+  { label: "---------", path: "#", isHeader: true },
   { label: "🌏 Explore by Country", path: "/seo", isHeader: true },
   { label: "🇸🇬 Singapore", path: "/seo/singapore-colorectal-screening" },
   { label: "🇦🇺 Australia", path: "/seo/australia-bowel-cancer-screening" },
@@ -171,7 +171,7 @@ export const Header = () => {
             {links.map((link, index) => (
               <li key={`${link.path}-${index}`}>
                 {link.isHeader ? (
-                  link.label.startsWith("—————————") ? (
+                  link.label.startsWith("---------") ? (
                     <div className="px-4 py-1">
                       <div className="border-t border-white/20" />
                     </div>
@@ -374,7 +374,7 @@ export const Header = () => {
                   {item.links.map((link, linkIndex) => (
                     <li key={`${link.path}-${linkIndex}`}>
                       {link.isHeader ? (
-                        link.label.startsWith("—————————") ? (
+                        link.label.startsWith("---------") ? (
                           <div className="py-1">
                             <div className="border-t border-white/20" />
                           </div>
@@ -409,7 +409,7 @@ export const Header = () => {
 
   return (
     <>
-      {/* Top slim bar (country + auth) — sticky and above everything */}
+      {/* Top slim bar (country + auth) - sticky and above everything */}
       <header ref={headerRef} className="sticky top-0 z-50 bg-[#004F8C] shadow-sm">
         <div className="py-1">
           <Container className="flex justify-between items-center h-10">

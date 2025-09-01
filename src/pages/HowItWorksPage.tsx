@@ -43,7 +43,7 @@ const HowItWorksPage: React.FC = () => {
           <h1 className="mt-3 text-3xl sm:text-4xl md:text-5xl font-extrabold">How It Works</h1>
           <p className="mt-4 max-w-3xl text-white/90 text-base sm:text-lg">
             Simple pathway, strong outcomes. We help more people get screened on time, triage those at
-            higher risk to colonoscopy, and catch colorectal cancer early—when it’s most treatable.
+            higher risk to colonoscopy, and catch colorectal cancer early-when it's most treatable.
           </p>
 
           <div className="mt-6 flex flex-wrap items-center gap-3 text-xs">
@@ -67,9 +67,9 @@ const HowItWorksPage: React.FC = () => {
         <Container>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="rounded-2xl bg-white shadow-sm border border-gray-200 p-6">
-              <h2 className="text-xl font-bold text-gray-900">Path A — Go Straight to Colonoscopy</h2>
+              <h2 className="text-xl font-bold text-gray-900">Path A - Go Straight to Colonoscopy</h2>
               <p className="mt-2 text-gray-600">
-                If you’re 50+, have symptoms, or have a family history, your doctor may recommend
+                If you're 50+, have symptoms, or have a family history, your doctor may recommend
                 colonoscopy directly. It both <strong>diagnoses and treats</strong> by removing polyps early.
               </p>
               <div className="mt-4 flex gap-3">
@@ -87,7 +87,7 @@ const HowItWorksPage: React.FC = () => {
             </div>
 
             <div className="rounded-2xl bg-white shadow-sm border border-gray-200 p-6">
-              <h2 className="text-xl font-bold text-gray-900">Path B — Start with a Validated Blood Test</h2>
+              <h2 className="text-xl font-bold text-gray-900">Path B - Start with a Validated Blood Test</h2>
               <p className="mt-2 text-gray-600">
                 For many people, a modern, high‑sensitivity blood‑based screening test is an
                 accessible first step. Positive results are triaged to timely colonoscopy.
@@ -136,7 +136,7 @@ const HowItWorksPage: React.FC = () => {
             <StepCard
               icon={<Building2 className="h-5 w-5" />}
               title="4) Colonoscopy (Gold Standard)"
-              text="Direct visualization and polyp removal in the same procedure—diagnosis and early treatment combined."
+              text="Direct visualization and polyp removal in the same procedure-diagnosis and early treatment combined."
             />
             <StepCard
               icon={<CalendarCheck2 className="h-5 w-5" />}
@@ -173,7 +173,7 @@ const HowItWorksPage: React.FC = () => {
       {/* Footer reassurance strip */}
       <section className="py-6 bg-gray-100 border-t border-gray-200">
         <Container className="text-sm text-gray-600">
-          ✅ Public–private collaboration · Led by Singapore’s medical experts
+          ✅ Public-private collaboration · Led by Singapore's medical experts
         </Container>
       </section>
     </main>

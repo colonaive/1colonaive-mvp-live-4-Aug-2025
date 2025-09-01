@@ -161,7 +161,7 @@ const ScreeningUrgencyWidget: React.FC = () => {
                     <td className="p-4 text-red-700">Urgent (within weeks)</td>
                   </tr>
                   <tr className="border-b bg-gray-50">
-                    <td className="p-4 text-gray-700">👨‍👩‍👧‍👦 Strong family history</td>
+                    <td className="p-4 text-gray-700">👨👩👧👦 Strong family history</td>
                     <td className="p-4 font-medium text-orange-700">Colonoscopy with specialist</td>
                     <td className="p-4 text-orange-700">Within 2-3 months</td>
                   </tr>

@@ -32,7 +32,7 @@ const ComponentPreview: React.FC = () => {
             {isPopupOpen && (
               <BookingPopup
                 isOpen={isPopupOpen}
-                title="Champion, before we proceed —"
+                title="Champion, before we proceed -"
                 message="Do you already have a trusted family doctor (GP) who can guide you through your CRC screening journey?"
                 onClose={handleClose}
                 onChoice={handleChoice}

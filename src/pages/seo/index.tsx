@@ -527,11 +527,11 @@ const SEOCatalogPage: React.FC = () => {
               COLONAiVE™ is a national movement to outsmart colorectal cancer and reduce CRC-related
               mortality through early detection, inclusive education, and access to clinically validated
               screening technologies. Founded in Singapore, the movement champions colonoscopy as the
-              gold standard — the only screening method that both detects and removes precancerous
+              gold standard - the only screening method that both detects and removes precancerous
               polyps, making it the only true preventive option. COLONAiVE™ also supports HSA-cleared,
               blood-based screening tools to help more people get tested before symptoms appear. Guided
               by leading specialists and driven by partnerships across Asia-Pacific, the initiative
-              empowers individuals to know when and how to screen — turning awareness into life-saving
+              empowers individuals to know when and how to screen - turning awareness into life-saving
               action. Its foundation is built on clinical evidence, real-world health impact, and
               multilingual tools that reach underserved and younger populations.
             </p>

@@ -4,7 +4,7 @@ import SEOLandingTemplate from './SEOLandingTemplate';
 const ColorectalCancerScreeningSingaporePage: React.FC = () => {
   const content = {
     title: 'Colorectal Cancer Screening Singapore | Early Detection Saves Lives',
-    metaDescription: 'Get comprehensive colorectal cancer screening in Singapore. HSA-cleared blood tests and colonoscopy services. Book your screening today – early detection saves lives.',
+    metaDescription: 'Get comprehensive colorectal cancer screening in Singapore. HSA-cleared blood tests and colonoscopy services. Book your screening today - early detection saves lives.',
     heroTitle: 'Colorectal Cancer Screening in Singapore',
     heroSubtitle: 'Protect your health with Singapore\'s most trusted colorectal cancer screening options. Early detection can save your life.',
     benefitsList: [

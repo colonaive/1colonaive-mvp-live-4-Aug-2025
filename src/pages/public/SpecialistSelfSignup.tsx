@@ -51,7 +51,7 @@ const SpecialistSelfSignup: React.FC = () => {
 
   const onSubmit = async () => {
     if (!form.name.trim() || !form.clinic_name.trim()) {
-      alert("Doctor’s name and clinic / centre name are required.");
+      alert("Doctor's name and clinic / centre name are required.");
       return;
     }
     try {
@@ -66,7 +66,7 @@ const SpecialistSelfSignup: React.FC = () => {
         new Set(form.locations.map((l) => l.trim()).filter(Boolean))
       );
 
-      // save as pending (inactive) — admin will review and activate
+      // save as pending (inactive) - admin will review and activate
       const payload: any = {
         name: form.name.trim(),
         clinic_name: form.clinic_name.trim(),
@@ -121,7 +121,7 @@ const SpecialistSelfSignup: React.FC = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="bg-white border-b">
         <Container className="py-6">
-          <h1 className="text-2xl font-bold">COLONAiVE™ Partner Specialist – Self Sign-Up</h1>
+          <h1 className="text-2xl font-bold">COLONAiVE™ Partner Specialist - Self Sign-Up</h1>
           <p className="text-gray-600 mt-1">
             Complete this form to request a listing. Submissions are reviewed by our admin team before going live.
           </p>
@@ -134,7 +134,7 @@ const SpecialistSelfSignup: React.FC = () => {
             <div className="grid md:grid-cols-2 gap-6">
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1">Doctor’s Name *</label>
+                  <label className="block text-sm font-medium mb-1">Doctor's Name *</label>
                   <input
                     className="w-full border rounded-md px-3 py-2"
                     value={form.name}
@@ -246,7 +246,7 @@ const SpecialistSelfSignup: React.FC = () => {
                 ))}
               </div>
               <p className="text-xs text-gray-500 mt-2">
-                We’ll save all addresses. The first address will appear as the main location.
+                We'll save all addresses. The first address will appear as the main location.
               </p>
             </div>
 

@@ -31,7 +31,7 @@ export const SEO_LANDING_PAGES: SEOPageConfig[] = [
     intent: 'diagnosis',
     category: 'primary',
     title: 'Colorectal Cancer Screening Singapore | Early Detection Saves Lives',
-    metaDescription: 'Get comprehensive colorectal cancer screening in Singapore. HSA-cleared blood tests and colonoscopy services. Book your screening today – early detection saves lives.',
+    metaDescription: 'Get comprehensive colorectal cancer screening in Singapore. HSA-cleared blood tests and colonoscopy services. Book your screening today - early detection saves lives.',
     canonicalUrl: 'https://colonaive.com/seo/colorectal-cancer-screening-singapore'
   },
   {
@@ -76,7 +76,7 @@ export const SEO_LANDING_PAGES: SEOPageConfig[] = [
     intent: 'diagnosis',
     category: 'primary',
     title: 'Colorectal Cancer Screening Australia | National Bowel Cancer Screening Program',
-    metaDescription: 'Access Australia\'s National Bowel Cancer Screening Program. Free FOBT tests, Medicare rebates for colonoscopy. Early detection saves lives – get screened today.',
+    metaDescription: 'Access Australia\'s National Bowel Cancer Screening Program. Free FOBT tests, Medicare rebates for colonoscopy. Early detection saves lives - get screened today.',
     canonicalUrl: 'https://colonaive.com/seo/colorectal-cancer-screening-australia'
   },
   {

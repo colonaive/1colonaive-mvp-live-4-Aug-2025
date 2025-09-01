@@ -164,7 +164,7 @@ const RIDCRCCSRPage: React.FC = () => {
               Corporate Champions Against Cancer
             </p>
             <p className="text-xl mb-8 opacity-90 max-w-3xl mx-auto">
-              Partner with Singapore's most impactful health movement. Your corporate sponsorship doesn't just build brand reputation — it saves lives through early colorectal cancer detection.
+              Partner with Singapore's most impactful health movement. Your corporate sponsorship doesn't just build brand reputation - it saves lives through early colorectal cancer detection.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/register/corporate">
@@ -200,7 +200,7 @@ const RIDCRCCSRPage: React.FC = () => {
                 </h2>
                 <p className="text-red-700 mb-4 text-base sm:text-lg break-words">
                   <strong>
-                    Every day, Singaporeans die from colorectal cancer — not because we can't treat it, but because we detect it too late.
+                    Every day, Singaporeans die from colorectal cancer - not because we can't treat it, but because we detect it too late.
                   </strong>
                 </p>
                 <p className="text-red-700 mb-6 text-base sm:text-lg break-words">
@@ -440,7 +440,7 @@ const RIDCRCCSRPage: React.FC = () => {
         <div className="py-16 max-w-5xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold mb-6">Your Partnership Journey</h2>
-            <p className="text-xl text-gray-600">From signup to impact — here's how we make it seamless</p>
+            <p className="text-xl text-gray-600">From signup to impact - here's how we make it seamless</p>
           </div>
 
           <div className="space-y-8">

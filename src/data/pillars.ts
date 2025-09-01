@@ -9,7 +9,7 @@ export const pillars = [
     brand: "RID-CRC SGP™",
     label: "Clinician Engagement",
     link: "/pillars/rid-crc-sgp",
-    icon: "👨‍⚕️"
+    icon: "👨⚕️"
   },
   {
     brand: "RID-CRC GOV™",

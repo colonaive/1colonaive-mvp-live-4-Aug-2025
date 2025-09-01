@@ -92,7 +92,7 @@ const EarlySymptomsOfCRC: React.FC = () => {
                 <h3 className="text-lg font-bold text-amber-800 mb-2">Important Note</h3>
                 <p className="text-amber-700">
                   Many of these symptoms can also be caused by non-cancerous conditions such as hemorrhoids
-                  or irritable bowel syndrome. However, it is crucial not to ignore them — timely evaluation
+                  or irritable bowel syndrome. However, it is crucial not to ignore them - timely evaluation
                   can make a significant difference.
                 </p>
               </div>

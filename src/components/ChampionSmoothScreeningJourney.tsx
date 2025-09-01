@@ -99,7 +99,7 @@ const ChampionSmoothScreeningJourney: React.FC = () => {
               Start Your Screening Journey, Champion!
             </h2>
             <p className="text-foreground-muted"> {/* Use semantic color if defined */}
-              Before we guide you, may we ask — who do you prefer to consult first?
+              Before we guide you, may we ask - who do you prefer to consult first?
             </p>
             {/* Grid layout remains similar, check button styling */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

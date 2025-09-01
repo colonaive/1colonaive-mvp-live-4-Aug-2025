@@ -21,7 +21,7 @@ const ChampionReferralPopup: React.FC<ChampionReferralPopupProps> = ({
     navigate('/');
   };
 
-  const title = "Champion, before we proceed —";
+  const title = "Champion, before we proceed -";
   const message = referralType === "gp"
     ? "Do you already have a trusted family doctor (GP) who can guide you through your CRC screening journey?"
     : referralType === "specialist"

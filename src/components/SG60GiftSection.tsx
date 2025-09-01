@@ -23,12 +23,12 @@ const SG60GiftSection = () => {
 
           {/* Pledge Text Styling - Clearer contrast */}
           <p className="text-xl md:text-2xl text-slate-800 dark:text-slate-200 max-w-3xl mx-auto mb-6 leading-relaxed">
-            By <strong className="font-bold text-teal-600 dark:text-teal-400">2030</strong>, we pledge to reach <strong className="font-bold text-teal-600 dark:text-teal-400">80% screening</strong> uptake — and reduce colorectal cancer deaths by <strong className="font-bold text-teal-600 dark:text-teal-400">80%</strong> by <strong className="font-bold text-teal-600 dark:text-teal-400">2035</strong>.
+            By <strong className="font-bold text-teal-600 dark:text-teal-400">2030</strong>, we pledge to reach <strong className="font-bold text-teal-600 dark:text-teal-400">80% screening</strong> uptake - and reduce colorectal cancer deaths by <strong className="font-bold text-teal-600 dark:text-teal-400">80%</strong> by <strong className="font-bold text-teal-600 dark:text-teal-400">2035</strong>.
           </p>
 
           {/* Italic Text Styling - Clearer contrast */}
           <p className="text-base md:text-lg italic text-slate-600 dark:text-slate-400 max-w-3xl mx-auto mb-10">
-            This is our national contribution — powered by doctors, supported by sponsors, embraced by citizens. 🇸🇬
+            This is our national contribution - powered by doctors, supported by sponsors, embraced by citizens. 🇸🇬
           </p>
 
           {/* Button Styling - Using standard primary variant for consistency */}

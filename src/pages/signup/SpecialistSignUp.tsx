@@ -142,7 +142,7 @@ const SpecialistSignUp: React.FC = () => {
     if (errors.specialties) setErrors(prev => ({ ...prev, specialties: undefined }));
   };
 
-  // Free‑form “Other specialties” helpers
+  // Free‑form "Other specialties" helpers
   const updateOtherSpecialty = (idx: number, val: string) => {
     setFormData(prev => {
       const next = [...prev.otherSpecialties];
@@ -223,7 +223,7 @@ const SpecialistSignUp: React.FC = () => {
     setErrors({});
 
     try {
-      // Your wrapper’s 3‑arg signature: (email, password, options)
+      // Your wrapper's 3‑arg signature: (email, password, options)
       const { data } = await authApi.signUp(formData.email, formData.password, {
         data: {
           full_name: formData.specialistName.trim(),

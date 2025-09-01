@@ -1,5 +1,5 @@
 // /home/project/src/utils/fuzzyMatch.ts
-// ✅ FULLY INTEGRATED VERSION — June 2025
+// ✅ FULLY INTEGRATED VERSION - June 2025
 // - Knowledge base externalized into sub-files for better organization.
 // - Preserves all Perplexity logic, safety guardrails, and fuzzy matching tuning.
 // - Supports multi-part responses.
@@ -180,7 +180,7 @@ const normalizeWithSynonyms = (input: string): string => {
 // --- Emotion Detection ---
 const emotionKeywords = {
   fear: ['scared', 'afraid', 'worried', 'fear', 'anxious', 'anxiety'],
-  frustration: ['don’t know', 'confused', 'frustrated', 'angry', 'annoyed'],
+  frustration: ['don't know', 'confused', 'frustrated', 'angry', 'annoyed'],
   urgency: ['now', 'urgent', 'immediately', 'asap', 'pain', 'bleeding'],
 };
 
@@ -374,7 +374,7 @@ export const getChatbotResponse = async (userInput: string, previousMessages?: s
     return {
       type: 'educational',
       response: [
-        "It's normal to feel anxious — I'm here to help.",
+        "It's normal to feel anxious - I'm here to help.",
         "You can ask about symptoms, prevention, or screening options.",
       ],
       urgency: 'urgent',

@@ -67,7 +67,7 @@ const SuperAdminDashboard = () => {
       alert('Enter recipient email.');
       return;
     }
-    const subject = 'COLONAiVE – Partner Specialist Listing Invitation';
+    const subject = 'COLONAiVE - Partner Specialist Listing Invitation';
     const html = `
       <div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;color:#111">
         <p>${inviteMsg}</p>
@@ -78,7 +78,7 @@ const SuperAdminDashboard = () => {
         <p style="color:#555;margin-top:12px">
           If you prefer, you may reply to this email with your clinic details and our admin will assist to complete the listing.
         </p>
-        <p style="margin-top:20px">— COLONAiVE Admin Team</p>
+        <p style="margin-top:20px">- COLONAiVE Admin Team</p>
       </div>
     `;
     try {
@@ -416,7 +416,7 @@ const SuperAdminDashboard = () => {
 
             <div className="grid md:grid-cols-3 gap-3 mt-4">
               <div>
-                <label className="block text-sm text-gray-600 mb-1">Doctor’s Name (optional)</label>
+                <label className="block text-sm text-gray-600 mb-1">Doctor's Name (optional)</label>
                 <input className="w-full border rounded-md px-3 py-2" value={inviteName} onChange={(e) => setInviteName(e.target.value)} placeholder="Dr Jane Doe" />
               </div>
               <div>

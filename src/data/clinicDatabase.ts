@@ -29,7 +29,7 @@ export const clinicDatabase: ClinicType[] = [
       publicHoliday: "Closed"
     },
     panelListed: true,
-    notes: "Open Mon–Sat. Offers ColonAiQ® blood-based CRC screening."
+    notes: "Open Mon-Sat. Offers ColonAiQ® blood-based CRC screening."
   },
   {
     clinicId: "SPEC001",

@@ -31,7 +31,7 @@ type Specialist = {
   display_order: number | null;
   /** NEW: academic credentials (optional) */
   credentials?: string | null;
-  /** Can be text[] or JSON[] depending on DB — we normalize at runtime */
+  /** Can be text[] or JSON[] depending on DB - we normalize at runtime */
   locations?: any[] | null;
 };
 

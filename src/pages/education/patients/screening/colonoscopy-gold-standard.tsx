@@ -91,7 +91,7 @@ const ColonoscopyGoldStandard: React.FC = () => {
             </h2>
             
             <p className="text-xl text-blue-100 mb-6 max-w-3xl mx-auto">
-              Where screening meets treatment in a single procedure — the ultimate in preventive medicine
+              Where screening meets treatment in a single procedure - the ultimate in preventive medicine
             </p>
             
             {/* FIXED: Changed responsive breakpoints */}
@@ -383,14 +383,14 @@ const ColonoscopyGoldStandard: React.FC = () => {
             </p>
             <p className="text-lg mb-8 opacity-80">
               Colonoscopy stands alone as the only screening method that can detect, treat, and prevent colorectal cancer 
-              in a single procedure. It's not just screening — it's the beginning of treatment and the path to prevention.
+              in a single procedure. It's not just screening - it's the beginning of treatment and the path to prevention.
             </p>
             
             <div className="bg-white bg-opacity-10 rounded-lg p-6 mb-6">
               <h3 className="text-xl font-bold mb-3">The COLONAiVE Promise</h3>
               <p className="text-lg">
                 The benefits of early detection and prevention far outweigh the temporary discomfort associated with the procedure. 
-                Colonoscopy transforms screening from simple detection into active cancer prevention — truly making it the gold standard of preventive medicine.
+                Colonoscopy transforms screening from simple detection into active cancer prevention - truly making it the gold standard of preventive medicine.
               </p>
             </div>
           </div>

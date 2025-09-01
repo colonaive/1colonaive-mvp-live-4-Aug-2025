@@ -54,8 +54,8 @@ const CorporateSignUp: React.FC = () => {
     {
       name: 'Gold Sponsor',
       icon: <Award className="h-8 w-8" />,
-      livesReached: '100–499',
-      budgetRange: 'S$35,500–S$177,445',
+      livesReached: '100-499',
+      budgetRange: 'S$35,500-S$177,445',
       perks: ['Logo + link on CSR Showcase page', 'Quarterly impact reports', 'Certificate of appreciation'],
       minAmount: 35500,
       color: 'text-yellow-600',
@@ -64,8 +64,8 @@ const CorporateSignUp: React.FC = () => {
     {
       name: 'Platinum Sponsor',
       icon: <Star className="h-8 w-8" />,
-      livesReached: '500–999',
-      budgetRange: 'S$177,500–S$354,645',
+      livesReached: '500-999',
+      budgetRange: 'S$177,500-S$354,645',
       perks: ['Homepage badge + impact story', 'Media mentions in campaigns', 'VIP event invitations'],
       minAmount: 177500,
       color: 'text-gray-600',

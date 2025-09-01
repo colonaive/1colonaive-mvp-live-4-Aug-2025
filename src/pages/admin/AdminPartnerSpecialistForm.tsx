@@ -92,7 +92,7 @@ const AdminPartnerSpecialistForm: React.FC = () => {
       photo_url: "",
       specialtiesSelected: ["Colorectal surgery", "Robotic colorectal surgery"],
       specialtiesOther: "Geriatric colorectal care",
-      credentials: "MD, MMed (S’pore), FRCS (Edin), FAMS",
+      credentials: "MD, MMed (S'pore), FRCS (Edin), FAMS",
       locations: [
         {
           label: "Main clinic",
@@ -129,7 +129,7 @@ const AdminPartnerSpecialistForm: React.FC = () => {
 
   const onSave = async () => {
     if (!form.name.trim() || !form.clinic_name.trim()) {
-      alert("Doctor’s name and clinic name are required.");
+      alert("Doctor's name and clinic name are required.");
       return;
     }
 
@@ -167,8 +167,8 @@ const AdminPartnerSpecialistForm: React.FC = () => {
         credentials: form.credentials?.trim() || null, // new column
       };
 
-      // If you’ve added the JSONB column `locations`, try to save the full array as well.
-      // If the column doesn’t exist yet, Supabase will error — that’s fine, we’ll ignore it.
+      // If you've added the JSONB column `locations`, try to save the full array as well.
+      // If the column doesn't exist yet, Supabase will error - that's fine, we'll ignore it.
       let saveLocations = true;
       try {
         const { error: locErr } = await supabase
@@ -240,7 +240,7 @@ const AdminPartnerSpecialistForm: React.FC = () => {
             <div className="grid md:grid-cols-2 gap-6">
               <div className="space-y-4">
                 <div>
-                    <label className="block text-sm font-medium mb-1">Doctor’s Name *</label>
+                    <label className="block text-sm font-medium mb-1">Doctor's Name *</label>
                     <input
                       className="w-full border rounded-md px-3 py-2"
                       value={form.name}
@@ -329,7 +329,7 @@ const AdminPartnerSpecialistForm: React.FC = () => {
                   <label className="block text-sm font-medium mb-1">Credentials / Academic Achievements</label>
                   <textarea
                     className="w-full border rounded-md px-3 py-2 min-h-[72px]"
-                    placeholder="e.g., MD, MMed (S’pore), FRCS (Edin), FAMS"
+                    placeholder="e.g., MD, MMed (S'pore), FRCS (Edin), FAMS"
                     value={form.credentials || ""}
                     onChange={(e) => setForm((f) => ({ ...f, credentials: e.target.value }))}
                   />

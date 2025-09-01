@@ -114,7 +114,7 @@ const JapanCRCEducation: React.FC = () => {
         progression: {
           title: "From Polyps to Cancer: How CRC Develops",
           content:
-            "Most colorectal cancers start as small growths called polyps. Over 5–10 years, some polyps can turn cancerous. Regular screening can detect and remove polyps early.",
+            "Most colorectal cancers start as small growths called polyps. Over 5-10 years, some polyps can turn cancerous. Regular screening can detect and remove polyps early.",
         },
         screening: {
           title: "Why Early Screening Matters in Japan",

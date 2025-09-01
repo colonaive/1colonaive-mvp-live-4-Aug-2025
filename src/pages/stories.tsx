@@ -128,7 +128,7 @@ const StoriesPage = () => {
                 </div>
                 <div className="mt-auto pt-4 border-t border-gray-100">
                   <p className="text-sm font-semibold text-gray-700">
-                    — {story.anonymous ? 'Anonymous' : story.story_type}
+                    - {story.anonymous ? 'Anonymous' : story.story_type}
                   </p>
                   <p className="text-xs text-gray-400 mt-1">{story.location}</p>
                 </div>

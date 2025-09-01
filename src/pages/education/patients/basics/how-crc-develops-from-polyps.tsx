@@ -535,7 +535,7 @@ const HowCrcDevelopsFromPolyps: React.FC = () => {
           "Understanding the polyp-to-cancer sequence has revolutionized colorectal cancer prevention. 
           We now have the knowledge and tools to prevent most cases of this disease."
           <footer className="text-sm text-gray-600 mt-3 not-italic">
-            — American Cancer Society Research Guidelines
+            - American Cancer Society Research Guidelines
           </footer>
         </blockquote>
 
@@ -589,7 +589,7 @@ const HowCrcDevelopsFromPolyps: React.FC = () => {
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 my-8">
           <h4 className="font-semibold text-yellow-800 mb-3">Remember</h4>
           <p className="text-sm">
-            The transformation from polyp to cancer is not inevitable—it's preventable. By understanding 
+            The transformation from polyp to cancer is not inevitable-it's preventable. By understanding 
             this process and taking action through screening and healthy lifestyle choices, you have the 
             power to protect yourself from colorectal cancer.
           </p>

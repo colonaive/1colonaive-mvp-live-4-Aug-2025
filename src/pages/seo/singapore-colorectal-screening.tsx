@@ -34,7 +34,7 @@ export default function SingaporeColorectalScreening() {
                 "acceptedAnswer": {
                   "@type": "Answer",
                   "text":
-                    "In Singapore, average-risk adults are generally advised to start screening at age 45. Higher-risk individuals—such as those with a strong family history or certain medical conditions—may need earlier and/or more frequent screening as advised by their clinician."
+                    "In Singapore, average-risk adults are generally advised to start screening at age 45. Higher-risk individuals-such as those with a strong family history or certain medical conditions-may need earlier and/or more frequent screening as advised by their clinician."
                 }
               },
               {
@@ -94,8 +94,8 @@ export default function SingaporeColorectalScreening() {
         <h2>Who should get screened?</h2>
         <p>
           Average-risk adults are generally advised to begin screening at age 45.
-          Individuals with higher risk—such as a family history of colorectal cancer
-          or certain inherited conditions—may need to start earlier and screen more
+          Individuals with higher risk-such as a family history of colorectal cancer
+          or certain inherited conditions-may need to start earlier and screen more
           frequently. Screening is intended for people without symptoms; anyone with
           symptoms should seek medical evaluation promptly.
         </p>
@@ -126,7 +126,7 @@ export default function SingaporeColorectalScreening() {
         <p>
           Access pathways include public polyclinics and private clinics. Financial support
           mechanisms may apply for eligible patients; speak to your provider about what is
-          available for your situation. Costs vary by test type, facility, and clinical needs—
+          available for your situation. Costs vary by test type, facility, and clinical needs-
           your clinician can advise which route is most appropriate.
         </p>
       </section>

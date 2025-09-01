@@ -137,7 +137,7 @@ const KaiserCRCStudyPage: React.FC = () => {
                       </h2>
                       <p className="text-foreground/90"> {/* Use theme color */}
                         Singapore's national CRC screening uptake remains under 40%. With the integration of convenient
-                        non-invasive blood-based tests — alongside colonoscopy — Project COLONAiVE™ aims to emulate
+                        non-invasive blood-based tests - alongside colonoscopy - Project COLONAiVE™ aims to emulate
                         and exceed Kaiser's outcomes, leading Singapore toward a future of lower CRC mortality rates
                         and earlier interventions.
                       </p>

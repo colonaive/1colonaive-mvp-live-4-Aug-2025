@@ -251,7 +251,7 @@ const RegionalEducationTemplate: React.FC<RegionalEducationProps> = ({
               Ready to Take Control of Your Health?
             </h2>
             <p className="text-xl mb-8 text-blue-100">
-              Early detection saves lives. Don't wait – start your screening journey today.
+              Early detection saves lives. Don't wait - start your screening journey today.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/get-screened">
