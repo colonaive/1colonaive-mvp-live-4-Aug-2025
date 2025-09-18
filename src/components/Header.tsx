@@ -8,12 +8,14 @@ import ColonaiveLogo from "./ColonaiveLogo";
 import { getDashboardRoute } from "./ProtectedRoute";
 import CountrySelector from "./CountrySelector";
 
+
 /** ---------- Types ---------- */
 type NavLink = {
   label: string;
   path: string;
   isHeader?: boolean; // section header/divider if true
 };
+
 
 /** ---------- Link Data ---------- */
 const educationLinks: NavLink[] = [
@@ -26,11 +28,13 @@ const educationLinks: NavLink[] = [
   { label: "Upcoming Events", path: "/upcoming-events" },
 ];
 
+
 const screeningLinks: NavLink[] = [
   { label: "Colonoscopy (Gold Standard)", path: "/education/article/colonoscopy-gold-standard" },
   { label: "Screening Blood Test", path: "/get-screened" },
   { label: "Find a Screening Center", path: "/find-a-gp" },
   { label: "Find a COLONAiVE Specialist", path: "/find-a-specialist" },
+  { label: "Our Lab Partner", path: "/our-lab-partner" },
   { label: "—————————", path: "#", isHeader: true },
   { label: "🌏 Explore by Country", path: "/seo", isHeader: true },
   { label: "🇸🇬 Singapore", path: "/seo/singapore-colorectal-screening" },
@@ -39,6 +43,7 @@ const screeningLinks: NavLink[] = [
   { label: "🇵🇭 Philippines", path: "/seo/colorectal-cancer-screening-philippines" },
   { label: "🇯🇵 Japan", path: "/seo/colorectal-cancer-screening-japan" },
 ];
+
 
 const pillarLinks: NavLink[] = [
   { label: "All Pillars Overview", path: "/movement-pillars" },
@@ -49,6 +54,7 @@ const pillarLinks: NavLink[] = [
   { label: "RID-CRC EDU™", path: "/pillars/rid-crc-edu" },
 ];
 
+
 const aboutLinks: NavLink[] = [
   { label: "Our Story", path: "/about-us" },
   { label: "Our Advisors", path: "/about/advisors" },
@@ -56,6 +62,7 @@ const aboutLinks: NavLink[] = [
   { label: "CSR Showcase", path: "/csr-showcase" },
   { label: "Contact Us", path: "/contact" },
 ];
+
 
 export const getJoinLinks = (isAuthenticated: boolean): NavLink[] =>
   isAuthenticated
@@ -70,6 +77,7 @@ export const getJoinLinks = (isAuthenticated: boolean): NavLink[] =>
         { label: "Sponsor/CSR Sign-Up", path: "/register/corporate" },
         { label: "Read Real Stories", path: "/stories" },
       ];
+
 
 /** Small helper to pretty-print the account type */
 function prettyUserType(userType?: string | null) {
@@ -91,6 +99,7 @@ function prettyUserType(userType?: string | null) {
   }
 }
 
+
 /** ---------- Component ---------- */
 export const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -103,8 +112,10 @@ export const Header = () => {
   const headerRef = useRef<HTMLElement>(null);
   const { user, isAuthenticated, signOut, userType } = useAuth();
 
+
   const isAdmin = userType === "super_admin" || userType === "admin";
   const joinLinks = getJoinLinks(isAuthenticated);
+
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -116,19 +127,23 @@ export const Header = () => {
     }
   };
 
+
   const handleClose = () => {
     setIsOpen(false);
     setActiveSubmenu(null);
   };
+
 
   const handleMenuEnter = (menuKey: string) => {
     if (menuLeaveTimeout.current) clearTimeout(menuLeaveTimeout.current);
     setActiveSubmenu(menuKey);
   };
 
+
   const handleMenuLeave = () => {
     menuLeaveTimeout.current = setTimeout(() => setActiveSubmenu(null), 200);
   };
+
 
   const handleSignOut = async () => {
     try {
@@ -145,6 +160,7 @@ export const Header = () => {
       alert("An unexpected error occurred during sign out.");
     }
   };
+
 
   const renderDropdown = (label: string, links: NavLink[], menuKey: string) => (
     <div
@@ -200,6 +216,7 @@ export const Header = () => {
     </div>
   );
 
+
   const renderSearchBar = () => (
     <div className="border-t border-white/10 py-3 bg-[#0B1E3B]">
       <Container>
@@ -225,15 +242,18 @@ export const Header = () => {
     </div>
   );
 
+
   const renderChampionButton = () => {
     if (isAuthenticated && user) {
       const userName =
         user.user_metadata?.full_name || user.email?.split("@")[0] || "User";
 
+
       // Default dashboard based on user type
       let dashboardPath = getDashboardRoute(userType);
       // Admin override
       if (isAdmin) dashboardPath = "/admin/dashboard";
+
 
       // Default profile-settings paths (none for Admin)
       let profileSettingsPath: string | undefined = "/profile/champion";
@@ -241,6 +261,7 @@ export const Header = () => {
       else if (userType === "specialist") profileSettingsPath = "/profile/specialist";
       else if (userType === "corporate_contact") profileSettingsPath = "/dashboard/corporate";
       else if (isAdmin) profileSettingsPath = undefined; // hide for super admin
+
 
       return (
         <div
@@ -261,6 +282,7 @@ export const Header = () => {
             />
           </button>
 
+
           {activeSubmenu === "userMenu" && (
             <div className="absolute top-full right-0 w-56 mt-2 rounded-lg bg-white shadow-xl ring-1 ring-black/5 z-[9999]">
               <div className="py-1">
@@ -271,6 +293,7 @@ export const Header = () => {
                   <p className="text-xs text-gray-500">{prettyUserType(userType)}</p>
                 </div>
 
+
                 {/* Dashboard (admin goes to /admin/dashboard) */}
                 <Link
                   to={dashboardPath}
@@ -279,6 +302,7 @@ export const Header = () => {
                 >
                   My Dashboard
                 </Link>
+
 
                 {/* Super Admin quick actions */}
                 {isAdmin ? (
@@ -318,6 +342,7 @@ export const Header = () => {
                   )
                 )}
 
+
                 <button
                   onClick={handleSignOut}
                   className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 hover:text-red-700"
@@ -330,6 +355,7 @@ export const Header = () => {
         </div>
       );
     }
+
 
     // Not authenticated
     return (
@@ -344,6 +370,7 @@ export const Header = () => {
     );
   };
 
+
   const renderMobileMenu = () => {
     const groups: { label: string; links: NavLink[]; key: string }[] = [
       { label: "Education", links: educationLinks, key: "edu" },
@@ -352,6 +379,7 @@ export const Header = () => {
       { label: "Join the Movement", links: getJoinLinks(isAuthenticated), key: "join" },
       { label: "About Us", links: aboutLinks, key: "about" },
     ];
+
 
     return (
       <div className="absolute top-full left-0 w-full bg-[#0B1E3B] lg:hidden z-[60]">
@@ -395,6 +423,7 @@ export const Header = () => {
             </div>
           ))}
 
+
           <Link to="/news" onClick={handleClose} className="text-white font-semibold py-2 flex items-center">
             📰 Live CRC News
             <span className="ml-2 w-2 h-2 rounded-full bg-red-500 animate-pulse inline-block" />
@@ -407,6 +436,7 @@ export const Header = () => {
     );
   };
 
+
   return (
     <>
       {/* Top slim bar (country + auth) — sticky and above everything */}
@@ -417,6 +447,7 @@ export const Header = () => {
             {renderChampionButton()}
           </Container>
         </div>
+
 
         {/* Main nav bar */}
         <div className="bg-[#0B1E3B]">
@@ -435,10 +466,12 @@ export const Header = () => {
               </Link>
             </div>
 
+
             <nav className="hidden lg:flex items-center justify-center flex-shrink-0 h-full">
               {renderDropdown("Education", educationLinks, "edu")}
               {renderDropdown("Get Screened", screeningLinks, "screen")}
               {renderDropdown("Movement Pillars", pillarLinks, "pillars")}
+
 
               <Link
                 to="/news"
@@ -456,8 +489,10 @@ export const Header = () => {
                 />
               </Link>
 
+
               {renderDropdown("Join the Movement", joinLinks, "join")}
               {renderDropdown("About Us", aboutLinks, "about")}
+
 
               <Link
                 to="/clinical-trials"
@@ -474,12 +509,14 @@ export const Header = () => {
               </Link>
             </nav>
 
+
             <div className="flex-1 flex justify-end lg:hidden">
               <button className="p-2 text-white" onClick={() => setIsOpen(!isOpen)} aria-label="Toggle menu">
                 {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
               </button>
             </div>
           </Container>
+
 
           {isOpen && renderMobileMenu()}
           {renderSearchBar()}
