@@ -107,7 +107,7 @@ const OurLabPartnerPage: React.FC = () => {
             <div className="mb-8 flex justify-center">
               <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20">
                 <img
-                  src="/assets/images/logo/archerfish-logo-light.png"
+                  src="/assets/images/logo/archerfish-logo.avif"
                   alt="Archerfish Precision Diagnostics"
                   className="h-16 mx-auto"
                   loading="eager"
