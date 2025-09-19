@@ -118,7 +118,7 @@ const OurLabPartnerPage: React.FC = () => {
               Our Exclusive <span className="text-teal-400">Lab Partner</span>
             </h1>
             <p className="text-xl md:text-2xl text-blue-100 mb-8 leading-relaxed">
-              Archerfish Precision Diagnostics DX — delivering precise, adaptable, and
+              Archerfish Precision Diagnostics — delivering precise, adaptable, and
               scientifically-driven diagnostics in support of Project COLONAiVE™.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
