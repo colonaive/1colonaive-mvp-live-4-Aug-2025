@@ -147,7 +147,7 @@ const OurLabPartnerPage: React.FC = () => {
           <div className="mx-auto max-w-6xl grid grid-cols-1 md:grid-cols-3 gap-4 px-6 md:px-8">
             {[
               { src: "/assets/images/lab/lab-plasma-pipetting.webp", alt: "Plasma handling in biosafety cabinet" },
-              { src: "/assets/images/lab/pcr-plates-setup.jpg", alt: "qPCR plate setup at workstation" },
+              { src: "/assets/images/lab/lab-qpcr-plate-d.webp", alt: "qPCR plate setup at workstation" },
               { src: "/assets/images/lab/qubit-quantification.jpg", alt: "Qubit quantification of DNA" },
             ].map((img) => (
               <div
