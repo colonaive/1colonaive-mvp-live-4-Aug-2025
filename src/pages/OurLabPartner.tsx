@@ -104,16 +104,19 @@ const OurLabPartnerPage: React.FC = () => {
         <div className="absolute inset-0 bg-black/10" />
         <Container className="relative z-10">
           <div className="max-w-5xl mx-auto text-center">
-            <div className="mb-8 flex justify-center">
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20">
-                <img
-                  src="/assets/images/logo/archerfish-logo.avif"
-                  alt="Archerfish Precision Diagnostics"
-                  className="h-16 mx-auto"
-                  loading="eager"
-                />
-              </div>
-            </div>
+            <div className="flex justify-center mb-8">
+  <div className="inline-flex items-center rounded-2xl bg-white
+                  ring-1 ring-slate-200 shadow-sm px-6 py-4">
+    <img
+      src="/assets/images/logo/archerfish-logo.avif"
+      alt="Archerfish Precision Diagnostics"
+      className="h-16 w-auto"
+      width={256}
+      height={64}
+    />
+  </div>
+</div>
+
             <h1 className="text-4xl md:text-6xl font-bold mb-6">
               Our Exclusive <span className="text-teal-400">Lab Partner</span>
             </h1>
