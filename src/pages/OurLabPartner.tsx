@@ -97,6 +97,9 @@ const OurLabPartnerPage: React.FC = () => {
     { icon: <CheckCircle className="h-6 w-6 text-green-600" />, text: "Secure Sample Receipt & Result Delivery" },
   ];
 
+  // regulatory chips (kept short so they don't truncate; wraps on small screens)
+  const regChips: string[] = ["CE IVD", "NMPA Class III", "HSA-cleared"];
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
       {/* Hero */}
@@ -108,18 +111,18 @@ const OurLabPartnerPage: React.FC = () => {
             <div className="flex justify-center mb-8">
               <div className="rounded-2xl bg-white/0 p-0">
                 <picture>
-  <source type="image/avif" srcSet="/assets/images/logo/archerfish-logo-white.avif" />
-  <source type="image/webp" srcSet="/assets/images/logo/archerfish-logo-white.webp" />
-  <img
-    src="/assets/images/logo/archerfish-logo-white.png"
-    alt="Archerfish Precision Diagnostics"
-    className="h-20 w-auto drop-shadow-[0_2px_12px_rgba(0,0,0,0.35)]"
-    width={320}
-    height={80}
-    loading="eager"
-    decoding="async"
-  />
-</picture>
+                  <source type="image/avif" srcSet="/assets/images/logo/archerfish-logo-white.avif" />
+                  <source type="image/webp" srcSet="/assets/images/logo/archerfish-logo-white.webp" />
+                  <img
+                    src="/assets/images/logo/archerfish-logo-white.png"
+                    alt="Archerfish Precision Diagnostics"
+                    className="h-20 w-auto drop-shadow-[0_2px_12px_rgba(0,0,0,0.35)]"
+                    width={320}
+                    height={80}
+                    loading="eager"
+                    decoding="async"
+                  />
+                </picture>
               </div>
             </div>
 
@@ -297,7 +300,7 @@ const OurLabPartnerPage: React.FC = () => {
             </h2>
 
             <div className="grid md:grid-cols-2 gap-8">
-              {/* Regulatory badges */}
+              {/* Regulatory facts + chips */}
               <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-100">
                 <h3 className="text-xl font-semibold text-gray-900 mb-4">Regulatory Facts</h3>
                 <ul className="space-y-3 text-gray-700">
@@ -317,26 +320,19 @@ const OurLabPartnerPage: React.FC = () => {
                   </li>
                 </ul>
 
-                // put this where the badges are rendered under "Regulatory Facts"
-const regChips = ["CE IVD", "NMPA Class III", "HSA-cleared"];
-
-<ul className="mt-6 flex flex-wrap gap-3">
-  {regChips.map((label) => (
-    <li
-      key={label}
-      className="inline-flex items-center gap-2 rounded-full border border-blue-200
-                 bg-white/70 px-3 py-1.5 text-sm font-medium text-slate-800 shadow-sm"
-    >
-      {/* check icon (lucide) */}
-      <svg viewBox="0 0 24 24" className="h-4 w-4 text-teal-600" fill="none" stroke="currentColor" strokeWidth="2">
-        <path d="M20 6L9 17l-5-5" />
-      </svg>
-      <span className="whitespace-nowrap">{label}</span>
-    </li>
-  ))}
-</ul>
-
-
+                {/* non-truncating chips */}
+                <ul className="mt-6 flex flex-wrap gap-3">
+                  {regChips.map((label: string) => (
+                    <li
+                      key={label}
+                      className="inline-flex items-center gap-2 rounded-full border border-blue-200
+                                 bg-white/70 px-3 py-1.5 text-sm font-medium text-slate-800 shadow-sm"
+                    >
+                      <CheckCircle className="h-4 w-4 text-teal-600" />
+                      <span className="whitespace-nowrap">{label}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
 
               {/* Clinical journey */}
