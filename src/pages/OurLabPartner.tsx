@@ -317,11 +317,25 @@ const OurLabPartnerPage: React.FC = () => {
                   </li>
                 </ul>
 
-                <div className="mt-6 grid grid-cols-3 gap-4">
-  <img src="/assets/images/badges/ce-ivd-badge.png" alt="CE IVD" className="h-10 object-contain" />
-  <img src="/assets/images/badges/nmpa-class-iii-badge.png" alt="NMPA Class III registration" className="h-10 object-contain" />
-  <img src="/assets/images/badges/hsa-cleared-badge.png" alt="Singapore HSA-cleared" className="h-10 object-contain" />
-</div>
+                // put this where the badges are rendered under "Regulatory Facts"
+const regChips = ["CE IVD", "NMPA Class III", "HSA-cleared"];
+
+<ul className="mt-6 flex flex-wrap gap-3">
+  {regChips.map((label) => (
+    <li
+      key={label}
+      className="inline-flex items-center gap-2 rounded-full border border-blue-200
+                 bg-white/70 px-3 py-1.5 text-sm font-medium text-slate-800 shadow-sm"
+    >
+      {/* check icon (lucide) */}
+      <svg viewBox="0 0 24 24" className="h-4 w-4 text-teal-600" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M20 6L9 17l-5-5" />
+      </svg>
+      <span className="whitespace-nowrap">{label}</span>
+    </li>
+  ))}
+</ul>
+
 
               </div>
 
