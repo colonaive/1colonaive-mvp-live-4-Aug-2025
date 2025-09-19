@@ -104,21 +104,24 @@ const OurLabPartnerPage: React.FC = () => {
         <div className="absolute inset-0 bg-black/10" />
         <Container className="relative z-10">
           <div className="max-w-5xl mx-auto text-center">
+            {/* Logo with format fallbacks */}
             <div className="flex justify-center mb-8">
-  <div className="rounded-2xl bg-white/0 p-0">
-    <img
-      src="/assets/images/logo/archerfish-logowhite.avif"
-      srcSet="/assets/images/logo/archerfish-logowhite@2x.avif 2x"
-      alt="Archerfish Precision Diagnostics"
-      className="h-20 w-auto drop-shadow-[0_2px_12px_rgba(0,0,0,0.35)]"
-      width={320}
-      height={80}
-      loading="eager"
-      decoding="async"
-    />
-  </div>
-</div>
-
+              <div className="rounded-2xl bg-white/0 p-0">
+                <picture>
+  <source type="image/avif" srcSet="/assets/images/logo/archerfish-logo-white.avif" />
+  <source type="image/webp" srcSet="/assets/images/logo/archerfish-logo-white.webp" />
+  <img
+    src="/assets/images/logo/archerfish-logo-white.png"
+    alt="Archerfish Precision Diagnostics"
+    className="h-20 w-auto drop-shadow-[0_2px_12px_rgba(0,0,0,0.35)]"
+    width={320}
+    height={80}
+    loading="eager"
+    decoding="async"
+  />
+</picture>
+              </div>
+            </div>
 
             <h1 className="text-4xl md:text-6xl font-bold mb-6">
               Our Exclusive <span className="text-teal-400">Lab Partner</span>
@@ -148,24 +151,25 @@ const OurLabPartnerPage: React.FC = () => {
           </div>
         </Container>
 
-        {/* subtle lab banner images */}
+        {/* lab banner images */}
         <div className="mt-10">
           <div className="mx-auto max-w-6xl grid grid-cols-1 md:grid-cols-3 gap-4 px-6 md:px-8">
             {[
-              { src: "/assets/images/lab/lab-plasma-pipetting.webp", alt: "Plasma handling in biosafety cabinet" },
-              { src: "/assets/images/lab/lab-qpcr-plate-d.webp", alt: "qPCR plate setup at workstation" },
-              { src: "/assets/images/lab/lab-centrifuge-plasma-d.webp", alt: "Qubit quantification of DNA" },
+              { src: "/assets/images/lab/lab-plasma-pipetting.webp", alt: "Plasma pipetting inside a biosafety cabinet" },
+              { src: "/assets/images/lab/lab-qpcr-plate-d.webp", alt: "Sealed 96-well PCR plate being loaded into a qPCR instrument" },
+              { src: "/assets/images/lab/lab-centrifuge-plasma-d.webp", alt: "EDTA tube with pale plasma layer above a centrifuge rotor" },
             ].map((img) => (
               <div
                 key={img.src}
                 className="relative h-40 md:h-44 overflow-hidden rounded-xl border border-white/10"
-                aria-hidden="true"
               >
                 <img
                   src={img.src}
                   alt={img.alt}
                   className="w-full h-full object-cover opacity-90"
                   loading="lazy"
+                  width={1600}
+                  height={900}
                 />
               </div>
             ))}
@@ -358,7 +362,7 @@ const OurLabPartnerPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Inline SVG workflow (brand-neutral, no external image) */}
+            {/* Inline workflow */}
             <div className="mt-10 bg-white rounded-2xl border border-gray-100 p-6">
               <h4 className="text-lg font-semibold text-gray-900 mb-4 text-center">
                 How the Lab Workflow Supports You
