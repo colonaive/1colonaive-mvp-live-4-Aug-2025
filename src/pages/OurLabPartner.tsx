@@ -318,25 +318,11 @@ const OurLabPartnerPage: React.FC = () => {
                 </ul>
 
                 <div className="mt-6 grid grid-cols-3 gap-4">
-                  <img
-                    src="/assets/images/badges/ce-mark.png"
-                    alt="CE Mark"
-                    className="h-10 object-contain opacity-90"
-                    loading="lazy"
-                  />
-                  <img
-                    src="/assets/images/badges/nmpa.png"
-                    alt="China NMPA"
-                    className="h-10 object-contain opacity-90"
-                    loading="lazy"
-                  />
-                  <img
-                    src="/assets/images/badges/hsa-cleared.png"
-                    alt="HSA-cleared"
-                    className="h-10 object-contain opacity-90"
-                    loading="lazy"
-                  />
-                </div>
+  <img src="/assets/images/badges/ce-ivd-badge.png" alt="CE IVD" className="h-10 object-contain" />
+  <img src="/assets/images/badges/nmpa-class-iii-badge.png" alt="NMPA Class III registration" className="h-10 object-contain" />
+  <img src="/assets/images/badges/hsa-cleared-badge.png" alt="Singapore HSA-cleared" className="h-10 object-contain" />
+</div>
+
               </div>
 
               {/* Clinical journey */}
