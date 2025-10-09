@@ -23,7 +23,7 @@ import {
 const OurLabPartnerPage: React.FC = () => {
   useEffect(() => {
     document.title =
-      "Our Exclusive Lab Partner | Archerfish Precision Diagnostics | Project COLONAiVE™";
+      "Our Exclusive Lab Partner | Angsana Molecular & Diagnostics | Project COLONAiVE™";
   }, []);
 
   const features = [
@@ -35,9 +35,9 @@ const OurLabPartnerPage: React.FC = () => {
     },
     {
       icon: <Award className="h-8 w-8 text-blue-600" />,
-      title: "ISO 15189 Certified",
+      title: "ISO 15189–Aligned QA",
       description:
-        "Accredited medical laboratory quality system aligned to international best practices.",
+        "Accredited-quality laboratory operations aligned to international best practices.",
     },
     {
       icon: <Clock className="h-8 w-8 text-blue-600" />,
@@ -77,9 +77,9 @@ const OurLabPartnerPage: React.FC = () => {
         "Advanced molecular techniques for allergen identification and personalized management.",
     },
     {
-      title: "Nasopharyngeal Screening",
+      title: "Fetal-Maternal Health (NIPT)",
       description:
-        "Evidence-led early detection pathways for nasopharyngeal carcinoma (NPC).",
+        "Non-invasive prenatal testing and related assays to support confident maternity care.",
     },
     {
       title: "ColonAiQ® Processing",
@@ -97,7 +97,6 @@ const OurLabPartnerPage: React.FC = () => {
     { icon: <CheckCircle className="h-6 w-6 text-green-600" />, text: "Secure Sample Receipt & Result Delivery" },
   ];
 
-  // regulatory chips (kept short so they don't truncate; wraps on small screens)
   const regChips: string[] = ["CE IVD", "NMPA Class III", "HSA-cleared"];
 
   return (
@@ -107,15 +106,15 @@ const OurLabPartnerPage: React.FC = () => {
         <div className="absolute inset-0 bg-black/10" />
         <Container className="relative z-10">
           <div className="max-w-5xl mx-auto text-center">
-            {/* Logo with format fallbacks */}
+            {/* Logo (webp with optional png fallback) */}
             <div className="flex justify-center mb-8">
               <div className="rounded-2xl bg-white/0 p-0">
                 <picture>
-                  <source type="image/avif" srcSet="/assets/images/logo/archerfish-logo-white.avif" />
-                  <source type="image/webp" srcSet="/assets/images/logo/archerfish-logo-white.webp" />
+                  {/* Add an AVIF if you export one later */}
+                  <source type="image/webp" srcSet="/assets/images/logo/angsana-logo-white.webp" />
                   <img
-                    src="/assets/images/logo/archerfish-logo-white.png"
-                    alt="Archerfish Precision Diagnostics"
+                    src="/assets/images/logo/angsana-logo-white.webp"
+                    alt="Angsana Molecular & Diagnostics"
                     className="h-20 w-auto drop-shadow-[0_2px_12px_rgba(0,0,0,0.35)]"
                     width={320}
                     height={80}
@@ -130,17 +129,17 @@ const OurLabPartnerPage: React.FC = () => {
               Our Exclusive <span className="text-teal-400">Lab Partner</span>
             </h1>
             <p className="text-xl md:text-2xl text-blue-100 mb-8 leading-relaxed">
-              Archerfish Precision Diagnostics — delivering precise, adaptable, and
+              Angsana Molecular & Diagnostics — delivering precise, adaptable, and
               scientifically-driven diagnostics in support of Project COLONAiVE™.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a
-                href="https://www.archerfishdx.com"
+                href="https://www.angsanalabs.com/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-teal-500 hover:bg-teal-600 text-white px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 transform hover:scale-105 inline-flex items-center justify-center gap-2"
               >
-                Visit Archerfish Website
+                Visit Angsana Website
                 <ExternalLink className="h-5 w-5" />
               </a>
               <a
@@ -154,7 +153,7 @@ const OurLabPartnerPage: React.FC = () => {
           </div>
         </Container>
 
-        {/* lab banner images */}
+        {/* lab banner images (kept) */}
         <div className="mt-10">
           <div className="mx-auto max-w-6xl grid grid-cols-1 md:grid-cols-3 gap-4 px-6 md:px-8">
             {[
@@ -189,7 +188,7 @@ const OurLabPartnerPage: React.FC = () => {
                 Empowering Healthcare, <span className="text-blue-600">Improving Lives</span>
               </h2>
               <p className="text-lg text-gray-600 leading-relaxed">
-                We partner exclusively with Archerfish Precision Diagnostics DX for blood-based colorectal
+                We partner exclusively with Angsana Molecular & Diagnostics for blood-based colorectal
                 cancer screening test processing in Singapore. Together, we deliver high-quality insights
                 that help healthcare providers make informed decisions and accelerate timely colonoscopy
                 for those who need it.
@@ -201,7 +200,7 @@ const OurLabPartnerPage: React.FC = () => {
                 <div>
                   <h3 className="text-2xl font-bold text-gray-900 mb-4">Partnership Excellence</h3>
                   <p className="text-gray-700 mb-6">
-                    Archerfish serves as our dedicated lab, operating validated, quality-controlled
+                    Angsana serves as our dedicated lab, operating validated, quality-controlled
                     workflows that align with COLONAiVE™’s clinician-led national movement ethos.
                   </p>
                   <div className="space-y-3">
@@ -236,12 +235,12 @@ const OurLabPartnerPage: React.FC = () => {
         </Container>
       </section>
 
-      {/* Why Archerfish */}
+      {/* Why Angsana */}
       <section className="py-16 bg-gray-50">
         <Container>
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-              Why <span className="text-blue-600">Archerfish?</span>
+              Why <span className="text-blue-600">Angsana?</span>
             </h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
               Cutting-edge molecular workflows, rigorous quality standards, and an unwavering focus on
@@ -272,7 +271,7 @@ const OurLabPartnerPage: React.FC = () => {
               Comprehensive <span className="text-blue-600">Diagnostic Services</span>
             </h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              From early detection to molecular testing, Archerfish supports patient care with disciplined,
+              From early detection to molecular testing, Angsana supports patient care with disciplined,
               high-reliability diagnostics.
             </p>
           </div>
@@ -291,7 +290,7 @@ const OurLabPartnerPage: React.FC = () => {
         </Container>
       </section>
 
-      {/* Regulatory & Clinical Journey (neutral, factual) */}
+      {/* Regulatory & Clinical Journey */}
       <section className="py-16 bg-gray-50">
         <Container>
           <div className="max-w-5xl mx-auto">
@@ -358,7 +357,7 @@ const OurLabPartnerPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Inline workflow */}
+            {/* Workflow */}
             <div className="mt-10 bg-white rounded-2xl border border-gray-100 p-6">
               <h4 className="text-lg font-semibold text-gray-900 mb-4 text-center">
                 How the Lab Workflow Supports You
@@ -400,7 +399,7 @@ const OurLabPartnerPage: React.FC = () => {
                   ColonAiQ® Processing <span className="text-teal-600">Excellence</span>
                 </h2>
                 <p className="text-lg text-gray-600 leading-relaxed">
-                  As our exclusive laboratory partner, Archerfish processes ColonAiQ® tests using
+                  As our exclusive laboratory partner, Angsana processes ColonAiQ® tests using
                   validated, tightly controlled workflows that put patient safety first.
                 </p>
               </div>
@@ -488,7 +487,7 @@ const OurLabPartnerPage: React.FC = () => {
             <div className="bg-gradient-to-r from-teal-500/10 to-blue-500/10 rounded-xl p-6 border border-teal-400/20">
               <p className="text-lg font-semibold text-teal-300 mb-2">🌟 Partnership Excellence Since 2025</p>
               <p className="text-blue-100">
-                Archerfish Precision Diagnostics DX × Project COLONAiVE™ —{" "}
+                Angsana Molecular & Diagnostics × Project COLONAiVE™ —{" "}
                 <strong className="text-white">Scoped in Time, Saved in Time</strong>
               </p>
             </div>
