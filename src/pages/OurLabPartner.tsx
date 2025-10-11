@@ -108,32 +108,37 @@ const OurLabPartnerPage: React.FC = () => {
           <div className="max-w-5xl mx-auto text-center">
 
             {/* Logo on white pill for contrast (Option A) */}
-            <div className="flex justify-center mb-8">
-              <div
-                className="
-                  inline-flex items-center justify-center
-                  rounded-2xl bg-white/98 px-6 py-4
-                  shadow-[0_8px_24px_rgba(0,0,0,0.18)]
-                  ring-1 ring-black/5
-                "
-              >
-                <picture>
-                  <source
-                    type="image/webp"
-                    srcSet="/assets/images/logo/angsana-logo-white.webp"
-                  />
-                  <img
-                    src="/assets/images/logo/angsana-logo-white.webp"
-                    alt="Angsana Molecular & Diagnostics"
-                    className="h-16 md:h-20 w-auto"
-                    width={320}
-                    height={80}
-                    loading="eager"
-                    decoding="async"
-                  />
-                </picture>
-              </div>
-            </div>
+            {/* Logo on white pill for contrast (forced white background) */}
+<div className="flex justify-center mb-8">
+  <div
+    className="
+      inline-flex items-center justify-center
+      rounded-2xl px-6 py-4
+      shadow-[0_8px_24px_rgba(0,0,0,0.18)]
+      ring-1 ring-black/5
+      bg-white bg-opacity-95
+    "
+    // Inline style guarantees white even if Tailwind strips the class
+    style={{ backgroundColor: "rgba(255,255,255,0.97)" }}
+  >
+    <picture>
+      <source
+        type="image/webp"
+        srcSet="/assets/images/logo/angsana-logo-white.webp"
+      />
+      <img
+        src="/assets/images/logo/angsana-logo-white.webp"
+        alt="Angsana Molecular & Diagnostics"
+        className="h-16 md:h-20 w-auto"
+        width={320}
+        height={80}
+        loading="eager"
+        decoding="async"
+      />
+    </picture>
+  </div>
+</div>
+
 
             <h1 className="text-4xl md:text-6xl font-bold mb-6">
               Our Exclusive <span className="text-teal-400">Lab Partner</span>
