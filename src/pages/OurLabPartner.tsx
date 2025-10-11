@@ -106,16 +106,26 @@ const OurLabPartnerPage: React.FC = () => {
         <div className="absolute inset-0 bg-black/10" />
         <Container className="relative z-10">
           <div className="max-w-5xl mx-auto text-center">
-            {/* Logo (webp with optional png fallback) */}
+
+            {/* Logo on white pill for contrast (Option A) */}
             <div className="flex justify-center mb-8">
-              <div className="rounded-2xl bg-white/0 p-0">
+              <div
+                className="
+                  inline-flex items-center justify-center
+                  rounded-2xl bg-white/98 px-6 py-4
+                  shadow-[0_8px_24px_rgba(0,0,0,0.18)]
+                  ring-1 ring-black/5
+                "
+              >
                 <picture>
-                  {/* Add an AVIF if you export one later */}
-                  <source type="image/webp" srcSet="/assets/images/logo/angsana-logo-white.webp" />
+                  <source
+                    type="image/webp"
+                    srcSet="/assets/images/logo/angsana-logo-white.webp"
+                  />
                   <img
                     src="/assets/images/logo/angsana-logo-white.webp"
                     alt="Angsana Molecular & Diagnostics"
-                    className="h-20 w-auto drop-shadow-[0_2px_12px_rgba(0,0,0,0.35)]"
+                    className="h-16 md:h-20 w-auto"
                     width={320}
                     height={80}
                     loading="eager"
@@ -153,7 +163,7 @@ const OurLabPartnerPage: React.FC = () => {
           </div>
         </Container>
 
-        {/* lab banner images (kept) */}
+        {/* Lab banner images */}
         <div className="mt-10">
           <div className="mx-auto max-w-6xl grid grid-cols-1 md:grid-cols-3 gap-4 px-6 md:px-8">
             {[
@@ -319,7 +329,6 @@ const OurLabPartnerPage: React.FC = () => {
                   </li>
                 </ul>
 
-                {/* non-truncating chips */}
                 <ul className="mt-6 flex flex-wrap gap-3">
                   {regChips.map((label: string) => (
                     <li
