@@ -1,4 +1,4 @@
-import { submitIndiaLead } from "./submitIndiaLead";
+import { submitIndiaLead } from "./submitIndiaLead.ts";
 
 export const submitLeadHandling = async (e: React.FormEvent<HTMLFormElement>, formData: any, type: "partner" | "csr" | "join", toast: any, onSuccess: () => void) => {
     e.preventDefault();
