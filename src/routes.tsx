@@ -134,10 +134,17 @@ import ColorectalCancerScreeningJapan from './pages/seo/colorectal-cancer-screen
 
 
 // Placeholders
-import IndiaComingSoon from './pages/placeholder/IndiaComingSoon';
 import PhilippinesComingSoon from './pages/placeholder/PhilippinesComingSoon';
 import JapanComingSoon from './pages/placeholder/JapanComingSoon';
 import AustraliaComingSoon from './pages/placeholder/AustraliaComingSoon';
+
+// India Market Pack
+import IndiaLandingPage from './pages/markets/in/IndiaLandingPage';
+import IndiaEducationPage from './pages/markets/in/IndiaEducationPage';
+import IndiaAdvisoryBoardPage from './pages/markets/in/IndiaAdvisoryBoardPage';
+import IndiaPartnersPage from './pages/markets/in/IndiaPartnersPage';
+import IndiaCSRPage from './pages/markets/in/IndiaCSRPage';
+import IndiaJoinPage from './pages/markets/in/IndiaJoinPage';
 
 
 // Dashboards
@@ -355,11 +362,20 @@ const MainRoutes = () => {
 
 
           {/* Intl quick links */}
-          <Route path="/education/in" element={<IndiaComingSoon />} />
           <Route path="/education/ph" element={<PhilippinesComingSoon />} />
           <Route path="/education/jp" element={<JapanComingSoon />} />
           <Route path="/education/au" element={<AustraliaComingSoon />} />
 
+          {/* India Market (/in) */}
+          <Route path="/in" element={<IndiaLandingPage />} />
+          <Route path="/in/education" element={<IndiaEducationPage />} />
+          <Route path="/in/advisory-board" element={<IndiaAdvisoryBoardPage />} />
+          <Route path="/in/partners" element={<IndiaPartnersPage />} />
+          <Route path="/in/csr" element={<IndiaCSRPage />} />
+          <Route path="/in/join" element={<IndiaJoinPage />} />
+
+          {/* Redirects */}
+          <Route path="/education/in" element={<Navigate to="/in/education" replace />} />
 
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
