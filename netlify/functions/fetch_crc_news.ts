@@ -1,6 +1,5 @@
 // @ts-nocheck
 
-import crypto from "crypto";
 import { createClient } from '@supabase/supabase-js';
 // rss-parser types are messy for functions; ignore them.
 // @ts-ignore
@@ -56,7 +55,6 @@ const TRUSTED_DOMAINS = [
   "cell.com",
 ];
 
-const sha = (s: string) => crypto.createHash("sha256").update(s).digest("hex");
 const domainOf = (u: string) => {
   try {
     return new URL(u).hostname.replace(/^www\./, "");
@@ -65,13 +63,15 @@ const domainOf = (u: string) => {
   }
 };
 
-function mapCategory(text: string, fallback: "Clinical Research" | "Screening & Policy" | "Awareness & Campaigns") {
-  const t = text.toLowerCase();
-  if (/(guideline|policy|uspstf|nccn|coverage|screening program|insurance|reimbursement|moh|cdc|who)/.test(t))
-    return "Screening & Policy";
-  if (/(campaign|awareness|survivor|community|csr|public\s+outreach)/.test(t))
-    return "Awareness & Campaigns";
-  return fallback || "Clinical Research";
+function normalizeDateInput(value: unknown): string {
+  const dateValue =
+    typeof value === "string" || value instanceof Date
+      ? new Date(value)
+      : new Date();
+
+  return Number.isNaN(dateValue.getTime())
+    ? new Date().toISOString()
+    : dateValue.toISOString();
 }
 
 async function upsert(items: any[]) {
@@ -91,9 +91,32 @@ async function upsert(items: any[]) {
   // Create server-side client with service role key
   const supabase = createClient(url, key);
 
+  const rows = items
+    .map((item) => {
+      const rawScore = item.relevance_score;
+      const relevance_score =
+        typeof rawScore === "number" && Number.isFinite(rawScore)
+          ? rawScore
+          : rawScore == null
+            ? 5
+            : Number(rawScore);
+
+      return {
+        title: item.title,
+        link: item.url,
+        source: item.source,
+        summary: item.summary,
+        date_published: normalizeDateInput(item.published_at),
+        relevance_score: Number.isFinite(relevance_score) ? relevance_score : 5,
+      };
+    })
+    .filter((item) => item.title && item.link);
+
+  if (!rows.length) return;
+
   const { error } = await supabase
-    .from('crc_news')
-    .upsert(items, { onConflict: 'hash' });
+    .from('crc_news_feed')
+    .upsert(rows, { onConflict: 'link' });
 
   if (error) {
     throw new Error(`Supabase upsert failed: ${error.message}`);
@@ -164,21 +187,13 @@ export async function handler(event: any) {
       const summary = await aiSummary(title, text, useAI);
       const pub = it.isoDate || it.pubDate || new Date().toISOString();
 
-      // category normalization (based on content)
-      const normalizedCategory = mapCategory(`${title} ${text} ${sourceTitle} ${dom}`, f.category);
-
       collected.push({
         title,
         url: link,
         source: sourceTitle || dom,
-        source_domain: dom,
-        authors: it.creator ? [String(it.creator)] : [],
-        image_url: it.enclosure?.url || null,
-        category: normalizedCategory, // Clinical Research | Screening & Policy | Awareness & Campaigns
-        published_at: new Date(pub).toISOString(),
+        published_at: normalizeDateInput(pub),
         summary,
-        tags: [],
-        hash: sha(`${title}|${link}`),
+        relevance_score: 5,
       });
 
       if (Date.now() - started > 25000) break;

@@ -24,16 +24,11 @@ export async function handler(event: any) {
     // Create server-side client with service role key
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
-    // Use Supabase client instead of direct fetch
     let query = supabase
-      .from('crc_news')
-      .select('id,title,url,source,source_domain,authors,image_url,category,published_at,summary,tags')
-      .order('published_at', { ascending: false })
+      .from('crc_news_feed')
+      .select('id,title,link,source,summary,date_published,is_sticky,sticky_priority,relevance_score')
+      .order('date_published', { ascending: false })
       .limit(limit);
-
-    if (category !== "All") {
-      query = query.eq('category', category);
-    }
 
     if (q) {
       query = query.ilike('title', `%${q}%`);
@@ -50,10 +45,26 @@ export async function handler(event: any) {
       };
     }
 
+    if (category !== "All") {
+      console.warn("Ignoring unsupported category filter for crc_news_feed:", category);
+    }
+
+    const items = (data || []).map((item: any) => ({
+      id: item.id,
+      title: item.title,
+      url: item.link,
+      source: item.source,
+      summary: item.summary,
+      published_at: item.date_published,
+      is_sticky: item.is_sticky,
+      sticky_priority: item.sticky_priority,
+      relevance_score: item.relevance_score,
+    }));
+
     return { 
       statusCode: 200, 
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ items: data || [] }) 
+      body: JSON.stringify({ items }) 
     };
   } catch (e: any) {
     console.error("News function error:", e?.message);
