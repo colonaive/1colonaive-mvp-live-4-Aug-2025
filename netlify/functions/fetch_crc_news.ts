@@ -9,19 +9,21 @@ const parser: any = new (Parser as any)({
   headers: { "User-Agent": "COLONAiVE/NewsFetcher" },
 });
 
+type NewsCategory = "Screening" | "Research" | "Guidelines" | "Policy";
+
 // ---- SOURCE FEEDS (kept broad but we hard‑gate to CRC below) ----
 const FEEDS: {
   url: string;
-  category: "Clinical Research" | "Screening & Policy" | "Awareness & Campaigns";
+  defaultCategory?: NewsCategory;
 }[] = [
-  { url: "https://www.nejm.org/feed/rss", category: "Clinical Research" },
-  { url: "https://jamanetwork.com/rss/site_9/mostRecentIssue.xml", category: "Clinical Research" },
-  { url: "https://www.thelancet.com/rssfeed/lancet_oncology_current.xml", category: "Clinical Research" },
-  { url: "https://gut.bmj.com/rss/current.xml", category: "Clinical Research" },
-  { url: "https://ascopost.com/rss", category: "Clinical Research" },
-  { url: "https://www.nccn.org/rss", category: "Screening & Policy" },
-  { url: "https://www.uspreventiveservicestaskforce.org/uspstf/site-feed.xml", category: "Screening & Policy" },
-  { url: "https://www.cancer.org/feeds/newsroom.rss", category: "Awareness & Campaigns" },
+  { url: "https://www.nejm.org/feed/rss", defaultCategory: "Research" },
+  { url: "https://jamanetwork.com/rss/site_9/mostRecentIssue.xml", defaultCategory: "Research" },
+  { url: "https://www.thelancet.com/rssfeed/lancet_oncology_current.xml", defaultCategory: "Research" },
+  { url: "https://gut.bmj.com/rss/current.xml", defaultCategory: "Research" },
+  { url: "https://ascopost.com/rss", defaultCategory: "Research" },
+  { url: "https://www.nccn.org/rss", defaultCategory: "Guidelines" },
+  { url: "https://www.uspreventiveservicestaskforce.org/uspstf/site-feed.xml", defaultCategory: "Guidelines" },
+  { url: "https://www.cancer.org/feeds/newsroom.rss" },
 ];
 
 // ---- STRICT CRC CLASSIFIER ----
@@ -74,6 +76,95 @@ function normalizeDateInput(value: unknown): string {
     : dateValue.toISOString();
 }
 
+function canonicalizeCategory(value: unknown): NewsCategory | null {
+  if (typeof value !== "string") return null;
+
+  const normalized = value.trim().toLowerCase();
+  if (!normalized) return null;
+
+  if (
+    normalized === "screening" ||
+    normalized.includes("screening") ||
+    normalized.includes("colonoscopy") ||
+    normalized.includes("fit") ||
+    normalized.includes("fobt")
+  ) {
+    return "Screening";
+  }
+
+  if (
+    normalized === "research" ||
+    normalized.includes("research") ||
+    normalized.includes("study") ||
+    normalized.includes("trial") ||
+    normalized.includes("meta-analysis")
+  ) {
+    return "Research";
+  }
+
+  if (
+    normalized === "guidelines" ||
+    normalized.includes("guideline") ||
+    normalized.includes("recommendation") ||
+    normalized.includes("uspstf") ||
+    normalized.includes("nccn") ||
+    normalized.includes("esmo")
+  ) {
+    return "Guidelines";
+  }
+
+  if (
+    normalized === "policy" ||
+    normalized.includes("policy") ||
+    normalized.includes("ministry") ||
+    normalized.includes("funding") ||
+    normalized.includes("program")
+  ) {
+    return "Policy";
+  }
+
+  return null;
+}
+
+function deriveCategory(title = "", summary = "", content = ""): NewsCategory | null {
+  const hay = `${title}\n${summary}\n${content}`;
+
+  if (/\b(screening|colonoscopy|fit|fobt|blood test)\b/i.test(hay)) {
+    return "Screening";
+  }
+
+  if (/\b(trial|study|research|meta-analysis)\b/i.test(hay)) {
+    return "Research";
+  }
+
+  if (/\b(guideline|recommendation|uspstf|nccn|esmo)\b/i.test(hay)) {
+    return "Guidelines";
+  }
+
+  if (/\b(policy|ministry|funding|program)\b/i.test(hay)) {
+    return "Policy";
+  }
+
+  return null;
+}
+
+function resolveCategory(item: any, defaultCategory: NewsCategory | undefined, title: string, summary: string, content: string) {
+  const categoryCandidates = [
+    ...(Array.isArray(item?.categories) ? item.categories : []),
+    item?.category,
+    defaultCategory,
+  ];
+
+  for (const candidate of categoryCandidates) {
+    const canonical = canonicalizeCategory(candidate);
+    if (canonical) {
+      return canonical;
+    }
+  }
+
+  return deriveCategory(title, summary, content);
+}
+
 async function upsert(items: any[]) {
   if (!items.length) return;
   
@@ -107,6 +198,7 @@ async function upsert(items: any[]) {
         source: item.source,
         summary: item.summary,
         date_published: normalizeDateInput(item.published_at),
+        category: item.category ?? null,
         relevance_score: Number.isFinite(relevance_score) ? relevance_score : 5,
       };
     })
@@ -186,11 +278,13 @@ export async function handler(event: any) {
 
       const summary = await aiSummary(title, text, useAI);
       const pub = it.isoDate || it.pubDate || new Date().toISOString();
+      const category = resolveCategory(it, f.defaultCategory, title, it.contentSnippet || it.summary || "", it.content || "");
 
       collected.push({
         title,
         url: link,
         source: sourceTitle || dom,
+        category,
         published_at: normalizeDateInput(pub),
         summary,
         relevance_score: 5,

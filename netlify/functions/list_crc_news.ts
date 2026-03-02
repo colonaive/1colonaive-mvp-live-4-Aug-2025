@@ -2,11 +2,19 @@
 
 import { createClient } from '@supabase/supabase-js';
 
+function normalizePublishedAt(value: string | null) {
+  if (!value) return null;
+
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? value : parsed.toISOString();
+}
+
 export async function handler(event: any) {
   try {
-    const category = event.queryStringParameters?.category || "All";
+    const category = event.queryStringParameters?.category?.trim() || "All";
     const q = event.queryStringParameters?.q?.trim() || "";
-    const limit = Number(event.queryStringParameters?.limit || 40);
+    const rawLimit = Number(event.queryStringParameters?.limit || 40);
+    const limit = Number.isFinite(rawLimit) && rawLimit > 0 ? Math.min(rawLimit, 120) : 40;
 
     const supabaseUrl = process.env.SUPABASE_URL;
     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -21,32 +29,32 @@ export async function handler(event: any) {
       return { statusCode: 500, body: JSON.stringify({ error: "server_configuration_error" }) };
     }
 
-    // Create server-side client with service role key
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
     let query = supabase
       .from('crc_news_feed')
-      .select('id,title,link,source,summary,date_published,is_sticky,sticky_priority,relevance_score')
-      .order('date_published', { ascending: false })
+      .select('id,title,link,source,summary,category,date_published,created_at,is_sticky,sticky_priority,relevance_score')
+      .order('date_published', { ascending: false, nullsFirst: false })
+      .order('created_at', { ascending: false, nullsFirst: false })
       .limit(limit);
 
     if (q) {
       query = query.ilike('title', `%${q}%`);
     }
 
+    if (category !== "All") {
+      query = query.eq('category', category);
+    }
+
     const { data, error } = await query;
 
     if (error) {
       console.error("News function error:", error?.message);
-      return { 
-        statusCode: 500, 
+      return {
+        statusCode: 500,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ok: false, error: "server_error" }) 
+        body: JSON.stringify({ ok: false, error: "server_error" })
       };
-    }
-
-    if (category !== "All") {
-      console.warn("Ignoring unsupported category filter for crc_news_feed:", category);
     }
 
     const items = (data || []).map((item: any) => ({
@@ -55,23 +63,24 @@ export async function handler(event: any) {
       url: item.link,
       source: item.source,
       summary: item.summary,
-      published_at: item.date_published,
+      category: item.category ?? null,
+      published_at: normalizePublishedAt(item.date_published ?? null),
       is_sticky: item.is_sticky,
       sticky_priority: item.sticky_priority,
       relevance_score: item.relevance_score,
     }));
 
-    return { 
-      statusCode: 200, 
+    return {
+      statusCode: 200,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ items }) 
+      body: JSON.stringify({ items })
     };
   } catch (e: any) {
     console.error("News function error:", e?.message);
-    return { 
-      statusCode: 500, 
+    return {
+      statusCode: 500,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ok: false, error: "server_error" }) 
+      body: JSON.stringify({ ok: false, error: "server_error" })
     };
   }
 }

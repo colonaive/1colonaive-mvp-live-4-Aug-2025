@@ -9,7 +9,7 @@ type NewsItem = {
   source_domain?: string;
   authors?: string[];
   image_url?: string | null;
-  category: "Clinical Research" | "Screening & Policy" | "Awareness & Campaigns" | string;
+  category?: string | null;
   published_at?: string | null;
   summary?: string;
   tags?: string[];
@@ -17,11 +17,21 @@ type NewsItem = {
   sticky_priority?: number | null;
 };
 
+type Accent = {
+  ring: string;
+  headerBg: string;
+  headerText: string;
+  borderLeft: string;
+  badge: string;
+};
+
 const CATEGORY_ALL = "All";
-const CATEGORIES: Array<"Clinical Research" | "Screening & Policy" | "Awareness & Campaigns"> = [
-  "Clinical Research",
-  "Screening & Policy",
-  "Awareness & Campaigns",
+const CATEGORY_ORDER = [
+  "Screening",
+  "Guidelines",
+  "Research",
+  "Policy",
+  "Uncategorized",
 ];
 
 const fmtDate = (iso?: string | null) => {
@@ -31,12 +41,38 @@ const fmtDate = (iso?: string | null) => {
   return d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
 };
 
+const categoryLabel = (value?: string | null) => {
+  const trimmed = value?.trim();
+  return trimmed ? trimmed : "Uncategorized";
+};
+
+const categorySort = (left: string, right: string) => {
+  const leftIndex = CATEGORY_ORDER.indexOf(left);
+  const rightIndex = CATEGORY_ORDER.indexOf(right);
+
+  if (leftIndex !== -1 || rightIndex !== -1) {
+    if (leftIndex === -1) return 1;
+    if (rightIndex === -1) return -1;
+    return leftIndex - rightIndex;
+  }
+
+  return left.localeCompare(right);
+};
+
+const domainFromUrl = (url?: string) => {
+  if (!url) return "";
+
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return "";
+  }
+};
+
 const favicon = (host?: string) => (host ? `https://www.google.com/s2/favicons?domain=${host}&sz=64` : "");
 
-function buildApiUrl(params: { category?: string; q?: string; limit?: number }) {
+function buildApiUrl(params: { q?: string; limit?: number }) {
   const u = new URL("/.netlify/functions/list_crc_news", window.location.origin);
-  if (params.category && params.category !== CATEGORY_ALL) u.searchParams.set("category", params.category);
-  else u.searchParams.set("category", CATEGORY_ALL);
   if (params.q) u.searchParams.set("q", params.q);
   u.searchParams.set("limit", String(params.limit ?? 120));
   return u.toString();
@@ -53,27 +89,41 @@ const Chip: React.FC<{ label: string; active?: boolean; onClick?: () => void }> 
   </button>
 );
 
-const accents = {
-  "Clinical Research": {
-    ring: "ring-sky-100",
-    headerBg: "bg-sky-50",
-    headerText: "text-sky-900",
-    borderLeft: "border-l-sky-300",
-    badge: "bg-sky-100 text-sky-800",
+const accents: Record<string, Accent> = {
+  Screening: {
+    ring: "ring-emerald-100",
+    headerBg: "bg-emerald-50",
+    headerText: "text-emerald-900",
+    borderLeft: "border-l-emerald-300",
+    badge: "bg-emerald-100 text-emerald-800",
   },
-  "Screening & Policy": {
+  Guidelines: {
     ring: "ring-indigo-100",
     headerBg: "bg-indigo-50",
     headerText: "text-indigo-900",
     borderLeft: "border-l-indigo-300",
     badge: "bg-indigo-100 text-indigo-800",
   },
-  "Awareness & Campaigns": {
-    ring: "ring-rose-100",
-    headerBg: "bg-rose-50",
-    headerText: "text-rose-900",
-    borderLeft: "border-l-rose-300",
-    badge: "bg-rose-100 text-rose-800",
+  Research: {
+    ring: "ring-sky-100",
+    headerBg: "bg-sky-50",
+    headerText: "text-sky-900",
+    borderLeft: "border-l-sky-300",
+    badge: "bg-sky-100 text-sky-800",
+  },
+  Policy: {
+    ring: "ring-amber-100",
+    headerBg: "bg-amber-50",
+    headerText: "text-amber-900",
+    borderLeft: "border-l-amber-300",
+    badge: "bg-amber-100 text-amber-800",
+  },
+  Uncategorized: {
+    ring: "ring-slate-100",
+    headerBg: "bg-slate-50",
+    headerText: "text-slate-900",
+    borderLeft: "border-l-slate-300",
+    badge: "bg-slate-100 text-slate-800",
   },
 };
 
@@ -82,7 +132,7 @@ const EmptyBox: React.FC<{ label: string }> = ({ label }) => (
 );
 
 const NewsCard: React.FC<{ item: NewsItem; accent: typeof accents[keyof typeof accents] }> = ({ item, accent }) => {
-  const host = item.source_domain || (item.url ? new URL(item.url).hostname.replace(/^www\./, "") : "");
+  const host = item.source_domain || domainFromUrl(item.url);
   return (
     <article
       className={`group relative rounded-xl border border-gray-200 ${accent.borderLeft} border-l-4 bg-white p-4 shadow-sm hover:shadow-md transition`}
@@ -137,10 +187,10 @@ const NewsCard: React.FC<{ item: NewsItem; accent: typeof accents[keyof typeof a
 };
 
 const ColumnBox: React.FC<{
-  title: "Clinical Research" | "Screening & Policy" | "Awareness & Campaigns";
+  title: string;
   items: NewsItem[];
 }> = ({ title, items }) => {
-  const accent = accents[title];
+  const accent = accents[title] || accents.Uncategorized;
   return (
     // Create a local stacking context and keep it below the site header
     <section className="relative z-0 flex flex-col rounded-2xl bg-white border border-gray-200 overflow-hidden shadow-sm">
@@ -168,12 +218,11 @@ const LiveCRCNews: React.FC = () => {
   const [err, setErr] = useState<string | null>(null);
   const [items, setItems] = useState<NewsItem[]>([]);
 
-  const load = async (opts?: { category?: string; q?: string }) => {
+  const load = async (opts?: { q?: string }) => {
     setLoading(true);
     setErr(null);
     try {
       const url = buildApiUrl({
-        category: opts?.category ?? activeCat,
         q: (opts?.q ?? q).trim() || undefined,
         limit: 120,
       });
@@ -189,22 +238,45 @@ const LiveCRCNews: React.FC = () => {
   };
 
   useEffect(() => {
-    load({ category: CATEGORY_ALL, q: "" });
+    load({ q: "" });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const grouped = useMemo(() => {
-    const g: Record<string, NewsItem[]> = {
-      "Clinical Research": [],
-      "Screening & Policy": [],
-      "Awareness & Campaigns": [],
-    };
-    for (const it of items) {
-      if (g[it.category]) g[it.category].push(it);
-      else g["Clinical Research"].push(it);
+  const availableCategories = useMemo(() => {
+    const labels = new Set<string>();
+    for (const item of items) {
+      labels.add(categoryLabel(item.category));
     }
-    return g;
-  }, [items]);
+    if (activeCat !== CATEGORY_ALL) {
+      labels.add(activeCat);
+    }
+    return Array.from(labels).sort(categorySort);
+  }, [activeCat, items]);
+
+  const visibleItems = useMemo(
+    () =>
+      activeCat === CATEGORY_ALL
+        ? items
+        : items.filter((item) => categoryLabel(item.category) === activeCat),
+    [activeCat, items]
+  );
+
+  const grouped = useMemo(() => {
+    const groups = new Map<string, NewsItem[]>();
+    for (const item of visibleItems) {
+      const label = categoryLabel(item.category);
+      const bucket = groups.get(label) || [];
+      bucket.push(item);
+      groups.set(label, bucket);
+    }
+
+    const entries = Array.from(groups.entries()).sort((left, right) => categorySort(left[0], right[0]));
+    if (!entries.length && activeCat !== CATEGORY_ALL) {
+      return [[activeCat, []] as [string, NewsItem[]]];
+    }
+
+    return entries;
+  }, [activeCat, visibleItems]);
 
   return (
     // isolate = new stacking context for this page; z-0 keeps it under the header
@@ -220,20 +292,14 @@ const LiveCRCNews: React.FC = () => {
             <Chip
               label={CATEGORY_ALL}
               active={activeCat === CATEGORY_ALL}
-              onClick={() => {
-                setActiveCat(CATEGORY_ALL);
-                load({ category: CATEGORY_ALL });
-              }}
+              onClick={() => setActiveCat(CATEGORY_ALL)}
             />
-            {CATEGORIES.map((c) => (
+            {availableCategories.map((c) => (
               <Chip
                 key={c}
                 label={c}
                 active={activeCat === c}
-                onClick={() => {
-                  setActiveCat(c);
-                  load({ category: c });
-                }}
+                onClick={() => setActiveCat(c)}
               />
             ))}
           </div>
@@ -262,16 +328,20 @@ const LiveCRCNews: React.FC = () => {
         {loading && <div className="mb-4 text-sm text-gray-500">Loading…</div>}
         {err && <div className="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">{err}</div>}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <ColumnBox title="Clinical Research" items={grouped["Clinical Research"]} />
-          <div className="flex flex-col gap-6">
-            <ColumnBox title="Screening & Policy" items={grouped["Screening & Policy"]} />
-            <ColumnBox title="Awareness & Campaigns" items={grouped["Awareness & Campaigns"]} />
+        {grouped.length === 0 ? (
+          <section className="rounded-2xl border border-gray-200 bg-white px-4 py-8 text-sm text-gray-500 shadow-sm">
+            No stories available right now.
+          </section>
+        ) : (
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            {grouped.map(([title, groupItems]) => (
+              <ColumnBox key={title} title={title} items={groupItems} />
+            ))}
           </div>
-        </div>
+        )}
 
         <div className="mt-10 text-xs text-gray-400">
-          Tip: click “Search” with an empty box to refresh. Items are ordered by priority and date.
+          Tip: click “Search” with an empty box to refresh. Items are ordered by publish date, newest first.
         </div>
       </div>
     </main>
