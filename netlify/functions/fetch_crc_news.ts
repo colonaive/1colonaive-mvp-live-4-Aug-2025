@@ -12,10 +12,27 @@ const parser: any = new (Parser as any)({
 type NewsCategory = "Screening" | "Research" | "Guidelines" | "Policy";
 
 // ---- SOURCE FEEDS (kept broad but we hard‑gate to CRC below) ----
-const FEEDS: {
-  url: string;
-  defaultCategory?: NewsCategory;
-}[] = [
+type FeedConfig =
+  | {
+      kind?: "rss";
+      url: string;
+      defaultCategory?: NewsCategory;
+    }
+  | {
+      kind: "pubmed";
+      label: string;
+      query: string;
+      defaultCategory?: NewsCategory;
+    };
+
+const FEEDS: FeedConfig[] = [
+  {
+    kind: "pubmed",
+    label: "PubMed: colorectal cancer",
+    query:
+      '("colorectal cancer"[Title/Abstract] OR "colon cancer"[Title/Abstract] OR "rectal cancer"[Title/Abstract])',
+    defaultCategory: "Research",
+  },
   { url: "https://www.nejm.org/feed/rss", defaultCategory: "Research" },
   { url: "https://jamanetwork.com/rss/site_9/mostRecentIssue.xml", defaultCategory: "Research" },
   { url: "https://www.thelancet.com/rssfeed/lancet_oncology_current.xml", defaultCategory: "Research" },
@@ -55,6 +72,7 @@ const TRUSTED_DOMAINS = [
   "annals.org",
   "sciencedirect.com",
   "cell.com",
+  "pubmed.ncbi.nlm.nih.gov",
 ];
 
 const domainOf = (u: string) => {
@@ -168,6 +186,67 @@ function resolveCategory(item: any, defaultCategory: NewsCategory | undefined, t
   return deriveCategory(title, summary, content);
 }
 
+async function fetchPubMedFeed(feed: Extract<FeedConfig, { kind: "pubmed" }>) {
+  const searchUrl =
+    "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi" +
+    `?db=pubmed&term=${encodeURIComponent(feed.query)}&retmax=3&sort=pub+date&retmode=json`;
+  const searchResponse = await fetch(searchUrl, {
+    headers: { "User-Agent": "COLONAiVE/NewsFetcher" },
+  });
+
+  if (!searchResponse.ok) {
+    throw new Error(`PubMed search failed: ${searchResponse.status}`);
+  }
+
+  const searchJson = await searchResponse.json();
+  const ids = searchJson?.esearchresult?.idlist ?? [];
+
+  if (!Array.isArray(ids) || !ids.length) {
+    return { title: feed.label, items: [] };
+  }
+
+  const summaryUrl =
+    "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi" +
+    `?db=pubmed&id=${ids.join(",")}&retmode=json`;
+  const summaryResponse = await fetch(summaryUrl, {
+    headers: { "User-Agent": "COLONAiVE/NewsFetcher" },
+  });
+
+  if (!summaryResponse.ok) {
+    throw new Error(`PubMed summary failed: ${summaryResponse.status}`);
+  }
+
+  const summaryJson = await summaryResponse.json();
+
+  return {
+    title: feed.label,
+    items: ids
+      .map((id: string) => {
+        const meta = summaryJson?.result?.[id];
+        if (!meta?.title) return null;
+
+        const pubDate =
+          meta.pubdate ||
+          meta.epubdate ||
+          meta.sortpubdate ||
+          meta.sortfirstauthor ||
+          new Date().toISOString();
+        const byline = Array.isArray(meta.authors)
+          ? meta.authors.map((author: any) => author?.name).filter(Boolean).join(", ")
+          : "";
+
+        return {
+          title: meta.title,
+          link: `https://pubmed.ncbi.nlm.nih.gov/${id}/`,
+          pubDate,
+          contentSnippet: [meta.fulljournalname || meta.source || "", byline].filter(Boolean).join(". "),
+          categories: [feed.defaultCategory].filter(Boolean),
+        };
+      })
+      .filter(Boolean),
+  };
+}
+
 async function upsert(items: any[]) {
   if (!items.length) return;
   
@@ -261,7 +340,10 @@ export async function handler(event: any) {
 
     let out: any;
     try {
-      out = await parser.parseURL(f.url);
+      out =
+        f.kind === "pubmed"
+          ? await fetchPubMedFeed(f)
+          : await parser.parseURL(f.url);
     } catch {
       continue;
     }

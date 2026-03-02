@@ -23,7 +23,5 @@
   to = "/index.html"
   status = 200
 
-# Scheduled function for fetching CRC news
-[[scheduled.functions]]
-  name = "fetch_crc_news"
-  cron = "0 */2 * * *"   # every 2 hours
+[functions."fetch_crc_news"]
+  schedule = "*/5 * * * *"
