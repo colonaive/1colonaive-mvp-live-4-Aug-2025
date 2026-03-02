@@ -327,7 +327,13 @@ const LiveCRCNews: React.FC = () => {
             <div className="relative">
               <input
                 value={q}
-                onChange={(e) => setQ(e.target.value)}
+                onChange={(e) => {
+                  const nextValue = e.target.value;
+                  setQ(nextValue);
+                  if (!nextValue.trim() && appliedQuery) {
+                    load({ q: "" });
+                  }
+                }}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") load({ q });
                 }}
