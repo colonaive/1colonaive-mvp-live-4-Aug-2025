@@ -280,7 +280,7 @@ const LiveCRCNews: React.FC = () => {
 
   return (
     // isolate = new stacking context for this page; z-0 keeps it under the header
-    <main className="relative z-0 isolate bg-gray-50">
+    <main className="relative z-0 isolate bg-gray-50 pt-24 md:pt-28">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
         <header className="mb-6">
           <h1 className="text-3xl font-bold tracking-tight text-gray-900">Latest in Colorectal Cancer</h1>

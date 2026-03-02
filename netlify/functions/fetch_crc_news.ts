@@ -127,21 +127,24 @@ function canonicalizeCategory(value: unknown): NewsCategory | null {
 }
 
 function deriveCategory(title = "", summary = "", content = ""): NewsCategory | null {
-  const hay = `${title}\n${summary}\n${content}`;
+  const hay = `${title}\n${summary}\n${content}`.trim().toLowerCase();
+  if (!hay) {
+    return null;
+  }
 
-  if (/\b(screening|colonoscopy|fit|fobt|blood test)\b/i.test(hay)) {
+  if (/\b(screen|screening|colonoscopy|sigmoidoscopy|stool|fit|fobt|blood test|fecal|faecal)\b/.test(hay)) {
     return "Screening";
   }
 
-  if (/\b(trial|study|research|meta-analysis)\b/i.test(hay)) {
-    return "Research";
-  }
-
-  if (/\b(guideline|recommendation|uspstf|nccn|esmo)\b/i.test(hay)) {
+  if (/\b(guideline|guidelines|recommendation|task force|uspstf|nccn|esmo|asco|consensus)\b/.test(hay)) {
     return "Guidelines";
   }
 
-  if (/\b(policy|ministry|funding|program)\b/i.test(hay)) {
+  if (/\b(study|trial|cohort|research|meta-analysis|systematic review|randomized|randomised|preprint|journal)\b/.test(hay)) {
+    return "Research";
+  }
+
+  if (/\b(ministry|government|policy|funding|programme|program|initiative|national)\b/.test(hay)) {
     return "Policy";
   }
 
