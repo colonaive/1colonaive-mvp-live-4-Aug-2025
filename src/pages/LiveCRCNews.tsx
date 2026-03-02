@@ -69,7 +69,11 @@ const domainFromUrl = (url?: string) => {
   }
 };
 
-const favicon = (host?: string) => (host ? `https://www.google.com/s2/favicons?domain=${host}&sz=64` : "");
+const sourceBadge = (source?: string, host?: string) => {
+  const label = (source || host || "?").replace(/^www\./, "").trim();
+  const compact = label.replace(/[^A-Za-z0-9]/g, "");
+  return (compact.slice(0, 2) || "?").toUpperCase();
+};
 
 function buildApiUrl(params: { q?: string; limit?: number }) {
   const u = new URL("/.netlify/functions/list_crc_news", window.location.origin);
@@ -142,7 +146,9 @@ const NewsCard: React.FC<{ item: NewsItem; accent: typeof accents[keyof typeof a
           {item.image_url ? (
             <img src={item.image_url} alt="" className="w-full h-full object-cover" />
           ) : host ? (
-            <img src={favicon(host)} alt="" className="w-8 h-8 opacity-80" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-slate-200 text-[10px] font-semibold text-slate-600">
+              {sourceBadge(item.source, host)}
+            </div>
           ) : (
             <div className="text-xs text-gray-400">no image</div>
           )}
@@ -214,22 +220,25 @@ const ColumnBox: React.FC<{
 const LiveCRCNews: React.FC = () => {
   const [activeCat, setActiveCat] = useState<string>(CATEGORY_ALL);
   const [q, setQ] = useState("");
+  const [appliedQuery, setAppliedQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [items, setItems] = useState<NewsItem[]>([]);
 
   const load = async (opts?: { q?: string }) => {
+    const nextQuery = (opts?.q ?? q).trim();
     setLoading(true);
     setErr(null);
     try {
       const url = buildApiUrl({
-        q: (opts?.q ?? q).trim() || undefined,
+        q: nextQuery || undefined,
         limit: 120,
       });
       const res = await fetch(url);
       if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
       const j = await res.json();
       setItems(j.items || []);
+      setAppliedQuery(nextQuery);
     } catch (e: any) {
       setErr(e?.message || "Failed to load");
     } finally {
@@ -278,10 +287,20 @@ const LiveCRCNews: React.FC = () => {
     return entries;
   }, [activeCat, visibleItems]);
 
+  const hasSearch = appliedQuery.length > 0;
+  const resultLabel = hasSearch
+    ? `${visibleItems.length} result${visibleItems.length === 1 ? "" : "s"} for "${appliedQuery}"`
+    : null;
+  const emptyMessage = hasSearch
+    ? `No results found for "${appliedQuery}". Try a broader term.`
+    : activeCat !== CATEGORY_ALL
+      ? `No stories available for ${activeCat}.`
+      : "No stories available right now.";
+
   return (
     // isolate = new stacking context for this page; z-0 keeps it under the header
-    <main className="relative z-0 isolate bg-gray-50 pt-24 md:pt-28">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
+    <main className="relative z-0 isolate bg-gray-50 pt-16 md:pt-20">
+      <div className="mx-auto max-w-7xl px-4 pb-10 pt-4 sm:px-6 lg:px-8">
         <header className="mb-6">
           <h1 className="text-3xl font-bold tracking-tight text-gray-900">Latest in Colorectal Cancer</h1>
           <p className="mt-1 text-gray-600">Only verified stories with direct links to original sources.</p>
@@ -325,12 +344,14 @@ const LiveCRCNews: React.FC = () => {
           </div>
         </div>
 
+        {resultLabel && <div className="mb-4 text-sm text-gray-500">{resultLabel}</div>}
+
         {loading && <div className="mb-4 text-sm text-gray-500">Loading…</div>}
         {err && <div className="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">{err}</div>}
 
-        {grouped.length === 0 ? (
+        {!loading && visibleItems.length === 0 ? (
           <section className="rounded-2xl border border-gray-200 bg-white px-4 py-8 text-sm text-gray-500 shadow-sm">
-            No stories available right now.
+            {emptyMessage}
           </section>
         ) : (
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">

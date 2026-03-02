@@ -13,6 +13,7 @@ export async function handler(event: any) {
   try {
     const category = event.queryStringParameters?.category?.trim() || "All";
     const q = event.queryStringParameters?.q?.trim() || "";
+    const searchTerm = q.replace(/,/g, " ");
     const rawLimit = Number(event.queryStringParameters?.limit || 40);
     const limit = Number.isFinite(rawLimit) && rawLimit > 0 ? Math.min(rawLimit, 120) : 40;
 
@@ -38,8 +39,9 @@ export async function handler(event: any) {
       .order('created_at', { ascending: false, nullsFirst: false })
       .limit(limit);
 
-    if (q) {
-      query = query.ilike('title', `%${q}%`);
+    if (searchTerm) {
+      const pattern = `%${searchTerm}%`;
+      query = query.or(`title.ilike.${pattern},summary.ilike.${pattern},source.ilike.${pattern}`);
     }
 
     if (category !== "All") {
