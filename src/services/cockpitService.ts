@@ -35,6 +35,14 @@ export interface CRCNewsItem {
   relevance_score: number | null;
 }
 
+export interface ExecutiveBriefingSummary {
+  id: string;
+  date: string;
+  content: string;
+  sections: { heading: string; items: string[] }[];
+  created_at: string;
+}
+
 export const cockpitService = {
   getRegulatoryStatus: (): RegulatoryItem[] => regulatoryItems,
   getClinicalTrials: (): ClinicalTrial[] => clinicalTrials,
@@ -73,6 +81,30 @@ export const cockpitService = {
       published_at: item.published_at || null,
       relevance_score: item.relevance_score ?? null,
     }));
+  },
+
+  fetchLatestBriefing: async (): Promise<ExecutiveBriefingSummary | null> => {
+    try {
+      const res = await fetch('/.netlify/functions/generate_briefing?action=latest');
+      if (!res.ok) return null;
+      const data = await res.json();
+      if (!data || !data.content) return null;
+      return data as ExecutiveBriefingSummary;
+    } catch {
+      return null;
+    }
+  },
+
+  fetchBriefingHistory: async (limit = 7): Promise<ExecutiveBriefingSummary[]> => {
+    try {
+      const res = await fetch(`/.netlify/functions/generate_briefing?action=history&limit=${limit}`);
+      if (!res.ok) return [];
+      const data = await res.json();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return ((data as any).items || []) as ExecutiveBriefingSummary[];
+    } catch {
+      return [];
+    }
   },
 
   getRepoActivityPlaceholder: (): PlaceholderSection => ({

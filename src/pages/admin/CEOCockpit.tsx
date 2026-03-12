@@ -10,10 +10,13 @@ import {
   RefreshCw,
   AlertCircle,
   Newspaper,
+  Briefcase,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import CockpitCard from '@/components/cockpit/CockpitCard';
 import CockpitSection from '@/components/cockpit/CockpitSection';
-import { cockpitService, type InboxEmail, type CRCNewsItem } from '@/services/cockpitService';
+import { cockpitService, type InboxEmail, type CRCNewsItem, type ExecutiveBriefingSummary } from '@/services/cockpitService';
 
 const today = new Date().toLocaleDateString('en-SG', {
   weekday: 'long',
@@ -61,6 +64,27 @@ const CEOCockpit: React.FC = () => {
   const [crcLoading, setCrcLoading] = useState(true);
   const [crcError, setCrcError] = useState<string | null>(null);
 
+  const [briefing, setBriefing] = useState<ExecutiveBriefingSummary | null>(null);
+  const [briefingHistory, setBriefingHistory] = useState<ExecutiveBriefingSummary[]>([]);
+  const [briefingLoading, setBriefingLoading] = useState(true);
+  const [showHistory, setShowHistory] = useState(false);
+
+  const loadBriefing = async () => {
+    setBriefingLoading(true);
+    try {
+      const [latest, history] = await Promise.all([
+        cockpitService.fetchLatestBriefing(),
+        cockpitService.fetchBriefingHistory(7),
+      ]);
+      setBriefing(latest);
+      setBriefingHistory(history);
+    } catch {
+      // silent fail — briefing is supplementary
+    } finally {
+      setBriefingLoading(false);
+    }
+  };
+
   const loadInbox = async () => {
     setInboxLoading(true);
     setInboxError(null);
@@ -87,7 +111,7 @@ const CEOCockpit: React.FC = () => {
     }
   };
 
-  useEffect(() => { loadInbox(); loadCRCNews(); }, []);
+  useEffect(() => { loadInbox(); loadCRCNews(); loadBriefing(); }, []);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -100,6 +124,77 @@ const CEOCockpit: React.FC = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-8">
+        {/* Executive Briefing (top of dashboard) */}
+        <CockpitSection columns={1}>
+          <CockpitCard
+            title="Executive Briefing"
+            subtitle="Daily intelligence summary"
+            icon={<Briefcase size={18} />}
+            status={briefing ? 'active' : briefingLoading ? 'pending' : 'placeholder'}
+            lastUpdated={briefing?.created_at ? new Date(briefing.created_at).toLocaleDateString('en-SG', { day: 'numeric', month: 'short', year: 'numeric' }) : undefined}
+          >
+            {briefingLoading ? (
+              <div className="flex items-center justify-center py-6">
+                <RefreshCw size={20} className="animate-spin text-gray-400" />
+                <span className="ml-2 text-xs text-gray-400">Loading briefing...</span>
+              </div>
+            ) : !briefing ? (
+              <div className="flex flex-col items-center justify-center py-6 text-center">
+                <Briefcase size={32} className="text-gray-300 dark:text-gray-600 mb-3" />
+                <p className="text-gray-400 dark:text-gray-500 text-xs">No briefing available yet.</p>
+                <p className="text-gray-400 dark:text-gray-500 text-[11px] mt-1">Briefings are generated daily at 07:00 SGT.</p>
+              </div>
+            ) : (
+              <div>
+                {/* Today's briefing sections */}
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+                  {(briefing.sections || []).map((section) => (
+                    <div key={section.heading} className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3">
+                      <h4 className="text-[11px] font-semibold text-[#0F766E] dark:text-emerald-400 uppercase tracking-wide mb-2">
+                        {section.heading}
+                      </h4>
+                      <ul className="space-y-1">
+                        {section.items.map((item, idx) => (
+                          <li key={idx} className="text-[11px] text-gray-700 dark:text-gray-300 leading-relaxed">
+                            <span className="text-[#0F766E] dark:text-emerald-400 mr-1">•</span>
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Past briefings toggle */}
+                {briefingHistory.length > 1 && (
+                  <div className="mt-4 border-t border-gray-100 dark:border-gray-700 pt-3">
+                    <button
+                      onClick={() => setShowHistory(!showHistory)}
+                      className="flex items-center gap-1 text-[11px] text-blue-600 dark:text-blue-400 hover:underline"
+                    >
+                      {showHistory ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                      {showHistory ? 'Hide' : 'View'} past briefings ({briefingHistory.length - 1})
+                    </button>
+                    {showHistory && (
+                      <div className="mt-3 space-y-2 max-h-48 overflow-y-auto">
+                        {briefingHistory.slice(1).map((b) => (
+                          <div
+                            key={b.id}
+                            className="flex items-center justify-between bg-gray-50 dark:bg-gray-800/30 rounded px-3 py-2"
+                          >
+                            <span className="text-xs text-gray-700 dark:text-gray-300 font-medium">{b.date}</span>
+                            <span className="text-[10px] text-gray-400">{(b.sections || []).length} sections</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+          </CockpitCard>
+        </CockpitSection>
+
         {/* Row 1: Intelligence & Regulatory */}
         <CockpitSection>
           {/* Inbox Intelligence */}
