@@ -25,6 +25,14 @@ type FeedConfig =
       defaultCategory?: NewsCategory;
     };
 
+const GOOGLE_NEWS_QUERIES = [
+  "colorectal cancer screening",
+  "blood-based colorectal cancer screening",
+  "ctDNA colorectal cancer screening",
+  "early onset colorectal cancer",
+  "colon cancer screening program",
+];
+
 const FEEDS: FeedConfig[] = [
   {
     kind: "pubmed",
@@ -41,6 +49,11 @@ const FEEDS: FeedConfig[] = [
   { url: "https://www.nccn.org/rss", defaultCategory: "Guidelines" },
   { url: "https://www.uspreventiveservicestaskforce.org/uspstf/site-feed.xml", defaultCategory: "Guidelines" },
   { url: "https://www.cancer.org/feeds/newsroom.rss" },
+  // Google News RSS feeds — generated from GOOGLE_NEWS_QUERIES
+  ...GOOGLE_NEWS_QUERIES.map((q) => ({
+    url: `https://news.google.com/rss/search?q=${encodeURIComponent(q)}&hl=en&gl=US&ceid=US:en`,
+    defaultCategory: "Screening" as NewsCategory,
+  })),
 ];
 
 // ---- STRICT CRC CLASSIFIER ----
@@ -73,6 +86,7 @@ const TRUSTED_DOMAINS = [
   "sciencedirect.com",
   "cell.com",
   "pubmed.ncbi.nlm.nih.gov",
+  "news.google.com",
 ];
 
 const domainOf = (u: string) => {
@@ -82,6 +96,67 @@ const domainOf = (u: string) => {
     return "";
   }
 };
+
+// ---- RELEVANCE SCORING ----
+// Higher score = more relevant to CRC screening awareness mission
+const HIGH_VALUE_KEYWORDS = [
+  { pattern: /\bblood[- ]based\b/i, weight: 15 },
+  { pattern: /\bscreening\b/i, weight: 12 },
+  { pattern: /\bctdna\b/i, weight: 15 },
+  { pattern: /\bearly detection\b/i, weight: 14 },
+  { pattern: /\bearly[- ]onset\b/i, weight: 12 },
+  { pattern: /\bliquid biopsy\b/i, weight: 15 },
+  { pattern: /\bmethylation\b/i, weight: 10 },
+  { pattern: /\bcolonoscopy\b/i, weight: 8 },
+  { pattern: /\bpopulation[- ]based\b/i, weight: 8 },
+  { pattern: /\bguideline/i, weight: 8 },
+  { pattern: /\bsensitivity|specificity\b/i, weight: 7 },
+  { pattern: /\bstool[- ]dna|fit\b/i, weight: 6 },
+  { pattern: /\bnon[- ]invasive\b/i, weight: 10 },
+  { pattern: /\bstage i\b|stage 1\b/i, weight: 6 },
+  { pattern: /\bcost[- ]effective/i, weight: 5 },
+];
+
+function computeRelevanceScore(title: string, summary: string): number {
+  const hay = `${title}\n${summary}`.toLowerCase();
+  let score = 0;
+  for (const kw of HIGH_VALUE_KEYWORDS) {
+    if (kw.pattern.test(hay)) score += kw.weight;
+  }
+  // Cap at 100
+  return Math.min(score, 100);
+}
+
+// ---- LOW-VALUE ARTICLE FILTER ----
+// Exclude basic-science articles unless they also mention screening/detection
+const LOW_VALUE_PATTERNS = [
+  /\bmouse model/i,
+  /\borganoid/i,
+  /\bcell line/i,
+  /\bmolecular pathway/i,
+  /\bgene mutation analysis/i,
+  /\bin[- ]?vitro\b/i,
+  /\bxenograft/i,
+  /\btransgenic mice/i,
+];
+
+const RESCUE_PATTERNS = [
+  /\bscreening\b/i,
+  /\bearly detection\b/i,
+  /\bblood[- ]based\b/i,
+  /\bliquid biopsy\b/i,
+  /\bctdna\b/i,
+  /\bclinical trial\b/i,
+];
+
+function isLowValueArticle(title: string, summary: string): boolean {
+  const hay = `${title}\n${summary}`;
+  const hasLowValue = LOW_VALUE_PATTERNS.some((p) => p.test(hay));
+  if (!hasLowValue) return false;
+  // Rescue if it also mentions screening-relevant topics
+  const hasRescue = RESCUE_PATTERNS.some((p) => p.test(hay));
+  return !hasRescue;
+}
 
 function normalizeDateInput(value: unknown): string {
   const dateValue =
@@ -361,9 +436,15 @@ export async function handler(event: any) {
       const text = `${it.contentSnippet || ""}\n${it.content || ""}\n${it.summary || ""}`;
       if (!isCRCStrict(title, it.contentSnippet || it.summary || "", it.content || "")) continue;
 
+      // Filter out low-value basic-science articles
+      if (isLowValueArticle(title, text)) continue;
+
       const summary = await aiSummary(title, text, useAI);
       const pub = it.isoDate || it.pubDate || new Date().toISOString();
       const category = resolveCategory(it, f.defaultCategory, title, it.contentSnippet || it.summary || "", it.content || "");
+
+      // Compute relevance score based on screening-related keywords
+      const relevance = computeRelevanceScore(title, summary);
 
       collected.push({
         title,
@@ -372,12 +453,15 @@ export async function handler(event: any) {
         category,
         published_at: normalizeDateInput(pub),
         summary,
-        relevance_score: 5,
+        relevance_score: relevance,
       });
 
       if (Date.now() - started > 25000) break;
     }
   }
+
+  // Sort by relevance score descending before upserting
+  collected.sort((a, b) => (b.relevance_score || 0) - (a.relevance_score || 0));
 
   try {
     await upsert(collected);
