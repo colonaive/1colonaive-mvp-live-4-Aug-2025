@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Inbox,
   Shield,
@@ -7,10 +7,12 @@ import {
   TrendingUp,
   Brain,
   GitBranch,
+  RefreshCw,
+  AlertCircle,
 } from 'lucide-react';
 import CockpitCard from '@/components/cockpit/CockpitCard';
 import CockpitSection from '@/components/cockpit/CockpitSection';
-import { cockpitService } from '@/services/cockpitService';
+import { cockpitService, type InboxEmail } from '@/services/cockpitService';
 
 const today = new Date().toLocaleDateString('en-SG', {
   weekday: 'long',
@@ -35,14 +37,39 @@ const statusBadge = (status: string) => {
   );
 };
 
+const formatDateTime = (iso: string) => {
+  const d = new Date(iso);
+  return d.toLocaleString('en-SG', {
+    day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', hour12: true,
+  });
+};
+
 const CEOCockpit: React.FC = () => {
   const regulatory = cockpitService.getRegulatoryStatus();
   const trials = cockpitService.getClinicalTrials();
   const investors = cockpitService.getInvestorHistory();
   const brochureList = cockpitService.getBrochures();
   const memoryItems = cockpitService.getProjectMemoryItems();
-  const inbox = cockpitService.getInboxPlaceholder();
   const repo = cockpitService.getRepoActivityPlaceholder();
+
+  const [emails, setEmails] = useState<InboxEmail[]>([]);
+  const [inboxLoading, setInboxLoading] = useState(true);
+  const [inboxError, setInboxError] = useState<string | null>(null);
+
+  const loadInbox = async () => {
+    setInboxLoading(true);
+    setInboxError(null);
+    try {
+      const data = await cockpitService.fetchInboxEmails();
+      setEmails(data);
+    } catch (err: any) {
+      setInboxError(err.message || 'Failed to load emails');
+    } finally {
+      setInboxLoading(false);
+    }
+  };
+
+  useEffect(() => { loadInbox(); }, []);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -60,14 +87,43 @@ const CEOCockpit: React.FC = () => {
           {/* Inbox Intelligence */}
           <CockpitCard
             title="Inbox Intelligence"
-            subtitle="Email & calendar overview"
+            subtitle="admin@saversmed.com — latest 10"
             icon={<Inbox size={18} />}
-            status="placeholder"
+            status={inboxError ? 'pending' : 'active'}
           >
-            <div className="flex flex-col items-center justify-center py-6 text-center">
-              <Inbox size={32} className="text-gray-300 dark:text-gray-600 mb-3" />
-              <p className="text-gray-400 dark:text-gray-500 text-xs">{inbox.message}</p>
-            </div>
+            {inboxLoading ? (
+              <div className="flex items-center justify-center py-6">
+                <RefreshCw size={20} className="animate-spin text-gray-400" />
+                <span className="ml-2 text-xs text-gray-400">Loading emails...</span>
+              </div>
+            ) : inboxError ? (
+              <div className="flex flex-col items-center justify-center py-6 text-center">
+                <AlertCircle size={24} className="text-amber-400 mb-2" />
+                <p className="text-xs text-amber-600 dark:text-amber-400">{inboxError}</p>
+                <button onClick={loadInbox} className="mt-2 text-[11px] text-blue-600 dark:text-blue-400 hover:underline">Retry</button>
+              </div>
+            ) : emails.length === 0 ? (
+              <p className="text-gray-400 text-xs text-center py-4">No emails found.</p>
+            ) : (
+              <div className="space-y-2.5 max-h-72 overflow-y-auto">
+                {emails.map((e) => (
+                  <div
+                    key={e.id}
+                    className={`border-b border-gray-100 dark:border-gray-700 pb-2.5 last:border-0 last:pb-0 ${
+                      !e.isRead ? 'pl-2 border-l-2 border-l-blue-500' : ''
+                    }`}
+                  >
+                    <p className={`text-xs ${e.isRead ? 'text-gray-700 dark:text-gray-300' : 'font-semibold text-gray-900 dark:text-white'} line-clamp-1`}>
+                      {e.subject}
+                    </p>
+                    <div className="flex items-center justify-between mt-0.5">
+                      <span className="text-[11px] text-gray-500 dark:text-gray-400 truncate max-w-[60%]">{e.sender}</span>
+                      <span className="text-[10px] text-gray-400 dark:text-gray-500 whitespace-nowrap">{formatDateTime(e.receivedDateTime)}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </CockpitCard>
 
           {/* Regulatory Status */}
