@@ -17,6 +17,7 @@ import AdminPartnerSpecialistForm from './pages/admin/AdminPartnerSpecialistForm
 import AdminCSRPartnerForm from './pages/admin/AdminCSRPartnerForm';
 import CSRPartnersAdminPage from './pages/admin/CSRPartnersAdminPage';
 import PartnerSpecialistsAdminPage from './pages/admin/PartnerSpecialistsAdminPage';
+import CEOCockpit from './pages/admin/CEOCockpit';
 
 
 // ✅ Verified CRC News (two-column, AI summaries)
@@ -317,6 +318,10 @@ const MainRoutes = () => {
             element={<ProtectedAdminRoute><AdminPartnerSpecialistForm /></ProtectedAdminRoute>}
           />
           <Route path="/specialist-submission" element={<SpecialistPublicForm />} />
+          <Route
+            path="/admin/ceo-cockpit"
+            element={<ProtectedAdminRoute><CEOCockpit /></ProtectedAdminRoute>}
+          />
 
 
           {/* Protected */}

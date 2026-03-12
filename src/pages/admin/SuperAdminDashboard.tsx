@@ -294,6 +294,19 @@ const SuperAdminDashboard = () => {
               </div>
               <Button size="sm" onClick={() => navigate('/admin/partner-specialists')} className="whitespace-nowrap">Open</Button>
             </div>
+
+            <div className="flex items-start justify-between rounded-xl border border-gray-200 p-5">
+              <div className="flex items-start gap-3">
+                <div className="rounded-lg bg-indigo-50 p-3">
+                  <BarChart3 className="h-6 w-6 text-indigo-600" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-900">CEO Cockpit</h4>
+                  <p className="text-sm text-gray-600">Executive dashboard with regulatory, clinical, investor, and project intelligence.</p>
+                </div>
+              </div>
+              <Button size="sm" onClick={() => navigate('/admin/ceo-cockpit')} className="whitespace-nowrap">Open</Button>
+            </div>
           </div>
         </CardContent>
       </Card>
