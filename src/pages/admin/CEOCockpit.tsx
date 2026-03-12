@@ -9,10 +9,11 @@ import {
   GitBranch,
   RefreshCw,
   AlertCircle,
+  Newspaper,
 } from 'lucide-react';
 import CockpitCard from '@/components/cockpit/CockpitCard';
 import CockpitSection from '@/components/cockpit/CockpitSection';
-import { cockpitService, type InboxEmail } from '@/services/cockpitService';
+import { cockpitService, type InboxEmail, type CRCNewsItem } from '@/services/cockpitService';
 
 const today = new Date().toLocaleDateString('en-SG', {
   weekday: 'long',
@@ -56,6 +57,10 @@ const CEOCockpit: React.FC = () => {
   const [inboxLoading, setInboxLoading] = useState(true);
   const [inboxError, setInboxError] = useState<string | null>(null);
 
+  const [crcNews, setCrcNews] = useState<CRCNewsItem[]>([]);
+  const [crcLoading, setCrcLoading] = useState(true);
+  const [crcError, setCrcError] = useState<string | null>(null);
+
   const loadInbox = async () => {
     setInboxLoading(true);
     setInboxError(null);
@@ -69,7 +74,20 @@ const CEOCockpit: React.FC = () => {
     }
   };
 
-  useEffect(() => { loadInbox(); }, []);
+  const loadCRCNews = async () => {
+    setCrcLoading(true);
+    setCrcError(null);
+    try {
+      const data = await cockpitService.fetchCRCNews();
+      setCrcNews(data);
+    } catch (err: any) {
+      setCrcError(err.message || 'Failed to load CRC news');
+    } finally {
+      setCrcLoading(false);
+    }
+  };
+
+  useEffect(() => { loadInbox(); loadCRCNews(); }, []);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -170,7 +188,73 @@ const CEOCockpit: React.FC = () => {
           </CockpitCard>
         </CockpitSection>
 
-        {/* Row 2: Marketing, Investors, Memory */}
+        {/* Row 2: CRC Intelligence (full width) */}
+        <CockpitSection columns={1}>
+          <CockpitCard
+            title="CRC Intelligence"
+            subtitle="Latest colorectal cancer research & screening news"
+            icon={<Newspaper size={18} />}
+            status={crcError ? 'pending' : 'active'}
+          >
+            {crcLoading ? (
+              <div className="flex items-center justify-center py-6">
+                <RefreshCw size={20} className="animate-spin text-gray-400" />
+                <span className="ml-2 text-xs text-gray-400">Loading CRC news...</span>
+              </div>
+            ) : crcError ? (
+              <div className="flex flex-col items-center justify-center py-6 text-center">
+                <AlertCircle size={24} className="text-amber-400 mb-2" />
+                <p className="text-xs text-amber-600 dark:text-amber-400">{crcError}</p>
+                <button onClick={loadCRCNews} className="mt-2 text-[11px] text-blue-600 dark:text-blue-400 hover:underline">Retry</button>
+              </div>
+            ) : crcNews.length === 0 ? (
+              <p className="text-gray-400 text-xs text-center py-4">No CRC news available.</p>
+            ) : (
+              <div className="space-y-4">
+                {crcNews.map((item) => (
+                  <div key={item.id} className="border-b border-gray-100 dark:border-gray-700 pb-4 last:border-0 last:pb-0">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1">
+                        <a
+                          href={item.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs font-medium text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors line-clamp-2"
+                        >
+                          {item.title}
+                        </a>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-[11px] text-blue-600 dark:text-blue-400 font-medium">{item.source}</span>
+                          {item.published_at && (
+                            <span className="text-[10px] text-gray-400">{formatDateTime(item.published_at)}</span>
+                          )}
+                        </div>
+                        {item.summary && (
+                          <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-1.5 line-clamp-2">{item.summary}</p>
+                        )}
+                      </div>
+                      {item.relevance_score != null && (
+                        <span className="shrink-0 inline-block bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 text-[10px] px-2 py-0.5 rounded font-medium">
+                          {item.relevance_score}%
+                        </span>
+                      )}
+                    </div>
+                    <div className="mt-2 flex gap-2">
+                      <span className="inline-block bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 text-[10px] px-2 py-0.5 rounded">
+                        Suggested: Share on LinkedIn
+                      </span>
+                      <span className="inline-block bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 text-[10px] px-2 py-0.5 rounded">
+                        Clinic bulletin
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CockpitCard>
+        </CockpitSection>
+
+        {/* Row 3: Marketing, Investors, Memory */}
         <CockpitSection>
           {/* Marketing Materials */}
           <CockpitCard

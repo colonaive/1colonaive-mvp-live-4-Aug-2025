@@ -24,6 +24,16 @@ export interface InboxEmail {
   isRead: boolean;
 }
 
+export interface CRCNewsItem {
+  id: string;
+  title: string;
+  url: string;
+  source: string;
+  summary: string | null;
+  published_at: string | null;
+  relevance_score: number | null;
+}
+
 export const cockpitService = {
   getRegulatoryStatus: (): RegulatoryItem[] => regulatoryItems,
   getClinicalTrials: (): ClinicalTrial[] => clinicalTrials,
@@ -42,6 +52,22 @@ export const cockpitService = {
       sender: m.from?.emailAddress?.name || m.from?.emailAddress?.address || 'Unknown',
       receivedDateTime: m.receivedDateTime,
       isRead: m.isRead ?? true,
+    }));
+  },
+
+  fetchCRCNews: async (): Promise<CRCNewsItem[]> => {
+    const res = await fetch('/.netlify/functions/list_crc_news?limit=5');
+    if (!res.ok) throw new Error(`CRC news fetch failed (${res.status})`);
+    const data = await res.json();
+    const items: any[] = data.items || [];
+    return items.map((item) => ({
+      id: item.id,
+      title: item.title || '(untitled)',
+      url: item.url || '',
+      source: item.source || 'Unknown',
+      summary: item.summary || null,
+      published_at: item.published_at || null,
+      relevance_score: item.relevance_score ?? null,
     }));
   },
 
