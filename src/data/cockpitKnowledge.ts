@@ -1,4 +1,4 @@
-// CEO Cockpit — Static knowledge data extracted from agent/agent/knowledge/*.md
+// CEO Cockpit — Static knowledge data extracted from agent/knowledge/*.md
 // Update this file when knowledge files change.
 
 export interface RegulatoryItem {

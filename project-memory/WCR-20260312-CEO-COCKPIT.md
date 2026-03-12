@@ -19,7 +19,7 @@ Created a CEO Cockpit executive dashboard at `/admin/ceo-cockpit`, protected beh
 
 | File | Purpose |
 |------|---------|
-| `src/data/cockpitKnowledge.ts` | Static typed data extracted from `agent/agent/knowledge/*.md` files |
+| `src/data/cockpitKnowledge.ts` | Static typed data extracted from `agent/knowledge/*.md` files |
 | `src/components/cockpit/CockpitCard.tsx` | Reusable executive card component with status indicators |
 | `src/components/cockpit/CockpitSection.tsx` | Responsive grid layout wrapper (1/2/3 columns) |
 | `src/services/cockpitService.ts` | Service layer exposing knowledge data accessors |
@@ -48,7 +48,7 @@ Created a CEO Cockpit executive dashboard at `/admin/ceo-cockpit`, protected beh
 
 ## Design Decisions
 
-- **Static data approach:** Knowledge files in `agent/agent/knowledge/` are outside the Vite build pipeline. Extracted data into a typed TypeScript file (`cockpitKnowledge.ts`) following existing patterns (`clinicDatabase.ts`, `pillars.ts`).
+- **Static data approach:** Knowledge files in `agent/knowledge/` are outside the Vite build pipeline. Extracted data into a typed TypeScript file (`cockpitKnowledge.ts`) following existing patterns (`clinicDatabase.ts`, `pillars.ts`).
 - **Dark mode compatible:** All components use Tailwind `dark:` variants matching the existing class-based strategy.
 - **Brand gradient:** Card headers use `from-[#0A385A] to-[#0F766E]` matching the COLONAiVE brand palette.
 - **Service abstraction:** `cockpitService.ts` provides a stable API — when real integrations (Outlook, GitHub) are added, only the service changes.
