@@ -47,3 +47,44 @@ Common issues to resolve automatically:
 • JSX return type errors
 
 Only after all three checks pass may the agent proceed to step 6 (commit).
+
+
+FINALIZATION AND ARCHIVAL
+
+After completing a development cycle, agents must perform the following steps:
+
+1. Generate Window Closure Record
+
+Create a WCR summarizing:
+
+• tasks performed
+• files modified
+• commands executed
+• deployment verification
+• recommended next actions
+
+Save to:
+
+project-memory/WCR-{timestamp}.md
+
+
+2. Create Repository Snapshot
+
+Generate a repository archive so the project state can be shared with external AI contexts.
+
+Procedure:
+
+zip -r COLONAiVE-REPO-{timestamp}.zip .
+
+Place the archive in the project root folder.
+
+Purpose:
+
+• share repository with Master Chat context
+• maintain historical checkpoints
+• support AI knowledge synchronization
+
+
+3. Confirm snapshot creation
+
+Verify the ZIP archive exists and report the filename in the closure report.
