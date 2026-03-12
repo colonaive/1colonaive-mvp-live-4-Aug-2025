@@ -22,7 +22,9 @@
       "Bash(rm:*)",
       "Bash(copy:*)",
       "Bash(curl:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(wc -l /c/GIT/colonaive-mvp-live/agent/agent/knowledge/*.md)",
+      "WebFetch(domain:www.colonaive.ai)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"
