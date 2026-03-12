@@ -22,6 +22,7 @@ export interface InboxEmail {
   sender: string;
   receivedDateTime: string;
   isRead: boolean;
+  preview: string;
 }
 
 export interface CRCNewsItem {
@@ -45,13 +46,15 @@ export const cockpitService = {
     const res = await fetch('/.netlify/functions/outlook-inbox');
     if (!res.ok) throw new Error(`Inbox fetch failed (${res.status})`);
     const data = await res.json();
-    const messages: any[] = data.value || [];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- external API response
+    const messages = ((data as any).value || []) as any[];
     return messages.map((m) => ({
-      id: m.id,
-      subject: m.subject || '(no subject)',
-      sender: m.from?.emailAddress?.name || m.from?.emailAddress?.address || 'Unknown',
-      receivedDateTime: m.receivedDateTime,
-      isRead: m.isRead ?? true,
+      id: m.id as string,
+      subject: (m.subject as string) || '(no subject)',
+      sender: (m.sender || m.from?.emailAddress?.name || m.from?.emailAddress?.address || 'Unknown') as string,
+      receivedDateTime: m.receivedDateTime as string,
+      isRead: (m.isRead ?? true) as boolean,
+      preview: (m.preview || '') as string,
     }));
   },
 
@@ -59,7 +62,8 @@ export const cockpitService = {
     const res = await fetch('/.netlify/functions/list_crc_news?limit=5');
     if (!res.ok) throw new Error(`CRC news fetch failed (${res.status})`);
     const data = await res.json();
-    const items: any[] = data.items || [];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- external API response
+    const items = ((data as any).items || []) as any[];
     return items.map((item) => ({
       id: item.id,
       title: item.title || '(untitled)',

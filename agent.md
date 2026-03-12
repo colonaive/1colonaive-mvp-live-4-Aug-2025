@@ -91,6 +91,31 @@ Closure reports must include:
 • deployment verification
 • recommended next actions
 
+GLOBAL CODE QUALITY POLICY
+
+All agents must perform code validation before committing changes.
+
+Required checks (in order):
+
+1. npm run build — must exit 0, no errors
+2. npm run lint — must exit 0, no errors
+3. npx tsc --noEmit — must report zero TypeScript errors
+
+Agents must automatically fix any errors detected before proceeding.
+
+Common auto-fixable issues:
+
+• missing or incorrect imports
+• unused variables (remove them)
+• type mismatches (correct the type annotation)
+• unresolved module paths
+• ESLint formatting violations (run eslint --fix)
+
+No deployment should occur if any check still fails after fix attempts.
+
+If an error cannot be auto-resolved, the agent must report it and halt before committing.
+
+
 SESSION DOCUMENTATION
 
 After every completed development task, generate a Window Closure Record using the window-closure-record skill and save it in the project-memory folder.

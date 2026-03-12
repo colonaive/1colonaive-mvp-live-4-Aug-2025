@@ -67,8 +67,8 @@ const CEOCockpit: React.FC = () => {
     try {
       const data = await cockpitService.fetchInboxEmails();
       setEmails(data);
-    } catch (err: any) {
-      setInboxError(err.message || 'Failed to load emails');
+    } catch (err: unknown) {
+      setInboxError(err instanceof Error ? err.message : 'Failed to load emails');
     } finally {
       setInboxLoading(false);
     }
@@ -80,8 +80,8 @@ const CEOCockpit: React.FC = () => {
     try {
       const data = await cockpitService.fetchCRCNews();
       setCrcNews(data);
-    } catch (err: any) {
-      setCrcError(err.message || 'Failed to load CRC news');
+    } catch (err: unknown) {
+      setCrcError(err instanceof Error ? err.message : 'Failed to load CRC news');
     } finally {
       setCrcLoading(false);
     }
@@ -123,11 +123,11 @@ const CEOCockpit: React.FC = () => {
             ) : emails.length === 0 ? (
               <p className="text-gray-400 text-xs text-center py-4">No emails found.</p>
             ) : (
-              <div className="space-y-2.5 max-h-72 overflow-y-auto">
+              <div className="space-y-3 max-h-96 overflow-y-auto">
                 {emails.map((e) => (
                   <div
                     key={e.id}
-                    className={`border-b border-gray-100 dark:border-gray-700 pb-2.5 last:border-0 last:pb-0 ${
+                    className={`border-b border-gray-100 dark:border-gray-700 pb-3 last:border-0 last:pb-0 ${
                       !e.isRead ? 'pl-2 border-l-2 border-l-blue-500' : ''
                     }`}
                   >
@@ -138,6 +138,9 @@ const CEOCockpit: React.FC = () => {
                       <span className="text-[11px] text-gray-500 dark:text-gray-400 truncate max-w-[60%]">{e.sender}</span>
                       <span className="text-[10px] text-gray-400 dark:text-gray-500 whitespace-nowrap">{formatDateTime(e.receivedDateTime)}</span>
                     </div>
+                    {e.preview && (
+                      <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-1 line-clamp-2">{e.preview}</p>
+                    )}
                   </div>
                 ))}
               </div>
