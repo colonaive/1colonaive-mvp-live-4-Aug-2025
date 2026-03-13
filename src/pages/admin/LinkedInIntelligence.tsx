@@ -13,8 +13,10 @@ import {
   ExternalLink,
   BarChart3,
   X,
+  Radar,
 } from 'lucide-react';
 import { cockpitService, type LinkedInPost } from '@/services/cockpitService';
+import { competitiveIntelligenceService } from '@/services/competitiveIntelligenceService';
 import { useNavigate } from 'react-router-dom';
 
 /* ── toast notification ── */
@@ -175,6 +177,9 @@ const LinkedInIntelligence: React.FC = () => {
   const [manualText, setManualText] = useState('');
   const [manualGenerating, setManualGenerating] = useState(false);
 
+  // Radar generation state
+  const [radarGenerating, setRadarGenerating] = useState(false);
+
   // Editor state — all fields synced live to preview
   const [editTitle, setEditTitle] = useState('');
   const [editContent, setEditContent] = useState('');
@@ -323,6 +328,24 @@ const LinkedInIntelligence: React.FC = () => {
     }
   };
 
+  const handleRadarGenerate = async () => {
+    setRadarGenerating(true);
+    addToast('Generating posts from Radar signals...', 'info');
+    try {
+      const result = await competitiveIntelligenceService.generateRadarLinkedInPosts();
+      if (result.ok) {
+        await loadPosts();
+        addToast(`Generated ${result.generated || 0} post(s) from ${result.scanned || 0} radar signals.`, 'success');
+      } else {
+        addToast('Radar generation returned no results', 'error');
+      }
+    } catch (err: unknown) {
+      addToast(err instanceof Error ? err.message : 'Radar generation failed', 'error');
+    } finally {
+      setRadarGenerating(false);
+    }
+  };
+
   const handleManualGenerate = async () => {
     if (!manualUrl && !manualText) {
       addToast('Paste a URL or article text first.', 'error');
@@ -425,6 +448,33 @@ const LinkedInIntelligence: React.FC = () => {
                   )}
                   {manualGenerating ? 'Generating...' : 'Generate LinkedIn Post'}
                 </button>
+              </div>
+            </div>
+
+            {/* Radar Intelligence Posts */}
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+              <div className="p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <Radar size={14} className="text-red-500" />
+                  <h2 className="text-sm font-semibold text-gray-900 dark:text-white">
+                    Radar Intelligence Posts
+                  </h2>
+                </div>
+                <button
+                  onClick={handleRadarGenerate}
+                  disabled={radarGenerating}
+                  className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-medium transition-colors disabled:opacity-50"
+                >
+                  {radarGenerating ? (
+                    <RefreshCw size={14} className="animate-spin" />
+                  ) : (
+                    <Radar size={14} />
+                  )}
+                  {radarGenerating ? 'Scanning Radar...' : 'Generate From Radar'}
+                </button>
+                <p className="text-[10px] text-gray-400 mt-2 text-center">
+                  Scans signals with radar score 10+ and creates LinkedIn drafts
+                </p>
               </div>
             </div>
 

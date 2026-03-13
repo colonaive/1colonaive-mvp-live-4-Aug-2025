@@ -23,6 +23,7 @@ import CRCRadar from './pages/admin/CRCRadar';
 
 // Public Research
 import ResearchRadar from './pages/ResearchRadar';
+import TechnologyLandscape from './pages/TechnologyLandscape';
 
 
 // ✅ Verified CRC News (two-column, AI summaries)
@@ -258,6 +259,7 @@ const MainRoutes = () => {
 
           {/* Public Research Radar */}
           <Route path="/research" element={<ResearchRadar />} />
+          <Route path="/technology-landscape" element={<TechnologyLandscape />} />
 
           {/* Convenience redirects */}
           <Route path="/clinics" element={<Navigate to="/find-a-gp" replace />} />

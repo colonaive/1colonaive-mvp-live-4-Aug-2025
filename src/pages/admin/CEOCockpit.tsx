@@ -15,12 +15,16 @@ import {
   ChevronUp,
   Linkedin,
   Radar,
+  Target,
+  Zap,
+  Globe,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import CockpitCard from '@/components/cockpit/CockpitCard';
 import CockpitSection from '@/components/cockpit/CockpitSection';
 import { cockpitService, type InboxEmail, type CRCNewsItem, type ExecutiveBriefingSummary, type LinkedInPost } from '@/services/cockpitService';
 import { radarService, type RadarSignal } from '@/services/radarService';
+import { competitiveIntelligenceService, type CompetitorSignal, type EarlyWarningSignal, type TechnologyTrend } from '@/services/competitiveIntelligenceService';
 import { classifySignal, getSignalColor, getSignalLabel } from '@/radar/scoring/radarScore';
 
 const today = new Date().toLocaleDateString('en-SG', {
@@ -80,6 +84,29 @@ const CEOCockpit: React.FC = () => {
 
   const [radarSignals, setRadarSignals] = useState<RadarSignal[]>([]);
   const [radarLoading, setRadarLoading] = useState(true);
+
+  const [compSignals, setCompSignals] = useState<CompetitorSignal[]>([]);
+  const [earlyWarnings, setEarlyWarnings] = useState<EarlyWarningSignal[]>([]);
+  const [techTrends, setTechTrends] = useState<TechnologyTrend[]>([]);
+  const [compLoading, setCompLoading] = useState(true);
+
+  const loadCompetitiveIntel = async () => {
+    setCompLoading(true);
+    try {
+      const [cs, ew, tt] = await Promise.all([
+        competitiveIntelligenceService.fetchCompetitorSignals(5),
+        competitiveIntelligenceService.fetchEarlyWarningSignals(5),
+        competitiveIntelligenceService.fetchTechnologyTrends(),
+      ]);
+      setCompSignals(cs);
+      setEarlyWarnings(ew);
+      setTechTrends(tt);
+    } catch {
+      // silent fail — supplementary
+    } finally {
+      setCompLoading(false);
+    }
+  };
 
   const loadRadar = async () => {
     setRadarLoading(true);
@@ -147,7 +174,7 @@ const CEOCockpit: React.FC = () => {
     }
   };
 
-  useEffect(() => { loadInbox(); loadCRCNews(); loadBriefing(); loadLinkedIn(); loadRadar(); }, []);
+  useEffect(() => { loadInbox(); loadCRCNews(); loadBriefing(); loadLinkedIn(); loadRadar(); loadCompetitiveIntel(); }, []);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -482,6 +509,128 @@ const CEOCockpit: React.FC = () => {
                   className="px-4 py-2 rounded-lg bg-[#0A385A] hover:bg-[#0A385A]/90 text-white text-xs font-medium transition-colors"
                 >
                   Open Research Radar
+                </button>
+              </div>
+            )}
+          </CockpitCard>
+        </CockpitSection>
+
+        {/* Row: Competitive Intelligence */}
+        <CockpitSection>
+          {/* Early Warning Signals */}
+          <CockpitCard
+            title="Early Warning Signals"
+            subtitle="Pre-media research detections"
+            icon={<Zap size={18} />}
+            status={compLoading ? 'pending' : earlyWarnings.length > 0 ? 'active' : 'placeholder'}
+          >
+            {compLoading ? (
+              <div className="flex items-center justify-center py-6">
+                <RefreshCw size={20} className="animate-spin text-gray-400" />
+                <span className="ml-2 text-xs text-gray-400">Loading signals...</span>
+              </div>
+            ) : earlyWarnings.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-6 text-center">
+                <Zap size={32} className="text-gray-300 dark:text-gray-600 mb-3" />
+                <p className="text-gray-400 text-xs">No early warning signals detected yet.</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {earlyWarnings.slice(0, 4).map((ew) => (
+                  <div key={ew.id} className="border-b border-gray-100 dark:border-gray-700 pb-2 last:border-0 last:pb-0">
+                    <div className="flex items-start justify-between gap-2">
+                      <a href={ew.source_link || '#'} target="_blank" rel="noopener noreferrer" className="text-xs font-medium text-gray-900 dark:text-white hover:text-blue-600 line-clamp-2 flex-1">
+                        {ew.title}
+                      </a>
+                      <span className={`shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded ${ew.confidence_score >= 70 ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'}`}>
+                        {ew.confidence_score}%
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 mt-1 text-[10px] text-gray-400">
+                      <span>{ew.source}</span>
+                      {!ew.in_media && <span className="text-red-500 font-medium">NOT IN MEDIA</span>}
+                    </div>
+                    {ew.recommended_action && (
+                      <p className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-1 italic">{ew.recommended_action}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </CockpitCard>
+
+          {/* Competitor Activity */}
+          <CockpitCard
+            title="Competitor Activity"
+            subtitle="Latest competitive signals"
+            icon={<Target size={18} />}
+            status={compLoading ? 'pending' : compSignals.length > 0 ? 'active' : 'placeholder'}
+          >
+            {compLoading ? (
+              <div className="flex items-center justify-center py-6">
+                <RefreshCw size={20} className="animate-spin text-gray-400" />
+                <span className="ml-2 text-xs text-gray-400">Loading...</span>
+              </div>
+            ) : compSignals.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-6 text-center">
+                <Target size={32} className="text-gray-300 dark:text-gray-600 mb-3" />
+                <p className="text-gray-400 text-xs">No competitor signals yet.</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {compSignals.slice(0, 4).map((cs) => (
+                  <div key={cs.id} className="border-b border-gray-100 dark:border-gray-700 pb-2 last:border-0 last:pb-0">
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="text-xs font-medium text-gray-900 dark:text-white line-clamp-2 flex-1">{cs.title}</p>
+                      <span className="shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+                        {cs.company_name}
+                      </span>
+                    </div>
+                    {cs.description && (
+                      <p className="text-[10px] text-gray-400 mt-1 line-clamp-1">{cs.description}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </CockpitCard>
+
+          {/* Technology Trends */}
+          <CockpitCard
+            title="Technology Trends"
+            subtitle="Detected from research signals"
+            icon={<Globe size={18} />}
+            status={compLoading ? 'pending' : techTrends.length > 0 ? 'active' : 'placeholder'}
+          >
+            {compLoading ? (
+              <div className="flex items-center justify-center py-6">
+                <RefreshCw size={20} className="animate-spin text-gray-400" />
+                <span className="ml-2 text-xs text-gray-400">Loading...</span>
+              </div>
+            ) : techTrends.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-6 text-center">
+                <Globe size={32} className="text-gray-300 dark:text-gray-600 mb-3" />
+                <p className="text-gray-400 text-xs">No technology trends detected yet.</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {techTrends.slice(0, 5).map((tt) => (
+                  <div key={tt.id} className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <p className="text-xs font-medium text-gray-900 dark:text-white">{tt.trend_name}</p>
+                      <p className="text-[10px] text-gray-400">{tt.evidence_count} signal(s)</p>
+                    </div>
+                    <div className="w-16 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                      <div className="h-full bg-teal-500 rounded-full" style={{ width: `${Math.min(tt.trend_score, 100)}%` }} />
+                    </div>
+                    <span className="text-[10px] font-medium text-gray-500 ml-2 w-8 text-right">{tt.trend_score}%</span>
+                  </div>
+                ))}
+                <button
+                  onClick={() => navigate('/technology-landscape')}
+                  className="px-4 py-2 rounded-lg bg-[#0A385A] hover:bg-[#0A385A]/90 text-white text-xs font-medium transition-colors mt-2"
+                >
+                  View Technology Landscape
                 </button>
               </div>
             )}
