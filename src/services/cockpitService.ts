@@ -163,6 +163,15 @@ export const cockpitService = {
     return res.json();
   },
 
+  generateFromManualSource: async (url?: string, text?: string): Promise<{ ok: boolean; post?: LinkedInPost; error?: string }> => {
+    const res = await fetch('/.netlify/functions/linkedin_manual_source', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url, text }),
+    });
+    return res.json();
+  },
+
   publishToLinkedIn: async (postId: string, text: string, articleUrl?: string, imageUrl?: string): Promise<{ success: boolean; linkedin_post_url?: string; error?: string }> => {
     const res = await fetch('/.netlify/functions/linkedin_publish', {
       method: 'POST',

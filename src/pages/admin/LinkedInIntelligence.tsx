@@ -170,6 +170,11 @@ const LinkedInIntelligence: React.FC = () => {
   const [generatingImage, setGeneratingImage] = useState(false);
   const [toasts, setToasts] = useState<Toast[]>([]);
 
+  // Manual source state
+  const [manualUrl, setManualUrl] = useState('');
+  const [manualText, setManualText] = useState('');
+  const [manualGenerating, setManualGenerating] = useState(false);
+
   // Editor state — all fields synced live to preview
   const [editTitle, setEditTitle] = useState('');
   const [editContent, setEditContent] = useState('');
@@ -318,6 +323,34 @@ const LinkedInIntelligence: React.FC = () => {
     }
   };
 
+  const handleManualGenerate = async () => {
+    if (!manualUrl && !manualText) {
+      addToast('Paste a URL or article text first.', 'error');
+      return;
+    }
+    setManualGenerating(true);
+    addToast('Generating post from manual source...', 'info');
+    try {
+      const result = await cockpitService.generateFromManualSource(
+        manualUrl || undefined,
+        manualText || undefined,
+      );
+      if (result.ok && result.post) {
+        await loadPosts();
+        setSelectedId(result.post.id);
+        setManualUrl('');
+        setManualText('');
+        addToast('Post generated! Select it in the list to edit.', 'success');
+      } else {
+        addToast(result.error || 'Generation failed', 'error');
+      }
+    } catch (err: unknown) {
+      addToast(err instanceof Error ? err.message : 'Manual generation failed', 'error');
+    } finally {
+      setManualGenerating(false);
+    }
+  };
+
   const postTypeLabel = (post: LinkedInPost): string => {
     if (post.colonaiq_context) return 'Blood-Based Screening';
     if ((post.relevance_score || 0) >= 50) return 'High-Relevance Research';
@@ -357,8 +390,46 @@ const LinkedInIntelligence: React.FC = () => {
       {/* Body — three-panel */}
       <div className="max-w-[1600px] mx-auto px-4 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
-          {/* LEFT: Post Opportunities */}
-          <div className="lg:col-span-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+          {/* LEFT: Manual Source + Post Opportunities */}
+          <div className="lg:col-span-3 space-y-4">
+            {/* Manual Post Source */}
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+              <div className="p-4">
+                <h2 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
+                  Manual Post Source
+                </h2>
+                <input
+                  type="text"
+                  placeholder="Paste article URL"
+                  value={manualUrl}
+                  onChange={(e) => setManualUrl(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-[#0F766E] focus:border-transparent outline-none mb-2"
+                />
+                <div className="text-center text-[10px] text-gray-400 mb-2">or</div>
+                <textarea
+                  placeholder="Paste article text"
+                  value={manualText}
+                  onChange={(e) => setManualText(e.target.value)}
+                  rows={4}
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-[#0F766E] focus:border-transparent outline-none resize-y mb-3"
+                />
+                <button
+                  onClick={handleManualGenerate}
+                  disabled={manualGenerating || (!manualUrl && !manualText)}
+                  className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-[#0077B5] hover:bg-[#006097] text-white text-xs font-medium transition-colors disabled:opacity-50"
+                >
+                  {manualGenerating ? (
+                    <RefreshCw size={14} className="animate-spin" />
+                  ) : (
+                    <Sparkles size={14} />
+                  )}
+                  {manualGenerating ? 'Generating...' : 'Generate LinkedIn Post'}
+                </button>
+              </div>
+            </div>
+
+            {/* Curated Post Opportunities */}
+          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
             <div className="p-4 border-b border-gray-100 dark:border-gray-700">
               <h2 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
                 Curated Post Opportunities
@@ -467,6 +538,7 @@ const LinkedInIntelligence: React.FC = () => {
                 ))
               )}
             </div>
+          </div>
           </div>
 
           {/* CENTER: Editor */}
