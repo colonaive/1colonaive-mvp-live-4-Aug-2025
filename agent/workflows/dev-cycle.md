@@ -88,3 +88,59 @@ npx netlify deploy --prod
 2. Verify key pages load on production
 3. Test any new/modified API endpoints
 4. Generate Window Closure Record if session-ending work
+
+---
+
+## Session Completion Protocol
+
+Every major implementation session MUST end with the following steps:
+
+### 1. Generate a Window Closure Record (WCR)
+
+**File path:**
+```
+project-memory/WCR-{YYYY-MM-DD}-{topic}.md
+```
+
+The WCR must contain:
+- Date
+- Session topic
+- Summary of changes
+- Files modified
+- Infrastructure updates
+- Deployment status
+- Next recommended actions
+
+### 2. Create a repository snapshot ZIP
+
+**Command:**
+```powershell
+$ts = Get-Date -Format "yyyy-MM-dd-HHmm"
+git archive --format=zip -o "COLONAiVE-REPO-$ts.zip" HEAD
+```
+
+Save ZIP in repo root.
+
+### 3. Commit both the WCR and snapshot
+
+```bash
+git add .
+git commit -m "Session archive: WCR + repo snapshot"
+git push origin main
+```
+
+### 4. Verify Netlify auto-deploy triggered
+
+Check Netlify dashboard or CLI to confirm the push triggered a new production deploy.
+
+---
+
+**This rule applies to ALL AGENTS including:**
+
+- Claude CTO
+- Codex Engineer
+- Gemini Research
+- Browser QA
+- Chief-of-Staff AI
+
+No session is considered complete until the WCR is written, the snapshot is created, and the commit is pushed.
