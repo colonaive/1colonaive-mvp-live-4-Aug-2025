@@ -29,8 +29,8 @@ async function getAccessToken() {
     const url = `https://login.microsoftonline.com/${tenant}/oauth2/v2.0/token`;
 
     const params = new URLSearchParams();
-    params.append("client_id", clientId);
-    params.append("client_secret", clientSecret);
+    params.append("client_id", clientId || "");
+    params.append("client_secret", clientSecret || "");
     params.append("scope", "https://graph.microsoft.com/.default");
     params.append("grant_type", "client_credentials");
 
@@ -39,7 +39,7 @@ async function getAccessToken() {
         body: params
     });
 
-    const data = await res.json();
+    const data: any = await res.json();
     return data.access_token;
 }
 

@@ -8,6 +8,10 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
+    "typecheck": "tsc --noEmit -p tsconfig.app.json",
+    "typecheck:functions": "tsc --noEmit -p tsconfig.functions.json",
+    "typecheck:all": "npm run typecheck && npm run typecheck:functions",
+    "prebuild": "npm run typecheck:functions",
     "dev:clean": "rimraf node_modules package-lock.json && npm i && npm run dev"
   },
   "dependencies": {

@@ -1,10 +1,7 @@
 // @ts-nocheck
-/**
- * Competitive Intelligence Radar — Scheduled Netlify Function
- *
- * Monitors competitor activity and technology trends in the CRC screening space.
- * Schedule: 0 */6 * * *  (every 6 hours)
- */
+// Competitive Intelligence Radar — Scheduled Netlify Function
+// Monitors competitor activity and technology trends in the CRC screening space.
+// Schedule: 0 */6 * * *  (every 6 hours)
 
 import { createClient } from '@supabase/supabase-js';
 

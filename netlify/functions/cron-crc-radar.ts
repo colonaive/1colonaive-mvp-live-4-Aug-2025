@@ -1,10 +1,7 @@
 // @ts-nocheck
-/**
- * CRC Research Radar — Scheduled Netlify Function
- * Runs every 6 hours to collect, score, deduplicate, and store CRC intelligence.
- *
- * Schedule: 0 */6 * * *
- */
+// CRC Research Radar — Scheduled Netlify Function
+// Runs every 6 hours to collect, score, deduplicate, and store CRC intelligence.
+// Schedule: 0 */6 * * *
 
 import { createClient } from '@supabase/supabase-js';
 

@@ -11,14 +11,19 @@ Production domain: `https://colonaive.com` (also `colonaive.ai`)
 ## Commands
 
 ```bash
-npm run dev          # Start Vite dev server (port 5173, opens browser)
-npm run build        # Production build → dist/
-npm run preview      # Preview production build locally (port 4173)
-npm run lint         # ESLint (flat config, TS + React rules)
-npm run dev:clean    # Nuke node_modules + lockfile, reinstall, then dev
+npm run dev               # Start Vite dev server (port 5173, opens browser)
+npm run build             # Production build → dist/ (runs typecheck:functions first via prebuild)
+npm run preview           # Preview production build locally (port 4173)
+npm run lint              # ESLint (flat config, TS + React rules)
+npm run typecheck         # Type-check frontend (src/)
+npm run typecheck:functions  # Type-check Netlify functions (netlify/functions/)
+npm run typecheck:all     # Type-check both frontend and functions
+npm run dev:clean         # Nuke node_modules + lockfile, reinstall, then dev
 ```
 
 There is no test runner configured. No unit/integration test commands exist.
+
+**Pre-deploy workflow:** `npm run build` automatically runs `typecheck:functions` via the `prebuild` hook. This ensures all Netlify function TypeScript errors are caught before deployment. When editing functions, always run `npm run typecheck:functions` to verify before committing.
 
 ## Architecture
 

@@ -1,15 +1,13 @@
 // @ts-nocheck
-/**
- * Early Signal Detection Engine — Scheduled Netlify Function
- *
- * Detects research signals before media amplification:
- * 1. Monitor PubMed for recent papers
- * 2. Check if they appear in Google News
- * 3. If paper exists in PubMed but NOT in news → flag as early_warning_signal
- * 4. Generate strategic analysis for high-confidence signals
- *
- * Schedule: 0 */12 * * *  (every 12 hours)
- */
+// Early Signal Detection Engine — Scheduled Netlify Function
+//
+// Detects research signals before media amplification:
+// 1. Monitor PubMed for recent papers
+// 2. Check if they appear in Google News
+// 3. If paper exists in PubMed but NOT in news -> flag as early_warning_signal
+// 4. Generate strategic analysis for high-confidence signals
+//
+// Schedule: 0 */12 * * *  (every 12 hours)
 
 import { createClient } from '@supabase/supabase-js';
 
