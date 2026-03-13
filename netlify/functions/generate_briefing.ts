@@ -160,50 +160,52 @@ function buildBriefingHtml(date: string, sections: BriefingSection[]): string {
 
 /* ---------- email sender ---------- */
 
-async function sendBriefingEmail(subject: string, text: string, html: string): Promise<boolean> {
+async function sendBriefingEmail(subject: string, text: string, html: string): Promise<{ sent: boolean; error?: string }> {
   const apiKey = process.env.SENDGRID_API_KEY;
   const from = process.env.SENDGRID_FROM || 'info@colonaive.ai';
   const to = process.env.EXEC_BRIEFING_TO || 'admin@saversmed.com';
 
   if (!apiKey) {
-    console.error('SENDGRID_API_KEY not set — cannot send briefing email');
-    return false;
+    const msg = 'SENDGRID_API_KEY not set';
+    console.error(msg);
+    return { sent: false, error: msg };
   }
 
   if (!from) {
-    console.error('SENDGRID_FROM not set — cannot send briefing email');
-    return false;
+    const msg = 'SENDGRID_FROM not set';
+    console.error(msg);
+    return { sent: false, error: msg };
   }
 
-  console.log(`Sending briefing email to: ${to}, from: ${from}`);
+  console.log(`Sending briefing email to: ${to}, from: ${from}, apiKey starts with: ${apiKey.substring(0, 5)}...`);
 
   try {
     sgMail.setApiKey(apiKey);
 
-    const msg = {
+    const [response] = await sgMail.send({
       to,
       from: { email: from, name: 'COLONAiVE' },
       subject,
       text,
       html,
-    };
+    });
 
-    const [response] = await sgMail.send(msg);
     console.log(`SendGrid response status: ${response.statusCode}`);
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
       console.log('Briefing email sent successfully');
-      return true;
+      return { sent: true };
     }
 
-    console.error(`SendGrid unexpected status: ${response.statusCode}`);
-    return false;
+    const msg = `SendGrid unexpected status: ${response.statusCode}`;
+    console.error(msg);
+    return { sent: false, error: msg };
   } catch (e: any) {
-    console.error('SendGrid email error:', e?.message);
-    if (e?.response?.body) {
-      console.error('SendGrid error body:', JSON.stringify(e.response.body));
-    }
-    return false;
+    const errMsg = e?.message || 'Unknown error';
+    const errBody = e?.response?.body ? JSON.stringify(e.response.body) : '';
+    console.error('SendGrid email error:', errMsg);
+    if (errBody) console.error('SendGrid error body:', errBody);
+    return { sent: false, error: `${errMsg}${errBody ? ' | ' + errBody : ''}` };
   }
 }
 
@@ -296,7 +298,7 @@ export async function handler(event: any) {
 
     // Send email
     const emailSubject = `ColonAiVE Daily Executive Briefing — ${dateStr}`;
-    const emailSent = await sendBriefingEmail(emailSubject, content, html);
+    const emailResult = await sendBriefingEmail(emailSubject, content, html);
 
     return {
       statusCode: 200,
@@ -304,7 +306,8 @@ export async function handler(event: any) {
       body: JSON.stringify({
         ok: true,
         date: dateISO,
-        emailSent,
+        emailSent: emailResult.sent,
+        emailError: emailResult.error || null,
         sectionsCount: sections.length,
       }),
     };
