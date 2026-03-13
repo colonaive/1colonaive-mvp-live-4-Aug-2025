@@ -38,6 +38,10 @@ import { operationsEngine } from '@/chief-of-staff/operations/operationsEngine';
 import { investorGenerator } from '@/chief-of-staff/investors/investorGenerator';
 import { projectRegistry } from '@/chief-of-staff/projects/projectRegistry';
 import { strategyDigest, type WeeklyStrategyDigest } from '@/chief-of-staff/strategy/strategyDigest';
+import ActionCenterChat from '@/components/cockpit/ActionCenterChat';
+import { chatEngine } from '@/chief-of-staff/action-center/chatEngine';
+import { promptGenerator } from '@/chief-of-staff/action-center/promptGenerator';
+import { emailComposer } from '@/chief-of-staff/action-center/emailComposer';
 
 const today = new Date().toLocaleDateString('en-SG', {
   weekday: 'long',
@@ -229,6 +233,79 @@ const CEOCockpit: React.FC = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-8">
+
+        {/* === CEO ACTION CENTER === */}
+        <ActionCenterChat />
+
+        {/* === ACTION CENTER DASHBOARD WIDGET === */}
+        <CockpitSection>
+          <CockpitCard
+            title="Recent CEO Chats"
+            subtitle={`${chatEngine.getMessageCount()} messages in current session`}
+            icon={<ListChecks size={18} />}
+            status={chatEngine.getMessageCount() > 0 ? 'active' : 'pending'}
+          >
+            {chatEngine.getMessages().length === 0 ? (
+              <p className="text-gray-400 text-xs text-center py-4">No conversations yet. Use the Action Center above.</p>
+            ) : (
+              <div className="space-y-2 max-h-32 overflow-y-auto">
+                {chatEngine.getRecentMessages(5).map((msg) => (
+                  <div key={msg.id} className="text-[11px] text-gray-600 dark:text-gray-400 truncate">
+                    <span className={msg.role === 'ceo' ? 'text-teal-600 dark:text-teal-400 font-medium' : 'text-gray-500'}>
+                      {msg.role === 'ceo' ? 'CEO' : 'AI'}:
+                    </span>{' '}
+                    {msg.content.slice(0, 80)}{msg.content.length > 80 ? '...' : ''}
+                  </div>
+                ))}
+              </div>
+            )}
+          </CockpitCard>
+
+          <CockpitCard
+            title="Generated Prompts"
+            subtitle={`${promptGenerator.getHistory().length} prompts created`}
+            icon={<ClipboardList size={18} />}
+            status={promptGenerator.getHistory().length > 0 ? 'active' : 'pending'}
+          >
+            {promptGenerator.getHistory().length === 0 ? (
+              <p className="text-gray-400 text-xs text-center py-4">No AG prompts generated yet.</p>
+            ) : (
+              <div className="space-y-2">
+                {promptGenerator.getRecent(3).map((p) => (
+                  <div key={p.id} className="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-2 last:border-0 last:pb-0">
+                    <div className="flex-1">
+                      <p className="text-xs font-medium text-gray-900 dark:text-white truncate">{p.title}</p>
+                      <p className="text-[10px] text-gray-400">{p.status}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CockpitCard>
+
+          <CockpitCard
+            title="Draft Emails"
+            subtitle={`${emailComposer.getStats().total} total · ${emailComposer.getStats().sent} sent`}
+            icon={<Inbox size={18} />}
+            status={emailComposer.getStats().total > 0 ? 'active' : 'pending'}
+          >
+            {emailComposer.getAllDrafts().length === 0 ? (
+              <p className="text-gray-400 text-xs text-center py-4">No email drafts. Use "Draft email" in the Action Center.</p>
+            ) : (
+              <div className="space-y-2">
+                {emailComposer.getPendingDrafts().slice(0, 3).map((d) => (
+                  <div key={d.id} className="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-2 last:border-0 last:pb-0">
+                    <div className="flex-1">
+                      <p className="text-xs font-medium text-gray-900 dark:text-white truncate">{d.subject}</p>
+                      <p className="text-[10px] text-gray-400">{d.to || '(no recipient)'} · {d.status}</p>
+                    </div>
+                    {statusBadge(d.status)}
+                  </div>
+                ))}
+              </div>
+            )}
+          </CockpitCard>
+        </CockpitSection>
 
         {/* === CHIEF-OF-STAFF: Strategy Digest === */}
         {digest && (

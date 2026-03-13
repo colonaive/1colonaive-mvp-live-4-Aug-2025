@@ -112,16 +112,27 @@
 |----------|--------|-------------|
 | Project_COLONAiVE_Platform_Spec Updated 22 April 2025.docx | DOCX | Platform specification for public health initiative |
 
-## 10 — Operations & Logistics (6 documents)
+## 10 — Legal Agreements (6 documents)
 
-| Document | Format | Description |
-|----------|--------|-------------|
-| ADDENDUM NO. 1 TO COLLABORATION AGREEMENT 20 April 2025.pdf | PDF | Agreement addendum (signed) |
-| Business Consultancy Agreement Singlera-Chandramohan 1 April 2023.docx | DOCX | Original business consultancy agreement |
-| Distributor Agreement - Singlera and Saver's Med.docx | DOCX | Master distributor agreement |
-| Important Clauses for Exclusivity.docx | DOCX | Exclusivity clause analysis |
-| Pricing Tables.xlsx | XLSX | Product pricing structure |
-| Singlera-Chandra Business Development Term Sheet 20230626.docx | DOCX | Business development term sheet |
+> **Category: Critical** — Distributor protection, territory rights, and contractual obligations.
+> **KB Location:** `C:\COLONAiVE_MASTER_KB\00_Legal_Agreements\`
+
+| Document | Format | Description | Importance |
+|----------|--------|-------------|------------|
+| Distributor Agreement - Singlera and Saver's Med.docx | DOCX | Master distributor agreement — defines exclusive territory rights for Singapore, Philippines, India | **Critical** |
+| ADDENDUM NO. 1 TO COLLABORATION AGREEMENT 20 April 2025.pdf | PDF | Signed addendum to collaboration agreement — India territory expansion | **Critical** |
+| Business Consultancy Agreement Singlera-Chandramohan 1 April 2023.docx | DOCX | Original business consultancy agreement | High |
+| Singlera-Chandra Business Development Term Sheet 20230626.docx | DOCX | Business development term sheet | High |
+| Important Clauses for Exclusivity.docx | DOCX | Analysis of exclusivity clauses across agreements | High |
+| Pricing Tables.xlsx | XLSX | Product pricing structure (confidential) | **Critical** |
+
+### Key Legal Documents for NotebookLM
+
+The following should be added to the NotebookLM ingestion set:
+- Distributor Agreement - Singlera and Saver's Med.docx
+- ADDENDUM NO. 1 TO COLLABORATION AGREEMENT 20 April 2025.pdf
+
+## 11 — Operations & Logistics
 
 ---
 

@@ -21,3 +21,18 @@ export type { ConnectedProject, ProjectStatus } from './projects/projectRegistry
 
 export { strategyDigest } from './strategy/strategyDigest';
 export type { WeeklyStrategyDigest, StrategySection } from './strategy/strategyDigest';
+
+// Action Center
+export { chatEngine } from './action-center/chatEngine';
+export type { ChatMessage, ChatTranscript } from './action-center/chatEngine';
+
+export { actionRouter } from './action-center/actionRouter';
+export type { ActionType, RoutedAction } from './action-center/actionRouter';
+
+export { promptGenerator } from './action-center/promptGenerator';
+export type { AGPrompt } from './action-center/promptGenerator';
+
+export { emailComposer } from './action-center/emailComposer';
+export type { EmailDraft, EmailStatus } from './action-center/emailComposer';
+
+export { voiceInput } from './action-center/voiceInput';
