@@ -11,7 +11,6 @@
 
 import { createClient } from '@supabase/supabase-js';
 import fetch from 'node-fetch';
-import sgMail from '@sendgrid/mail';
 
 export const config = {
   schedule: '0 23 * * *',
@@ -158,54 +157,50 @@ function buildBriefingHtml(date: string, sections: BriefingSection[]): string {
   return html;
 }
 
-/* ---------- email sender ---------- */
+/* ---------- email sender (Resend) ---------- */
 
-async function sendBriefingEmail(subject: string, text: string, html: string): Promise<{ sent: boolean; error?: string }> {
-  const apiKey = process.env.SENDGRID_API_KEY;
+async function sendBriefingEmail(subject: string, _text: string, html: string): Promise<{ sent: boolean; error?: string }> {
+  const apiKey = process.env.RESEND_API_KEY || process.env.VITE_RESEND_API_KEY;
   const from = process.env.SENDGRID_FROM || 'info@colonaive.ai';
   const to = process.env.EXEC_BRIEFING_TO || 'admin@saversmed.com';
 
   if (!apiKey) {
-    const msg = 'SENDGRID_API_KEY not set';
+    const msg = 'RESEND_API_KEY not set — cannot send briefing email';
     console.error(msg);
     return { sent: false, error: msg };
   }
 
-  if (!from) {
-    const msg = 'SENDGRID_FROM not set';
-    console.error(msg);
-    return { sent: false, error: msg };
-  }
-
-  console.log(`Sending briefing email to: ${to}, from: ${from}, apiKey starts with: ${apiKey.substring(0, 5)}...`);
+  console.log(`Sending briefing email via Resend to: ${to}, from: ${from}`);
 
   try {
-    sgMail.setApiKey(apiKey);
-
-    const [response] = await sgMail.send({
-      to,
-      from: { email: from, name: 'COLONAiVE' },
-      subject,
-      text,
-      html,
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: `COLONAiVE <${from}>`,
+        to: [to],
+        subject,
+        html,
+      }),
     });
 
-    console.log(`SendGrid response status: ${response.statusCode}`);
+    const body: any = await res.json();
 
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      console.log('Briefing email sent successfully');
+    if (res.ok && body.id) {
+      console.log(`Resend email sent successfully, id: ${body.id}`);
       return { sent: true };
     }
 
-    const msg = `SendGrid unexpected status: ${response.statusCode}`;
-    console.error(msg);
-    return { sent: false, error: msg };
+    const errMsg = body?.message || body?.error || `Resend status ${res.status}`;
+    console.error('Resend error:', errMsg);
+    return { sent: false, error: errMsg };
   } catch (e: any) {
     const errMsg = e?.message || 'Unknown error';
-    const errBody = e?.response?.body ? JSON.stringify(e.response.body) : '';
-    console.error('SendGrid email error:', errMsg);
-    if (errBody) console.error('SendGrid error body:', errBody);
-    return { sent: false, error: `${errMsg}${errBody ? ' | ' + errBody : ''}` };
+    console.error('Resend email error:', errMsg);
+    return { sent: false, error: errMsg };
   }
 }
 
