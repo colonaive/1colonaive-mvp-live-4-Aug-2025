@@ -4,6 +4,8 @@ import { createClient } from '@supabase/supabase-js';
 // rss-parser types are messy for functions; ignore them.
 // @ts-ignore
 import Parser from "rss-parser";
+import { Readability } from '@mozilla/readability';
+import { JSDOM } from 'jsdom';
 
 const parser: any = new (Parser as any)({
   headers: { "User-Agent": "COLONAiVE/NewsFetcher" },
@@ -372,24 +374,43 @@ async function upsert(items: any[]) {
   }
 }
 
-// ---- METADATA EXTRACTION from article pages ----
-async function fetchArticleMetadata(url: string): Promise<{ summary: string | null; canonicalUrl: string | null }> {
+// ---- ARTICLE EXTRACTION with Readability + JSDOM ----
+async function fetchArticleContent(url: string): Promise<{
+  articleText: string | null;
+  summary: string | null;
+  canonicalUrl: string | null;
+}> {
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 5000);
+    const timeout = setTimeout(() => controller.abort(), 8000);
     const res = await fetch(url, {
       headers: { "User-Agent": "COLONAiVE/NewsFetcher" },
       signal: controller.signal,
       redirect: "follow",
     });
     clearTimeout(timeout);
-    if (!res.ok) return { summary: null, canonicalUrl: null };
+    if (!res.ok) return { articleText: null, summary: null, canonicalUrl: null };
 
     const html = await res.text();
-    // Only parse first 50KB to stay fast
-    const head = html.slice(0, 50000);
+    // Cap HTML to 200KB to avoid memory issues
+    const cappedHtml = html.slice(0, 200000);
 
-    // Extract summary from meta tags (priority order)
+    // Parse with JSDOM + Readability for full article text
+    let articleText: string | null = null;
+    try {
+      const dom = new JSDOM(cappedHtml, { url });
+      const reader = new Readability(dom.window.document);
+      const article = reader.parse();
+      if (article?.textContent) {
+        // Trim to first 5000 chars for summarization
+        articleText = article.textContent.replace(/\s+/g, ' ').trim().slice(0, 5000);
+      }
+    } catch {
+      // Readability parse failed — continue with meta fallback
+    }
+
+    // Extract summary from meta tags (fallback if Readability fails)
+    const head = cappedHtml.slice(0, 50000);
     let summary: string | null = null;
     const ogDesc = head.match(/<meta\s+(?:[^>]*?)property=["']og:description["']\s+content=["']([^"']+)["']/i)
       || head.match(/<meta\s+content=["']([^"']+)["']\s+(?:[^>]*?)property=["']og:description["']/i);
@@ -413,22 +434,23 @@ async function fetchArticleMetadata(url: string): Promise<{ summary: string | nu
       if (canonical?.[1]) canonicalUrl = canonical[1].trim();
     }
 
-    return { summary: summary || null, canonicalUrl: canonicalUrl || null };
+    return { articleText, summary: summary || null, canonicalUrl: canonicalUrl || null };
   } catch {
-    return { summary: null, canonicalUrl: null };
+    return { articleText: null, summary: null, canonicalUrl: null };
   }
 }
 
-async function aiSummary(title: string, text: string, useAI: boolean) {
-  // First try to get summary from the article page metadata
-  const snippet = (text || "").split(/[\.\n]/).slice(0, 3).join(". ").trim();
+async function aiSummary(title: string, text: string, articleText: string | null, useAI: boolean) {
+  // Use full article text (from Readability) if available, otherwise fall back to RSS snippet
+  const bestText = articleText || text;
+  const snippet = (bestText || "").split(/[\.\n]/).slice(0, 3).join(". ").trim();
 
   if (!useAI || !process.env.OPENAI_API_KEY) {
     return snippet || "CRC research article — open the original source for full details.";
   }
 
-  // If we have decent text, use AI to summarize
-  const inputText = snippet || title;
+  // Prefer full article text for AI summarization, fall back to snippet
+  const inputText = articleText || snippet || title;
   if (!inputText || inputText.length < 20) {
     return "CRC research article — open the original source for full details.";
   }
@@ -446,9 +468,9 @@ async function aiSummary(title: string, text: string, useAI: boolean) {
         {
           role: "system",
           content:
-            "Medical editor. Write a neutral 2–3 sentence summary for clinicians about colorectal cancer research, screening policy, or awareness. Never say 'summary unavailable'.",
+            "Medical editor. Write a neutral 2–3 sentence summary for clinicians about colorectal cancer research, screening policy, or awareness. Focus on key findings, clinical implications, and relevance to screening. Never say 'summary unavailable'.",
         },
-        { role: "user", content: `Title:\n${title}\n\nText:\n${inputText}\n\nWrite the summary.` },
+        { role: "user", content: `Title:\n${title}\n\nArticle text:\n${inputText.slice(0, 5000)}\n\nWrite a concise 2-3 sentence summary.` },
       ],
     }),
   });
@@ -494,10 +516,10 @@ export async function handler(event: any) {
       // Filter out low-value basic-science articles
       if (isLowValueArticle(title, text)) continue;
 
-      // Try to extract metadata (summary + canonical URL) from the article page
-      let articleMeta = { summary: null as string | null, canonicalUrl: null as string | null };
+      // Fetch full article content using Readability + meta extraction
+      let articleMeta = { articleText: null as string | null, summary: null as string | null, canonicalUrl: null as string | null };
       if (!FAST && link) {
-        articleMeta = await fetchArticleMetadata(link);
+        articleMeta = await fetchArticleContent(link);
       }
 
       // Use extracted meta summary if RSS text is thin
@@ -505,7 +527,8 @@ export async function handler(event: any) {
         ? `${text}\n${articleMeta.summary}`
         : text;
 
-      const summary = articleMeta.summary || await aiSummary(title, enrichedText, useAI);
+      // AI summary gets full article text from Readability when available
+      const summary = articleMeta.summary || await aiSummary(title, enrichedText, articleMeta.articleText, useAI);
 
       // Resolve canonical URL: prefer og:url/canonical over RSS redirect link
       const resolvedUrl = articleMeta.canonicalUrl || link;
