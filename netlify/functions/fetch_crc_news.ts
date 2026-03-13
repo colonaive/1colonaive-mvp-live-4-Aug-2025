@@ -4,8 +4,7 @@ import { createClient } from '@supabase/supabase-js';
 // rss-parser types are messy for functions; ignore them.
 // @ts-ignore
 import Parser from "rss-parser";
-import { Readability } from '@mozilla/readability';
-import { JSDOM } from 'jsdom';
+// Lightweight HTML text extraction (no heavy JSDOM dependency for serverless)
 
 const parser: any = new (Parser as any)({
   headers: { "User-Agent": "COLONAiVE/NewsFetcher" },
@@ -374,7 +373,26 @@ async function upsert(items: any[]) {
   }
 }
 
-// ---- ARTICLE EXTRACTION with Readability + JSDOM ----
+// ---- ARTICLE EXTRACTION — lightweight HTML text extraction ----
+function stripHtmlToText(html: string): string {
+  return html
+    // Remove script/style/noscript blocks
+    .replace(/<(script|style|noscript)[^>]*>[\s\S]*?<\/\1>/gi, '')
+    // Remove nav, header, footer, aside elements
+    .replace(/<(nav|header|footer|aside)[^>]*>[\s\S]*?<\/\1>/gi, '')
+    // Convert paragraph/heading breaks to newlines
+    .replace(/<\/(p|h[1-6]|div|li|br|tr)>/gi, '\n')
+    // Remove all remaining HTML tags
+    .replace(/<[^>]+>/g, ' ')
+    // Decode common HTML entities
+    .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&nbsp;/g, ' ')
+    // Collapse whitespace
+    .replace(/[ \t]+/g, ' ')
+    .replace(/\n\s*\n/g, '\n')
+    .trim();
+}
+
 async function fetchArticleContent(url: string): Promise<{
   articleText: string | null;
   summary: string | null;
@@ -382,7 +400,7 @@ async function fetchArticleContent(url: string): Promise<{
 }> {
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 8000);
+    const timeout = setTimeout(() => controller.abort(), 6000);
     const res = await fetch(url, {
       headers: { "User-Agent": "COLONAiVE/NewsFetcher" },
       signal: controller.signal,
@@ -392,24 +410,18 @@ async function fetchArticleContent(url: string): Promise<{
     if (!res.ok) return { articleText: null, summary: null, canonicalUrl: null };
 
     const html = await res.text();
-    // Cap HTML to 200KB to avoid memory issues
-    const cappedHtml = html.slice(0, 200000);
+    // Cap HTML to 100KB
+    const cappedHtml = html.slice(0, 100000);
 
-    // Parse with JSDOM + Readability for full article text
+    // Extract article text by stripping HTML
     let articleText: string | null = null;
-    try {
-      const dom = new JSDOM(cappedHtml, { url });
-      const reader = new Readability(dom.window.document);
-      const article = reader.parse();
-      if (article?.textContent) {
-        // Trim to first 5000 chars for summarization
-        articleText = article.textContent.replace(/\s+/g, ' ').trim().slice(0, 5000);
-      }
-    } catch {
-      // Readability parse failed — continue with meta fallback
+    const stripped = stripHtmlToText(cappedHtml);
+    if (stripped.length > 100) {
+      // Take first 5000 chars for summarization
+      articleText = stripped.slice(0, 5000);
     }
 
-    // Extract summary from meta tags (fallback if Readability fails)
+    // Extract summary from meta tags
     const head = cappedHtml.slice(0, 50000);
     let summary: string | null = null;
     const ogDesc = head.match(/<meta\s+(?:[^>]*?)property=["']og:description["']\s+content=["']([^"']+)["']/i)
