@@ -54,7 +54,7 @@ export async function handler(event: any) {
       };
     }
 
-    const authUrl = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&scope=r_liteprofile%20w_member_social`;
+    const authUrl = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&scope=openid%20profile%20w_member_social`;
 
     return {
       statusCode: 200,
@@ -111,16 +111,29 @@ export async function handler(event: any) {
     const expiresIn = tokenData.expires_in; // seconds
 
     // Step 2: Fetch profile to get person URN
+    // Try OpenID userinfo first (modern apps), fall back to /v2/me (legacy)
     let personUrn = '(could not retrieve — set manually)';
     let displayName = '';
     try {
-      const profileRes = await fetch('https://api.linkedin.com/v2/me', {
+      // OpenID Connect userinfo endpoint
+      const userinfoRes = await fetch('https://api.linkedin.com/v2/userinfo', {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
-      if (profileRes.ok) {
-        const profile = await profileRes.json();
-        personUrn = `urn:li:person:${profile.id}`;
-        displayName = `${profile.localizedFirstName || ''} ${profile.localizedLastName || ''}`.trim();
+      if (userinfoRes.ok) {
+        const userinfo = await userinfoRes.json();
+        // userinfo.sub is the member ID
+        personUrn = `urn:li:person:${userinfo.sub}`;
+        displayName = userinfo.name || `${userinfo.given_name || ''} ${userinfo.family_name || ''}`.trim();
+      } else {
+        // Fallback to legacy /v2/me
+        const profileRes = await fetch('https://api.linkedin.com/v2/me', {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        if (profileRes.ok) {
+          const profile = await profileRes.json();
+          personUrn = `urn:li:person:${profile.id}`;
+          displayName = `${profile.localizedFirstName || ''} ${profile.localizedLastName || ''}`.trim();
+        }
       }
     } catch (profileErr) {
       console.error('Profile fetch failed:', profileErr);
