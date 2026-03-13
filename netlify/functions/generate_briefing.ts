@@ -11,6 +11,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import fetch from 'node-fetch';
+import sgMail from '@sendgrid/mail';
 
 export const config = {
   schedule: '0 23 * * *',
@@ -162,37 +163,46 @@ function buildBriefingHtml(date: string, sections: BriefingSection[]): string {
 async function sendBriefingEmail(subject: string, text: string, html: string): Promise<boolean> {
   const apiKey = process.env.SENDGRID_API_KEY;
   const from = process.env.SENDGRID_FROM || 'info@colonaive.ai';
+  const to = process.env.EXEC_BRIEFING_TO || 'admin@saversmed.com';
+
   if (!apiKey) {
-    console.warn('SENDGRID_API_KEY not set — skipping email');
+    console.error('SENDGRID_API_KEY not set — cannot send briefing email');
     return false;
   }
 
-  try {
-    const res = await fetch('https://api.sendgrid.com/v3/mail/send', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        personalizations: [{ to: [{ email: 'admin@saversmed.com' }] }],
-        from: { email: from, name: 'COLONAiVE' },
-        subject,
-        content: [
-          { type: 'text/plain', value: text },
-          { type: 'text/html', value: html },
-        ],
-      }),
-    });
+  if (!from) {
+    console.error('SENDGRID_FROM not set — cannot send briefing email');
+    return false;
+  }
 
-    if (!res.ok) {
-      const msg = await res.text();
-      console.error('SendGrid error:', msg);
-      return false;
+  console.log(`Sending briefing email to: ${to}, from: ${from}`);
+
+  try {
+    sgMail.setApiKey(apiKey);
+
+    const msg = {
+      to,
+      from: { email: from, name: 'COLONAiVE' },
+      subject,
+      text,
+      html,
+    };
+
+    const [response] = await sgMail.send(msg);
+    console.log(`SendGrid response status: ${response.statusCode}`);
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      console.log('Briefing email sent successfully');
+      return true;
     }
-    return true;
+
+    console.error(`SendGrid unexpected status: ${response.statusCode}`);
+    return false;
   } catch (e: any) {
-    console.error('Email send error:', e?.message);
+    console.error('SendGrid email error:', e?.message);
+    if (e?.response?.body) {
+      console.error('SendGrid error body:', JSON.stringify(e.response.body));
+    }
     return false;
   }
 }
