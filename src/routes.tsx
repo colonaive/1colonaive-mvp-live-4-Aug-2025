@@ -19,6 +19,10 @@ import CSRPartnersAdminPage from './pages/admin/CSRPartnersAdminPage';
 import PartnerSpecialistsAdminPage from './pages/admin/PartnerSpecialistsAdminPage';
 import CEOCockpit from './pages/admin/CEOCockpit';
 import LinkedInIntelligence from './pages/admin/LinkedInIntelligence';
+import CRCRadar from './pages/admin/CRCRadar';
+
+// Public Research
+import ResearchRadar from './pages/ResearchRadar';
 
 
 // ✅ Verified CRC News (two-column, AI summaries)
@@ -252,6 +256,9 @@ const MainRoutes = () => {
           <Route path="/upcoming-clinics" element={<UpcomingClinicsPage />} />
 
 
+          {/* Public Research Radar */}
+          <Route path="/research" element={<ResearchRadar />} />
+
           {/* Convenience redirects */}
           <Route path="/clinics" element={<Navigate to="/find-a-gp" replace />} />
           <Route path="/choose-screening" element={<Navigate to="/get-screened" replace />} />
@@ -326,6 +333,10 @@ const MainRoutes = () => {
           <Route
             path="/admin/linkedin-intelligence"
             element={<ProtectedAdminRoute><LinkedInIntelligence /></ProtectedAdminRoute>}
+          />
+          <Route
+            path="/admin/crc-radar"
+            element={<ProtectedAdminRoute><CRCRadar /></ProtectedAdminRoute>}
           />
 
 

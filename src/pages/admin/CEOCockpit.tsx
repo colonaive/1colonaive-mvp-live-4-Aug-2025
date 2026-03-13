@@ -14,11 +14,14 @@ import {
   ChevronDown,
   ChevronUp,
   Linkedin,
+  Radar,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import CockpitCard from '@/components/cockpit/CockpitCard';
 import CockpitSection from '@/components/cockpit/CockpitSection';
 import { cockpitService, type InboxEmail, type CRCNewsItem, type ExecutiveBriefingSummary, type LinkedInPost } from '@/services/cockpitService';
+import { radarService, type RadarSignal } from '@/services/radarService';
+import { classifySignal, getSignalColor, getSignalLabel } from '@/radar/scoring/radarScore';
 
 const today = new Date().toLocaleDateString('en-SG', {
   weekday: 'long',
@@ -75,6 +78,21 @@ const CEOCockpit: React.FC = () => {
   const [linkedInPosts, setLinkedInPosts] = useState<LinkedInPost[]>([]);
   const [linkedInLoading, setLinkedInLoading] = useState(true);
 
+  const [radarSignals, setRadarSignals] = useState<RadarSignal[]>([]);
+  const [radarLoading, setRadarLoading] = useState(true);
+
+  const loadRadar = async () => {
+    setRadarLoading(true);
+    try {
+      const data = await radarService.fetchTopSignals(7, 5);
+      setRadarSignals(data);
+    } catch {
+      // silent fail — supplementary
+    } finally {
+      setRadarLoading(false);
+    }
+  };
+
   const loadBriefing = async () => {
     setBriefingLoading(true);
     try {
@@ -129,7 +147,7 @@ const CEOCockpit: React.FC = () => {
     }
   };
 
-  useEffect(() => { loadInbox(); loadCRCNews(); loadBriefing(); loadLinkedIn(); }, []);
+  useEffect(() => { loadInbox(); loadCRCNews(); loadBriefing(); loadLinkedIn(); loadRadar(); }, []);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -407,6 +425,63 @@ const CEOCockpit: React.FC = () => {
                   className="px-4 py-2 rounded-lg bg-[#0A385A] hover:bg-[#0A385A]/90 text-white text-xs font-medium transition-colors"
                 >
                   Open LinkedIn Intelligence
+                </button>
+              </div>
+            )}
+          </CockpitCard>
+        </CockpitSection>
+
+        {/* CRC Research Radar Widget */}
+        <CockpitSection columns={1}>
+          <CockpitCard
+            title="CRC Research Radar"
+            subtitle="Top intelligence signals this week"
+            icon={<Radar size={18} />}
+            status={radarLoading ? 'pending' : radarSignals.length > 0 ? 'active' : 'placeholder'}
+          >
+            {radarLoading ? (
+              <div className="flex items-center justify-center py-6">
+                <RefreshCw size={20} className="animate-spin text-gray-400" />
+                <span className="ml-2 text-xs text-gray-400">Loading radar signals...</span>
+              </div>
+            ) : radarSignals.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-6 text-center">
+                <Radar size={32} className="text-gray-300 dark:text-gray-600 mb-3" />
+                <p className="text-gray-400 dark:text-gray-500 text-xs">No radar signals detected yet.</p>
+              </div>
+            ) : (
+              <div>
+                <div className="space-y-3 mb-4">
+                  {radarSignals.slice(0, 3).map((signal) => {
+                    const level = classifySignal(signal.radar_score);
+                    const colorClass = getSignalColor(level);
+                    return (
+                      <div key={signal.id} className="flex items-start justify-between gap-3 border-b border-gray-100 dark:border-gray-700 pb-3 last:border-0 last:pb-0">
+                        <div className="flex-1">
+                          <a
+                            href={signal.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs font-medium text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 line-clamp-1"
+                          >
+                            {signal.headline || signal.title}
+                          </a>
+                          <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-1">
+                            {signal.journal || signal.source} {signal.publication_date ? `— ${new Date(signal.publication_date).toLocaleDateString('en-SG', { day: 'numeric', month: 'short' })}` : ''}
+                          </p>
+                        </div>
+                        <span className={`shrink-0 inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase ${colorClass}`}>
+                          {signal.radar_score} — {getSignalLabel(level)}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+                <button
+                  onClick={() => navigate('/admin/crc-radar')}
+                  className="px-4 py-2 rounded-lg bg-[#0A385A] hover:bg-[#0A385A]/90 text-white text-xs font-medium transition-colors"
+                >
+                  Open Research Radar
                 </button>
               </div>
             )}
