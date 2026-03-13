@@ -1,5 +1,12 @@
 // Chief-of-Staff — Chat Engine
 // Manages CEO ↔ AI conversation state, transcript storage, and message handling.
+// Supports contextual CTA actions attached to assistant messages.
+
+export type SuggestedAction = {
+  type: string;
+  label: string;
+  executed?: boolean;
+};
 
 export interface ChatMessage {
   id: string;
@@ -8,6 +15,7 @@ export interface ChatMessage {
   timestamp: string;
   contextTags?: string[];
   actionTaken?: string;
+  suggestedActions?: SuggestedAction[];
 }
 
 export interface ChatTranscript {
@@ -35,17 +43,27 @@ export const chatEngine = {
     return msg;
   },
 
-  /** Add an assistant response */
-  addResponse(content: string, actionTaken?: string): ChatMessage {
+  /** Add an assistant response with optional CTA buttons */
+  addResponse(content: string, actionTaken?: string, suggestedActions?: SuggestedAction[]): ChatMessage {
     const msg: ChatMessage = {
       id: `msg-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
       role: 'assistant',
       content,
       timestamp: new Date().toISOString(),
       actionTaken,
+      suggestedActions,
     };
     currentMessages.push(msg);
     return msg;
+  },
+
+  /** Mark a suggested action as executed on a specific message */
+  markActionExecuted(messageId: string, actionType: string): void {
+    const msg = currentMessages.find((m) => m.id === messageId);
+    if (msg?.suggestedActions) {
+      const action = msg.suggestedActions.find((a) => a.type === actionType);
+      if (action) action.executed = true;
+    }
   },
 
   /** Get all current messages */
@@ -56,6 +74,13 @@ export const chatEngine = {
   /** Get the last N messages */
   getRecentMessages(count: number): ChatMessage[] {
     return currentMessages.slice(-count);
+  },
+
+  /** Get conversation context as a single string (for prompt generation) */
+  getConversationContext(): string {
+    return currentMessages
+      .map((m) => `[${m.role.toUpperCase()}] ${m.content}`)
+      .join('\n\n');
   },
 
   /** Save current conversation as a transcript */

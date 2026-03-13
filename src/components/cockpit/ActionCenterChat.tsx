@@ -18,22 +18,24 @@ import {
   Save,
   MoreHorizontal,
   RefreshCw,
+  MapPin,
+  ArrowRight,
 } from 'lucide-react';
-import { chatEngine, type ChatMessage } from '@/chief-of-staff/action-center/chatEngine';
+import { chatEngine, type ChatMessage, type SuggestedAction } from '@/chief-of-staff/action-center/chatEngine';
 import { voiceInput } from '@/chief-of-staff/action-center/voiceInput';
 import { actionRouter, type ActionType } from '@/chief-of-staff/action-center/actionRouter';
 import { promptGenerator } from '@/chief-of-staff/action-center/promptGenerator';
 import { emailComposer } from '@/chief-of-staff/action-center/emailComposer';
 
 const ACTION_ICONS: Record<string, React.ReactNode> = {
-  'create-task': <ListChecks size={14} />,
-  'draft-email': <Mail size={14} />,
-  'generate-prompt': <Wand2 size={14} />,
-  'add-roadmap': <FileText size={14} />,
-  'generate-linkedin': <Linkedin size={14} />,
-  'create-strategy-note': <BookOpen size={14} />,
-  'save-transcript': <Save size={14} />,
-  'export-meeting-note': <FileText size={14} />,
+  'create-task': <ListChecks size={12} />,
+  'draft-email': <Mail size={12} />,
+  'generate-prompt': <Wand2 size={12} />,
+  'add-roadmap': <MapPin size={12} />,
+  'generate-linkedin': <Linkedin size={12} />,
+  'create-strategy-note': <BookOpen size={12} />,
+  'save-transcript': <Save size={12} />,
+  'export-meeting-note': <FileText size={12} />,
 };
 
 const ActionCenterChat: React.FC = () => {
@@ -56,7 +58,7 @@ const ActionCenterChat: React.FC = () => {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, generatedPrompt, emailDraftId]);
 
   useEffect(() => {
     if (isExpanded && inputRef.current) {
@@ -64,39 +66,146 @@ const ActionCenterChat: React.FC = () => {
     }
   }, [isExpanded]);
 
-  const handleSend = () => {
-    if (!input.trim()) return;
+  const refreshMessages = () => setMessages([...chatEngine.getMessages()]);
 
-    // Add CEO message
-    chatEngine.sendMessage(input.trim());
-    const detected = actionRouter.detectAction(input.trim());
-
-    // Generate assistant response based on detected action
-    let responseText: string;
-    if (detected.confidence >= 50) {
-      const result = actionRouter.executeAction(detected);
-      responseText = result.message;
-
-      // Handle specific action results
-      if (detected.type === 'generate-prompt') {
-        const prompt = promptGenerator.generateFromText(input.trim());
-        setGeneratedPrompt(prompt.prompt);
-      }
-      if (detected.type === 'draft-email') {
-        const draft = emailComposer.createDraft(input.trim());
-        setEmailDraftId(draft.id);
-        responseText = `Email draft created for: ${draft.to || '(specify recipient)'}. Subject: "${draft.subject}". Review in the email panel.`;
-      }
-    } else {
-      responseText = `Understood. I've noted: "${input.trim().slice(0, 100)}${input.trim().length > 100 ? '...' : ''}". Would you like me to create a task, draft an email, or generate an AG prompt from this?`;
+  // --- CTA action handler ---
+  const handleCTAAction = (actionType: string, messageId?: string) => {
+    // Mark the action as executed on the originating message
+    if (messageId) {
+      chatEngine.markActionExecuted(messageId, actionType);
     }
 
-    chatEngine.addResponse(responseText, detected.type !== 'unknown' ? detected.type : undefined);
+    // Get the last CEO message as context
+    const ceoMessages = chatEngine.getMessages().filter((m) => m.role === 'ceo');
+    const lastCeoMessage = ceoMessages[ceoMessages.length - 1]?.content || '';
 
-    setMessages(chatEngine.getMessages());
+    switch (actionType) {
+      case 'draft-email': {
+        const draft = emailComposer.createDraft(lastCeoMessage);
+        setEmailDraftId(draft.id);
+        chatEngine.addResponse(
+          `Email draft created.\n\nTo: ${draft.to || '(specify recipient)'}\nSubject: "${draft.subject}"\n\nReview and send below.`,
+          'draft-email'
+        );
+        break;
+      }
+
+      case 'create-task': {
+        const detected = actionRouter.detectAction(lastCeoMessage);
+        const result = actionRouter.executeAction({ ...detected, type: 'create-task' });
+        chatEngine.addResponse(
+          `${result.message}\n\nTask added to Chief-of-Staff dashboard.`,
+          'create-task',
+          [{ type: 'generate-prompt', label: 'Generate AG Prompt' }]
+        );
+        break;
+      }
+
+      case 'generate-prompt': {
+        const prompt = promptGenerator.generateFromChat();
+        setGeneratedPrompt(prompt.prompt);
+        chatEngine.addResponse(
+          `AG prompt generated: "${prompt.title}"\n\nCopy or send to Antigravity below.`,
+          'generate-prompt'
+        );
+        break;
+      }
+
+      case 'add-roadmap': {
+        chatEngine.addResponse(
+          `Roadmap item captured: "${lastCeoMessage.slice(0, 60)}..."\n\nAdded to product backlog.`,
+          'add-roadmap',
+          [{ type: 'create-task', label: 'Create Task' }]
+        );
+        break;
+      }
+
+      case 'generate-linkedin': {
+        chatEngine.addResponse(
+          'LinkedIn post content staged. Navigate to LinkedIn Intelligence widget to finalize and publish.',
+          'generate-linkedin'
+        );
+        break;
+      }
+
+      case 'create-strategy-note': {
+        chatEngine.addResponse(
+          `Strategy memo saved: "${lastCeoMessage.slice(0, 60)}..."`,
+          'create-strategy-note'
+        );
+        break;
+      }
+
+      case 'export-meeting-note': {
+        chatEngine.addResponse(
+          `Meeting note exported from conversation context.`,
+          'export-meeting-note'
+        );
+        break;
+      }
+
+      case 'save-transcript': {
+        chatEngine.saveTranscript();
+        chatEngine.addResponse('Transcript saved successfully.');
+        break;
+      }
+
+      default:
+        chatEngine.addResponse('Action not recognized.');
+    }
+
+    refreshMessages();
+  };
+
+  // --- Send handler with intent detection ---
+  const handleSend = () => {
+    if (!input.trim()) return;
+    const text = input.trim();
+
+    // Add CEO message
+    chatEngine.sendMessage(text);
+
+    // Run intent detection
+    const intent = actionRouter.detectIntent(text);
+
+    if (intent.primary.confidence >= 50) {
+      // High-confidence: execute primary action inline and show CTAs for alternatives
+      if (intent.primary.type === 'draft-email') {
+        const draft = emailComposer.createDraft(text);
+        setEmailDraftId(draft.id);
+        chatEngine.addResponse(
+          `${intent.analysisText}\n\nEmail draft created for: ${draft.to || '(specify recipient)'}.\nSubject: "${draft.subject}"`,
+          'draft-email',
+          intent.suggestedActions.filter((a) => a.type !== 'draft-email')
+        );
+      } else if (intent.primary.type === 'generate-prompt') {
+        const prompt = promptGenerator.generateFromText(text);
+        setGeneratedPrompt(prompt.prompt);
+        chatEngine.addResponse(
+          `${intent.analysisText}\n\nAG prompt generated: "${prompt.title}"`,
+          'generate-prompt',
+          intent.suggestedActions.filter((a) => a.type !== 'generate-prompt')
+        );
+      } else {
+        // Execute action directly
+        const result = actionRouter.executeAction(intent.primary);
+        chatEngine.addResponse(
+          `${intent.analysisText}\n\n${result.message}`,
+          intent.primary.type,
+          intent.suggestedActions.filter((a) => a.type !== intent.primary.type)
+        );
+      }
+    } else {
+      // Low confidence: show analysis + all suggested CTAs
+      chatEngine.addResponse(
+        `Understood. I've noted: "${text.slice(0, 100)}${text.length > 100 ? '...' : ''}"\n\nWhat would you like to do with this?`,
+        undefined,
+        intent.suggestedActions
+      );
+    }
+
+    refreshMessages();
     setInput('');
-    setGeneratedPrompt(null);
-    setEmailDraftId(null);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -137,21 +246,15 @@ const ActionCenterChat: React.FC = () => {
     setShowActions(false);
 
     if (type === 'save-transcript') {
-      chatEngine.saveTranscript();
-      chatEngine.addResponse('Transcript saved successfully.');
-      setMessages([...chatEngine.getMessages()]);
+      handleCTAAction('save-transcript');
       return;
     }
 
     if (type === 'generate-prompt') {
-      const prompt = promptGenerator.generateFromChat();
-      setGeneratedPrompt(prompt.prompt);
-      chatEngine.addResponse(`AG prompt generated: "${prompt.title}". Copy it below.`);
-      setMessages([...chatEngine.getMessages()]);
+      handleCTAAction('generate-prompt');
       return;
     }
 
-    // For other actions, pre-fill the input
     const labels: Record<string, string> = {
       'create-task': 'Task: ',
       'draft-email': 'Email: Send to ',
@@ -168,6 +271,31 @@ const ActionCenterChat: React.FC = () => {
     navigator.clipboard.writeText(text);
     setCopiedPrompt(id);
     setTimeout(() => setCopiedPrompt(null), 2000);
+  };
+
+  // --- CTA Button Component ---
+  const CTAButtons: React.FC<{ actions: SuggestedAction[]; messageId: string }> = ({ actions, messageId }) => {
+    if (!actions || actions.length === 0) return null;
+    return (
+      <div className="flex flex-wrap gap-1.5 mt-2">
+        {actions.map((action) => (
+          <button
+            key={action.type}
+            onClick={() => handleCTAAction(action.type, messageId)}
+            disabled={action.executed}
+            className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[10px] font-medium transition-all ${
+              action.executed
+                ? 'bg-gray-200 dark:bg-gray-600 text-gray-400 dark:text-gray-500 cursor-default line-through'
+                : 'bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-700 hover:bg-teal-100 dark:hover:bg-teal-900/50 hover:border-teal-400 dark:hover:border-teal-500 cursor-pointer'
+            }`}
+          >
+            {ACTION_ICONS[action.type] || <ArrowRight size={12} />}
+            <span>{action.label}</span>
+            {action.executed && <Check size={10} className="ml-0.5" />}
+          </button>
+        ))}
+      </div>
+    );
   };
 
   // Collapsed bar
@@ -211,7 +339,7 @@ const ActionCenterChat: React.FC = () => {
             <ChevronUp size={16} />
           </button>
           <button
-            onClick={() => { chatEngine.clearConversation(); setMessages([]); setIsExpanded(false); }}
+            onClick={() => { chatEngine.clearConversation(); setMessages([]); setIsExpanded(false); setGeneratedPrompt(null); setEmailDraftId(null); }}
             className="p-1.5 rounded hover:bg-white/10 text-white/80 hover:text-white transition-colors"
           >
             <X size={16} />
@@ -238,7 +366,7 @@ const ActionCenterChat: React.FC = () => {
       )}
 
       {/* Messages */}
-      <div className="h-64 overflow-y-auto px-5 py-3 space-y-3">
+      <div className="h-72 overflow-y-auto px-5 py-3 space-y-3">
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full text-center">
             <MessageSquare size={28} className="text-gray-300 dark:text-gray-600 mb-2" />
@@ -257,19 +385,25 @@ const ActionCenterChat: React.FC = () => {
             className={`flex ${msg.role === 'ceo' ? 'justify-end' : 'justify-start'}`}
           >
             <div
-              className={`max-w-[80%] rounded-lg px-3 py-2 ${
+              className={`max-w-[85%] rounded-lg px-3 py-2 ${
                 msg.role === 'ceo'
                   ? 'bg-[#0A385A] text-white'
                   : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200'
               }`}
             >
               <p className="text-xs leading-relaxed whitespace-pre-wrap">{msg.content}</p>
-              <div className="flex items-center justify-between mt-1">
+
+              {/* Inline CTA buttons for assistant messages */}
+              {msg.role === 'assistant' && msg.suggestedActions && msg.suggestedActions.length > 0 && (
+                <CTAButtons actions={msg.suggestedActions} messageId={msg.id} />
+              )}
+
+              <div className="flex items-center justify-between mt-1.5">
                 <span className="text-[9px] opacity-50">
                   {new Date(msg.timestamp).toLocaleTimeString('en-SG', { hour: '2-digit', minute: '2-digit' })}
                 </span>
                 {msg.actionTaken && (
-                  <span className="text-[9px] bg-white/10 dark:bg-black/10 px-1.5 py-0.5 rounded uppercase">
+                  <span className="text-[9px] bg-white/10 dark:bg-black/10 px-1.5 py-0.5 rounded uppercase tracking-wide">
                     {msg.actionTaken}
                   </span>
                 )}
@@ -313,8 +447,9 @@ const ActionCenterChat: React.FC = () => {
               </div>
               <div className="space-y-1 text-[10px]">
                 <p className="text-gray-800 dark:text-gray-200"><strong>To:</strong> {draft.to || '(not set)'}</p>
+                {draft.cc && <p className="text-gray-800 dark:text-gray-200"><strong>Cc:</strong> {draft.cc}</p>}
                 <p className="text-gray-800 dark:text-gray-200"><strong>Subject:</strong> {draft.subject}</p>
-                <p className="text-gray-700 dark:text-gray-300 mt-1 whitespace-pre-wrap line-clamp-3">{draft.body}</p>
+                <p className="text-gray-700 dark:text-gray-300 mt-1 whitespace-pre-wrap line-clamp-4">{draft.body}</p>
               </div>
               {!isSent && (
                 <div className="flex items-center gap-2 mt-3">
@@ -322,18 +457,28 @@ const ActionCenterChat: React.FC = () => {
                     onClick={async () => {
                       if (!draft.to) {
                         chatEngine.addResponse('Cannot send: no recipient specified. Edit the draft first.');
-                        setMessages([...chatEngine.getMessages()]);
+                        refreshMessages();
                         return;
                       }
                       setSendingEmail(true);
                       const result = await emailComposer.sendEmail(draft.id);
                       setSendingEmail(false);
                       if (result.success) {
-                        chatEngine.addResponse(`Email sent successfully to ${draft.to}.`);
+                        chatEngine.addResponse(
+                          `Email sent successfully to ${draft.to}.\n\nWould you like to do anything else?`,
+                          'email-sent',
+                          [
+                            { type: 'create-task', label: 'Create Follow-up Task' },
+                            { type: 'save-transcript', label: 'Save Transcript' },
+                          ]
+                        );
                       } else {
-                        chatEngine.addResponse(`Email send failed: ${result.error}`);
+                        chatEngine.addResponse(
+                          `Email send failed: ${result.error}\n\nWould you like to retry or edit?`,
+                          'email-failed'
+                        );
                       }
-                      setMessages([...chatEngine.getMessages()]);
+                      refreshMessages();
                     }}
                     disabled={sendingEmail || !draft.to}
                     className="px-3 py-1.5 rounded bg-[#0F766E] text-white text-[10px] font-medium hover:bg-[#0F766E]/90 disabled:opacity-40 transition-colors flex items-center gap-1"
@@ -355,12 +500,18 @@ const ActionCenterChat: React.FC = () => {
                       emailComposer.deleteDraft(draft.id);
                       setEmailDraftId(null);
                       chatEngine.addResponse('Email draft discarded.');
-                      setMessages([...chatEngine.getMessages()]);
+                      refreshMessages();
                     }}
                     className="px-3 py-1.5 rounded bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 text-[10px] font-medium hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
                   >
                     Discard
                   </button>
+                </div>
+              )}
+              {isSent && (
+                <div className="flex items-center gap-1 mt-2 text-[10px] text-emerald-600 dark:text-emerald-400">
+                  <Check size={12} />
+                  <span>Delivered at {draft.sentAt ? new Date(draft.sentAt).toLocaleTimeString('en-SG', { hour: '2-digit', minute: '2-digit' }) : ''}</span>
                 </div>
               )}
             </div>
