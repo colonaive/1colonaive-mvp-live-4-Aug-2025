@@ -36,3 +36,16 @@ export { emailComposer } from './action-center/emailComposer';
 export type { EmailDraft, EmailStatus } from './action-center/emailComposer';
 
 export { voiceInput } from './action-center/voiceInput';
+
+// Decision Memory
+export { decisionMemoryEngine } from './decision-memory/decisionMemoryEngine';
+export type { DecisionEvent, RecordActionInput } from './decision-memory/decisionMemoryEngine';
+
+export { decisionPatterns } from './decision-memory/decisionPatterns';
+export type { DecisionPattern } from './decision-memory/decisionPatterns';
+
+export { decisionScorer } from './decision-memory/decisionScorer';
+export type { ScoredDecision } from './decision-memory/decisionScorer';
+
+export { decisionSuggestions } from './decision-memory/decisionSuggestions';
+export type { MemorySuggestion } from './decision-memory/decisionSuggestions';

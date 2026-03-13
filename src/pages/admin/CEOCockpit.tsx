@@ -42,6 +42,8 @@ import ActionCenterChat from '@/components/cockpit/ActionCenterChat';
 import { chatEngine } from '@/chief-of-staff/action-center/chatEngine';
 import { promptGenerator } from '@/chief-of-staff/action-center/promptGenerator';
 import { emailComposer } from '@/chief-of-staff/action-center/emailComposer';
+import { decisionMemoryEngine } from '@/chief-of-staff/decision-memory/decisionMemoryEngine';
+import { decisionPatterns, type DecisionPattern } from '@/chief-of-staff/decision-memory/decisionPatterns';
 
 const today = new Date().toLocaleDateString('en-SG', {
   weekday: 'long',
@@ -119,7 +121,14 @@ const CEOCockpit: React.FC = () => {
   // Chief-of-Staff state
   const [digest, setDigest] = useState<WeeklyStrategyDigest | null>(null);
   const [, setWidgetTick] = useState(0);
-  const handleActionCenterUpdate = () => setWidgetTick((t) => t + 1);
+  const [memoryPatterns, setMemoryPatterns] = useState<DecisionPattern[]>([]);
+  const [memoryStats, setMemoryStats] = useState<{ totalMemories: number; topEntity: string | null; topAction: string | null; avgConfidence: number }>({ totalMemories: 0, topEntity: null, topAction: null, avgConfidence: 0 });
+  const handleActionCenterUpdate = () => {
+    setWidgetTick((t) => t + 1);
+    // Refresh decision memory widget
+    setMemoryPatterns(decisionPatterns.getTopPatterns(5));
+    setMemoryStats(decisionMemoryEngine.getStats());
+  };
 
   const loadCompetitiveIntel = async () => {
     setCompLoading(true);
@@ -209,6 +218,11 @@ const CEOCockpit: React.FC = () => {
     loadInbox(); loadCRCNews(); loadBriefing(); loadLinkedIn(); loadRadar(); loadCompetitiveIntel();
     // Load Chief-of-Staff strategy digest (synchronous)
     setDigest(strategyDigest.generate());
+    // Load decision memory
+    decisionMemoryEngine.ensureLoaded().then(() => {
+      setMemoryPatterns(decisionPatterns.getTopPatterns(5));
+      setMemoryStats(decisionMemoryEngine.getStats());
+    }).catch(() => {});
   }, []);
 
   // Chief-of-Staff computed data
@@ -304,6 +318,48 @@ const CEOCockpit: React.FC = () => {
                     {statusBadge(d.status)}
                   </div>
                 ))}
+              </div>
+            )}
+          </CockpitCard>
+        </CockpitSection>
+
+        {/* === DECISION MEMORY WIDGET === */}
+        <CockpitSection>
+          <CockpitCard
+            title="Decision Memory"
+            subtitle={`${memoryStats.totalMemories} patterns tracked`}
+            icon={<Brain size={18} />}
+            status={memoryStats.totalMemories > 0 ? 'active' : 'pending'}
+          >
+            {memoryStats.totalMemories === 0 ? (
+              <p className="text-gray-400 text-xs text-center py-4">No decision patterns yet. Patterns emerge as you use the Action Center.</p>
+            ) : (
+              <div className="space-y-3">
+                <div className="grid grid-cols-3 gap-2 text-center">
+                  <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-2">
+                    <p className="text-sm font-bold text-gray-900 dark:text-white">{memoryStats.topAction || '—'}</p>
+                    <p className="text-[10px] text-gray-500">Top Action</p>
+                  </div>
+                  <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-2">
+                    <p className="text-sm font-bold text-teal-600 dark:text-teal-400">{memoryStats.topEntity || '—'}</p>
+                    <p className="text-[10px] text-gray-500">Top Contact</p>
+                  </div>
+                  <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-2">
+                    <p className="text-sm font-bold text-sky-600 dark:text-sky-400">{memoryStats.avgConfidence}%</p>
+                    <p className="text-[10px] text-gray-500">Avg Confidence</p>
+                  </div>
+                </div>
+                {memoryPatterns.length > 0 && (
+                  <div className="space-y-1.5">
+                    <p className="text-[10px] text-gray-500 uppercase tracking-wide font-medium">Active Patterns</p>
+                    {memoryPatterns.map((p) => (
+                      <div key={p.id} className="flex items-center justify-between text-[11px]">
+                        <span className="text-gray-700 dark:text-gray-300 truncate">{p.label}</span>
+                        <span className="text-gray-400 ml-2 shrink-0">{p.frequency}x · {p.confidence}%</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </CockpitCard>

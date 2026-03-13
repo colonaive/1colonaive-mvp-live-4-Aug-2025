@@ -26,6 +26,8 @@ import { voiceInput } from '@/chief-of-staff/action-center/voiceInput';
 import { actionRouter, type ActionType } from '@/chief-of-staff/action-center/actionRouter';
 import { promptGenerator } from '@/chief-of-staff/action-center/promptGenerator';
 import { emailComposer } from '@/chief-of-staff/action-center/emailComposer';
+import { decisionMemoryEngine } from '@/chief-of-staff/decision-memory/decisionMemoryEngine';
+import { decisionSuggestions, type MemorySuggestion } from '@/chief-of-staff/decision-memory/decisionSuggestions';
 
 const ACTION_ICONS: Record<string, React.ReactNode> = {
   'create-task': <ListChecks size={12} />,
@@ -82,6 +84,13 @@ const ActionCenterChat: React.FC<ActionCenterChatProps> = ({ onAction }) => {
     }
   }, [isExpanded]);
 
+  // Load decision memory on first expand
+  useEffect(() => {
+    if (isExpanded) {
+      decisionMemoryEngine.ensureLoaded().catch(() => {});
+    }
+  }, [isExpanded]);
+
   const refreshMessages = useCallback(() => {
     setMessages([...chatEngine.getMessages()]);
   }, []);
@@ -98,8 +107,40 @@ const ActionCenterChat: React.FC<ActionCenterChatProps> = ({ onAction }) => {
 
   const hasSubstantiveContext = (): boolean => {
     const ctx = getCEOContext();
-    // Need at least ~15 chars of real content from the CEO
     return ctx.trim().length >= 15;
+  };
+
+  // Map CTA action types to memory action types
+  const memoryActionType = (ctaType: string): string => {
+    const map: Record<string, string> = {
+      'draft-email': 'email',
+      'create-task': 'task',
+      'generate-prompt': 'prompt',
+      'add-roadmap': 'roadmap',
+      'generate-linkedin': 'linkedin',
+      'create-strategy-note': 'strategy',
+    };
+    return map[ctaType] || ctaType;
+  };
+
+  // Extract entity name from a message (e.g. "Kevin", "Aaron")
+  const extractEntity = (text: string): string | undefined => {
+    const knownNames = ['kevin', 'aaron', 'qiang', 'manish', 'daniel', 'francis', 'lawrence'];
+    const lower = text.toLowerCase();
+    for (const name of knownNames) {
+      if (lower.includes(name)) return name.charAt(0).toUpperCase() + name.slice(1);
+    }
+    const match = text.match(/(?:to|for|with|from)\s+([A-Z][a-z]+)/);
+    return match?.[1];
+  };
+
+  // Record action to decision memory (fire-and-forget)
+  const recordToMemory = (ctaType: string, context: string) => {
+    decisionMemoryEngine.recordAction({
+      action_type: memoryActionType(ctaType),
+      entity: extractEntity(context),
+      context_summary: context.slice(0, 120),
+    }).catch(() => {});
   };
 
   // --- CTA action handler ---
@@ -233,14 +274,18 @@ const ActionCenterChat: React.FC<ActionCenterChatProps> = ({ onAction }) => {
         chatEngine.addResponse('Action not recognized.');
     }
 
+    // Record action to decision memory
+    recordToMemory(actionType, lastCeoContent);
+
     setPendingAction(null);
     refreshMessages();
   };
 
-  // --- Send handler with intent detection + pending action fulfillment ---
-  const handleSend = () => {
+  // --- Send handler with intent detection + memory suggestions + pending action ---
+  const handleSend = async () => {
     if (!input.trim()) return;
     const text = input.trim();
+    setInput('');
 
     // Add CEO message
     chatEngine.sendMessage(text);
@@ -250,7 +295,6 @@ const ActionCenterChat: React.FC<ActionCenterChatProps> = ({ onAction }) => {
       const actionType = pendingAction.type;
       setPendingAction(null);
 
-      // Now the CEO has provided context — execute the action
       switch (actionType) {
         case 'create-task': {
           const detected = actionRouter.detectAction(text);
@@ -260,6 +304,7 @@ const ActionCenterChat: React.FC<ActionCenterChatProps> = ({ onAction }) => {
             'create-task',
             [{ type: 'generate-prompt', label: 'Generate AG Prompt' }]
           );
+          recordToMemory('create-task', text);
           notifyParent();
           break;
         }
@@ -270,6 +315,7 @@ const ActionCenterChat: React.FC<ActionCenterChatProps> = ({ onAction }) => {
             `AG prompt generated: "${prompt.title}"\n\nCopy or send to Antigravity below.`,
             'generate-prompt'
           );
+          recordToMemory('generate-prompt', text);
           break;
         }
         case 'draft-email': {
@@ -279,6 +325,7 @@ const ActionCenterChat: React.FC<ActionCenterChatProps> = ({ onAction }) => {
             `Email draft created.\n\nTo: ${draft.to || '(specify recipient)'}\nSubject: "${draft.subject}"\n\nReview and send below.`,
             'draft-email'
           );
+          recordToMemory('draft-email', text);
           break;
         }
         case 'add-roadmap': {
@@ -287,6 +334,7 @@ const ActionCenterChat: React.FC<ActionCenterChatProps> = ({ onAction }) => {
             'add-roadmap',
             [{ type: 'create-task', label: 'Create Task' }]
           );
+          recordToMemory('add-roadmap', text);
           notifyParent();
           break;
         }
@@ -295,6 +343,7 @@ const ActionCenterChat: React.FC<ActionCenterChatProps> = ({ onAction }) => {
             `Strategy memo saved: "${text.slice(0, 60)}${text.length > 60 ? '...' : ''}"`,
             'create-strategy-note'
           );
+          recordToMemory('create-strategy-note', text);
           break;
         }
         default: {
@@ -303,56 +352,100 @@ const ActionCenterChat: React.FC<ActionCenterChatProps> = ({ onAction }) => {
       }
 
       refreshMessages();
-      setInput('');
       return;
+    }
+
+    // Fetch memory-based suggestions (async, non-blocking)
+    let memorySuggestions: MemorySuggestion[] = [];
+    try {
+      memorySuggestions = await decisionSuggestions.getSuggestions(text);
+    } catch {
+      // Memory suggestions are supplementary — don't block on failure
     }
 
     // Normal intent detection flow
     const intent = actionRouter.detectIntent(text);
+
+    // Merge memory suggestions into CTA list (memory suggestions first if relevant)
+    const mergeSuggestions = (intentActions: SuggestedAction[]): SuggestedAction[] => {
+      const merged: SuggestedAction[] = [];
+      const seen = new Set<string>();
+
+      // Memory suggestions come first (they're personalized)
+      for (const ms of memorySuggestions) {
+        if (!seen.has(ms.action.type)) {
+          merged.push(ms.action);
+          seen.add(ms.action.type);
+        }
+      }
+
+      // Then intent-based suggestions
+      for (const a of intentActions) {
+        if (!seen.has(a.type)) {
+          merged.push(a);
+          seen.add(a.type);
+        }
+      }
+
+      return merged.slice(0, 4);
+    };
+
+    // Build memory hint text if we have relevant suggestions
+    const memoryHint = memorySuggestions.length > 0
+      ? `\n\n${memorySuggestions[0].reason}`
+      : '';
 
     if (intent.primary.confidence >= 50) {
       if (intent.primary.type === 'draft-email') {
         const draft = emailComposer.createDraft(text);
         setEmailDraftId(draft.id);
         chatEngine.addResponse(
-          `${intent.analysisText}\n\nEmail draft created for: ${draft.to || '(specify recipient)'}.\nSubject: "${draft.subject}"`,
+          `${intent.analysisText}${memoryHint}\n\nEmail draft created for: ${draft.to || '(specify recipient)'}.\nSubject: "${draft.subject}"`,
           'draft-email',
-          intent.suggestedActions.filter((a) => a.type !== 'draft-email')
+          mergeSuggestions(intent.suggestedActions.filter((a) => a.type !== 'draft-email'))
         );
+        recordToMemory('draft-email', text);
       } else if (intent.primary.type === 'generate-prompt') {
         const prompt = promptGenerator.generateFromText(text);
         setGeneratedPrompt(prompt.prompt);
         chatEngine.addResponse(
-          `${intent.analysisText}\n\nAG prompt generated: "${prompt.title}"`,
+          `${intent.analysisText}${memoryHint}\n\nAG prompt generated: "${prompt.title}"`,
           'generate-prompt',
-          intent.suggestedActions.filter((a) => a.type !== 'generate-prompt')
+          mergeSuggestions(intent.suggestedActions.filter((a) => a.type !== 'generate-prompt'))
         );
+        recordToMemory('generate-prompt', text);
       } else if (intent.primary.type === 'create-task') {
         const result = actionRouter.executeAction(intent.primary);
         chatEngine.addResponse(
-          `${intent.analysisText}\n\n${result.message}`,
+          `${intent.analysisText}${memoryHint}\n\n${result.message}`,
           intent.primary.type,
-          intent.suggestedActions.filter((a) => a.type !== intent.primary.type)
+          mergeSuggestions(intent.suggestedActions.filter((a) => a.type !== intent.primary.type))
         );
+        recordToMemory('create-task', text);
         notifyParent();
       } else {
         const result = actionRouter.executeAction(intent.primary);
         chatEngine.addResponse(
-          `${intent.analysisText}\n\n${result.message}`,
+          `${intent.analysisText}${memoryHint}\n\n${result.message}`,
           intent.primary.type,
-          intent.suggestedActions.filter((a) => a.type !== intent.primary.type)
+          mergeSuggestions(intent.suggestedActions.filter((a) => a.type !== intent.primary.type))
         );
+        recordToMemory(intent.primary.type, text);
       }
     } else {
+      // Low confidence — show memory suggestions prominently if available
+      const responseText = memorySuggestions.length > 0
+        ? `Understood. ${memorySuggestions[0].reason}\n\nWhat would you like to do?`
+        : `Understood. I've noted: "${text.slice(0, 100)}${text.length > 100 ? '...' : ''}"\n\nWhat would you like to do with this?`;
+
       chatEngine.addResponse(
-        `Understood. I've noted: "${text.slice(0, 100)}${text.length > 100 ? '...' : ''}"\n\nWhat would you like to do with this?`,
+        responseText,
         undefined,
-        intent.suggestedActions
+        mergeSuggestions(intent.suggestedActions)
       );
     }
 
     refreshMessages();
-    setInput('');
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
