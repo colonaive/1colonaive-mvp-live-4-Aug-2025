@@ -231,6 +231,8 @@ export async function handler(event: any) {
     if (fields.draft_content !== undefined) allowed.draft_content = fields.draft_content;
     if (fields.hashtags !== undefined) allowed.hashtags = fields.hashtags;
     if (fields.image_prompt !== undefined) allowed.image_prompt = fields.image_prompt;
+    if (fields.image_url !== undefined) allowed.image_url = fields.image_url;
+    if (fields.linkedin_url !== undefined) allowed.linkedin_url = fields.linkedin_url;
     if (fields.status !== undefined) {
       allowed.status = fields.status;
       if (fields.status === 'posted') allowed.posted_at = new Date().toISOString();

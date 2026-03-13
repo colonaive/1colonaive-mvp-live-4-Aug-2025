@@ -8,10 +8,52 @@ import {
   Sparkles,
   Eye,
   ArrowLeft,
-  Image,
+  Image as ImageIcon,
+  Send,
+  ExternalLink,
+  BarChart3,
+  X,
 } from 'lucide-react';
 import { cockpitService, type LinkedInPost } from '@/services/cockpitService';
 import { useNavigate } from 'react-router-dom';
+
+/* ── toast notification ── */
+
+interface Toast {
+  id: number;
+  message: string;
+  type: 'success' | 'error' | 'info';
+}
+
+let toastId = 0;
+
+const ToastContainer: React.FC<{ toasts: Toast[]; onDismiss: (id: number) => void }> = ({
+  toasts,
+  onDismiss,
+}) => (
+  <div className="fixed top-4 right-4 z-50 flex flex-col gap-2">
+    {toasts.map((t) => (
+      <div
+        key={t.id}
+        className={`flex items-center gap-2 px-4 py-3 rounded-lg shadow-lg text-sm font-medium animate-slide-in ${
+          t.type === 'success'
+            ? 'bg-emerald-600 text-white'
+            : t.type === 'error'
+              ? 'bg-red-600 text-white'
+              : 'bg-[#0A385A] text-white'
+        }`}
+      >
+        {t.type === 'success' && <CheckCircle size={16} />}
+        {t.type === 'error' && <AlertCircle size={16} />}
+        {t.type === 'info' && <Linkedin size={16} />}
+        <span>{t.message}</span>
+        <button onClick={() => onDismiss(t.id)} className="ml-2 opacity-70 hover:opacity-100">
+          <X size={14} />
+        </button>
+      </div>
+    ))}
+  </div>
+);
 
 /* ── status badge ── */
 
@@ -29,13 +71,16 @@ const StatusBadge: React.FC<{ status: string }> = ({ status }) => (
   </span>
 );
 
-/* ── LinkedIn-style preview ── */
+/* ── LinkedIn-style preview (live synced) ── */
 
-const LinkedInPreview: React.FC<{ title: string; content: string; imagePrompt?: string }> = ({
-  title,
-  content,
-  imagePrompt,
-}) => (
+const LinkedInPreview: React.FC<{
+  title: string;
+  content: string;
+  hashtags: string;
+  sourceUrl: string;
+  imageUrl?: string | null;
+  imagePrompt?: string;
+}> = ({ title, content, hashtags, sourceUrl, imageUrl, imagePrompt }) => (
   <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
     {/* Profile header */}
     <div className="flex items-center gap-3 p-4 pb-2">
@@ -45,27 +90,56 @@ const LinkedInPreview: React.FC<{ title: string; content: string; imagePrompt?: 
       <div>
         <p className="text-sm font-semibold text-gray-900 dark:text-white">M. Chandramohan</p>
         <p className="text-[11px] text-gray-500 dark:text-gray-400">
-          Founder &amp; CEO, Saver's Med | ColonAiVE Movement
+          Founder &amp; CEO, Saver&apos;s Med | ColonAiVE Movement
         </p>
         <p className="text-[10px] text-gray-400">Just now</p>
       </div>
     </div>
 
-    {/* Body */}
+    {/* Body — live synced from editor */}
     <div className="px-4 pb-3">
       <p className="text-sm font-semibold text-gray-900 dark:text-white mb-2">{title}</p>
-      <div className="text-[13px] text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed max-h-80 overflow-y-auto">
+      <div className="text-[13px] text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed max-h-72 overflow-y-auto">
         {content}
       </div>
     </div>
 
-    {/* Image placeholder */}
-    {imagePrompt && (
-      <div className="mx-4 mb-3 bg-gray-100 dark:bg-gray-700 rounded-lg p-4 flex flex-col items-center justify-center min-h-[120px]">
-        <Image size={28} className="text-gray-400 mb-2" />
-        <p className="text-[11px] text-gray-400 dark:text-gray-500 text-center italic">
+    {/* Image — real image if available, otherwise prompt placeholder */}
+    {imageUrl ? (
+      <div className="mx-4 mb-3">
+        <img
+          src={imageUrl}
+          alt="Generated post image"
+          className="w-full rounded-lg object-cover max-h-64"
+        />
+      </div>
+    ) : imagePrompt ? (
+      <div className="mx-4 mb-3 bg-gray-100 dark:bg-gray-700 rounded-lg p-4 flex flex-col items-center justify-center min-h-[100px]">
+        <ImageIcon size={24} className="text-gray-400 mb-2" />
+        <p className="text-[10px] text-gray-400 dark:text-gray-500 text-center italic line-clamp-2">
           {imagePrompt}
         </p>
+      </div>
+    ) : null}
+
+    {/* Source link */}
+    {sourceUrl && (
+      <div className="mx-4 mb-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg px-3 py-2">
+        <a
+          href={sourceUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-[11px] text-blue-600 dark:text-blue-400 hover:underline truncate block"
+        >
+          {sourceUrl}
+        </a>
+      </div>
+    )}
+
+    {/* Hashtags */}
+    {hashtags && (
+      <div className="px-4 pb-2">
+        <p className="text-[12px] text-blue-600 dark:text-blue-400">{hashtags}</p>
       </div>
     )}
 
@@ -92,12 +166,26 @@ const LinkedInIntelligence: React.FC = () => {
   const [filter, setFilter] = useState<string>('');
   const [copied, setCopied] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+  const [generatingImage, setGeneratingImage] = useState(false);
+  const [toasts, setToasts] = useState<Toast[]>([]);
 
-  // Editor state
+  // Editor state — all fields synced live to preview
   const [editTitle, setEditTitle] = useState('');
   const [editContent, setEditContent] = useState('');
   const [editHashtags, setEditHashtags] = useState('');
   const [editImagePrompt, setEditImagePrompt] = useState('');
+  const [editImageUrl, setEditImageUrl] = useState<string | null>(null);
+
+  const addToast = (message: string, type: Toast['type'] = 'info') => {
+    const id = ++toastId;
+    setToasts((prev) => [...prev, { id, message, type }]);
+    setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), 4000);
+  };
+
+  const dismissToast = (id: number) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  };
 
   const loadPosts = useCallback(async () => {
     setLoading(true);
@@ -118,13 +206,14 @@ const LinkedInIntelligence: React.FC = () => {
 
   const selectedPost = posts.find((p) => p.id === selectedId) || null;
 
-  // Load post into editor
+  // Load post into editor when selection changes
   useEffect(() => {
     if (selectedPost) {
       setEditTitle(selectedPost.title);
       setEditContent(selectedPost.draft_content || '');
       setEditHashtags(selectedPost.hashtags || '');
       setEditImagePrompt(selectedPost.image_prompt || '');
+      setEditImageUrl(selectedPost.image_url || null);
     }
   }, [selectedPost]);
 
@@ -135,9 +224,9 @@ const LinkedInIntelligence: React.FC = () => {
       if (result.generated > 0) {
         await loadPosts();
       }
-      alert(`Generated ${result.generated} new post(s) from ${result.scanned} articles.`);
+      addToast(`Generated ${result.generated} new post(s) from ${result.scanned} articles.`, 'success');
     } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : 'Generation failed');
+      addToast(err instanceof Error ? err.message : 'Generation failed', 'error');
     } finally {
       setGenerating(false);
     }
@@ -151,11 +240,13 @@ const LinkedInIntelligence: React.FC = () => {
         draft_content: editContent,
         hashtags: editHashtags,
         image_prompt: editImagePrompt,
+        image_url: editImageUrl,
         status: 'draft',
       });
       await loadPosts();
+      addToast('Draft saved.', 'success');
     } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : 'Save failed');
+      addToast(err instanceof Error ? err.message : 'Save failed', 'error');
     } finally {
       setSaving(false);
     }
@@ -168,19 +259,63 @@ const LinkedInIntelligence: React.FC = () => {
       await cockpitService.updateLinkedInPost(selectedId, { status: 'posted' });
       await loadPosts();
       setSelectedId(null);
+      addToast('Post marked as published.', 'success');
     } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : 'Update failed');
+      addToast(err instanceof Error ? err.message : 'Update failed', 'error');
     } finally {
       setSaving(false);
     }
   };
 
   const handleCopy = () => {
-    const text = `${editTitle}\n\n${editContent}`;
-    navigator.clipboard.writeText(text).then(() => {
+    const fullText = `${editTitle}\n\n${editContent}\n\n${editHashtags}`;
+    navigator.clipboard.writeText(fullText).then(() => {
       setCopied(true);
+      addToast('Post copied to clipboard.', 'success');
       setTimeout(() => setCopied(false), 2000);
     });
+  };
+
+  const handleGenerateImage = async () => {
+    if (!editImagePrompt || !selectedId) return;
+    setGeneratingImage(true);
+    addToast('Generating image with DALL-E 3...', 'info');
+    try {
+      const result = await cockpitService.generatePostImage(editImagePrompt, selectedId);
+      setEditImageUrl(result.image_url);
+      await loadPosts();
+      addToast('Image generated successfully.', 'success');
+    } catch (err: unknown) {
+      addToast(err instanceof Error ? err.message : 'Image generation failed', 'error');
+    } finally {
+      setGeneratingImage(false);
+    }
+  };
+
+  const handlePublishToLinkedIn = async () => {
+    if (!selectedId || !selectedPost) return;
+    setPublishing(true);
+    addToast('Publishing to LinkedIn...', 'info');
+    try {
+      const fullText = `${editTitle}\n\n${editContent}\n\n${editHashtags}`;
+      const result = await cockpitService.publishToLinkedIn(
+        selectedId,
+        fullText,
+        selectedPost.source_url,
+        editImageUrl || undefined,
+      );
+      if (result.success) {
+        await loadPosts();
+        addToast('Published to LinkedIn!', 'success');
+        setSelectedId(null);
+      } else {
+        addToast(result.error || 'LinkedIn publish failed', 'error');
+      }
+    } catch (err: unknown) {
+      addToast(err instanceof Error ? err.message : 'Publish failed', 'error');
+    } finally {
+      setPublishing(false);
+    }
   };
 
   const postTypeLabel = (post: LinkedInPost): string => {
@@ -192,14 +327,13 @@ const LinkedInIntelligence: React.FC = () => {
   const pendingCount = posts.filter((p) => p.status !== 'posted').length;
   const postedThisWeek = posts.filter((p) => {
     if (p.status !== 'posted' || !p.posted_at) return false;
-    const d = new Date(p.posted_at);
-    const now = new Date();
-    const diff = now.getTime() - d.getTime();
-    return diff < 7 * 24 * 60 * 60 * 1000;
+    return (Date.now() - new Date(p.posted_at).getTime()) < 7 * 24 * 60 * 60 * 1000;
   }).length;
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
+
       {/* Header */}
       <div className="bg-gradient-to-r from-[#0A385A] to-[#0F766E] px-6 py-6">
         <div className="max-w-[1600px] mx-auto">
@@ -285,7 +419,7 @@ const LinkedInIntelligence: React.FC = () => {
                   <Linkedin size={28} className="text-gray-300 dark:text-gray-600 mb-2" />
                   <p className="text-xs text-gray-400">No post opportunities yet.</p>
                   <p className="text-[11px] text-gray-400 mt-1">
-                    Click "Generate" to scan CRC news.
+                    Click &quot;Generate&quot; to scan CRC news.
                   </p>
                 </div>
               ) : (
@@ -315,7 +449,20 @@ const LinkedInIntelligence: React.FC = () => {
                         </span>
                       )}
                     </div>
-                    <p className="text-[10px] text-gray-400 mt-1">{postTypeLabel(post)}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <p className="text-[10px] text-gray-400">{postTypeLabel(post)}</p>
+                      {post.linkedin_url && (
+                        <a
+                          href={post.linkedin_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="text-[10px] text-blue-500 hover:underline flex items-center gap-0.5"
+                        >
+                          <ExternalLink size={10} /> View
+                        </a>
+                      )}
+                    </div>
                   </button>
                 ))
               )}
@@ -404,17 +551,61 @@ const LinkedInIntelligence: React.FC = () => {
                   </div>
                 )}
 
-                {/* Image Prompt */}
+                {/* Image Prompt + Generate Image */}
                 <div>
                   <label className="block text-[11px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">
                     Image Prompt
                   </label>
-                  <textarea
-                    value={editImagePrompt}
-                    onChange={(e) => setEditImagePrompt(e.target.value)}
-                    rows={2}
-                    className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-[12px] text-gray-900 dark:text-white focus:ring-2 focus:ring-[#0F766E] focus:border-transparent outline-none resize-y italic"
-                  />
+                  <div className="flex gap-2">
+                    <textarea
+                      value={editImagePrompt}
+                      onChange={(e) => setEditImagePrompt(e.target.value)}
+                      rows={2}
+                      className="flex-1 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-[12px] text-gray-900 dark:text-white focus:ring-2 focus:ring-[#0F766E] focus:border-transparent outline-none resize-y italic"
+                    />
+                    <button
+                      onClick={handleGenerateImage}
+                      disabled={generatingImage || !editImagePrompt}
+                      className="self-end px-3 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-[11px] font-medium transition-colors disabled:opacity-50 whitespace-nowrap"
+                    >
+                      {generatingImage ? (
+                        <RefreshCw size={14} className="animate-spin" />
+                      ) : (
+                        <ImageIcon size={14} />
+                      )}
+                    </button>
+                  </div>
+                  {editImageUrl && (
+                    <div className="mt-2">
+                      <img
+                        src={editImageUrl}
+                        alt="Generated"
+                        className="w-full rounded-lg max-h-40 object-cover"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* Performance placeholder */}
+                <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
+                  <div className="flex items-center gap-2 mb-2">
+                    <BarChart3 size={14} className="text-gray-400" />
+                    <p className="text-[11px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                      Performance
+                    </p>
+                  </div>
+                  {selectedPost.status === 'posted' ? (
+                    <div className="flex gap-4 text-[11px] text-gray-500 dark:text-gray-400">
+                      <span>Views: 0</span>
+                      <span>Likes: 0</span>
+                      <span>Comments: 0</span>
+                      <span>Shares: 0</span>
+                    </div>
+                  ) : (
+                    <p className="text-[11px] text-gray-400 italic">
+                      Analytics available after publishing.
+                    </p>
+                  )}
                 </div>
 
                 {/* Action buttons */}
@@ -435,8 +626,16 @@ const LinkedInIntelligence: React.FC = () => {
                     {copied ? 'Copied!' : 'Copy Post'}
                   </button>
                   <button
+                    onClick={handlePublishToLinkedIn}
+                    disabled={publishing || selectedPost.status === 'posted'}
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#0077B5] hover:bg-[#006097] text-white text-xs font-medium transition-colors disabled:opacity-50"
+                  >
+                    {publishing ? <RefreshCw size={14} className="animate-spin" /> : <Send size={14} />}
+                    Publish to LinkedIn
+                  </button>
+                  <button
                     onClick={handleMarkPosted}
-                    disabled={saving}
+                    disabled={saving || selectedPost.status === 'posted'}
                     className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium transition-colors disabled:opacity-50"
                   >
                     <CheckCircle size={14} />
@@ -447,13 +646,14 @@ const LinkedInIntelligence: React.FC = () => {
             )}
           </div>
 
-          {/* RIGHT: Preview */}
+          {/* RIGHT: Preview — live synced */}
           <div className="lg:col-span-4">
             <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden mb-4">
               <div className="p-4 border-b border-gray-100 dark:border-gray-700">
                 <h2 className="text-sm font-semibold text-gray-900 dark:text-white">
                   Post Preview
                 </h2>
+                <p className="text-[10px] text-gray-400 mt-0.5">Live synced with editor</p>
               </div>
 
               <div className="p-4">
@@ -468,6 +668,9 @@ const LinkedInIntelligence: React.FC = () => {
                   <LinkedInPreview
                     title={editTitle}
                     content={editContent}
+                    hashtags={editHashtags}
+                    sourceUrl={selectedPost.source_url}
+                    imageUrl={editImageUrl}
                     imagePrompt={editImagePrompt || undefined}
                   />
                 )}

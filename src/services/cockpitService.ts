@@ -50,6 +50,8 @@ export interface LinkedInPost {
   draft_content: string | null;
   hashtags: string | null;
   image_prompt: string | null;
+  image_url: string | null;
+  linkedin_url: string | null;
   colonaiq_context: boolean;
   status: 'new' | 'draft' | 'posted';
   relevance_score: number | null;
@@ -141,7 +143,7 @@ export const cockpitService = {
 
   updateLinkedInPost: async (
     id: string,
-    fields: Partial<Pick<LinkedInPost, 'draft_content' | 'hashtags' | 'image_prompt' | 'status'>>
+    fields: Partial<Pick<LinkedInPost, 'draft_content' | 'hashtags' | 'image_prompt' | 'image_url' | 'linkedin_url' | 'status'>>
   ): Promise<void> => {
     const res = await fetch('/.netlify/functions/linkedin_posts?action=update', {
       method: 'POST',
@@ -149,6 +151,25 @@ export const cockpitService = {
       body: JSON.stringify({ id, ...fields }),
     });
     if (!res.ok) throw new Error(`LinkedIn update failed (${res.status})`);
+  },
+
+  generatePostImage: async (prompt: string, postId?: string): Promise<{ image_url: string }> => {
+    const res = await fetch('/.netlify/functions/generate_post_image', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt, post_id: postId }),
+    });
+    if (!res.ok) throw new Error(`Image generation failed (${res.status})`);
+    return res.json();
+  },
+
+  publishToLinkedIn: async (postId: string, text: string, articleUrl?: string, imageUrl?: string): Promise<{ success: boolean; linkedin_post_url?: string; error?: string }> => {
+    const res = await fetch('/.netlify/functions/linkedin_publish', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ post_id: postId, text, article_url: articleUrl, image_url: imageUrl }),
+    });
+    return res.json();
   },
 
   getRepoActivityPlaceholder: (): PlaceholderSection => ({

@@ -372,10 +372,65 @@ async function upsert(items: any[]) {
   }
 }
 
+// ---- METADATA EXTRACTION from article pages ----
+async function fetchArticleMetadata(url: string): Promise<{ summary: string | null; canonicalUrl: string | null }> {
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+    const res = await fetch(url, {
+      headers: { "User-Agent": "COLONAiVE/NewsFetcher" },
+      signal: controller.signal,
+      redirect: "follow",
+    });
+    clearTimeout(timeout);
+    if (!res.ok) return { summary: null, canonicalUrl: null };
+
+    const html = await res.text();
+    // Only parse first 50KB to stay fast
+    const head = html.slice(0, 50000);
+
+    // Extract summary from meta tags (priority order)
+    let summary: string | null = null;
+    const ogDesc = head.match(/<meta\s+(?:[^>]*?)property=["']og:description["']\s+content=["']([^"']+)["']/i)
+      || head.match(/<meta\s+content=["']([^"']+)["']\s+(?:[^>]*?)property=["']og:description["']/i);
+    if (ogDesc?.[1]) {
+      summary = ogDesc[1].trim();
+    } else {
+      const metaDesc = head.match(/<meta\s+(?:[^>]*?)name=["']description["']\s+content=["']([^"']+)["']/i)
+        || head.match(/<meta\s+content=["']([^"']+)["']\s+(?:[^>]*?)name=["']description["']/i);
+      if (metaDesc?.[1]) summary = metaDesc[1].trim();
+    }
+
+    // Extract canonical URL
+    let canonicalUrl: string | null = null;
+    const ogUrl = head.match(/<meta\s+(?:[^>]*?)property=["']og:url["']\s+content=["']([^"']+)["']/i)
+      || head.match(/<meta\s+content=["']([^"']+)["']\s+(?:[^>]*?)property=["']og:url["']/i);
+    if (ogUrl?.[1]) {
+      canonicalUrl = ogUrl[1].trim();
+    } else {
+      const canonical = head.match(/<link\s+(?:[^>]*?)rel=["']canonical["']\s+href=["']([^"']+)["']/i)
+        || head.match(/<link\s+href=["']([^"']+)["']\s+(?:[^>]*?)rel=["']canonical["']/i);
+      if (canonical?.[1]) canonicalUrl = canonical[1].trim();
+    }
+
+    return { summary: summary || null, canonicalUrl: canonicalUrl || null };
+  } catch {
+    return { summary: null, canonicalUrl: null };
+  }
+}
+
 async function aiSummary(title: string, text: string, useAI: boolean) {
+  // First try to get summary from the article page metadata
+  const snippet = (text || "").split(/[\.\n]/).slice(0, 3).join(". ").trim();
+
   if (!useAI || !process.env.OPENAI_API_KEY) {
-    const snippet = (text || "").split(/[\.\n]/).slice(0, 3).join(". ").trim();
-    return snippet || "Summary unavailable. Open the original article for details.";
+    return snippet || "CRC research article — open the original source for full details.";
+  }
+
+  // If we have decent text, use AI to summarize
+  const inputText = snippet || title;
+  if (!inputText || inputText.length < 20) {
+    return "CRC research article — open the original source for full details.";
   }
 
   const r = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -391,15 +446,15 @@ async function aiSummary(title: string, text: string, useAI: boolean) {
         {
           role: "system",
           content:
-            "Medical editor. Write a neutral 2–3 sentence summary for clinicians about colorectal cancer research, screening policy, or awareness.",
+            "Medical editor. Write a neutral 2–3 sentence summary for clinicians about colorectal cancer research, screening policy, or awareness. Never say 'summary unavailable'.",
         },
-        { role: "user", content: `Title:\n${title}\n\nText:\n${text}\n\nWrite the summary.` },
+        { role: "user", content: `Title:\n${title}\n\nText:\n${inputText}\n\nWrite the summary.` },
       ],
     }),
   });
 
   const j = await r.json();
-  return j.choices?.[0]?.message?.content?.trim() || "Summary unavailable.";
+  return j.choices?.[0]?.message?.content?.trim() || "CRC research article — open the original source for full details.";
 }
 
 export async function handler(event: any) {
@@ -439,7 +494,22 @@ export async function handler(event: any) {
       // Filter out low-value basic-science articles
       if (isLowValueArticle(title, text)) continue;
 
-      const summary = await aiSummary(title, text, useAI);
+      // Try to extract metadata (summary + canonical URL) from the article page
+      let articleMeta = { summary: null as string | null, canonicalUrl: null as string | null };
+      if (!FAST && link) {
+        articleMeta = await fetchArticleMetadata(link);
+      }
+
+      // Use extracted meta summary if RSS text is thin
+      const enrichedText = articleMeta.summary
+        ? `${text}\n${articleMeta.summary}`
+        : text;
+
+      const summary = articleMeta.summary || await aiSummary(title, enrichedText, useAI);
+
+      // Resolve canonical URL: prefer og:url/canonical over RSS redirect link
+      const resolvedUrl = articleMeta.canonicalUrl || link;
+
       const pub = it.isoDate || it.pubDate || new Date().toISOString();
       const category = resolveCategory(it, f.defaultCategory, title, it.contentSnippet || it.summary || "", it.content || "");
 
@@ -448,7 +518,7 @@ export async function handler(event: any) {
 
       collected.push({
         title,
-        url: link,
+        url: resolvedUrl,
         source: sourceTitle || dom,
         category,
         published_at: normalizeDateInput(pub),
