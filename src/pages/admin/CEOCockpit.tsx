@@ -118,6 +118,8 @@ const CEOCockpit: React.FC = () => {
 
   // Chief-of-Staff state
   const [digest, setDigest] = useState<WeeklyStrategyDigest | null>(null);
+  const [, setWidgetTick] = useState(0);
+  const handleActionCenterUpdate = () => setWidgetTick((t) => t + 1);
 
   const loadCompetitiveIntel = async () => {
     setCompLoading(true);
@@ -235,7 +237,7 @@ const CEOCockpit: React.FC = () => {
       <div className="max-w-7xl mx-auto px-6 py-8">
 
         {/* === CEO ACTION CENTER === */}
-        <ActionCenterChat />
+        <ActionCenterChat onAction={handleActionCenterUpdate} />
 
         {/* === ACTION CENTER DASHBOARD WIDGET === */}
         <CockpitSection>

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
   MessageSquare,
   Mic,
@@ -38,7 +38,18 @@ const ACTION_ICONS: Record<string, React.ReactNode> = {
   'export-meeting-note': <FileText size={12} />,
 };
 
-const ActionCenterChat: React.FC = () => {
+// Pending action state — when a CTA needs follow-up context before executing
+type PendingAction = {
+  type: string;
+  messageId?: string;
+} | null;
+
+interface ActionCenterChatProps {
+  /** Called whenever an action modifies shared state (tasks, roadmap, etc.) so the parent can re-render widgets */
+  onAction?: () => void;
+}
+
+const ActionCenterChat: React.FC<ActionCenterChatProps> = ({ onAction }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -48,17 +59,22 @@ const ActionCenterChat: React.FC = () => {
   const [generatedPrompt, setGeneratedPrompt] = useState<string | null>(null);
   const [emailDraftId, setEmailDraftId] = useState<string | null>(null);
   const [sendingEmail, setSendingEmail] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [pendingAction, setPendingAction] = useState<PendingAction>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const voiceRef = useRef<{ stop: () => void } | null>(null);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+  // Scroll within the chat container only — never the page
+  const scrollToBottom = useCallback(() => {
+    const el = chatContainerRef.current;
+    if (el) {
+      el.scrollTop = el.scrollHeight;
+    }
+  }, []);
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages, generatedPrompt, emailDraftId]);
+  }, [messages, generatedPrompt, emailDraftId, scrollToBottom]);
 
   useEffect(() => {
     if (isExpanded && inputRef.current) {
@@ -66,22 +82,49 @@ const ActionCenterChat: React.FC = () => {
     }
   }, [isExpanded]);
 
-  const refreshMessages = () => setMessages([...chatEngine.getMessages()]);
+  const refreshMessages = useCallback(() => {
+    setMessages([...chatEngine.getMessages()]);
+  }, []);
+
+  const notifyParent = useCallback(() => {
+    onAction?.();
+  }, [onAction]);
+
+  // --- Check if there's enough CEO context for an action ---
+  const getCEOContext = (): string => {
+    const ceoMsgs = chatEngine.getMessages().filter((m) => m.role === 'ceo');
+    return ceoMsgs.map((m) => m.content).join(' ');
+  };
+
+  const hasSubstantiveContext = (): boolean => {
+    const ctx = getCEOContext();
+    // Need at least ~15 chars of real content from the CEO
+    return ctx.trim().length >= 15;
+  };
 
   // --- CTA action handler ---
   const handleCTAAction = (actionType: string, messageId?: string) => {
-    // Mark the action as executed on the originating message
     if (messageId) {
       chatEngine.markActionExecuted(messageId, actionType);
     }
 
-    // Get the last CEO message as context
-    const ceoMessages = chatEngine.getMessages().filter((m) => m.role === 'ceo');
-    const lastCeoMessage = ceoMessages[ceoMessages.length - 1]?.content || '';
+    const lastCeoContent = (() => {
+      const ceoMsgs = chatEngine.getMessages().filter((m) => m.role === 'ceo');
+      return ceoMsgs[ceoMsgs.length - 1]?.content || '';
+    })();
 
     switch (actionType) {
       case 'draft-email': {
-        const draft = emailComposer.createDraft(lastCeoMessage);
+        if (!hasSubstantiveContext()) {
+          chatEngine.addResponse(
+            'I need a bit more context to draft the email.\n\nWho should I send it to, and what should the email be about?'
+          );
+          setPendingAction({ type: 'draft-email', messageId });
+          refreshMessages();
+          inputRef.current?.focus();
+          return;
+        }
+        const draft = emailComposer.createDraft(lastCeoContent);
         setEmailDraftId(draft.id);
         chatEngine.addResponse(
           `Email draft created.\n\nTo: ${draft.to || '(specify recipient)'}\nSubject: "${draft.subject}"\n\nReview and send below.`,
@@ -91,17 +134,36 @@ const ActionCenterChat: React.FC = () => {
       }
 
       case 'create-task': {
-        const detected = actionRouter.detectAction(lastCeoMessage);
+        if (!hasSubstantiveContext()) {
+          chatEngine.addResponse(
+            'What task would you like to create?\n\nPlease describe the task — e.g. "Implement radar scoring update" or "Fix LinkedIn automation pipeline".'
+          );
+          setPendingAction({ type: 'create-task', messageId });
+          refreshMessages();
+          inputRef.current?.focus();
+          return;
+        }
+        const detected = actionRouter.detectAction(lastCeoContent);
         const result = actionRouter.executeAction({ ...detected, type: 'create-task' });
         chatEngine.addResponse(
           `${result.message}\n\nTask added to Chief-of-Staff dashboard.`,
           'create-task',
           [{ type: 'generate-prompt', label: 'Generate AG Prompt' }]
         );
+        notifyParent();
         break;
       }
 
       case 'generate-prompt': {
+        if (!hasSubstantiveContext()) {
+          chatEngine.addResponse(
+            'I need more context to generate a useful AG prompt.\n\nWhat problem are you trying to solve, or what feature should the prompt address?'
+          );
+          setPendingAction({ type: 'generate-prompt', messageId });
+          refreshMessages();
+          inputRef.current?.focus();
+          return;
+        }
         const prompt = promptGenerator.generateFromChat();
         setGeneratedPrompt(prompt.prompt);
         chatEngine.addResponse(
@@ -112,11 +174,21 @@ const ActionCenterChat: React.FC = () => {
       }
 
       case 'add-roadmap': {
+        if (!hasSubstantiveContext()) {
+          chatEngine.addResponse(
+            'What feature or milestone should I add to the roadmap?\n\nDescribe the item and its priority.'
+          );
+          setPendingAction({ type: 'add-roadmap', messageId });
+          refreshMessages();
+          inputRef.current?.focus();
+          return;
+        }
         chatEngine.addResponse(
-          `Roadmap item captured: "${lastCeoMessage.slice(0, 60)}..."\n\nAdded to product backlog.`,
+          `Roadmap item captured: "${lastCeoContent.slice(0, 60)}..."\n\nAdded to product backlog.`,
           'add-roadmap',
           [{ type: 'create-task', label: 'Create Task' }]
         );
+        notifyParent();
         break;
       }
 
@@ -129,8 +201,15 @@ const ActionCenterChat: React.FC = () => {
       }
 
       case 'create-strategy-note': {
+        if (!hasSubstantiveContext()) {
+          chatEngine.addResponse('What strategic insight or decision should I capture?');
+          setPendingAction({ type: 'create-strategy-note', messageId });
+          refreshMessages();
+          inputRef.current?.focus();
+          return;
+        }
         chatEngine.addResponse(
-          `Strategy memo saved: "${lastCeoMessage.slice(0, 60)}..."`,
+          `Strategy memo saved: "${lastCeoContent.slice(0, 60)}..."`,
           'create-strategy-note'
         );
         break;
@@ -138,7 +217,7 @@ const ActionCenterChat: React.FC = () => {
 
       case 'export-meeting-note': {
         chatEngine.addResponse(
-          `Meeting note exported from conversation context.`,
+          'Meeting note exported from conversation context.',
           'export-meeting-note'
         );
         break;
@@ -154,10 +233,11 @@ const ActionCenterChat: React.FC = () => {
         chatEngine.addResponse('Action not recognized.');
     }
 
+    setPendingAction(null);
     refreshMessages();
   };
 
-  // --- Send handler with intent detection ---
+  // --- Send handler with intent detection + pending action fulfillment ---
   const handleSend = () => {
     if (!input.trim()) return;
     const text = input.trim();
@@ -165,11 +245,72 @@ const ActionCenterChat: React.FC = () => {
     // Add CEO message
     chatEngine.sendMessage(text);
 
-    // Run intent detection
+    // If there's a pending action waiting for context, fulfill it now
+    if (pendingAction) {
+      const actionType = pendingAction.type;
+      setPendingAction(null);
+
+      // Now the CEO has provided context — execute the action
+      switch (actionType) {
+        case 'create-task': {
+          const detected = actionRouter.detectAction(text);
+          const result = actionRouter.executeAction({ ...detected, type: 'create-task' });
+          chatEngine.addResponse(
+            `${result.message}\n\nTask added to Chief-of-Staff dashboard.`,
+            'create-task',
+            [{ type: 'generate-prompt', label: 'Generate AG Prompt' }]
+          );
+          notifyParent();
+          break;
+        }
+        case 'generate-prompt': {
+          const prompt = promptGenerator.generateFromText(text);
+          setGeneratedPrompt(prompt.prompt);
+          chatEngine.addResponse(
+            `AG prompt generated: "${prompt.title}"\n\nCopy or send to Antigravity below.`,
+            'generate-prompt'
+          );
+          break;
+        }
+        case 'draft-email': {
+          const draft = emailComposer.createDraft(text);
+          setEmailDraftId(draft.id);
+          chatEngine.addResponse(
+            `Email draft created.\n\nTo: ${draft.to || '(specify recipient)'}\nSubject: "${draft.subject}"\n\nReview and send below.`,
+            'draft-email'
+          );
+          break;
+        }
+        case 'add-roadmap': {
+          chatEngine.addResponse(
+            `Roadmap item captured: "${text.slice(0, 60)}${text.length > 60 ? '...' : ''}"\n\nAdded to product backlog.`,
+            'add-roadmap',
+            [{ type: 'create-task', label: 'Create Task' }]
+          );
+          notifyParent();
+          break;
+        }
+        case 'create-strategy-note': {
+          chatEngine.addResponse(
+            `Strategy memo saved: "${text.slice(0, 60)}${text.length > 60 ? '...' : ''}"`,
+            'create-strategy-note'
+          );
+          break;
+        }
+        default: {
+          chatEngine.addResponse(`Action completed: ${actionType}`);
+        }
+      }
+
+      refreshMessages();
+      setInput('');
+      return;
+    }
+
+    // Normal intent detection flow
     const intent = actionRouter.detectIntent(text);
 
     if (intent.primary.confidence >= 50) {
-      // High-confidence: execute primary action inline and show CTAs for alternatives
       if (intent.primary.type === 'draft-email') {
         const draft = emailComposer.createDraft(text);
         setEmailDraftId(draft.id);
@@ -186,8 +327,15 @@ const ActionCenterChat: React.FC = () => {
           'generate-prompt',
           intent.suggestedActions.filter((a) => a.type !== 'generate-prompt')
         );
+      } else if (intent.primary.type === 'create-task') {
+        const result = actionRouter.executeAction(intent.primary);
+        chatEngine.addResponse(
+          `${intent.analysisText}\n\n${result.message}`,
+          intent.primary.type,
+          intent.suggestedActions.filter((a) => a.type !== intent.primary.type)
+        );
+        notifyParent();
       } else {
-        // Execute action directly
         const result = actionRouter.executeAction(intent.primary);
         chatEngine.addResponse(
           `${intent.analysisText}\n\n${result.message}`,
@@ -196,7 +344,6 @@ const ActionCenterChat: React.FC = () => {
         );
       }
     } else {
-      // Low confidence: show analysis + all suggested CTAs
       chatEngine.addResponse(
         `Understood. I've noted: "${text.slice(0, 100)}${text.length > 100 ? '...' : ''}"\n\nWhat would you like to do with this?`,
         undefined,
@@ -250,13 +397,13 @@ const ActionCenterChat: React.FC = () => {
       return;
     }
 
-    if (type === 'generate-prompt') {
-      handleCTAAction('generate-prompt');
+    // For all other quick actions, go through the CTA handler which will ask for context if needed
+    if (type === 'generate-prompt' || type === 'create-task') {
+      handleCTAAction(type);
       return;
     }
 
     const labels: Record<string, string> = {
-      'create-task': 'Task: ',
       'draft-email': 'Email: Send to ',
       'add-roadmap': 'Roadmap: Add feature ',
       'generate-linkedin': 'LinkedIn: Create post about ',
@@ -323,6 +470,9 @@ const ActionCenterChat: React.FC = () => {
           <MessageSquare size={18} className="text-white" />
           <span className="text-sm font-semibold text-white">CEO Action Center</span>
           <span className="text-[10px] text-white/50 ml-2">{messages.length} messages</span>
+          {pendingAction && (
+            <span className="text-[10px] text-amber-300 ml-2">Awaiting input...</span>
+          )}
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -339,7 +489,7 @@ const ActionCenterChat: React.FC = () => {
             <ChevronUp size={16} />
           </button>
           <button
-            onClick={() => { chatEngine.clearConversation(); setMessages([]); setIsExpanded(false); setGeneratedPrompt(null); setEmailDraftId(null); }}
+            onClick={() => { chatEngine.clearConversation(); setMessages([]); setIsExpanded(false); setGeneratedPrompt(null); setEmailDraftId(null); setPendingAction(null); }}
             className="p-1.5 rounded hover:bg-white/10 text-white/80 hover:text-white transition-colors"
           >
             <X size={16} />
@@ -365,8 +515,8 @@ const ActionCenterChat: React.FC = () => {
         </div>
       )}
 
-      {/* Messages */}
-      <div className="h-72 overflow-y-auto px-5 py-3 space-y-3">
+      {/* Messages — scrolls ONLY within this container */}
+      <div ref={chatContainerRef} className="h-72 overflow-y-auto px-5 py-3 space-y-3">
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full text-center">
             <MessageSquare size={28} className="text-gray-300 dark:text-gray-600 mb-2" />
@@ -479,6 +629,7 @@ const ActionCenterChat: React.FC = () => {
                         );
                       }
                       refreshMessages();
+                      notifyParent();
                     }}
                     disabled={sendingEmail || !draft.to}
                     className="px-3 py-1.5 rounded bg-[#0F766E] text-white text-[10px] font-medium hover:bg-[#0F766E]/90 disabled:opacity-40 transition-colors flex items-center gap-1"
@@ -517,8 +668,6 @@ const ActionCenterChat: React.FC = () => {
             </div>
           );
         })()}
-
-        <div ref={messagesEndRef} />
       </div>
 
       {/* Input bar */}
@@ -542,7 +691,7 @@ const ActionCenterChat: React.FC = () => {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder={isListening ? 'Listening...' : 'Type a message or instruction...'}
+          placeholder={pendingAction ? `Describe the ${pendingAction.type.replace('-', ' ')}...` : isListening ? 'Listening...' : 'Type a message or instruction...'}
           className="flex-1 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 text-xs text-gray-800 dark:text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-teal-500"
         />
         <button
