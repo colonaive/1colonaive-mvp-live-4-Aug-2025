@@ -17,6 +17,7 @@ import {
   BookOpen,
   Save,
   MoreHorizontal,
+  RefreshCw,
 } from 'lucide-react';
 import { chatEngine, type ChatMessage } from '@/chief-of-staff/action-center/chatEngine';
 import { voiceInput } from '@/chief-of-staff/action-center/voiceInput';
@@ -44,6 +45,7 @@ const ActionCenterChat: React.FC = () => {
   const [copiedPrompt, setCopiedPrompt] = useState<string | null>(null);
   const [generatedPrompt, setGeneratedPrompt] = useState<string | null>(null);
   const [emailDraftId, setEmailDraftId] = useState<string | null>(null);
+  const [sendingEmail, setSendingEmail] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const voiceRef = useRef<{ stop: () => void } | null>(null);
@@ -299,17 +301,68 @@ const ActionCenterChat: React.FC = () => {
         {emailDraftId && (() => {
           const draft = emailComposer.getAllDrafts().find((d) => d.id === emailDraftId);
           if (!draft) return null;
+          const isSent = draft.status === 'sent';
+          const isFailed = draft.status === 'failed';
           return (
-            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
+            <div className={`border rounded-lg p-3 ${isSent ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800' : isFailed ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'}`}>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[11px] font-semibold text-blue-700 dark:text-blue-300">Email Draft</span>
-                <span className="text-[10px] text-blue-500">{draft.status}</span>
+                <span className={`text-[11px] font-semibold ${isSent ? 'text-emerald-700 dark:text-emerald-300' : isFailed ? 'text-red-700 dark:text-red-300' : 'text-blue-700 dark:text-blue-300'}`}>
+                  {isSent ? 'Email Sent' : isFailed ? 'Email Failed' : 'Email Draft'}
+                </span>
+                <span className="text-[10px] text-gray-500">{draft.status}</span>
               </div>
               <div className="space-y-1 text-[10px]">
-                <p className="text-blue-800 dark:text-blue-200"><strong>To:</strong> {draft.to || '(not set)'}</p>
-                <p className="text-blue-800 dark:text-blue-200"><strong>Subject:</strong> {draft.subject}</p>
-                <p className="text-blue-700 dark:text-blue-300 mt-1 whitespace-pre-wrap line-clamp-3">{draft.body}</p>
+                <p className="text-gray-800 dark:text-gray-200"><strong>To:</strong> {draft.to || '(not set)'}</p>
+                <p className="text-gray-800 dark:text-gray-200"><strong>Subject:</strong> {draft.subject}</p>
+                <p className="text-gray-700 dark:text-gray-300 mt-1 whitespace-pre-wrap line-clamp-3">{draft.body}</p>
               </div>
+              {!isSent && (
+                <div className="flex items-center gap-2 mt-3">
+                  <button
+                    onClick={async () => {
+                      if (!draft.to) {
+                        chatEngine.addResponse('Cannot send: no recipient specified. Edit the draft first.');
+                        setMessages([...chatEngine.getMessages()]);
+                        return;
+                      }
+                      setSendingEmail(true);
+                      const result = await emailComposer.sendEmail(draft.id);
+                      setSendingEmail(false);
+                      if (result.success) {
+                        chatEngine.addResponse(`Email sent successfully to ${draft.to}.`);
+                      } else {
+                        chatEngine.addResponse(`Email send failed: ${result.error}`);
+                      }
+                      setMessages([...chatEngine.getMessages()]);
+                    }}
+                    disabled={sendingEmail || !draft.to}
+                    className="px-3 py-1.5 rounded bg-[#0F766E] text-white text-[10px] font-medium hover:bg-[#0F766E]/90 disabled:opacity-40 transition-colors flex items-center gap-1"
+                  >
+                    {sendingEmail ? <RefreshCw size={10} className="animate-spin" /> : <Send size={10} />}
+                    {sendingEmail ? 'Sending...' : 'Send'}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setInput(`Edit email to ${draft.to}: `);
+                      inputRef.current?.focus();
+                    }}
+                    className="px-3 py-1.5 rounded bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 text-[10px] font-medium hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => {
+                      emailComposer.deleteDraft(draft.id);
+                      setEmailDraftId(null);
+                      chatEngine.addResponse('Email draft discarded.');
+                      setMessages([...chatEngine.getMessages()]);
+                    }}
+                    className="px-3 py-1.5 rounded bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 text-[10px] font-medium hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+                  >
+                    Discard
+                  </button>
+                </div>
+              )}
             </div>
           );
         })()}

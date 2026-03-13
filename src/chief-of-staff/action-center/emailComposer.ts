@@ -83,6 +83,41 @@ export const emailComposer = {
     return true;
   },
 
+  /** Send an email via the Outlook send Netlify function */
+  async sendEmail(draftId: string): Promise<{ success: boolean; error?: string }> {
+    const draft = emailDrafts.find((d) => d.id === draftId);
+    if (!draft) return { success: false, error: 'Draft not found' };
+    if (!draft.to) return { success: false, error: 'No recipient specified' };
+
+    try {
+      const res = await fetch('/.netlify/functions/outlook-send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to: draft.to,
+          cc: draft.cc || undefined,
+          subject: draft.subject,
+          body: draft.body,
+          context_source: draft.contextSource || 'ceo-cockpit',
+        }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        draft.status = 'sent';
+        draft.sentAt = new Date().toISOString();
+        return { success: true };
+      } else {
+        draft.status = 'failed';
+        return { success: false, error: data.error || 'Send failed' };
+      }
+    } catch (err) {
+      draft.status = 'failed';
+      return { success: false, error: err instanceof Error ? err.message : 'Network error' };
+    }
+  },
+
   /** Get all drafts */
   getAllDrafts(): EmailDraft[] {
     return [...emailDrafts];
