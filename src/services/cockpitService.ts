@@ -43,6 +43,22 @@ export interface ExecutiveBriefingSummary {
   created_at: string;
 }
 
+export interface LinkedInPost {
+  id: string;
+  source_url: string;
+  title: string;
+  draft_content: string | null;
+  hashtags: string | null;
+  image_prompt: string | null;
+  colonaiq_context: boolean;
+  status: 'new' | 'draft' | 'posted';
+  relevance_score: number | null;
+  source_name: string | null;
+  posted_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export const cockpitService = {
   getRegulatoryStatus: (): RegulatoryItem[] => regulatoryItems,
   getClinicalTrials: (): ClinicalTrial[] => clinicalTrials,
@@ -105,6 +121,34 @@ export const cockpitService = {
     } catch {
       return [];
     }
+  },
+
+  fetchLinkedInPosts: async (status?: string): Promise<LinkedInPost[]> => {
+    const params = new URLSearchParams({ action: 'list', limit: '50' });
+    if (status) params.set('status', status);
+    const res = await fetch(`/.netlify/functions/linkedin_posts?${params}`);
+    if (!res.ok) throw new Error(`LinkedIn posts fetch failed (${res.status})`);
+    const data = await res.json();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return ((data as any).items || []) as LinkedInPost[];
+  },
+
+  generateLinkedInPosts: async (): Promise<{ generated: number; scanned: number }> => {
+    const res = await fetch('/.netlify/functions/linkedin_posts?action=generate');
+    if (!res.ok) throw new Error(`LinkedIn generate failed (${res.status})`);
+    return res.json();
+  },
+
+  updateLinkedInPost: async (
+    id: string,
+    fields: Partial<Pick<LinkedInPost, 'draft_content' | 'hashtags' | 'image_prompt' | 'status'>>
+  ): Promise<void> => {
+    const res = await fetch('/.netlify/functions/linkedin_posts?action=update', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, ...fields }),
+    });
+    if (!res.ok) throw new Error(`LinkedIn update failed (${res.status})`);
   },
 
   getRepoActivityPlaceholder: (): PlaceholderSection => ({

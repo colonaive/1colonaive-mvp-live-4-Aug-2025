@@ -13,10 +13,12 @@ import {
   Briefcase,
   ChevronDown,
   ChevronUp,
+  Linkedin,
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import CockpitCard from '@/components/cockpit/CockpitCard';
 import CockpitSection from '@/components/cockpit/CockpitSection';
-import { cockpitService, type InboxEmail, type CRCNewsItem, type ExecutiveBriefingSummary } from '@/services/cockpitService';
+import { cockpitService, type InboxEmail, type CRCNewsItem, type ExecutiveBriefingSummary, type LinkedInPost } from '@/services/cockpitService';
 
 const today = new Date().toLocaleDateString('en-SG', {
   weekday: 'long',
@@ -49,6 +51,7 @@ const formatDateTime = (iso: string) => {
 };
 
 const CEOCockpit: React.FC = () => {
+  const navigate = useNavigate();
   const regulatory = cockpitService.getRegulatoryStatus();
   const trials = cockpitService.getClinicalTrials();
   const investors = cockpitService.getInvestorHistory();
@@ -68,6 +71,9 @@ const CEOCockpit: React.FC = () => {
   const [briefingHistory, setBriefingHistory] = useState<ExecutiveBriefingSummary[]>([]);
   const [briefingLoading, setBriefingLoading] = useState(true);
   const [showHistory, setShowHistory] = useState(false);
+
+  const [linkedInPosts, setLinkedInPosts] = useState<LinkedInPost[]>([]);
+  const [linkedInLoading, setLinkedInLoading] = useState(true);
 
   const loadBriefing = async () => {
     setBriefingLoading(true);
@@ -111,7 +117,19 @@ const CEOCockpit: React.FC = () => {
     }
   };
 
-  useEffect(() => { loadInbox(); loadCRCNews(); loadBriefing(); }, []);
+  const loadLinkedIn = async () => {
+    setLinkedInLoading(true);
+    try {
+      const data = await cockpitService.fetchLinkedInPosts();
+      setLinkedInPosts(data);
+    } catch {
+      // silent fail — supplementary
+    } finally {
+      setLinkedInLoading(false);
+    }
+  };
+
+  useEffect(() => { loadInbox(); loadCRCNews(); loadBriefing(); loadLinkedIn(); }, []);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -347,6 +365,49 @@ const CEOCockpit: React.FC = () => {
                     </div>
                   </div>
                 ))}
+              </div>
+            )}
+          </CockpitCard>
+        </CockpitSection>
+
+        {/* LinkedIn Intelligence */}
+        <CockpitSection columns={1}>
+          <CockpitCard
+            title="LinkedIn Intelligence"
+            subtitle="AI-curated post opportunities from CRC news"
+            icon={<Linkedin size={18} />}
+            status={linkedInLoading ? 'pending' : linkedInPosts.length > 0 ? 'active' : 'placeholder'}
+          >
+            {linkedInLoading ? (
+              <div className="flex items-center justify-center py-6">
+                <RefreshCw size={20} className="animate-spin text-gray-400" />
+                <span className="ml-2 text-xs text-gray-400">Loading LinkedIn posts...</span>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-6">
+                  <div>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                      {linkedInPosts.filter((p) => p.status !== 'posted').length}
+                    </p>
+                    <p className="text-[11px] text-gray-500 dark:text-gray-400">Pending Posts</p>
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+                      {linkedInPosts.filter((p) => {
+                        if (p.status !== 'posted' || !p.posted_at) return false;
+                        return (Date.now() - new Date(p.posted_at).getTime()) < 7 * 24 * 60 * 60 * 1000;
+                      }).length}
+                    </p>
+                    <p className="text-[11px] text-gray-500 dark:text-gray-400">Posted This Week</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => navigate('/admin/linkedin-intelligence')}
+                  className="px-4 py-2 rounded-lg bg-[#0A385A] hover:bg-[#0A385A]/90 text-white text-xs font-medium transition-colors"
+                >
+                  Open LinkedIn Intelligence
+                </button>
               </div>
             )}
           </CockpitCard>
