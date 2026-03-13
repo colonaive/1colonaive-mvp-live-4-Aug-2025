@@ -18,6 +18,12 @@ import {
   Target,
   Zap,
   Globe,
+  ListChecks,
+  Map,
+  Activity,
+  Layers,
+  BarChart3,
+  ClipboardList,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import CockpitCard from '@/components/cockpit/CockpitCard';
@@ -26,6 +32,12 @@ import { cockpitService, type InboxEmail, type CRCNewsItem, type ExecutiveBriefi
 import { radarService, type RadarSignal } from '@/services/radarService';
 import { competitiveIntelligenceService, type CompetitorSignal, type EarlyWarningSignal, type TechnologyTrend } from '@/services/competitiveIntelligenceService';
 import { classifySignal, getSignalColor, getSignalLabel } from '@/radar/scoring/radarScore';
+import { taskEngine } from '@/chief-of-staff/tasks/taskEngine';
+import { roadmapEngine } from '@/chief-of-staff/roadmap/roadmapEngine';
+import { operationsEngine } from '@/chief-of-staff/operations/operationsEngine';
+import { investorGenerator } from '@/chief-of-staff/investors/investorGenerator';
+import { projectRegistry } from '@/chief-of-staff/projects/projectRegistry';
+import { strategyDigest, type WeeklyStrategyDigest } from '@/chief-of-staff/strategy/strategyDigest';
 
 const today = new Date().toLocaleDateString('en-SG', {
   weekday: 'long',
@@ -42,12 +54,22 @@ const statusBadge = (status: string) => {
     draft: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300',
     ready: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300',
     published: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+    planned: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
+    'in-progress': 'bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-300',
+    healthy: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300',
+    degraded: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
+    down: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
   };
   return (
     <span className={`inline-block px-2 py-0.5 rounded text-[11px] font-medium uppercase tracking-wide ${colors[status] || colors.draft}`}>
       {status}
     </span>
   );
+};
+
+const healthDot = (status: 'green' | 'amber' | 'red') => {
+  const cls = status === 'green' ? 'bg-emerald-500' : status === 'amber' ? 'bg-amber-500' : 'bg-red-500';
+  return <span className={`inline-block w-2 h-2 rounded-full ${cls}`} />;
 };
 
 const formatDateTime = (iso: string) => {
@@ -89,6 +111,9 @@ const CEOCockpit: React.FC = () => {
   const [earlyWarnings, setEarlyWarnings] = useState<EarlyWarningSignal[]>([]);
   const [techTrends, setTechTrends] = useState<TechnologyTrend[]>([]);
   const [compLoading, setCompLoading] = useState(true);
+
+  // Chief-of-Staff state
+  const [digest, setDigest] = useState<WeeklyStrategyDigest | null>(null);
 
   const loadCompetitiveIntel = async () => {
     setCompLoading(true);
@@ -174,7 +199,23 @@ const CEOCockpit: React.FC = () => {
     }
   };
 
-  useEffect(() => { loadInbox(); loadCRCNews(); loadBriefing(); loadLinkedIn(); loadRadar(); loadCompetitiveIntel(); }, []);
+  useEffect(() => {
+    loadInbox(); loadCRCNews(); loadBriefing(); loadLinkedIn(); loadRadar(); loadCompetitiveIntel();
+    // Load Chief-of-Staff strategy digest (synchronous)
+    setDigest(strategyDigest.generate());
+  }, []);
+
+  // Chief-of-Staff computed data
+  const taskStats = taskEngine.getStats();
+  const roadmapStats = roadmapEngine.getStats();
+  const roadmapEntries = roadmapEngine.getAllEntries();
+  const activeMilestone = roadmapEngine.getActiveMilestone();
+  const opsSnapshot = operationsEngine.getSnapshot();
+  const opsStats = operationsEngine.getDashboardStats();
+  const investorStats = investorGenerator.getStats();
+  const investorMaterials = investorGenerator.getAllMaterials();
+  const projects = projectRegistry.getAllProjects();
+  const projectStats = projectRegistry.getStats();
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -183,10 +224,45 @@ const CEOCockpit: React.FC = () => {
         <div className="max-w-7xl mx-auto">
           <h1 className="text-2xl font-bold text-white">CEO Cockpit</h1>
           <p className="text-sm text-white/70 mt-1">{today}</p>
+          <p className="text-xs text-white/50 mt-0.5">Chief-of-Staff Intelligence Layer Active</p>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-8">
+
+        {/* === CHIEF-OF-STAFF: Strategy Digest === */}
+        {digest && (
+          <CockpitSection columns={1}>
+            <CockpitCard
+              title="Weekly Strategy Digest"
+              subtitle={`Week of ${digest.weekOf}`}
+              icon={<ClipboardList size={18} />}
+              status={digest.overallHealth === 'green' ? 'active' : 'pending'}
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                {digest.sections.map((section) => (
+                  <div key={section.heading} className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3">
+                    <div className="flex items-center gap-2 mb-2">
+                      {healthDot(section.status)}
+                      <h4 className="text-[11px] font-semibold text-[#0F766E] dark:text-emerald-400 uppercase tracking-wide">
+                        {section.heading}
+                      </h4>
+                    </div>
+                    <ul className="space-y-1">
+                      {section.items.map((item, idx) => (
+                        <li key={idx} className="text-[11px] text-gray-700 dark:text-gray-300 leading-relaxed">
+                          <span className="text-[#0F766E] dark:text-emerald-400 mr-1">•</span>
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </CockpitCard>
+          </CockpitSection>
+        )}
+
         {/* Executive Briefing (top of dashboard) */}
         <CockpitSection columns={1}>
           <CockpitCard
@@ -255,6 +331,145 @@ const CEOCockpit: React.FC = () => {
                 )}
               </div>
             )}
+          </CockpitCard>
+        </CockpitSection>
+
+        {/* === CHIEF-OF-STAFF: Tasks + Roadmap + Operations === */}
+        <CockpitSection>
+          {/* Task Management */}
+          <CockpitCard
+            title="Chief-of-Staff Tasks"
+            subtitle="Development task tracker"
+            icon={<ListChecks size={18} />}
+            status={taskStats.total > 0 ? 'active' : 'pending'}
+          >
+            <div className="space-y-3">
+              <div className="grid grid-cols-3 gap-2 text-center">
+                <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-2">
+                  <p className="text-lg font-bold text-gray-900 dark:text-white">{taskStats.inProgress}</p>
+                  <p className="text-[10px] text-gray-500">In Progress</p>
+                </div>
+                <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-2">
+                  <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">{taskStats.completed}</p>
+                  <p className="text-[10px] text-gray-500">Completed</p>
+                </div>
+                <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-2">
+                  <p className="text-lg font-bold text-amber-600 dark:text-amber-400">{taskStats.blocked}</p>
+                  <p className="text-[10px] text-gray-500">Blocked</p>
+                </div>
+              </div>
+              <div className="flex items-center justify-between text-[11px] text-gray-500">
+                <span>{taskStats.total} total tasks</span>
+                <span>{taskStats.verified} verified</span>
+              </div>
+            </div>
+          </CockpitCard>
+
+          {/* Product Roadmap */}
+          <CockpitCard
+            title="Product Roadmap"
+            subtitle={activeMilestone?.name || 'No active milestone'}
+            icon={<Map size={18} />}
+            status={roadmapStats.inProgress > 0 ? 'active' : 'pending'}
+          >
+            <div className="space-y-2">
+              {roadmapEntries.slice(0, 5).map((entry) => (
+                <div key={entry.id} className="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-2 last:border-0 last:pb-0">
+                  <div className="flex-1">
+                    <p className="text-xs font-medium text-gray-900 dark:text-white">{entry.title}</p>
+                    <p className="text-[10px] text-gray-400">{entry.targetRelease} · {entry.priority}</p>
+                  </div>
+                  {statusBadge(entry.status)}
+                </div>
+              ))}
+              <div className="flex items-center justify-between text-[11px] text-gray-500 pt-1">
+                <span>{roadmapStats.total} features total</span>
+                <span>{roadmapStats.completed} shipped</span>
+              </div>
+            </div>
+          </CockpitCard>
+
+          {/* Operations Status */}
+          <CockpitCard
+            title="Operations Status"
+            subtitle={`Overall: ${opsStats.overallStatus.toUpperCase()}`}
+            icon={<Activity size={18} />}
+            status={opsStats.overallStatus === 'healthy' ? 'active' : 'pending'}
+          >
+            <div className="space-y-2">
+              {opsSnapshot.systems.map((sys) => (
+                <div key={sys.system} className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className={`w-2 h-2 rounded-full ${sys.status === 'healthy' ? 'bg-emerald-500' : sys.status === 'degraded' ? 'bg-amber-500' : 'bg-red-500'}`} />
+                    <span className="text-xs text-gray-900 dark:text-white">{sys.system}</span>
+                  </div>
+                  <span className="text-[10px] text-gray-400">{sys.status}</span>
+                </div>
+              ))}
+              {opsStats.alertCount > 0 && (
+                <div className="bg-red-50 dark:bg-red-900/20 rounded p-2 mt-2">
+                  <p className="text-[11px] text-red-700 dark:text-red-300 font-medium">{opsStats.alertCount} active alert(s)</p>
+                </div>
+              )}
+            </div>
+          </CockpitCard>
+        </CockpitSection>
+
+        {/* === CHIEF-OF-STAFF: Investors + Connected Projects === */}
+        <CockpitSection columns={2}>
+          {/* Investor Materials */}
+          <CockpitCard
+            title="Investor Materials"
+            subtitle={`${investorStats.totalMaterials} materials · ${investorStats.currentValuation} valuation`}
+            icon={<BarChart3 size={18} />}
+            status={investorStats.totalMaterials > 0 ? 'active' : 'pending'}
+          >
+            <div className="space-y-2">
+              {investorMaterials.slice(0, 4).map((mat) => (
+                <div key={mat.id} className="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-2 last:border-0 last:pb-0">
+                  <div className="flex-1">
+                    <p className="text-xs font-medium text-gray-900 dark:text-white">{mat.title}</p>
+                    <p className="text-[10px] text-gray-400">{mat.type}</p>
+                  </div>
+                  {statusBadge(mat.status)}
+                </div>
+              ))}
+              <div className="grid grid-cols-2 gap-2 text-center pt-2">
+                <div className="bg-gray-50 dark:bg-gray-800/50 rounded p-2">
+                  <p className="text-sm font-bold text-gray-900 dark:text-white">{investorStats.totalRaised}</p>
+                  <p className="text-[10px] text-gray-500">Total Raised</p>
+                </div>
+                <div className="bg-gray-50 dark:bg-gray-800/50 rounded p-2">
+                  <p className="text-sm font-bold text-gray-900 dark:text-white">{investorStats.marketsActive}</p>
+                  <p className="text-[10px] text-gray-500">Markets Cleared</p>
+                </div>
+              </div>
+            </div>
+          </CockpitCard>
+
+          {/* Connected Projects */}
+          <CockpitCard
+            title="Connected Projects"
+            subtitle={`${projectStats.active} active · ${projectStats.totalAgents} agents`}
+            icon={<Layers size={18} />}
+            status={projectStats.active > 0 ? 'active' : 'pending'}
+          >
+            <div className="space-y-3">
+              {projects.map((proj) => (
+                <div key={proj.id} className="border-b border-gray-100 dark:border-gray-700 pb-3 last:border-0 last:pb-0">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs font-medium text-gray-900 dark:text-white">{proj.project_name}</span>
+                    {statusBadge(proj.status)}
+                  </div>
+                  <p className="text-[10px] text-gray-400">{proj.description}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-[10px] text-blue-500">{proj.tier.toUpperCase()}</span>
+                    <span className="text-[10px] text-gray-400">{proj.active_agents.length} agents</span>
+                    {proj.domain && <span className="text-[10px] text-gray-400">{proj.domain}</span>}
+                  </div>
+                </div>
+              ))}
+            </div>
           </CockpitCard>
         </CockpitSection>
 

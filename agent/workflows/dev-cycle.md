@@ -87,7 +87,11 @@ npx netlify deploy --prod
 1. Confirm Netlify deploy succeeds (check deploy URL)
 2. Verify key pages load on production
 3. Test any new/modified API endpoints
-4. Generate Window Closure Record if session-ending work
+4. **Chief-of-Staff review before completion** — verify changes are reflected in:
+   - Task Engine (`src/chief-of-staff/tasks/taskEngine.ts`) — update task states
+   - Operations Engine (`src/chief-of-staff/operations/operationsEngine.ts`) — confirm system health
+   - Roadmap Engine (`src/chief-of-staff/roadmap/roadmapEngine.ts`) — update feature status if applicable
+5. Generate Window Closure Record if session-ending work
 
 ---
 
