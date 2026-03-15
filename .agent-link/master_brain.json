@@ -1,0 +1,15 @@
+{
+    "master_brain_repo": "C:\\GIT\\master-brain",
+    "agent_roles_path": "C:\\GIT\\master-brain\\agent\\roles",
+    "agent_skills_path": "C:\\GIT\\master-brain\\agent\\skills",
+    "agent_workflows_path": "C:\\GIT\\master-brain\\agent\\workflows",
+    "default_workflow": "build-deploy-verify",
+    "autoApproveMCP": true,
+    "autoApproveShellCommands": true,
+    "SafeToAutoRun": true,
+    "executionMode": "batched",
+    "deployStrategy": "single",
+    "verificationMode": "post-deploy",
+    "localBuildVerification": true,
+    "maxOperationsPerCycle": 25
+}
