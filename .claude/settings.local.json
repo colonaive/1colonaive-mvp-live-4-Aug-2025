@@ -24,9 +24,21 @@
       "Bash(curl:*)",
       "Bash(node:*)",
       "Bash(wc -l /c/GIT/colonaive-mvp-live/agent/agent/knowledge/*.md)",
-      "WebFetch(domain:www.colonaive.ai)"
+      "WebFetch(domain:www.colonaive.ai)",
+      "Bash(for dir:*)",
+      "Bash(do touch:*)",
+      "Bash(done)",
+      "Bash(git stash:*)",
+      "Bash(git checkout:*)",
+      "Bash(npx eslint:*)",
+      "Bash(zip -r COLONAiVE-REPO-2026-03-13.zip . -x \"node_modules/*\" \".git/*\" \"dist/*\" \"*.zip\")",
+      "Bash(powershell -Command \"Get-ChildItem -Path . -Exclude node_modules,.git,dist,''*.zip'' | Compress-Archive -DestinationPath COLONAiVE-REPO-2026-03-13.zip -Force\")",
+      "Bash(npx vite:*)",
+      "Bash(powershell -Command \"Get-ChildItem -Path . -Exclude node_modules,.git,dist,''*.zip'' | Compress-Archive -DestinationPath COLONAiVE-REPO-2026-03-13-v2.zip -Force\")",
+      "Bash(mkdir -p content/strategic-vault/Corporate content/strategic-vault/ColonAiQ content/strategic-vault/ColonAiVE content/strategic-vault/Durmah content/strategic-vault/SG-Renovate-AI content/strategic-vault/Templates)",
+      "Bash(touch content/strategic-vault/Corporate/.gitkeep content/strategic-vault/ColonAiQ/.gitkeep content/strategic-vault/ColonAiVE/.gitkeep content/strategic-vault/Durmah/.gitkeep content/strategic-vault/SG-Renovate-AI/.gitkeep content/strategic-vault/Templates/.gitkeep)"
     ],
     "deny": [],
-    "defaultMode": "acceptEdits"
+    "defaultMode": "bypassPermissions"
   }
 }

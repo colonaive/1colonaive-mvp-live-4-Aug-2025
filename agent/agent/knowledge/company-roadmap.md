@@ -1,0 +1,4 @@
+regulatory milestones
+clinical validation milestones
+market launch phases
+fundraising phases
