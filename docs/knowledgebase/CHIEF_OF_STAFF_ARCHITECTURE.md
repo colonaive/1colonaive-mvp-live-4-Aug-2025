@@ -1,4 +1,4 @@
-# Chief-of-Staff Intelligence Layer — Architecture
+# Chief-of-Staff Intelligence Layer Architecture
 
 ## Overview
 
@@ -8,14 +8,14 @@ The Chief-of-Staff layer is the central operational intelligence platform inside
 
 ```
 src/chief-of-staff/
-  index.ts                          — Barrel export for all submodules
-  tasks/taskEngine.ts               — Development task management
-  roadmap/roadmapEngine.ts          — Product roadmap & milestones
-  research/researchDigest.ts        — Research intelligence digest
-  investors/investorGenerator.ts    — Investor materials generation
-  operations/operationsEngine.ts    — System health & alerting
-  projects/projectRegistry.ts       — Multi-project coordination
-  strategy/strategyDigest.ts        — Weekly strategy brief generator
+  index.ts                          : Barrel export for all submodules
+  tasks/taskEngine.ts               : Development task management
+  roadmap/roadmapEngine.ts          : Product roadmap and milestones
+  research/researchDigest.ts        : Research intelligence digest
+  investors/investorGenerator.ts    : Investor materials generation
+  operations/operationsEngine.ts    : System health and alerting
+  projects/projectRegistry.ts       : Multi-project coordination
+  strategy/strategyDigest.ts        : Weekly strategy brief generator
 ```
 
 ## Modules
@@ -34,9 +34,9 @@ Maintains the product feature roadmap with priority ranking (P0–P3).
 
 ### 3. Research Digest (`research/researchDigest.ts`)
 Integrates with existing intelligence modules:
-- **CRC Research Radar** — `radarService`
-- **Competitive Intelligence Radar** — `competitiveIntelligenceService`
-- **Early Signal Engine** — early warning signals
+- **CRC Research Radar:** `radarService`
+- **Competitive Intelligence Radar:** `competitiveIntelligenceService`
+- **Early Signal Engine:** early warning signals
 
 Generates weekly research briefs with sections:
 - Top Research Signals
@@ -93,12 +93,12 @@ Each section includes a RAG (Red/Amber/Green) health indicator.
 ## CEO Cockpit Integration
 
 The Chief-of-Staff adds 6 new widget cards to the CEO Cockpit dashboard:
-1. **Weekly Strategy Digest** — full-width RAG-coded strategy overview
-2. **Chief-of-Staff Tasks** — task stats (in-progress, completed, blocked)
-3. **Product Roadmap** — feature list with priority and milestone
-4. **Operations Status** — system health indicators with alert count
-5. **Investor Materials** — material list with financial summary
-6. **Connected Projects** — multi-project registry with tier and agent count
+1. **Weekly Strategy Digest:** full-width RAG-coded strategy overview
+2. **Chief-of-Staff Tasks:** task stats (in-progress, completed, blocked)
+3. **Product Roadmap:** feature list with priority and milestone
+4. **Operations Status:** system health indicators with alert count
+5. **Investor Materials:** material list with financial summary
+6. **Connected Projects:** multi-project registry with tier and agent count
 
 ## Data Flow
 
@@ -122,6 +122,6 @@ The dev-cycle workflow (`agent/workflows/dev-cycle.md`) includes a Chief-of-Staf
 ## Project Memory
 
 Chief-of-Staff records are stored in `project-memory/` as Window Closure Records:
-- `WCR-strategy-update` — strategy digest snapshots
-- `WCR-roadmap-change` — roadmap modifications
-- `WCR-research-alert` — significant research detections
+- `WCR-strategy-update`: strategy digest snapshots
+- `WCR-roadmap-change`: roadmap modifications
+- `WCR-research-alert`: significant research detections

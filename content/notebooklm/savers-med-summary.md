@@ -1,32 +1,19 @@
-# Saver's Med — Corporate Summary
+# Saver's Med Corporate Summary
 
-## Company
-Saver's Med Pte. Ltd.
-UEN: 201913122E | Incorporated: 23 April 2019
-Registered Office: 10 Jalan Rengas, Singapore 808530
-Type: Exempt Private Company Limited by Shares
+## Company Profile
+Saver's Med Pte. Ltd. is an exempt private company limited by shares, incorporated on 23 April 2019 under UEN 201913122E. Its registered office is 10 Jalan Rengas, Singapore 808530.
 
-## Business
-Wholesale of medical, professional, scientific and precision equipment. Focuses on introducing advanced cancer diagnostics into Asian healthcare markets.
+## Business Focus
+The company operates in the wholesale of medical, professional, scientific, and precision equipment, with a particular focus on introducing advanced cancer diagnostics into Asian healthcare markets.
 
 ## Founder
-M. Chandramohan — Director and Founder. Healthcare diagnostics industry experience, regional business development across Asia, focus on cancer genomics and screening.
+M. Chandramohan is the director and founder. His background is in healthcare diagnostics and regional business development across Asia, with a sustained focus on cancer genomics and screening.
 
-## Share Capital
-Total issued: 300 ordinary shares | Paid-up capital: SGD 135,270
+## Share Capital and Ownership
+Saver's Med has 300 ordinary shares in issue and paid-up capital of SGD 135,270. M. Chandramohan holds 255 shares, representing 85% of the company. Arulkumaran Manivasagam holds 36 shares, while Francis Seow-Choen, Shabbir S/O M Moochhala, and Tong Hiu Li each hold 3 shares.
 
-## Shareholders
-- M. Chandramohan: 255 shares (85%)
-- Arulkumaran Manivasagam: 36 shares
-- Francis Seow-Choen: 3 shares
-- Shabbir S/O M Moochhala: 3 shares
-- Tong Hiu Li: 3 shares
+## Strategic Position
+The company's principal strategic assets include exclusive ColonAiQ distribution rights in Singapore, the Philippines, and India, together with clinical collaborations and healthcare opinion leader relationships that support market access. ColonAiVE functions as the public-facing awareness and engagement platform within that wider ecosystem.
 
-## Strategic Assets
-1. Exclusive ColonAiQ distribution rights (Singapore, Philippines, India)
-2. Clinical collaborations with leading colorectal surgeons
-3. Healthcare opinion leader relationships
-4. ColonAiVE public awareness platform
-
-## Role in Ecosystem
-Commercial and strategic engine behind ColonAiVE. Handles regulatory strategy, clinical validation partnerships, commercialization, investor engagement, and strategic healthcare partnerships.
+## Role in the Ecosystem
+Saver's Med serves as the commercial and strategic operating entity behind ColonAiVE. Its responsibilities include regulatory planning, clinical validation partnerships, commercialization, investor engagement, and healthcare partnership development.

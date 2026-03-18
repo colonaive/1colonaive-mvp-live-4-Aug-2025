@@ -19,13 +19,15 @@ const ColonoscopyPreparationGuide: React.FC = () => {
       <div>
         {/* Encouraging Introduction */}
         <div className="bg-green-50 border-l-4 border-green-500 p-6 mb-8">
-          <h2 className="text-xl font-semibold mb-3 text-green-900">The Good News About Colonoscopy</h2>
-          <ul className="space-y-2 text-green-800">
-            <li>• <strong>Highly effective:</strong> Prevents up to 90% of colorectal cancers</li>
-            <li>• <strong>Safe procedure:</strong> Serious complications occur in less than 1 in 1,000 cases</li>
-            <li>• <strong>Quick recovery:</strong> Most people return to normal activities the next day</li>
-            <li>• <strong>Life-saving:</strong> Early detection leads to over 90% survival rates</li>
-          </ul>
+          <h2 className="text-xl font-semibold mb-3 text-green-900">Why Preparation Matters</h2>
+          <p className="text-green-800 mb-3">
+            Colonoscopy remains one of the most effective tools in colorectal cancer prevention because it can detect
+            cancer early and remove precancerous polyps during the same procedure.
+          </p>
+          <p className="text-green-800 mb-0">
+            Preparation is what makes that examination accurate. When the bowel is well prepared, the endoscopist can
+            examine the lining properly and reduce the risk of missing important findings.
+          </p>
         </div>
 
         <h2>Why This Preparation Guide Matters</h2>
@@ -37,7 +39,7 @@ const ColonoscopyPreparationGuide: React.FC = () => {
 
         <p>
           This guide will walk you through everything you need to know in a straightforward, easy-to-follow
-          way. Think of preparation as the foundation that makes your screening as effective as possible—and
+          way. Preparation is the foundation that makes your screening as effective as possible, and
           it's much simpler than most people think.
         </p>
 
@@ -80,7 +82,7 @@ const ColonoscopyPreparationGuide: React.FC = () => {
               <span className="text-green-600 mr-3 text-lg">✓</span>
               <div>
                 <p className="font-medium">Arrange Your Ride</p>
-                <p className="text-sm text-gray-600">You'll need someone to drive you home after sedation—a great excuse to catch up with a friend or family member!</p>
+                <p className="text-sm text-gray-600">You'll need someone to drive you home after sedation, so it is worth arranging this early with a family member or friend.</p>
               </div>
             </div>
             <div className="flex items-start">
@@ -94,7 +96,7 @@ const ColonoscopyPreparationGuide: React.FC = () => {
               <span className="text-green-600 mr-3 text-lg">✓</span>
               <div>
                 <p className="font-medium">Review Medications</p>
-                <p className="text-sm text-gray-600">Your doctor will tell you which medications to pause temporarily—usually just blood thinners and iron supplements</p>
+                <p className="text-sm text-gray-600">Your doctor will tell you which medications to pause temporarily, most commonly blood thinners and iron supplements.</p>
               </div>
             </div>
           </div>
@@ -102,8 +104,8 @@ const ColonoscopyPreparationGuide: React.FC = () => {
 
         <h2>Smart Eating: Days Before Your Procedure</h2>
         <p>
-          For a few days before your procedure, you'll switch to easily digestible foods. This isn't
-          about strict dieting—it's about choosing foods that are gentle on your system and make the
+          For a few days before your procedure, you'll switch to easily digestible foods. This is not
+          about strict dieting. It is about choosing foods that are gentle on your system and make the
           cleaning process more effective.
         </p>
 
@@ -145,7 +147,7 @@ const ColonoscopyPreparationGuide: React.FC = () => {
                 <h5 className="font-medium">Raw Items:</h5>
                 <p className="text-orange-700">Fresh fruits with skins, raw vegetables, salads</p>
               </div>
-              <p className="text-xs text-orange-600 mt-3 italic">Don't worry—you can enjoy all these foods again right after your procedure!</p>
+              <p className="text-xs text-orange-600 mt-3 italic">These restrictions are temporary, and most people return to their usual diet soon after the procedure.</p>
             </div>
           </div>
         </div>
@@ -208,7 +210,7 @@ const ColonoscopyPreparationGuide: React.FC = () => {
             <div>
               <h5 className="font-medium mb-2">Before You Start:</h5>
               <ul className="text-sm space-y-1">
-                <li>• Chill the solution—it tastes better cold</li>
+                <li>• Chill the solution because many people find it easier to drink when cold</li>
                 <li>• Have lime wedges or approved hard candy ready</li>
                 <li>• Set up a comfortable spot near the bathroom</li>
                 <li>• Have entertainment ready (books, tablet, etc.)</li>
@@ -229,7 +231,7 @@ const ColonoscopyPreparationGuide: React.FC = () => {
         <h3>What to Expect</h3>
         <p>
           You'll start having bowel movements within 1-4 hours of starting the prep. This is exactly
-          what should happen—it means the preparation is working. By the end, you'll be passing clear
+          what should happen because it means the preparation is working. By the end, you'll be passing clear
           or light yellow liquid, which indicates you're ready for an effective examination.
         </p>
 
@@ -260,7 +262,7 @@ const ColonoscopyPreparationGuide: React.FC = () => {
               <div className="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold mr-4 mt-1">3</div>
               <div>
                 <h5 className="font-medium">The Procedure (30-60 min)</h5>
-                <p className="text-sm text-gray-600">You'll be comfortably sedated—most people don't remember anything</p>
+                <p className="text-sm text-gray-600">You'll be comfortably sedated, and many people remember very little of the procedure itself.</p>
               </div>
             </div>
             <div className="flex items-start">
@@ -328,7 +330,7 @@ const ColonoscopyPreparationGuide: React.FC = () => {
         <h3>Understanding Your Results</h3>
         <p>
           Your doctor will share preliminary results right after the procedure. Most people receive
-          excellent news—no polyps found and normal results.
+          excellent news, with no polyps found and normal results.
         </p>
 
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 my-8">
@@ -338,14 +340,14 @@ const ColonoscopyPreparationGuide: React.FC = () => {
               <span className="bg-green-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold mr-3 mt-0.5">✓</span>
               <div>
                 <p className="font-medium">Normal Results (Most Common)</p>
-                <p className="text-sm text-gray-600">Your next screening in 10 years—you're done for a decade!</p>
+                <p className="text-sm text-gray-600">Your next screening may be in 10 years if no other risk factors are present.</p>
               </div>
             </div>
             <div className="flex items-start">
               <span className="bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold mr-3 mt-0.5">i</span>
               <div>
                 <p className="font-medium">Small Polyps Found</p>
-                <p className="text-sm text-gray-600">Removed during procedure—crisis prevented! Next screening in 3-5 years</p>
+                <p className="text-sm text-gray-600">These are usually removed during the procedure, with repeat screening often advised in 3 to 5 years.</p>
               </div>
             </div>
             <div className="flex items-start">
@@ -377,7 +379,7 @@ const ColonoscopyPreparationGuide: React.FC = () => {
 
           <div className="border-l-4 border-orange-500 pl-4">
             <h5 className="font-medium">"What if they find something?"</h5>
-            <p className="text-sm text-gray-700">Finding and removing polyps is actually great news—you've prevented cancer! Early detection means excellent treatment options.</p>
+            <p className="text-sm text-gray-700">Finding and removing polyps is clinically valuable because it can prevent cancer from developing and guide appropriate follow-up.</p>
           </div>
 
           <div className="border-l-4 border-purple-500 pl-4">
@@ -425,7 +427,7 @@ const ColonoscopyPreparationGuide: React.FC = () => {
           complete proper preparation, we can detect and remove pre-cancerous polyps before they ever
           become a threat. It's prevention in action."
           <footer className="text-sm text-gray-600 mt-3 not-italic">
-            — American Society for Gastrointestinal Endoscopy
+            American Society for Gastrointestinal Endoscopy
           </footer>
         </blockquote>
 
@@ -450,7 +452,7 @@ const ColonoscopyPreparationGuide: React.FC = () => {
         <h2>Ready to Take Action?</h2>
         <p>
           You now have everything you need to confidently prepare for your colonoscopy. This preparation
-          isn't just about the procedure—it's about taking control of your health and potentially
+          is not just about the procedure. It is also about taking control of your health and potentially
           preventing a life-threatening disease.
         </p>
 

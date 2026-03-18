@@ -31,8 +31,8 @@
 | 08 | Investor Materials | 5 | PDF, PPTX, DOCX |
 | 09 | CSR / Public Health | 1 | DOCX |
 | 10 | Operations & Logistics | 6 | PDF, DOCX, XLSX |
-| 11 | Press & Media | 0 | — |
-| 12 | Archive | 0 | — |
+| 11 | Press & Media | 0 | None |
+| 12 | Archive | 0 | None |
 
 ## Source Locations Scanned
 
@@ -55,14 +55,14 @@
 
 ## Observations
 
-1. **Clinical research is the strongest category** (14 documents) — solid evidence base with peer-reviewed publications
+1. **Clinical research is the strongest category** (14 documents). It provides a solid evidence base with peer-reviewed publications.
 2. **Regulatory documentation is comprehensive** for approved markets (SG, CN, EU) but thin for pending markets (IN, PH)
-3. **Strategy documents show evolution** from Oct 2023 workplan through May 2025 contingency — good strategic trail
+3. **Strategy documents show evolution** from the October 2023 workplan through the May 2025 contingency material. This provides a useful strategic trail.
 4. **Investor materials are current** (April 2025 pitch deck is latest)
-5. **Press/media coverage not archived** — gap in institutional memory
-6. **Market intelligence is thin** (2 documents) — opportunity to build out with competitive radar data
-7. **Some documents appear in multiple categories** — cross-referenced where relevant (e.g., Singapore Data doc in both Product and Market Intelligence)
-8. **Pricing table (XLSX) in Operations** — sensitive document, handle with care
+5. **Press and media coverage is not archived**, which creates a gap in institutional memory.
+6. **Market intelligence is thin** (2 documents), which creates an opportunity to build out that area with competitive radar data.
+7. **Some documents appear in multiple categories** and have been cross-referenced where relevant, such as the Singapore Data document appearing in both Product and Market Intelligence.
+8. **The pricing table (XLSX) in Operations** is sensitive and should be handled with care.
 
 ## Recommendations
 

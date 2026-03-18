@@ -63,7 +63,7 @@ const ResearchUpdatesPage: React.FC = () => {
               <p className="text-gray-600 mb-4">
                 {searchQuery 
                   ? "No research updates found matching your search criteria." 
-                  : "Research updates are coming soon. Check back later for updates."}
+                  : "No research updates are currently published in this section."}
               </p>
               {searchQuery && (
                 <button 

@@ -1,31 +1,19 @@
-# ColonAiQ — Science & Technology Summary
+# ColonAiQ Science and Technology Summary
 
-## What It Is
-ColonAiQ is a multiplex ctDNA methylation PCR assay for colorectal cancer (CRC) screening using plasma from peripheral blood. It detects abnormal DNA methylation signatures associated with colorectal tumorigenesis.
+## Platform Overview
+ColonAiQ is a multiplex ctDNA methylation PCR assay designed for colorectal cancer screening using plasma from peripheral blood. It detects abnormal DNA methylation patterns associated with colorectal tumorigenesis.
 
 ## Detection Workflow
-Blood collection > plasma separation > cfDNA extraction > bisulfite conversion > target pre-amplification > qPCR methylation detection > Ct threshold interpretation.
+The assay workflow begins with blood collection, followed by plasma separation, cfDNA extraction, bisulfite conversion, target pre-amplification, qPCR-based methylation detection, and Ct-threshold interpretation. The process is intended to convert a routine blood draw into a structured molecular screening result.
 
 ## Marker Panels
-
-**Current Singapore HSA version (5 markers):**
-SEPTIN9, IKZF1, BCAT1, VAV3, SEPTIN9-2
-
-**Upcoming aligned version (6 markers):**
-SEPTIN9, SEPTIN9 region 2, BCAT1, IKZF1, BCAN, VAV3
-
-The 6-marker version improves detection sensitivity through multi-locus methylation signatures and will be aligned across EU CE IVDR, Singapore HSA update, and India CDSCO submission.
+The current Singapore HSA-cleared configuration uses five markers: SEPTIN9, IKZF1, BCAT1, VAV3, and SEPTIN9-2. The planned aligned version uses six markers: SEPTIN9, SEPTIN9 region 2, BCAT1, IKZF1, BCAN, and VAV3. The six-marker configuration is intended to support a more consistent regional regulatory and clinical strategy.
 
 ## Performance
-- Sensitivity for CRC detection: ~86-89%
-- Specificity: ~86-92% (varies by population cohort)
+Published evidence places colorectal cancer sensitivity at approximately 86 to 89% and specificity at approximately 86 to 92%, depending on the study population.
 
 ## Clinical Role
-- Colorectal cancer screening
-- Triage for colonoscopy
-- Potential recurrence monitoring (future application)
+The intended role is colorectal cancer screening, with potential use as a triage step before colonoscopy in appropriate pathways. Future clinical development may also support recurrence-related applications, but screening remains the primary use case described here.
 
-## Critical Limitations
-- Positive results must be confirmed with colonoscopy and histopathology
-- Negative results do not rule out colorectal cancer
-- This is a screening and risk stratification tool, not a diagnostic assay
+## Important Limitations
+Positive results must be confirmed by colonoscopy and histopathology. Negative results do not rule out colorectal cancer. ColonAiQ should therefore be understood as a screening and risk-stratification tool, not a standalone diagnostic assay.

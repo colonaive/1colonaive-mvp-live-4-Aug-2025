@@ -6,7 +6,7 @@
 
 ---
 
-## 01 — Strategy (11 documents)
+## 01. Strategy (11 documents)
 
 | Document | Format | Description |
 |----------|--------|-------------|
@@ -22,7 +22,7 @@
 | Project_COLONAiVE_Strategic_Snapshot_FINAL_UPDATED.docx | DOCX | Final updated strategic snapshot |
 | Saver's Med Marketing Plan for Singlera.pdf | PDF | Marketing plan presented to manufacturer |
 
-## 02 — Product & Technology (11 documents)
+## 02. Product & Technology (11 documents)
 
 | Document | Format | Description |
 |----------|--------|-------------|
@@ -32,21 +32,21 @@
 | ColonAiQ Used for MRD SM.pdf | PDF | MRD (Minimal Residual Disease) application guide |
 | ColonAiQ intro APAC July 2024.pdf | PDF | APAC market introduction deck |
 | ColonAiQ_Presention 20251212.pptx | PPTX | Latest product presentation (Dec 2025) |
-| IFU FINAL.docx | DOCX | Instructions for Use — final version |
+| IFU FINAL.docx | DOCX | Instructions for Use, final version |
 | Pics of Multi-Gene Methylation Detection Kit.docx | DOCX | Product photography and kit images |
 | Requirement for ColonAiQ assay(Auto) SM.pdf | PDF | Automated assay technical requirements |
 | Singapore Data Situation and need for ColonAiQ.docx | DOCX | Singapore epidemiological data and product need |
 | Workflow introduction of ColonAiQ 23 April 2025.pdf | PDF | Lab workflow and processing guide |
 
-## 03 — Clinical Research (14 documents)
+## 03. Clinical Research (14 documents)
 
 | Document | Format | Description |
 |----------|--------|-------------|
-| A Multilocus Blood-Based Assay Targeting ctDNA Methylation - CRC Detection.pdf | PDF | Gastroenterology 2021 — primary clinical evidence paper |
+| A Multilocus Blood-Based Assay Targeting ctDNA Methylation - CRC Detection.pdf | PDF | Gastroenterology 2021, primary clinical evidence paper |
 | Clinical Evidence Brief for COLONAiVE.pdf | PDF | Summary of clinical evidence for stakeholders |
 | ColonAiQ Poster - World Congress on GI Cancer.pdf | PDF | Conference poster presentation |
 | DRAFT SCRS Temasek Trial Proposal 26 May 2025.docx | DOCX | Singapore trial proposal draft |
-| Early Detection of MRD - JAMA Oncology - ColonAiQ.pdf | PDF | JAMA Oncology 2023 — MRD risk stratification |
+| Early Detection of MRD - JAMA Oncology - ColonAiQ.pdf | PDF | JAMA Oncology 2023, MRD risk stratification |
 | Effects of Organized CRC Screening on Cancer incidence.pdf | PDF | Evidence for organized screening programs |
 | Jama Oncology - ColonAiQ MRD.pdf | PDF | JAMA Oncology MRD paper (alternate copy) |
 | Performance Evaluation of Multi-gene Methylation Detection Kit.pdf | PDF | Analytical performance evaluation study |
@@ -54,10 +54,10 @@
 | SMART_CRC_SG_Protocol_Synopsis_Final.docx | DOCX | Singapore SMART CRC trial protocol synopsis |
 | Singapore CRC Screening Enhancement Study Protocol Note.pdf | PDF | Screening enhancement study protocol |
 | Triple Effect of CRC Screening.pdf | PDF | Evidence for screening health economics |
-| Uptake of CRC screening blood test vs fecal test.pdf | PDF | Comparative uptake study — blood vs stool |
+| Uptake of CRC screening blood test vs fecal test.pdf | PDF | Comparative uptake study of blood versus stool screening |
 | Using the Kaiser Permanente program (FIT) outreach.pdf | PDF | Kaiser FIT program reference model |
 
-## 04 — Regulatory (11 documents)
+## 04. Regulatory (11 documents)
 
 | Document | Format | Description |
 |----------|--------|-------------|
@@ -73,14 +73,14 @@
 | NMPA approval ID No. 20243400902.pdf | PDF | China NMPA approval certificate |
 | SKV Brief Profile PPT.pdf | PDF | India regulatory consultant profile |
 
-## 05 — Market Intelligence (2 documents)
+## 05. Market Intelligence (2 documents)
 
 | Document | Format | Description |
 |----------|--------|-------------|
 | Analysis of Project COLONAiVE as New Standard in CRC Prevention.docx | DOCX | Strategic analysis of COLONAiVE positioning |
 | Singapore Data Situation and need for ColonAiQ.docx | DOCX | Singapore CRC epidemiology and market need |
 
-## 06 — KOL Engagement (3 documents)
+## 06. KOL Engagement (3 documents)
 
 | Document | Format | Description |
 |----------|--------|-------------|
@@ -88,7 +88,7 @@
 | KTPH Trial Notes 26 May 2025.docx | DOCX | KTPH investigator meeting notes |
 | SCRS_Colorectal_Surgeons_List.docx | DOCX | Singapore colorectal surgeon directory |
 
-## 07 — Marketing Assets (3 documents)
+## 07. Marketing Assets (3 documents)
 
 | Document | Format | Description |
 |----------|--------|-------------|
@@ -96,7 +96,7 @@
 | ColonAiQ intro APAC July 2024.pdf | PDF | APAC introduction deck |
 | ColonAiQ_Presention 20251212 Copy.pdf | PDF | Product presentation (PDF export) |
 
-## 08 — Investor Materials (5 documents)
+## 08. Investor Materials (5 documents)
 
 | Document | Format | Description |
 |----------|--------|-------------|
@@ -106,21 +106,21 @@
 | MRA Grant Proposal - ColonAiQ.docx | DOCX | Government grant proposal |
 | Singlera Genomics Inc. Proposal.docx | DOCX | Manufacturer partnership proposal |
 
-## 09 — CSR / Public Health (1 document)
+## 09. CSR / Public Health (1 document)
 
 | Document | Format | Description |
 |----------|--------|-------------|
 | Project_COLONAiVE_Platform_Spec Updated 22 April 2025.docx | DOCX | Platform specification for public health initiative |
 
-## 10 — Legal Agreements (6 documents)
+## 10. Legal Agreements (6 documents)
 
-> **Category: Critical** — Distributor protection, territory rights, and contractual obligations.
+> **Category: Critical:** Distributor protection, territory rights, and contractual obligations.
 > **KB Location:** `C:\COLONAiVE_MASTER_KB\00_Legal_Agreements\`
 
 | Document | Format | Description | Importance |
 |----------|--------|-------------|------------|
-| Distributor Agreement - Singlera and Saver's Med.docx | DOCX | Master distributor agreement — defines exclusive territory rights for Singapore, Philippines, India | **Critical** |
-| ADDENDUM NO. 1 TO COLLABORATION AGREEMENT 20 April 2025.pdf | PDF | Signed addendum to collaboration agreement — India territory expansion | **Critical** |
+| Distributor Agreement - Singlera and Saver's Med.docx | DOCX | Master distributor agreement defining exclusive territory rights for Singapore, Philippines, and India | **Critical** |
+| ADDENDUM NO. 1 TO COLLABORATION AGREEMENT 20 April 2025.pdf | PDF | Signed addendum to collaboration agreement covering India territory expansion | **Critical** |
 | Business Consultancy Agreement Singlera-Chandramohan 1 April 2023.docx | DOCX | Original business consultancy agreement | High |
 | Singlera-Chandra Business Development Term Sheet 20230626.docx | DOCX | Business development term sheet | High |
 | Important Clauses for Exclusivity.docx | DOCX | Analysis of exclusivity clauses across agreements | High |
@@ -132,7 +132,7 @@ The following should be added to the NotebookLM ingestion set:
 - Distributor Agreement - Singlera and Saver's Med.docx
 - ADDENDUM NO. 1 TO COLLABORATION AGREEMENT 20 April 2025.pdf
 
-## 11 — Operations & Logistics
+## 11. Operations & Logistics
 
 ---
 

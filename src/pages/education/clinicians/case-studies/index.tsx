@@ -63,7 +63,7 @@ const ClinicianCaseStudiesHub: React.FC = () => {
               <p className="text-gray-600 mb-4">
                 {searchQuery 
                   ? "No articles found matching your search criteria." 
-                  : "Case studies are coming soon. Check back later for updates."}
+                  : "No clinical case studies are currently published in this section."}
               </p>
               {searchQuery && (
                 <button 
@@ -77,12 +77,12 @@ const ClinicianCaseStudiesHub: React.FC = () => {
           )}
         </div>
 
-        {/* Coming Soon */}
+        {/* Publishing Status */}
         <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-          <h3 className="text-2xl font-bold text-gray-900 mb-4">Case Studies Coming Soon</h3>
+          <h3 className="text-2xl font-bold text-gray-900 mb-4">Case Study Publishing Status</h3>
           <p className="text-gray-700 mb-6 max-w-3xl mx-auto">
-            We're developing a comprehensive library of case studies to help clinicians learn from real-world scenarios. 
-            These will include challenging diagnostic cases, management dilemmas, and success stories in CRC prevention.
+            A case-study library is being curated for publication. It is intended to cover diagnostic challenges,
+            management decisions, and prevention-focused learning scenarios once editorial review is complete.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link to="/education/clinicians/research">

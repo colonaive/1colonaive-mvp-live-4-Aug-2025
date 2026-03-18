@@ -21,12 +21,15 @@ const UnderstandingColorectalCancer: React.FC = () => {
         {/* Introduction */}
         <div className="bg-blue-50 border-l-4 border-blue-500 p-6 mb-8">
           <h2 className="text-xl font-semibold mb-3 text-blue-900">Quick Facts</h2>
-          <ul className="space-y-2 text-blue-800">
-            <li>• Colorectal cancer is the <strong>3rd most common cancer</strong> worldwide</li>
-            <li>• In Singapore, it's the <strong>#1 cancer</strong> affecting both men and women</li>
-            <li>• <strong>90% preventable</strong> with proper screening and early detection</li>
-            <li>• Most effective treatment when caught in early stages</li>
-          </ul>
+          <p className="text-blue-800 mb-3">
+            Colorectal cancer is the third most common cancer worldwide, and in Singapore it remains one of the most
+            important cancers affecting both men and women.
+          </p>
+          <p className="text-blue-800 mb-0">
+            The encouraging point is that much of this burden is preventable. Screening and early detection can identify
+            disease at a stage when treatment is most effective, and can also prevent cancer by allowing precancerous
+            polyps to be removed.
+          </p>
         </div>
 
         <h2>What is Colorectal Cancer?</h2>
@@ -245,7 +248,7 @@ const UnderstandingColorectalCancer: React.FC = () => {
           "Colorectal cancer is largely preventable. By understanding your risk factors and getting screened 
           at the right time, you can significantly reduce your chances of developing this disease."
           <footer className="text-sm text-gray-600 mt-3 not-italic">
-            — American Cancer Society Guidelines
+            American Cancer Society Guidelines
           </footer>
         </blockquote>
 

@@ -63,7 +63,7 @@ const ClinicianGuidelinesHub: React.FC = () => {
               <p className="text-gray-600 mb-4">
                 {searchQuery 
                   ? "No articles found matching your search criteria." 
-                  : "Clinical guidelines are coming soon. Check back later for updates."}
+                  : "No clinical guideline articles are currently published in this section."}
               </p>
               {searchQuery && (
                 <button 

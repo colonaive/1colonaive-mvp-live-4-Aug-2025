@@ -6,7 +6,7 @@
     "regions": ["Singapore", "India", "Philippines", "Australia", "Japan"],
     "languages": ["en", "zh", "ms", "ta", "hi", "tl", "ja"],
     "storyTypes": ["video", "text", "audio"],
-    "status": "SCAFFOLD_ONLY"
+    "status": "CURATION_READY"
   },
   "configuration": {
     "moderationRequired": true,
@@ -63,14 +63,10 @@
   "pendingApproval": [],
   "drafts": [],
   "rejectedStories": [],
-  "todo": [
-    "TODO: Inject verified stories only after live patient signups",
-    "TODO: Implement story submission form for patients",
-    "TODO: Add moderation workflow for medical accuracy",
-    "TODO: Create consent management system",
-    "TODO: Add multilingual story support",
-    "TODO: Implement video upload and processing",
-    "TODO: Add story analytics and engagement tracking"
+  "publicationNotes": [
+    "Verified stories will be published only after patient consent, moderation, and medical accuracy review are complete.",
+    "The submission workflow must support moderation, consent management, multilingual publishing, and media handling before public launch.",
+    "Analytics and engagement reporting should be added only after the live patient story workflow is operational."
   ],
   "legalNotices": {
     "medicalDisclaimer": "All patient stories are shared with consent and are for informational purposes only. Individual results may vary. Always consult with healthcare professionals for personalized medical advice.",

@@ -121,7 +121,7 @@ const NewsroomHub: React.FC = () => {
               </div>
             ) : (
               <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-                <p className="text-gray-600">News articles are coming soon. Check back later for updates.</p>
+                <p className="text-gray-600">No newsroom articles are currently published in this section.</p>
               </div>
             )}
           </div>

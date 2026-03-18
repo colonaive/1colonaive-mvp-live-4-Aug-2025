@@ -1,4 +1,4 @@
-# CEO Action Center — Architecture
+# CEO Action Center Architecture
 
 ## Overview
 
@@ -8,15 +8,15 @@ The CEO Action Center is a two-way AI communication interface embedded in the CE
 
 ```
 src/chief-of-staff/action-center/
-  index.ts                — Barrel export
-  chatEngine.ts           — Conversation state and transcript management
-  voiceInput.ts           — Browser speech recognition
-  actionRouter.ts         — Intelligent message → action routing
-  promptGenerator.ts      — AG prompt generation
-  emailComposer.ts        — Email drafting and contact resolution
+  index.ts                : Barrel export
+  chatEngine.ts           : Conversation state and transcript management
+  voiceInput.ts           : Browser speech recognition
+  actionRouter.ts         : Intelligent message to action routing
+  promptGenerator.ts      : AG prompt generation
+  emailComposer.ts        : Email drafting and contact resolution
 
 src/components/cockpit/
-  ActionCenterChat.tsx    — React UI component
+  ActionCenterChat.tsx    : React UI component
 ```
 
 ## Components
@@ -47,7 +47,7 @@ Intelligent routing of CEO messages to actions:
 | LinkedIn Post | "linkedin", "share on linkedin" | Routes to LinkedIn Intelligence |
 | Strategy Note | "strategy", "memo", "briefing" | Creates strategy note |
 | Meeting Note | "meeting note", "call summary" | Exports meeting note |
-| Save Transcript | — | Saves current conversation |
+| Save Transcript | Default | Saves current conversation |
 
 ### 4. AG Prompt Generator (`promptGenerator.ts`)
 Converts chat context into structured Antigravity prompts:
@@ -75,28 +75,28 @@ React component with:
 ## Dashboard Widgets
 
 Three new widgets added to CEO Cockpit:
-1. **Recent CEO Chats** — Last 5 messages from current session
-2. **Generated Prompts** — Recent AG prompts with status
-3. **Draft Emails** — Pending email drafts with recipient and status
+1. **Recent CEO Chats:** Last 5 messages from the current session
+2. **Generated Prompts:** Recent AG prompts with status
+3. **Draft Emails:** Pending email drafts with recipient and status
 
 ## Database Tables
 
 ### `ceo_chat_transcripts`
-- `id` (uuid) — primary key
-- `timestamp` (timestamptz) — creation time
-- `messages` (jsonb) — array of ChatMessage objects
-- `summary` (text) — optional transcript summary
-- `context_tags` (text[]) — categorization tags
-- `archived` (boolean) — archive flag
+- `id` (uuid): primary key
+- `timestamp` (timestamptz): creation time
+- `messages` (jsonb): array of ChatMessage objects
+- `summary` (text): optional transcript summary
+- `context_tags` (text[]): categorization tags
+- `archived` (boolean): archive flag
 
 ### `email_activity`
-- `id` (uuid) — primary key
-- `direction` (text) — 'outbound' or 'inbound'
-- `to_address`, `cc_address` (text) — recipients
-- `subject`, `body` (text) — email content
-- `status` (text) — draft/ready/sent/failed/received
-- `context_source` (text) — originating instruction
-- `sent_at` (timestamptz) — send timestamp
+- `id` (uuid): primary key
+- `direction` (text): 'outbound' or 'inbound'
+- `to_address`, `cc_address` (text): recipients
+- `subject`, `body` (text): email content
+- `status` (text): draft/ready/sent/failed/received
+- `context_source` (text): originating instruction
+- `sent_at` (timestamptz): send timestamp
 
 ## Data Flow
 
@@ -133,8 +133,8 @@ CEO Voice/Text → Chat Engine → Action Router
 
 ## Integration Points
 
-- **Chief-of-Staff Task Engine** — tasks created from Action Center
-- **Roadmap Engine** — roadmap items suggested from Action Center
-- **Strategy Digest** — strategy notes feed into weekly digest
-- **LinkedIn Intelligence** — LinkedIn actions route to `/admin/linkedin-intelligence`
-- **Outlook Integration** — email loop connects to existing inbox monitoring
+- **Chief-of-Staff Task Engine:** tasks created from Action Center
+- **Roadmap Engine:** roadmap items suggested from Action Center
+- **Strategy Digest:** strategy notes feed into weekly digest
+- **LinkedIn Intelligence:** LinkedIn actions route to `/admin/linkedin-intelligence`
+- **Outlook Integration:** email loop connects to existing inbox monitoring

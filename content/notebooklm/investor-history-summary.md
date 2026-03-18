@@ -1,30 +1,19 @@
-# Saver's Med — Investor History Summary
+# Saver's Med Investor History Summary
 
-## Phase 1: Early Stage (Pre-HSA)
-Company formation. Key asset: exclusive ColonAiQ distribution rights. Markets: Singapore, Philippines.
-Investor feedback: traction concerns, regulatory uncertainty, need for clinical validation.
+## Early Stage
+In the pre-HSA phase, Saver's Med was framed primarily around exclusive ColonAiQ distribution rights in Singapore and the Philippines. Investor feedback at that stage focused on the usual early concerns: limited traction, regulatory uncertainty, and the need for stronger clinical validation.
 
 ## Seed Round
-- Valuation: SGD 500K
-- Total raised: SGD 65K
-- Dr Arul: SGD 60K
-- Lydia Tong: SGD 5K
-- Use of funds: regulatory preparation, market development, operational runway
+The seed round was completed at a valuation of SGD 500,000, with SGD 65,000 raised in total. Dr Arul contributed SGD 60,000 and Lydia Tong contributed SGD 5,000. Funds were directed toward regulatory preparation, market development, and operational runway.
 
-## Phase 2: Post-HSA Registration
-HSA registration achieved. Investor perception improved due to regulatory clearance, market readiness, regional expansion potential.
+## Post-HSA Phase
+After HSA registration, investor perception improved because the business had a clearer regulatory position, stronger market readiness, and more credible regional expansion potential.
 
 ## Second Capital Raise
-- Valuation: SGD 3M (6x increase from seed)
-- Total raised: SGD 60K
-- Prof Seow-Choen (investment amount not disclosed)
-- Prof Shabbir (investment amount not disclosed)
-- Use of funds: commercialization preparation, clinical validation programs, expansion planning
+The second raise was completed at a valuation of SGD 3 million, representing a substantial step up from the seed round. SGD 60,000 was raised, with investment from Prof Seow-Choen and Prof Shabbir, although individual amounts were not disclosed. Those funds were intended to support commercialization preparation, clinical validation programmes, and expansion planning.
 
 ## Strategic Lessons
-- Regulatory milestones significantly impact valuation
-- Clinical validation improves investor confidence
-- Multi-country distribution rights strengthen pitch narrative
+The funding history suggests that regulatory milestones materially influence valuation, and that clinical validation strengthens investor confidence. It also shows that multi-country distribution rights can improve the strategic narrative when supported by credible execution plans.
 
-## Cumulative Raised
-SGD 125K across two rounds. Valuation growth: SGD 500K > SGD 3M.
+## Cumulative Position
+Across both rounds, Saver's Med has raised SGD 125,000. Reported valuation moved from SGD 500,000 to SGD 3 million over that period.

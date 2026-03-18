@@ -21,12 +21,14 @@ const HowCrcDevelopsFromPolyps: React.FC = () => {
         {/* Introduction */}
         <div className="bg-orange-50 border-l-4 border-orange-500 p-6 mb-8">
           <h2 className="text-xl font-semibold mb-3 text-orange-900">Key Takeaways</h2>
-          <ul className="space-y-2 text-orange-800">
-            <li>• Most colorectal cancers (about <strong>75%</strong>) begin as small, benign polyps</li>
-            <li>• It typically takes <strong>7-10+ years</strong> for a polyp to become cancerous</li>
-            <li>• Only about <strong>5-10%</strong> of adenomatous polyps ever become cancer</li>
-            <li>• Early removal during screening prevents cancer development</li>
-          </ul>
+          <p className="text-orange-800 mb-3">
+            Most colorectal cancers begin as small benign polyps, particularly adenomatous polyps. The transition from
+            polyp to cancer usually takes years rather than weeks or months.
+          </p>
+          <p className="text-orange-800 mb-0">
+            That slow progression is clinically important because it gives screening programmes time to detect and remove
+            precancerous growths before invasive cancer develops.
+          </p>
         </div>
 
         <h2>The Journey from Normal Tissue to Cancer</h2>
@@ -535,7 +537,7 @@ const HowCrcDevelopsFromPolyps: React.FC = () => {
           "Understanding the polyp-to-cancer sequence has revolutionized colorectal cancer prevention. 
           We now have the knowledge and tools to prevent most cases of this disease."
           <footer className="text-sm text-gray-600 mt-3 not-italic">
-            — American Cancer Society Research Guidelines
+            American Cancer Society Research Guidelines
           </footer>
         </blockquote>
 
@@ -589,7 +591,7 @@ const HowCrcDevelopsFromPolyps: React.FC = () => {
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 my-8">
           <h4 className="font-semibold text-yellow-800 mb-3">Remember</h4>
           <p className="text-sm">
-            The transformation from polyp to cancer is not inevitable—it's preventable. By understanding 
+            The transformation from polyp to cancer is not inevitable. It is preventable. By understanding 
             this process and taking action through screening and healthy lifestyle choices, you have the 
             power to protect yourself from colorectal cancer.
           </p>

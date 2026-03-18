@@ -50,13 +50,18 @@ const ArticlePage: React.FC = () => {
   
   const relatedArticles = getRelatedArticles(article.id);
   
-  // For now, we'll use the excerpt as content
-  // In a real implementation, you would have full article content
   const articleContent = article.content || (
     <div>
       <p className="mb-4">{article.excerpt}</p>
-      <p className="mb-4">This is a placeholder for the full article content. In a production environment, this would be replaced with the complete article text.</p>
-      <p>The article would include detailed information about {article.title.toLowerCase()}, with proper formatting, headings, and possibly images or diagrams to illustrate key points.</p>
+      <p className="mb-4">
+        This page currently presents the article summary and metadata available in the education index. Where a
+        dedicated long-form version exists elsewhere in the education library, that version remains the primary
+        reading experience.
+      </p>
+      <p>
+        Readers should use the related articles and category pages to access the most complete published coverage on
+        this topic.
+      </p>
     </div>
   );
   

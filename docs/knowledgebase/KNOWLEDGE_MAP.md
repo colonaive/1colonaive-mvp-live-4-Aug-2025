@@ -113,7 +113,7 @@ Documented in Project_COLONAiVE_Overview_and_Pillars.docx
 - Dr. Francis Seow-Choen (Medical Advisor)
 - Prof. Eu Kong Weng (Medical Advisor)
 - Prof. Lawrence Ho (Medical Advisor)
-- Dr. Daniel Lee (KTPH — investigator-initiated study)
+- Dr. Daniel Lee (KTPH investigator-initiated study)
 - SCRS Colorectal Surgeons List (full directory)
 
 ### 6.2 Lab Partners
@@ -129,7 +129,7 @@ Documented in Project_COLONAiVE_Overview_and_Pillars.docx
 ## 7. FUNDING & INVESTMENT
 
 ### 7.1 Materials
-- Pitch Deck (April 2025) — SG, PH, IN markets
+- Pitch Deck (April 2025) covering Singapore, Philippines, and India markets
 - Business Summary (March 2025)
 - MRA Grant Proposal
 - Singlera Genomics Inc. Proposal
@@ -138,13 +138,13 @@ Documented in Project_COLONAiVE_Overview_and_Pillars.docx
 
 ## 8. KNOWLEDGE GAPS IDENTIFIED
 
-1. **India 6-marker vs 5-marker alignment** — documentary evidence for 6-marker version needed
-2. **EU IVDR transition** — current status of CE IVDD → IVDR upgrade unclear
-3. **Philippines regulatory pathway** — no regulatory submission documents found
-4. **Post-market surveillance** — no PMS documentation identified
-5. **Manufacturing quality** — ISO 13485 certificate not found in audit
-6. **Health economics** — no formal cost-effectiveness analysis specific to Singapore found
-7. **Press/media coverage** — 11_Press_Media folder empty; media coverage not systematically archived
+1. **India 6-marker vs 5-marker alignment:** documentary evidence for the six-marker version is still needed.
+2. **EU IVDR transition:** the current status of the CE IVDD to IVDR upgrade remains unclear.
+3. **Philippines regulatory pathway:** no regulatory submission documents were found.
+4. **Post-market surveillance:** no PMS documentation was identified.
+5. **Manufacturing quality:** an ISO 13485 certificate was not found in the audit.
+6. **Health economics:** no formal Singapore-specific cost-effectiveness analysis was found.
+7. **Press and media coverage:** the `11_Press_Media` folder is empty and media coverage is not yet systematically archived.
 
 ---
 

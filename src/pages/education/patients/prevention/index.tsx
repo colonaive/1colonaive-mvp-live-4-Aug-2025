@@ -63,7 +63,7 @@ const PatientPreventionHub: React.FC = () => {
               <p className="text-gray-600 mb-4">
                 {searchQuery 
                   ? "No articles found matching your search criteria." 
-                  : "Prevention resources are coming soon. Check back later for updates."}
+                  : "No prevention articles are currently published in this section."}
               </p>
               {searchQuery && (
                 <button 

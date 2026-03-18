@@ -64,7 +64,7 @@ const PressReleasesPage: React.FC = () => {
               <p className="text-gray-600 mb-4">
                 {searchQuery 
                   ? "No press releases found matching your search criteria." 
-                  : "Press releases are coming soon. Check back later for updates."}
+                  : "No press releases are currently published in this section."}
               </p>
               {searchQuery && (
                 <button 

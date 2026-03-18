@@ -1,19 +1,13 @@
-# ColonAiQ — Clinical Context Summary
+# ColonAiQ Clinical Context Summary
 
 ## CRC Progression
-Adenoma > dysplasia > carcinoma. Typical progression time: 10-15 years.
+Most colorectal cancers develop through a gradual adenoma to dysplasia to carcinoma sequence. This process usually unfolds over 10 to 15 years, which is why screening has such a large preventive effect.
 
 ## Survival by Stage
-- Stage I: >90% survival
-- Stage IV: ~12% survival
-
-Early detection is the single most impactful intervention.
+Stage at diagnosis remains one of the strongest predictors of outcome. Stage I disease is associated with survival above 90%, while Stage IV disease is associated with survival closer to 12%. The clinical value of screening lies in shifting diagnosis toward these earlier, more treatable stages.
 
 ## Clinical Workflow
-1. Blood screening (ColonAiQ)
-2. Positive patients referred for colonoscopy
-3. Colonoscopy confirms diagnosis
-4. Pathology determines stage
+ColonAiQ is positioned within a two-step screening pathway. A blood sample is collected first, and individuals with a positive screening result are referred for colonoscopy. Colonoscopy establishes the diagnosis and enables tissue sampling, while histopathology determines stage and guides subsequent management.
 
 ## Key Insight
-Blood-based screening significantly improves compliance compared with stool tests (FIT/FOBT) and colonoscopy, addressing the primary barrier to CRC screening uptake.
+The most important barrier in colorectal cancer screening is often participation rather than test availability. Blood-based screening may help improve completion rates among people who are reluctant to use stool-based tests or undergo colonoscopy as an initial step.

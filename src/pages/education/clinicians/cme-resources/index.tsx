@@ -63,7 +63,7 @@ const ClinicianCMEHub: React.FC = () => {
               <p className="text-gray-600 mb-4">
                 {searchQuery 
                   ? "No articles found matching your search criteria." 
-                  : "CME resources are coming soon. Check back later for updates."}
+                  : "No CME resources are currently published in this section."}
               </p>
               {searchQuery && (
                 <button 
@@ -77,12 +77,13 @@ const ClinicianCMEHub: React.FC = () => {
           )}
         </div>
 
-        {/* Coming Soon */}
+        {/* Publishing Status */}
         <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-          <h3 className="text-2xl font-bold text-gray-900 mb-4">CME Program Coming Soon</h3>
+          <h3 className="text-2xl font-bold text-gray-900 mb-4">CME Publishing Status</h3>
           <p className="text-gray-700 mb-6 max-w-3xl mx-auto">
-            We're developing accredited CME modules focused on colorectal cancer screening, early detection, 
-            and prevention. These will provide valuable professional development opportunities for healthcare providers.
+            Accredited CME modules focused on colorectal cancer screening, early detection, and prevention are under
+            editorial and programme development. Until those materials are published, the research and guideline
+            sections remain the best sources for current clinician education.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link to="/education/clinicians/research">
