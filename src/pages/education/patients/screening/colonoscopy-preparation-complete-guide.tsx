@@ -321,7 +321,7 @@ const ColonoscopyPreparationGuide: React.FC = () => {
                 <li>• Return to normal diet</li>
                 <li>• Resume regular activities</li>
                 <li>• Back to work (most people)</li>
-                <li>• Feel proud of taking care of your health!</li>
+                <li>• Resume routine activities as advised by your care team</li>
               </ul>
             </div>
           </div>
@@ -456,7 +456,7 @@ const ColonoscopyPreparationGuide: React.FC = () => {
           preventing a life-threatening disease.
         </p>
 
-        {/* ENHANCED CTA SECTION */}
+        {/* CTA SECTION */}
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 sm:p-6 my-8">
           <h4 className="font-semibold text-blue-800 mb-6 text-lg sm:text-xl">
             Your Next Steps
@@ -467,7 +467,7 @@ const ColonoscopyPreparationGuide: React.FC = () => {
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="flex-1">
                 <h5 className="text-lg sm:text-xl font-bold mb-2 flex items-center">
-                  <span className="mr-2 sm:mr-3">📅</span>
+                  <span className="mr-2 sm:mr-3" aria-hidden="true">1</span>
                   Schedule Your Screening
                 </h5>
                 <p className="text-green-100 text-sm sm:text-base">
@@ -478,7 +478,7 @@ const ColonoscopyPreparationGuide: React.FC = () => {
                 href="/find-a-specialist"
                 className="bg-white text-green-600 px-4 py-2 rounded-lg font-semibold hover:bg-green-50 transition-colors duration-200 shadow-md w-full sm:w-auto text-center"
               >
-                Find A Specialist →
+                Find a Specialist
               </a>
             </div>
           </div>
@@ -503,21 +503,21 @@ const ColonoscopyPreparationGuide: React.FC = () => {
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="flex-1">
                 <h5 className="text-lg sm:text-xl font-bold mb-2 flex items-center">
-                  <span className="mr-2 sm:mr-3">💬</span>
+                  <span className="mr-2 sm:mr-3" aria-hidden="true">3</span>
                   Share Your Experience
                 </h5>
                 <p className="text-purple-100 text-sm sm:text-base">
-                  Join our community of Champions and inspire others to prioritize their health. Your story could save lives!
+                  If you would like to share your screening experience, you can contribute a patient story for review.
                 </p>
                 <p className="text-xs text-purple-200 mt-1 italic">
-                  *Members-only feature - Sign up to share your journey
+                  Story submissions are reviewed before publication.
                 </p>
               </div>
               <a
                 href="/members/share-story"
                 className="bg-white text-purple-600 px-4 py-2 rounded-lg font-semibold hover:bg-purple-50 transition-colors duration-200 shadow-md w-full sm:w-auto text-center"
               >
-                Share Story →
+                Share Story
               </a>
             </div>
           </div>

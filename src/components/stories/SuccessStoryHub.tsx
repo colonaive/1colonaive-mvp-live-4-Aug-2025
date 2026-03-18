@@ -4,9 +4,7 @@ import { Card, CardContent } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Play, FileText, Volume2, Heart, MessageCircle } from 'lucide-react';
 
-// SUCCESS STORY HUB COMPONENT - SCAFFOLD ONLY
-// TODO: Inject verified stories only after live patient signups
-// TODO: Connect to content/stories.json when real data is available
+// SUCCESS STORY HUB COMPONENT
 
 interface SuccessStoryHubProps {
   region?: string;
@@ -20,8 +18,7 @@ const SuccessStoryHub: React.FC<SuccessStoryHubProps> = ({
   showSubmissionPrompt = true
 }) => {
   
-  // PLACEHOLDER: Will be replaced with real story data
-  const hasStories = false; // Always false until real stories are added
+  const hasStories = false;
   
   return (
     <div className="py-16 bg-gray-50">
@@ -46,11 +43,10 @@ const SuccessStoryHub: React.FC<SuccessStoryHubProps> = ({
               <div className="max-w-md mx-auto">
                 <MessageCircle className="h-16 w-16 text-gray-400 mx-auto mb-6" />
                 <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                  Stories Coming Soon
+                  Patient Stories Under Review
                 </h3>
                 <p className="text-gray-600 mb-6">
-                  We're building a collection of inspiring patient journeys. 
-                  Real stories will be shared here with patient consent and medical accuracy verification.
+                  Patient stories will be published here once consent, moderation, and medical accuracy review are complete.
                 </p>
                 
                 {showSubmissionPrompt && (

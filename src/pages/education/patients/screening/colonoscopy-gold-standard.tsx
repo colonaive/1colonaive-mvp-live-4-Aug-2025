@@ -125,11 +125,11 @@ const ColonoscopyGoldStandard: React.FC = () => {
               <Star className="h-8 w-8 text-white" />
             </div>
             <h2 className="text-3xl font-bold text-teal-800 mb-4">
-              "Where Treatment Begins While Screening"
+              "Where Treatment Begins During Screening"
             </h2>
             <p className="text-xl text-gray-700 max-w-3xl mx-auto">
-              Colonoscopy is revolutionizing preventive medicine by being the only screening procedure that can 
-              immediately treat what it finds, transforming potential cancer threats into resolved health victories.
+              Colonoscopy is unique among screening tests because it can identify suspicious lesions and remove many
+              precancerous polyps during the same procedure.
             </p>
           </div>
           
@@ -146,8 +146,8 @@ const ColonoscopyGoldStandard: React.FC = () => {
             </div>
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <Heart className="h-10 w-10 text-green-600 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2 text-green-700">Instant Peace of Mind</h3>
-              <p className="text-gray-600">Leave the procedure knowing potential threats have been eliminated</p>
+              <h3 className="text-lg font-semibold mb-2 text-green-700">Clear Next Steps</h3>
+              <p className="text-gray-600">Patients often leave with a clearer understanding of their findings and follow-up plan</p>
             </div>
           </div>
         </div>
@@ -229,7 +229,7 @@ const ColonoscopyGoldStandard: React.FC = () => {
                 When only people who actually had colonoscopy were analyzed, colonoscopy reduced the number of colorectal cancers by 31% and of CRC-associated deaths by 50%.
               </p>
               <p className="text-gray-700">
-                The take-home message of this study is that when people have screening colonoscopies, deaths from colorectal cancer are reduced by half. That's a huge reduction!
+                The take-home message of this study is that when people undergo screening colonoscopy, deaths from colorectal cancer are reduced by half. This is a substantial reduction.
               </p>
             </div>
           </div>
@@ -387,7 +387,7 @@ const ColonoscopyGoldStandard: React.FC = () => {
             </p>
             
             <div className="bg-white bg-opacity-10 rounded-lg p-6 mb-6">
-              <h3 className="text-xl font-bold mb-3">The COLONAiVE Promise</h3>
+              <h3 className="text-xl font-bold mb-3">Why It Matters</h3>
               <p className="text-lg">
                 The benefits of early detection and prevention far outweigh the temporary discomfort associated with the procedure. 
                 Colonoscopy transforms screening from simple detection into active cancer prevention, which is why it continues to be regarded as the gold standard in preventive colorectal care.

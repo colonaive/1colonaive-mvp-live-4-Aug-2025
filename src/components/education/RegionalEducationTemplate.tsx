@@ -130,7 +130,7 @@ const RegionalEducationTemplate: React.FC<RegionalEducationProps> = ({
                       <div className="text-center text-gray-500">
                         <FileText className="h-16 w-16 mx-auto mb-4" />
                         <p className="text-sm font-medium">{section.imageAlt}</p>
-                        <p className="text-xs mt-1">Medical diagram placeholder</p>
+                        <p className="text-xs mt-1">Medical diagram area</p>
                       </div>
                     </div>
                   </div>
@@ -251,7 +251,7 @@ const RegionalEducationTemplate: React.FC<RegionalEducationProps> = ({
               Ready to Take Control of Your Health?
             </h2>
             <p className="text-xl mb-8 text-blue-100">
-              Early detection saves lives. Don't wait – start your screening journey today.
+              Early detection saves lives. Do not wait to start your screening journey.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/get-screened">

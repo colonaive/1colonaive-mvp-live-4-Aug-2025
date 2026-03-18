@@ -54,9 +54,9 @@ const ArticlePage: React.FC = () => {
     <div>
       <p className="mb-4">{article.excerpt}</p>
       <p className="mb-4">
-        This page currently presents the article summary and metadata available in the education index. Where a
-        dedicated long-form version exists elsewhere in the education library, that version remains the primary
-        reading experience.
+        The education index currently provides the article summary and metadata shown here. Where a dedicated
+        long-form version exists elsewhere in the education library, that version remains the primary reading
+        experience.
       </p>
       <p>
         Readers should use the related articles and category pages to access the most complete published coverage on

@@ -70,7 +70,10 @@ const BloodScreeningSection: React.FC = () => {
           {/* Kaiser Permanente research paragraph */}
           <div className="max-w-xl text-base lg:text-lg text-slate-600 leading-relaxed mb-6 bg-white/50 rounded-lg p-4 border border-slate-200">
             <p>
-              Studies like those by <strong>Kaiser Permanente</strong> show that non-invasive blood tests can significantly increase screening uptake. These tests lower barriers, reach younger and under-screened groups, and lead to earlier referrals for colonoscopy — when it still matters most.
+              Programmes such as <strong>Kaiser Permanente</strong> show that organised screening and lower-friction
+              pathways can raise participation. Blood-based tests may help reduce barriers for people who are
+              reluctant to start with stool testing or colonoscopy, while still directing positive results toward
+              appropriate follow-up.
             </p>
           </div>
 

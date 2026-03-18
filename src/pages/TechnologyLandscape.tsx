@@ -75,7 +75,7 @@ const TechnologyLandscape: React.FC = () => {
           </h1>
           <p className="text-lg text-white/80 max-w-3xl mx-auto">
             An educational overview of current and emerging technologies for colorectal cancer screening.
-            This page is for informational purposes only and does not endorse any specific product or company.
+            This overview is for informational purposes only and does not endorse any specific product or company.
           </p>
         </div>
       </div>
@@ -230,7 +230,7 @@ const TechnologyLandscape: React.FC = () => {
 
         {/* Disclaimer */}
         <div className="text-center text-[11px] text-gray-400 dark:text-gray-500 py-4 border-t border-gray-200 dark:border-gray-700">
-          This page provides educational information about CRC screening technologies. It does not constitute medical advice,
+          This overview provides educational information about CRC screening technologies. It does not constitute medical advice,
           endorse specific products, or make diagnostic claims. Consult a healthcare professional for screening decisions.
         </div>
       </div>

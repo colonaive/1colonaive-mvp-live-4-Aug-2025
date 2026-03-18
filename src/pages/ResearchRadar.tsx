@@ -275,7 +275,7 @@ const ResearchRadar: React.FC = () => {
                   <div className="bg-gradient-to-br from-[#0A385A]/5 to-[#0F766E]/5 dark:from-[#0A385A]/20 dark:to-[#0F766E]/20 rounded-xl p-8 mb-8">
                     <h3 className="text-lg font-semibold text-[#0A385A] dark:text-white mt-0">The Science is Clear</h3>
                     <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                      Colorectal cancer (CRC) is the third most common cancer worldwide and the second leading cause of cancer death. Yet when detected early — at Stage I — the 5-year survival rate exceeds 90%. By Stage IV, this drops below 15%.
+                      Colorectal cancer (CRC) is the third most common cancer worldwide and the second leading cause of cancer death. Yet when detected early, at Stage I, the 5-year survival rate exceeds 90%. By Stage IV, this drops below 15%.
                     </p>
                     <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
                       Screening is the single most effective intervention to bridge this gap. Regular screening can detect precancerous polyps before they become malignant, and catch early-stage cancers when treatment is most effective.
@@ -288,15 +288,15 @@ const ResearchRadar: React.FC = () => {
                       <ul className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                         <li className="flex items-start gap-2">
                           <span className="text-[#0F766E] mt-0.5">&#9679;</span>
-                          <span><strong>Colonoscopy</strong> — Gold standard. Detects and removes polyps in one procedure.</span>
+                          <span><strong>Colonoscopy</strong>: Gold standard. Detects and removes polyps in one procedure.</span>
                         </li>
                         <li className="flex items-start gap-2">
                           <span className="text-[#0F766E] mt-0.5">&#9679;</span>
-                          <span><strong>FIT / FOBT</strong> — Stool-based tests that detect hidden blood. Non-invasive but less sensitive.</span>
+                          <span><strong>FIT / FOBT</strong>: Stool-based tests that detect hidden blood. Non-invasive but less sensitive.</span>
                         </li>
                         <li className="flex items-start gap-2">
                           <span className="text-[#0F766E] mt-0.5">&#9679;</span>
-                          <span><strong>Blood-based tests</strong> — Emerging screening options using ctDNA or methylation biomarkers. More acceptable to patients who decline stool or invasive tests.</span>
+                          <span><strong>Blood-based tests</strong>: Emerging screening options using ctDNA or methylation biomarkers. They may be more acceptable to patients who decline stool or invasive tests.</span>
                         </li>
                       </ul>
                     </div>
@@ -336,7 +336,7 @@ const ResearchRadar: React.FC = () => {
       <div className="bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-6 py-8">
         <div className="max-w-5xl mx-auto text-center">
           <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
-            This page provides educational information about colorectal cancer research and screening. It is not medical advice.
+            This resource provides educational information about colorectal cancer research and screening. It is not medical advice.
             Always consult your healthcare provider for screening decisions. Data sourced from PubMed, ClinicalTrials.gov, and public news feeds.
           </p>
         </div>
