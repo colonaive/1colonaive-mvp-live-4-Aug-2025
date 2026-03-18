@@ -95,6 +95,7 @@ import HowCrcDevelopsFromPolyps from './pages/education/patients/basics/how-crc-
 import ColonoscopyPreparationGuide from './pages/education/patients/screening/colonoscopy-preparation-complete-guide';
 import EarlyWarningSigns from './pages/education/patients/symptoms/early-warning-signs';
 import ColonoscopyGoldStandard from './pages/education/patients/screening/colonoscopy-gold-standard';
+import KaiserCrcStudyAnalysis from './pages/education/clinicians/research/kaiser-crc-study-analysis';
 import ColorectalCancerPage from './pages/education/patients/colorectal-cancer';
 
 
@@ -223,6 +224,7 @@ const MainRoutes = () => {
           <Route path="/education/article/colonoscopy-preparation-complete-guide" element={<ColonoscopyPreparationGuide />} />
           <Route path="/education/article/early-warning-signs" element={<EarlyWarningSigns />} />
           <Route path="/education/article/colonoscopy-gold-standard" element={<ColonoscopyGoldStandard />} />
+          <Route path="/education/article/kaiser-crc-study-analysis" element={<KaiserCrcStudyAnalysis />} />
 
 
           {/* Clinician education */}

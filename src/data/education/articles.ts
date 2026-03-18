@@ -445,6 +445,39 @@ export const educationArticles: Article[] = [
         pages: '1298-1306',
         doi: '10.1056/NEJMoa1309086',
         type: 'journal'
+      },
+      {
+        id: 'ref-008',
+        authors: ['Doubeni CA', 'Corley DA', 'Quinn VP', 'et al'],
+        title: 'Effectiveness of screening colonoscopy in reducing the risk of death from right and left colon cancer: a large community-based study',
+        journal: 'Gut',
+        year: 2018,
+        volume: '67',
+        pages: '291-298',
+        doi: '10.1136/gutjnl-2016-312712',
+        type: 'journal'
+      },
+      {
+        id: 'ref-009',
+        authors: ['Levin TR', 'Corley DA', 'Jensen CD', 'et al'],
+        title: 'Effects of organized colorectal cancer screening on cancer incidence and mortality in a large community-based population',
+        journal: 'Gastroenterology',
+        year: 2018,
+        volume: '155',
+        pages: '1383-1391.e5',
+        doi: '10.1053/j.gastro.2018.07.017',
+        type: 'journal'
+      },
+      {
+        id: 'ref-010',
+        authors: ['Coronado GD', 'Petrik AF', 'Vollmer WM', 'et al'],
+        title: 'Effectiveness of a mailed colorectal cancer screening outreach program in community health clinics',
+        journal: 'JAMA Internal Medicine',
+        year: 2018,
+        volume: '178',
+        pages: '1174-1181',
+        doi: '10.1001/jamainternmed.2018.3629',
+        type: 'journal'
       }
     ]
   }
