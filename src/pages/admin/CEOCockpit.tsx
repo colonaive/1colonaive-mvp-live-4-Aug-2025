@@ -50,6 +50,7 @@ import { decisionMemoryEngine } from '@/chief-of-staff/decision-memory/decisionM
 import { decisionPatterns, type DecisionPattern } from '@/chief-of-staff/decision-memory/decisionPatterns';
 import { generateFounderBriefing, type FounderBriefing } from '@/lib/founderBriefing';
 import { generateCrossProjectBriefing, type CrossProjectBriefing, type ProjectId } from '@/lib/projectSignals';
+import { getTodayFocus, dismissNudge, type TodayFocus, type ProactiveNudge } from '@/lib/proactiveEngine';
 import type { ScoredAction } from '@/lib/actionIntelligence';
 import {
   trackAction,
@@ -151,6 +152,10 @@ const CEOCockpit: React.FC = () => {
 
   // Cross-Project Intelligence state — CTW-COCKPIT-02E
   const [crossProjectBriefing, setCrossProjectBriefing] = useState<CrossProjectBriefing | null>(null);
+
+  // Proactive Intelligence state — CTW-COCKPIT-02F
+  const [todayFocus, setTodayFocus] = useState<TodayFocus | null>(null);
+  const [todayFocusLoading, setTodayFocusLoading] = useState(true);
   const handleActionCenterUpdate = () => {
     setWidgetTick((t) => t + 1);
     // Refresh decision memory widget
@@ -321,6 +326,9 @@ const CEOCockpit: React.FC = () => {
 
   useEffect(() => {
     loadInbox(); loadCRCNews(); loadBriefing(); loadLinkedIn(); loadRadar(); loadCompetitiveIntel(); loadFounderIntelligence(); loadFounderProfile();
+    // Load Proactive Intelligence (async)
+    setTodayFocusLoading(true);
+    getTodayFocus().then((f) => setTodayFocus(f)).catch(() => {}).finally(() => setTodayFocusLoading(false));
     // Load Cross-Project Intelligence (synchronous)
     try { setCrossProjectBriefing(generateCrossProjectBriefing()); } catch { /* silent */ }
     // Load Chief-of-Staff strategy digest (synchronous)
@@ -356,6 +364,110 @@ const CEOCockpit: React.FC = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-8">
+
+        {/* === TODAY'S FOCUS — Proactive Intelligence CTW-COCKPIT-02F === */}
+        <CockpitSection columns={1}>
+          <CockpitCard
+            title="Today's Focus"
+            subtitle="Proactive priorities, nudges & upcoming actions"
+            icon={<Zap size={18} />}
+            status={todayFocus ? 'active' : 'pending'}
+          >
+            {todayFocusLoading ? (
+              <div className="flex items-center justify-center py-6">
+                <RefreshCw size={18} className="animate-spin text-gray-400" />
+                <span className="ml-2 text-xs text-gray-400">Scanning for priorities...</span>
+              </div>
+            ) : !todayFocus ? (
+              <div className="flex flex-col items-center justify-center py-6 text-center">
+                <Zap size={32} className="text-gray-300 dark:text-gray-600 mb-3" />
+                <p className="text-xs text-gray-400">Proactive intelligence unavailable.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {/* Top 3 Priorities Row */}
+                <div>
+                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">Top Priorities Right Now</p>
+                  {todayFocus.topPriorities.length === 0 ? (
+                    <p className="text-xs text-gray-400 italic">No global priorities identified.</p>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                      {todayFocus.topPriorities.map((gp) => (
+                        <div key={`tf-${gp.rank}`} className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-700/50 dark:to-gray-800/30 border border-gray-100 dark:border-gray-600 rounded-lg p-3">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className={`inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold ${
+                              gp.rank === 1 ? 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300'
+                              : gp.rank === 2 ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
+                              : 'bg-gray-100 text-gray-600 dark:bg-gray-600 dark:text-gray-300'
+                            }`}>{gp.rank}</span>
+                            <span className={`text-[9px] px-1.5 py-0.5 rounded ${
+                              ({ colonaive: 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300', durmah: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300', sciencehod: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300', sgrenovate: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300' } as Record<string, string>)[gp.project] || 'bg-gray-100 text-gray-600'
+                            }`}>{gp.projectLabel}</span>
+                          </div>
+                          <p className="text-xs font-medium text-gray-900 dark:text-white line-clamp-2">{gp.title}</p>
+                          <p className="text-[10px] text-gray-400 mt-1 line-clamp-1">{gp.reason.slice(0, 80)}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Nudges */}
+                {todayFocus.nudges.length > 0 && (
+                  <div>
+                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Proactive Nudges</p>
+                    <div className="space-y-1.5">
+                      {todayFocus.nudges.map((nudge) => (
+                        <div
+                          key={nudge.id}
+                          className={`flex items-start gap-2 rounded-lg px-3 py-2 border ${
+                            nudge.severity === 'urgent'
+                              ? 'bg-red-50 border-red-200 dark:bg-red-900/15 dark:border-red-800/30'
+                              : nudge.severity === 'attention'
+                              ? 'bg-amber-50 border-amber-200 dark:bg-amber-900/15 dark:border-amber-800/30'
+                              : 'bg-gray-50 border-gray-200 dark:bg-gray-800/30 dark:border-gray-700'
+                          }`}
+                        >
+                          <span className={`mt-0.5 w-2 h-2 rounded-full flex-shrink-0 ${
+                            nudge.severity === 'urgent' ? 'bg-red-500'
+                            : nudge.severity === 'attention' ? 'bg-amber-500'
+                            : 'bg-gray-400'
+                          }`} />
+                          <div className="flex-1 min-w-0">
+                            <p className={`text-xs leading-relaxed ${
+                              nudge.severity === 'urgent' ? 'text-red-800 dark:text-red-300'
+                              : nudge.severity === 'attention' ? 'text-amber-800 dark:text-amber-300'
+                              : 'text-gray-600 dark:text-gray-400'
+                            }`}>{nudge.message}</p>
+                            <p className="text-[10px] text-gray-400 mt-0.5 italic">{nudge.recommended_action}</p>
+                          </div>
+                          <button
+                            onClick={() => {
+                              dismissNudge(nudge.id);
+                              setTodayFocus((prev) => prev ? { ...prev, nudges: prev.nudges.filter((n) => n.id !== nudge.id) } : prev);
+                            }}
+                            className="text-gray-300 hover:text-gray-500 dark:text-gray-600 dark:hover:text-gray-400 flex-shrink-0"
+                            title="Dismiss for 24h"
+                          >
+                            <X size={12} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Footer stats */}
+                <div className="flex items-center gap-4 pt-2 border-t border-gray-100 dark:border-gray-700">
+                  <span className="text-[10px] text-gray-400">{todayFocus.nudges.length} active nudge{todayFocus.nudges.length !== 1 ? 's' : ''}</span>
+                  {todayFocus.upcomingCount > 0 && (
+                    <span className="text-[10px] text-blue-500">{todayFocus.upcomingCount} upcoming action{todayFocus.upcomingCount !== 1 ? 's' : ''} (48h)</span>
+                  )}
+                </div>
+              </div>
+            )}
+          </CockpitCard>
+        </CockpitSection>
 
         {/* === CEO ACTION CENTER === */}
         <ActionCenterChat onAction={handleActionCenterUpdate} />
