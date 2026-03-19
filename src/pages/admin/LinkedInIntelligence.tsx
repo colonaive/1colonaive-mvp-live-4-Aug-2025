@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Linkedin,
   RefreshCw,
@@ -7,6 +7,7 @@ import {
   CheckCircle,
   Sparkles,
   Eye,
+  EyeOff,
   ArrowLeft,
   Image as ImageIcon,
   Send,
@@ -14,6 +15,9 @@ import {
   BarChart3,
   X,
   Radar,
+  GripVertical,
+  List,
+  PenLine,
 } from 'lucide-react';
 import { cockpitService, type LinkedInPost } from '@/services/cockpitService';
 import { competitiveIntelligenceService } from '@/services/competitiveIntelligenceService';
@@ -155,6 +159,67 @@ const LinkedInPreview: React.FC<{
   </div>
 );
 
+/* ── resize handle ── */
+
+const ResizeHandle: React.FC<{
+  onDragStart: () => void;
+  onDrag: (deltaX: number) => void;
+}> = ({ onDragStart, onDrag }) => {
+  const onMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      onDragStart();
+      const startX = e.clientX;
+      const onMouseMove = (ev: MouseEvent) => {
+        onDrag(ev.clientX - startX);
+      };
+      const onMouseUp = () => {
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+      };
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+      document.addEventListener('mousemove', onMouseMove);
+      document.addEventListener('mouseup', onMouseUp);
+    },
+    [onDragStart, onDrag],
+  );
+
+  return (
+    <div
+      onMouseDown={onMouseDown}
+      className="hidden lg:flex w-2 flex-shrink-0 cursor-col-resize items-center justify-center group hover:bg-[#0F766E]/10 transition-colors rounded"
+      title="Drag to resize"
+    >
+      <GripVertical size={14} className="text-gray-300 group-hover:text-[#0F766E] transition-colors" />
+    </div>
+  );
+};
+
+/* ── panel toggle button ── */
+
+const PanelToggle: React.FC<{
+  active: boolean;
+  onClick: () => void;
+  icon: React.ReactNode;
+  label: string;
+}> = ({ active, onClick, icon, label }) => (
+  <button
+    onClick={onClick}
+    className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition-all ${
+      active
+        ? 'bg-white/20 text-white'
+        : 'bg-white/5 text-white/40 hover:bg-white/10 hover:text-white/70'
+    }`}
+    title={`${active ? 'Hide' : 'Show'} ${label}`}
+  >
+    {icon}
+    <span className="hidden sm:inline">{label}</span>
+  </button>
+);
+
 /* ── main page ── */
 
 const LinkedInIntelligence: React.FC = () => {
@@ -186,6 +251,58 @@ const LinkedInIntelligence: React.FC = () => {
   const [editHashtags, setEditHashtags] = useState('');
   const [editImagePrompt, setEditImagePrompt] = useState('');
   const [editImageUrl, setEditImageUrl] = useState<string | null>(null);
+
+  // Panel visibility & width state
+  const [showSources, setShowSources] = useState(true);
+  const [showEditor, setShowEditor] = useState(true);
+  const [showPreview, setShowPreview] = useState(true);
+  // Base widths as percentages (when all three panels visible: 25/42/33)
+  const [baseWidths, setBaseWidths] = useState([25, 42, 33]);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const dragStartWidths = useRef<number[]>([25, 42, 33]);
+
+  // Compute effective widths based on which panels are visible
+  const visiblePanels = [showSources, showEditor, showPreview];
+  const visibleCount = visiblePanels.filter(Boolean).length;
+  const effectiveWidths = (() => {
+    if (visibleCount === 0) return [0, 0, 0];
+    const totalVisible = baseWidths.reduce((sum, w, i) => sum + (visiblePanels[i] ? w : 0), 0);
+    return baseWidths.map((w, i) => (visiblePanels[i] ? (w / totalVisible) * 100 : 0));
+  })();
+
+  const snapshotWidths = useCallback(() => {
+    dragStartWidths.current = [...baseWidths];
+  }, [baseWidths]);
+
+  const handleDragLeft = useCallback(
+    (deltaX: number) => {
+      if (!containerRef.current) return;
+      const containerWidth = containerRef.current.offsetWidth;
+      const deltaPct = (deltaX / containerWidth) * 100;
+      const snap = dragStartWidths.current;
+      const minW = 15;
+      const newLeft = Math.max(minW, Math.min(snap[0] + deltaPct, 100 - snap[2] - minW));
+      const newCenter = 100 - newLeft - snap[2];
+      if (newCenter < minW) return;
+      setBaseWidths([newLeft, newCenter, snap[2]]);
+    },
+    [],
+  );
+
+  const handleDragRight = useCallback(
+    (deltaX: number) => {
+      if (!containerRef.current) return;
+      const containerWidth = containerRef.current.offsetWidth;
+      const deltaPct = (deltaX / containerWidth) * 100;
+      const snap = dragStartWidths.current;
+      const minW = 15;
+      const newCenter = Math.max(minW, Math.min(snap[1] + deltaPct, 100 - snap[0] - minW));
+      const newRight = 100 - snap[0] - newCenter;
+      if (newRight < minW) return;
+      setBaseWidths([snap[0], newCenter, newRight]);
+    },
+    [],
+  );
 
   const addToast = (message: string, type: Toast['type'] = 'info') => {
     const id = ++toastId;
@@ -394,17 +511,41 @@ const LinkedInIntelligence: React.FC = () => {
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />
 
       {/* Header */}
-      <div className="bg-gradient-to-r from-[#0A385A] to-[#0F766E] px-6 py-6">
+      <div className="bg-gradient-to-r from-[#0A385A] to-[#0F766E] px-6 py-4">
         <div className="max-w-[1600px] mx-auto">
-          <div className="flex items-center gap-3 mb-2">
-            <button
-              onClick={() => navigate('/admin/ceo-cockpit')}
-              className="text-white/70 hover:text-white transition-colors"
-            >
-              <ArrowLeft size={18} />
-            </button>
-            <Linkedin size={22} className="text-white" />
-            <h1 className="text-xl font-bold text-white">LinkedIn Intelligence</h1>
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => navigate('/admin/ceo-cockpit')}
+                className="text-white/70 hover:text-white transition-colors"
+              >
+                <ArrowLeft size={18} />
+              </button>
+              <Linkedin size={22} className="text-white" />
+              <h1 className="text-xl font-bold text-white">LinkedIn Intelligence</h1>
+            </div>
+
+            {/* Panel toggles */}
+            <div className="hidden lg:flex items-center gap-1.5 bg-white/10 rounded-lg p-1">
+              <PanelToggle
+                active={showSources}
+                onClick={() => setShowSources((v) => !v)}
+                icon={<List size={13} />}
+                label="Sources"
+              />
+              <PanelToggle
+                active={showEditor}
+                onClick={() => setShowEditor((v) => !v)}
+                icon={<PenLine size={13} />}
+                label="Editor"
+              />
+              <PanelToggle
+                active={showPreview}
+                onClick={() => setShowPreview((v) => !v)}
+                icon={showPreview ? <Eye size={13} /> : <EyeOff size={13} />}
+                label="Preview"
+              />
+            </div>
           </div>
           <div className="flex items-center gap-4 text-sm text-white/70">
             <span>{pendingCount} pending</span>
@@ -413,11 +554,21 @@ const LinkedInIntelligence: React.FC = () => {
         </div>
       </div>
 
-      {/* Body — three-panel */}
+      {/* Body — resizable panels */}
       <div className="max-w-[1600px] mx-auto px-4 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+        {visibleCount === 0 && (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <EyeOff size={32} className="text-gray-300 dark:text-gray-600 mb-3" />
+            <p className="text-sm text-gray-400">All panels hidden. Use the toggles above to show panels.</p>
+          </div>
+        )}
+        <div ref={containerRef} className="flex items-start gap-0">
           {/* LEFT: Manual Source + Post Opportunities */}
-          <div className="lg:col-span-3 space-y-4">
+          {showSources && (
+          <div
+            className="flex-shrink-0 space-y-4 overflow-hidden"
+            style={{ width: `${effectiveWidths[0]}%`, minWidth: 0, padding: '0 8px' }}
+          >
             {/* Manual Post Source */}
             <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
               <div className="p-4">
@@ -593,9 +744,20 @@ const LinkedInIntelligence: React.FC = () => {
             </div>
           </div>
           </div>
+          )}
+
+          {/* Drag handle: Sources ↔ Editor */}
+          {showSources && showEditor && (
+            <ResizeHandle onDragStart={snapshotWidths} onDrag={handleDragLeft} />
+          )}
 
           {/* CENTER: Editor */}
-          <div className="lg:col-span-5 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+          {showEditor && (
+          <div
+            className="flex-shrink-0 overflow-hidden"
+            style={{ width: `${effectiveWidths[1]}%`, minWidth: 0, padding: '0 8px' }}
+          >
+          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
             <div className="p-4 border-b border-gray-100 dark:border-gray-700">
               <h2 className="text-sm font-semibold text-gray-900 dark:text-white">
                 LinkedIn Post Editor
@@ -777,9 +939,20 @@ const LinkedInIntelligence: React.FC = () => {
               </div>
             )}
           </div>
+          </div>
+          )}
+
+          {/* Drag handle: Editor ↔ Preview */}
+          {showEditor && showPreview && (
+            <ResizeHandle onDragStart={snapshotWidths} onDrag={handleDragRight} />
+          )}
 
           {/* RIGHT: Preview — live synced */}
-          <div className="lg:col-span-4">
+          {showPreview && (
+          <div
+            className="flex-shrink-0 overflow-hidden"
+            style={{ width: `${effectiveWidths[2]}%`, minWidth: 0, padding: '0 8px' }}
+          >
             <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden mb-4">
               <div className="p-4 border-b border-gray-100 dark:border-gray-700">
                 <h2 className="text-sm font-semibold text-gray-900 dark:text-white">
@@ -809,6 +982,7 @@ const LinkedInIntelligence: React.FC = () => {
               </div>
             </div>
           </div>
+          )}
         </div>
       </div>
     </div>
