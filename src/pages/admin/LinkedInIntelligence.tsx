@@ -18,6 +18,9 @@ import {
   GripVertical,
   List,
   PenLine,
+  Wand2,
+  RotateCcw,
+  Palette,
 } from 'lucide-react';
 import { cockpitService, type LinkedInPost } from '@/services/cockpitService';
 import { competitiveIntelligenceService } from '@/services/competitiveIntelligenceService';
@@ -106,7 +109,7 @@ const LinkedInPreview: React.FC<{
     <div className="px-4 pb-3">
       <p className="text-sm font-semibold text-gray-900 dark:text-white mb-2">{title}</p>
       <div className="text-[13px] text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed max-h-72 overflow-y-auto">
-        {content}
+        {content || 'Key update generated from CRC intelligence. Review content before publishing.'}
       </div>
     </div>
 
@@ -220,6 +223,15 @@ const PanelToggle: React.FC<{
   </button>
 );
 
+/* ── image style presets ── */
+
+const IMAGE_STYLE_PRESETS: { label: string; suffix: string }[] = [
+  { label: 'Clean Medical', suffix: 'clean medical illustration, teal and white palette, modern healthcare design, abstract scientific aesthetic' },
+  { label: 'Professional Corporate', suffix: 'professional corporate design, navy and silver palette, sleek modern business style, subtle medical iconography' },
+  { label: 'Public Health Campaign', suffix: 'public health awareness campaign style, warm inviting colors, community health feel, accessible and inclusive design' },
+  { label: 'Minimal Icon Style', suffix: 'minimalist icon-based design, flat vector style, single accent color on white, clean geometric shapes, modern infographic aesthetic' },
+];
+
 /* ── main page ── */
 
 const LinkedInIntelligence: React.FC = () => {
@@ -244,6 +256,10 @@ const LinkedInIntelligence: React.FC = () => {
 
   // Radar generation state
   const [radarGenerating, setRadarGenerating] = useState(false);
+
+  // Image prompt improvement state
+  const [improvingPrompt, setImprovingPrompt] = useState(false);
+  const [selectedStylePreset, setSelectedStylePreset] = useState('');
 
   // Editor state — all fields synced live to preview
   const [editTitle, setEditTitle] = useState('');
@@ -337,10 +353,14 @@ const LinkedInIntelligence: React.FC = () => {
   useEffect(() => {
     if (selectedPost) {
       setEditTitle(selectedPost.title);
-      setEditContent(selectedPost.draft_content || '');
+      setEditContent(
+        selectedPost.draft_content ||
+        'Key update generated from CRC intelligence. Review content before publishing.'
+      );
       setEditHashtags(selectedPost.hashtags || '');
       setEditImagePrompt(selectedPost.image_prompt || '');
       setEditImageUrl(selectedPost.image_url || null);
+      setSelectedStylePreset('');
     }
   }, [selectedPost]);
 
@@ -419,6 +439,34 @@ const LinkedInIntelligence: React.FC = () => {
       );
     } finally {
       setGeneratingImage(false);
+    }
+  };
+
+  const handleImprovePrompt = async () => {
+    if (!editImagePrompt) return;
+    setImprovingPrompt(true);
+    addToast('Improving image prompt with AI...', 'info');
+    try {
+      const result = await cockpitService.improveImagePrompt(
+        editImagePrompt,
+        selectedStylePreset || undefined,
+      );
+      setEditImagePrompt(result.improved_prompt);
+      addToast('Prompt improved! Review and generate when ready.', 'success');
+    } catch (err: unknown) {
+      addToast(err instanceof Error ? err.message : 'Prompt improvement failed', 'error');
+    } finally {
+      setImprovingPrompt(false);
+    }
+  };
+
+  const handleStylePresetChange = (presetLabel: string) => {
+    setSelectedStylePreset(presetLabel);
+    const preset = IMAGE_STYLE_PRESETS.find((p) => p.label === presetLabel);
+    if (preset && editImagePrompt) {
+      // Strip any previous preset suffix by taking content before the first comma-separated style instruction
+      const basePrompt = editImagePrompt.split(/,\s*(?:clean medical|professional corporate|public health|minimalist icon)/i)[0].trim();
+      setEditImagePrompt(`${basePrompt}, ${preset.suffix}`);
     }
   };
 
@@ -838,32 +886,68 @@ const LinkedInIntelligence: React.FC = () => {
                   </div>
                 )}
 
-                {/* Image Prompt + Generate Image */}
+                {/* Image Prompt + Generate/Regenerate Image */}
                 <div>
                   <label className="block text-[11px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">
                     Image Prompt
                   </label>
-                  <div className="flex gap-2">
-                    <textarea
-                      value={editImagePrompt}
-                      onChange={(e) => setEditImagePrompt(e.target.value)}
-                      rows={2}
-                      className="flex-1 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-[12px] text-gray-900 dark:text-white focus:ring-2 focus:ring-[#0F766E] focus:border-transparent outline-none resize-y italic"
-                    />
+                  <textarea
+                    value={editImagePrompt}
+                    onChange={(e) => setEditImagePrompt(e.target.value)}
+                    placeholder="Describe image (or use Improve Prompt)"
+                    rows={3}
+                    className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-[12px] text-gray-900 dark:text-white focus:ring-2 focus:ring-[#0F766E] focus:border-transparent outline-none resize-y"
+                  />
+
+                  {/* Style presets */}
+                  <div className="flex items-center gap-2 mt-2">
+                    <Palette size={12} className="text-gray-400 flex-shrink-0" />
+                    <select
+                      value={selectedStylePreset}
+                      onChange={(e) => handleStylePresetChange(e.target.value)}
+                      className="flex-1 px-2 py-1.5 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-[11px] text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-[#0F766E] focus:border-transparent outline-none"
+                    >
+                      <option value="">Style Preset...</option>
+                      {IMAGE_STYLE_PRESETS.map((p) => (
+                        <option key={p.label} value={p.label}>{p.label}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Action buttons row */}
+                  <div className="flex gap-2 mt-2">
+                    <button
+                      onClick={handleImprovePrompt}
+                      disabled={improvingPrompt || !editImagePrompt}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-[11px] font-medium transition-colors disabled:opacity-50"
+                      title="AI-improve the prompt for better image results"
+                    >
+                      {improvingPrompt ? (
+                        <RefreshCw size={12} className="animate-spin" />
+                      ) : (
+                        <Wand2 size={12} />
+                      )}
+                      {improvingPrompt ? 'Improving...' : 'Improve Prompt'}
+                    </button>
                     <button
                       onClick={handleGenerateImage}
                       disabled={generatingImage || !editImagePrompt}
-                      className="self-end px-3 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-[11px] font-medium transition-colors disabled:opacity-50 whitespace-nowrap"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-[11px] font-medium transition-colors disabled:opacity-50"
                     >
                       {generatingImage ? (
-                        <RefreshCw size={14} className="animate-spin" />
+                        <RefreshCw size={12} className="animate-spin" />
+                      ) : editImageUrl ? (
+                        <RotateCcw size={12} />
                       ) : (
-                        <ImageIcon size={14} />
+                        <ImageIcon size={12} />
                       )}
+                      {generatingImage ? 'Generating...' : editImageUrl ? 'Regenerate' : 'Generate Image'}
                     </button>
                   </div>
-                  {editImageUrl && (
-                    <div className="mt-2 relative">
+
+                  {/* Image preview with remove */}
+                  {editImageUrl ? (
+                    <div className="mt-3 relative">
                       <img
                         src={editImageUrl}
                         alt="Generated"
@@ -877,6 +961,10 @@ const LinkedInIntelligence: React.FC = () => {
                         <X size={12} />
                       </button>
                     </div>
+                  ) : (
+                    <p className="mt-2 text-[10px] text-gray-400 italic">
+                      You can publish without an image or generate one above.
+                    </p>
                   )}
                 </div>
 

@@ -181,6 +181,16 @@ export const cockpitService = {
     return res.json();
   },
 
+  improveImagePrompt: async (prompt: string, style?: string): Promise<{ improved_prompt: string }> => {
+    const res = await fetch('/.netlify/functions/improve_image_prompt', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt, style }),
+    });
+    if (!res.ok) throw new Error(`Prompt improvement failed (${res.status})`);
+    return res.json();
+  },
+
   getRepoActivityPlaceholder: (): PlaceholderSection => ({
     status: 'placeholder',
     message: 'GitHub API integration pending. Will show recent commits, open PRs, and deployment status.',
