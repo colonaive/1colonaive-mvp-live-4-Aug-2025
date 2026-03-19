@@ -8,10 +8,11 @@
 import { supabase } from '@/supabase';
 import { getGlobalPriorities, type GlobalPriority } from '@/lib/projectSignals';
 import type { ActionHistoryRecord } from '@/lib/actionFeedback';
+import { getOverdueFollowups, getUpcomingFollowups, getHighValueContacts, type LinkedInContact } from '@/lib/linkedinEngine';
 
 /* ── Types ── */
 
-export type NudgeType = 'overdue' | 'ignored' | 'stale' | 'risk' | 'focus';
+export type NudgeType = 'overdue' | 'ignored' | 'stale' | 'risk' | 'focus' | 'linkedin_followup' | 'linkedin_overdue' | 'linkedin_warm';
 
 export interface ProactiveNudge {
   id: string;
@@ -189,6 +190,91 @@ function detectUnaddressedRisks(): ProactiveNudge[] {
   return nudges;
 }
 
+/* ── LinkedIn Relationship Nudges — CTW-COCKPIT-03A ── */
+
+async function detectLinkedInOverdueFollowups(): Promise<ProactiveNudge[]> {
+  const nudges: ProactiveNudge[] = [];
+  try {
+    const overdue = await getOverdueFollowups();
+    for (const contact of overdue) {
+      const nudgeId = `linkedin-overdue-${contact.id}`;
+      if (isNudgeSuppressed(nudgeId)) continue;
+
+      const daysOverdue = contact.next_followup_date
+        ? Math.floor((Date.now() - new Date(contact.next_followup_date).getTime()) / (24 * 60 * 60 * 1000))
+        : 0;
+
+      nudges.push({
+        id: nudgeId,
+        type: 'linkedin_overdue',
+        message: `Follow-up with ${contact.name}${contact.organisation ? ` (${contact.organisation})` : ''} is ${daysOverdue} day${daysOverdue !== 1 ? 's' : ''} overdue.`,
+        severity: daysOverdue > 7 ? 'urgent' : 'attention',
+        recommended_action: `Send a follow-up message to ${contact.name}.`,
+        source_id: contact.id,
+        created_at: new Date().toISOString(),
+      });
+    }
+  } catch {
+    // silent — supplementary
+  }
+  return nudges;
+}
+
+async function detectLinkedInUpcomingFollowups(): Promise<ProactiveNudge[]> {
+  const nudges: ProactiveNudge[] = [];
+  try {
+    const upcoming = await getUpcomingFollowups(3); // next 3 days
+    for (const contact of upcoming) {
+      const nudgeId = `linkedin-followup-${contact.id}`;
+      if (isNudgeSuppressed(nudgeId)) continue;
+
+      nudges.push({
+        id: nudgeId,
+        type: 'linkedin_followup',
+        message: `Follow-up due with ${contact.name}${contact.organisation ? ` (${contact.organisation})` : ''}.`,
+        severity: 'info',
+        recommended_action: `Prepare and send follow-up to ${contact.name}.`,
+        source_id: contact.id,
+        created_at: new Date().toISOString(),
+      });
+    }
+  } catch {
+    // silent
+  }
+  return nudges;
+}
+
+async function detectWarmLeadsNotProgressed(): Promise<ProactiveNudge[]> {
+  const nudges: ProactiveNudge[] = [];
+  try {
+    const highValue = await getHighValueContacts();
+    const staleThreshold = 14 * 24 * 60 * 60 * 1000; // 14 days
+
+    for (const contact of highValue) {
+      if (!contact.last_contact_date) continue;
+      const age = Date.now() - new Date(contact.last_contact_date).getTime();
+      if (age < staleThreshold) continue;
+
+      const nudgeId = `linkedin-warm-${contact.id}`;
+      if (isNudgeSuppressed(nudgeId)) continue;
+
+      const days = Math.floor(age / (24 * 60 * 60 * 1000));
+      nudges.push({
+        id: nudgeId,
+        type: 'linkedin_warm',
+        message: `${contact.status === 'advisor' ? 'Advisor' : 'Warm lead'} ${contact.name} has not been contacted in ${days} days.`,
+        severity: days > 30 ? 'urgent' : 'attention',
+        recommended_action: `Re-engage ${contact.name} to maintain relationship.`,
+        source_id: contact.id,
+        created_at: new Date().toISOString(),
+      });
+    }
+  } catch {
+    // silent
+  }
+  return nudges;
+}
+
 /* ── Main Engine ── */
 
 /**
@@ -211,12 +297,26 @@ export async function generateProactiveSignals(): Promise<ProactiveNudge[]> {
     // silent fail — will still generate risk nudges
   }
 
+  // LinkedIn relationship nudges (async)
+  let linkedInNudges: ProactiveNudge[] = [];
+  try {
+    const [liOverdue, liUpcoming, liWarm] = await Promise.all([
+      detectLinkedInOverdueFollowups(),
+      detectLinkedInUpcomingFollowups(),
+      detectWarmLeadsNotProgressed(),
+    ]);
+    linkedInNudges = [...liOverdue, ...liUpcoming, ...liWarm];
+  } catch {
+    // silent — supplementary
+  }
+
   // Collect all nudge types
   const allNudges: ProactiveNudge[] = [
     ...detectOverdueActions(history),
     ...detectIgnoredHighPriority(history),
     ...detectStaleSignals(history),
     ...detectUnaddressedRisks(),
+    ...linkedInNudges,
   ];
 
   // Sort: urgent first, then attention, then info

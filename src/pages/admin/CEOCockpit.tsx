@@ -61,6 +61,7 @@ import {
   type ActionHistoryRecord,
   type FounderProfile,
 } from '@/lib/actionFeedback';
+import { getRelationshipStats, getOverdueFollowups, getUpcomingFollowups, type RelationshipStats, type LinkedInContact } from '@/lib/linkedinEngine';
 
 const today = new Date().toLocaleDateString('en-SG', {
   weekday: 'long',
@@ -156,6 +157,12 @@ const CEOCockpit: React.FC = () => {
   // Proactive Intelligence state — CTW-COCKPIT-02F
   const [todayFocus, setTodayFocus] = useState<TodayFocus | null>(null);
   const [todayFocusLoading, setTodayFocusLoading] = useState(true);
+
+  // Relationship Intelligence state — CTW-COCKPIT-03A
+  const [relStats, setRelStats] = useState<RelationshipStats | null>(null);
+  const [relOverdue, setRelOverdue] = useState<LinkedInContact[]>([]);
+  const [relUpcoming, setRelUpcoming] = useState<LinkedInContact[]>([]);
+  const [relLoading, setRelLoading] = useState(true);
   const handleActionCenterUpdate = () => {
     setWidgetTick((t) => t + 1);
     // Refresh decision memory widget
@@ -324,8 +331,23 @@ const CEOCockpit: React.FC = () => {
     setActionUpdating(null);
   };
 
+  const loadRelationshipIntel = async () => {
+    setRelLoading(true);
+    try {
+      const [stats, overdue, upcoming] = await Promise.all([
+        getRelationshipStats(),
+        getOverdueFollowups(),
+        getUpcomingFollowups(7),
+      ]);
+      setRelStats(stats);
+      setRelOverdue(overdue);
+      setRelUpcoming(upcoming);
+    } catch { /* silent */ }
+    finally { setRelLoading(false); }
+  };
+
   useEffect(() => {
-    loadInbox(); loadCRCNews(); loadBriefing(); loadLinkedIn(); loadRadar(); loadCompetitiveIntel(); loadFounderIntelligence(); loadFounderProfile();
+    loadInbox(); loadCRCNews(); loadBriefing(); loadLinkedIn(); loadRadar(); loadCompetitiveIntel(); loadFounderIntelligence(); loadFounderProfile(); loadRelationshipIntel();
     // Load Proactive Intelligence (async)
     setTodayFocusLoading(true);
     getTodayFocus().then((f) => setTodayFocus(f)).catch(() => {}).finally(() => setTodayFocusLoading(false));
@@ -1359,6 +1381,86 @@ const CEOCockpit: React.FC = () => {
                 >
                   Open LinkedIn Intelligence
                 </button>
+              </div>
+            )}
+          </CockpitCard>
+        </CockpitSection>
+
+        {/* Relationship Intelligence — CTW-COCKPIT-03A */}
+        <CockpitSection columns={1}>
+          <CockpitCard
+            title="Relationship Intelligence"
+            subtitle="LinkedIn contacts, follow-ups & relationship management"
+            icon={<UserCircle size={18} />}
+            status={relLoading ? 'pending' : relStats && relStats.totalContacts > 0 ? 'active' : 'placeholder'}
+          >
+            {relLoading ? (
+              <div className="flex items-center justify-center py-6">
+                <RefreshCw size={20} className="animate-spin text-gray-400" />
+                <span className="ml-2 text-xs text-gray-400">Loading relationship data...</span>
+              </div>
+            ) : (
+              <div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-6">
+                    <div>
+                      <p className="text-2xl font-bold text-gray-900 dark:text-white">{relStats?.totalContacts || 0}</p>
+                      <p className="text-[11px] text-gray-500 dark:text-gray-400">Total Contacts</p>
+                    </div>
+                    <div>
+                      <p className={`text-2xl font-bold ${(relStats?.overdueFollowups || 0) > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white'}`}>
+                        {relStats?.overdueFollowups || 0}
+                      </p>
+                      <p className="text-[11px] text-gray-500 dark:text-gray-400">Overdue</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">{relStats?.upcomingFollowups || 0}</p>
+                      <p className="text-[11px] text-gray-500 dark:text-gray-400">Upcoming</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{relStats?.highValueContacts || 0}</p>
+                      <p className="text-[11px] text-gray-500 dark:text-gray-400">High-Value</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => navigate('/admin/relationship-intelligence')}
+                    className="px-4 py-2 rounded-lg bg-[#0A385A] hover:bg-[#0A385A]/90 text-white text-xs font-medium transition-colors"
+                  >
+                    Open Relationships
+                  </button>
+                </div>
+                {/* Overdue contacts preview */}
+                {relOverdue.length > 0 && (
+                  <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700">
+                    <p className="text-[10px] font-semibold text-red-600 dark:text-red-400 uppercase tracking-wide mb-2">Overdue Follow-ups</p>
+                    <div className="space-y-1.5">
+                      {relOverdue.slice(0, 3).map((c) => (
+                        <div key={c.id} className="flex items-center justify-between text-xs">
+                          <span className="text-gray-700 dark:text-gray-300 font-medium">{c.name}</span>
+                          <span className="text-red-500 dark:text-red-400 text-[10px]">
+                            {c.next_followup_date ? `${Math.abs(Math.ceil((new Date(c.next_followup_date).getTime() - Date.now()) / (24*60*60*1000)))}d overdue` : ''}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {/* Upcoming contacts preview */}
+                {relUpcoming.length > 0 && (
+                  <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+                    <p className="text-[10px] font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-wide mb-2">Upcoming This Week</p>
+                    <div className="space-y-1.5">
+                      {relUpcoming.slice(0, 3).map((c) => (
+                        <div key={c.id} className="flex items-center justify-between text-xs">
+                          <span className="text-gray-700 dark:text-gray-300 font-medium">{c.name}</span>
+                          <span className="text-amber-500 dark:text-amber-400 text-[10px]">
+                            {c.next_followup_date ? new Date(c.next_followup_date).toLocaleDateString('en-SG', { day: 'numeric', month: 'short' }) : ''}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </CockpitCard>

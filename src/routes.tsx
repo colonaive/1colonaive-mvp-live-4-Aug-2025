@@ -19,6 +19,7 @@ import CSRPartnersAdminPage from './pages/admin/CSRPartnersAdminPage';
 import PartnerSpecialistsAdminPage from './pages/admin/PartnerSpecialistsAdminPage';
 import CEOCockpit from './pages/admin/CEOCockpit';
 import LinkedInIntelligence from './pages/admin/LinkedInIntelligence';
+import RelationshipIntelligence from './pages/admin/RelationshipIntelligence';
 import CRCRadar from './pages/admin/CRCRadar';
 
 // Public Research
@@ -337,6 +338,10 @@ const MainRoutes = () => {
           <Route
             path="/admin/linkedin-intelligence"
             element={<ProtectedAdminRoute><LinkedInIntelligence /></ProtectedAdminRoute>}
+          />
+          <Route
+            path="/admin/relationship-intelligence"
+            element={<ProtectedAdminRoute><RelationshipIntelligence /></ProtectedAdminRoute>}
           />
           <Route
             path="/admin/crc-radar"
