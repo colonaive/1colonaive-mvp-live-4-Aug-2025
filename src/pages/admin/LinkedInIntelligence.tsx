@@ -289,14 +289,17 @@ const LinkedInIntelligence: React.FC = () => {
   const handleGenerateImage = async () => {
     if (!editImagePrompt || !selectedId) return;
     setGeneratingImage(true);
-    addToast('Generating image with DALL-E 3...', 'info');
+    addToast('Generating image with AI...', 'info');
     try {
       const result = await cockpitService.generatePostImage(editImagePrompt, selectedId);
       setEditImageUrl(result.image_url);
       await loadPosts();
       addToast('Image generated successfully.', 'success');
     } catch (err: unknown) {
-      addToast(err instanceof Error ? err.message : 'Image generation failed', 'error');
+      addToast(
+        `Image generation failed. ${err instanceof Error ? err.message : ''} You can still publish without an image.`,
+        'error',
+      );
     } finally {
       setGeneratingImage(false);
     }
@@ -698,12 +701,19 @@ const LinkedInIntelligence: React.FC = () => {
                     </button>
                   </div>
                   {editImageUrl && (
-                    <div className="mt-2">
+                    <div className="mt-2 relative">
                       <img
                         src={editImageUrl}
                         alt="Generated"
                         className="w-full rounded-lg max-h-40 object-cover"
                       />
+                      <button
+                        onClick={() => setEditImageUrl(null)}
+                        className="absolute top-1 right-1 p-1 rounded-full bg-black/50 hover:bg-black/70 text-white transition-colors"
+                        title="Remove image"
+                      >
+                        <X size={12} />
+                      </button>
                     </div>
                   )}
                 </div>
