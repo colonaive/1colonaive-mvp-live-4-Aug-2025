@@ -44,6 +44,8 @@ import { promptGenerator } from '@/chief-of-staff/action-center/promptGenerator'
 import { emailComposer } from '@/chief-of-staff/action-center/emailComposer';
 import { decisionMemoryEngine } from '@/chief-of-staff/decision-memory/decisionMemoryEngine';
 import { decisionPatterns, type DecisionPattern } from '@/chief-of-staff/decision-memory/decisionPatterns';
+import { generateFounderBriefing, type FounderBriefing } from '@/lib/founderBriefing';
+import type { ScoredAction } from '@/lib/actionIntelligence';
 
 const today = new Date().toLocaleDateString('en-SG', {
   weekday: 'long',
@@ -117,6 +119,10 @@ const CEOCockpit: React.FC = () => {
   const [earlyWarnings, setEarlyWarnings] = useState<EarlyWarningSignal[]>([]);
   const [techTrends, setTechTrends] = useState<TechnologyTrend[]>([]);
   const [compLoading, setCompLoading] = useState(true);
+
+  // Founder Intelligence state
+  const [founderBriefing, setFounderBriefing] = useState<FounderBriefing | null>(null);
+  const [founderLoading, setFounderLoading] = useState(true);
 
   // Chief-of-Staff state
   const [digest, setDigest] = useState<WeeklyStrategyDigest | null>(null);
@@ -214,8 +220,20 @@ const CEOCockpit: React.FC = () => {
     }
   };
 
+  const loadFounderIntelligence = async () => {
+    setFounderLoading(true);
+    try {
+      const briefingData = await generateFounderBriefing();
+      setFounderBriefing(briefingData);
+    } catch {
+      // silent fail — supplementary intelligence
+    } finally {
+      setFounderLoading(false);
+    }
+  };
+
   useEffect(() => {
-    loadInbox(); loadCRCNews(); loadBriefing(); loadLinkedIn(); loadRadar(); loadCompetitiveIntel();
+    loadInbox(); loadCRCNews(); loadBriefing(); loadLinkedIn(); loadRadar(); loadCompetitiveIntel(); loadFounderIntelligence();
     // Load Chief-of-Staff strategy digest (synchronous)
     setDigest(strategyDigest.generate());
     // Load decision memory
@@ -464,6 +482,142 @@ const CEOCockpit: React.FC = () => {
                     )}
                   </div>
                 )}
+              </div>
+            )}
+          </CockpitCard>
+        </CockpitSection>
+
+        {/* === FOUNDER INTELLIGENCE — Action Intelligence Layer === */}
+        <CockpitSection columns={1}>
+          <CockpitCard
+            title="Founder Intelligence"
+            subtitle="Action scoring, priorities & recommended next moves"
+            icon={<Target size={18} />}
+            status={founderBriefing ? 'active' : 'pending'}
+            lastUpdated={founderBriefing ? new Date(founderBriefing.generatedAt).toLocaleTimeString('en-SG', { hour: '2-digit', minute: '2-digit' }) : undefined}
+          >
+            {founderLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <RefreshCw size={18} className="animate-spin text-gray-400" />
+                <span className="ml-2 text-xs text-gray-400">Analysing intelligence signals...</span>
+              </div>
+            ) : !founderBriefing ? (
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <Target size={32} className="text-gray-300 dark:text-gray-600 mb-3" />
+                <p className="text-xs text-gray-400">No intelligence signals available yet.</p>
+              </div>
+            ) : (
+              <div className="space-y-5">
+                {/* Executive Summary */}
+                <div className="bg-gradient-to-r from-[#0A385A]/5 to-[#0F766E]/5 dark:from-[#0A385A]/20 dark:to-[#0F766E]/20 rounded-lg p-4">
+                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Executive Summary</p>
+                  <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed">{founderBriefing.executiveSummary}</p>
+                </div>
+
+                {/* Top 3 Priorities + Risks side by side */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Top Priorities */}
+                  <div>
+                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">Top Priorities</p>
+                    {founderBriefing.topPriorities.length === 0 ? (
+                      <p className="text-xs text-gray-400 italic">No priority actions identified.</p>
+                    ) : (
+                      <div className="space-y-2">
+                        {founderBriefing.topPriorities.map((action: ScoredAction) => (
+                          <div key={action.id} className="bg-white dark:bg-gray-700/50 border border-gray-100 dark:border-gray-600 rounded-lg p-3">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs font-medium text-gray-900 dark:text-white line-clamp-2">{action.title}</p>
+                                <p className="text-[10px] text-gray-400 mt-1 capitalize">{action.source.replace('_', ' ')}</p>
+                              </div>
+                              <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                                <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold ${
+                                  action.scores.priority >= 70 ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'
+                                  : action.scores.priority >= 50 ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
+                                  : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+                                }`}>
+                                  {action.scores.priority}/100
+                                </span>
+                                <span className="text-[9px] text-gray-400">#{action.rank}</span>
+                              </div>
+                            </div>
+                            {/* Score breakdown */}
+                            <div className="flex gap-3 mt-2 text-[9px] text-gray-400">
+                              <span>Impact {action.scores.impact}</span>
+                              <span>Urgency {action.scores.urgency}</span>
+                              <span>Effort {action.scores.effort}</span>
+                              <span>Alignment {action.scores.alignment}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Critical Risks */}
+                  <div>
+                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">Critical Risks</p>
+                    {founderBriefing.criticalRisks.length === 0 ? (
+                      <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-lg p-3">
+                        <p className="text-xs text-emerald-700 dark:text-emerald-300">No critical risks detected. Signal landscape clear.</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {founderBriefing.criticalRisks.map((risk) => (
+                          <div key={risk.id} className="bg-white dark:bg-gray-700/50 border border-gray-100 dark:border-gray-600 rounded-lg p-3">
+                            <div className="flex items-start justify-between gap-2">
+                              <p className="text-xs font-medium text-gray-900 dark:text-white line-clamp-2 flex-1">{risk.title}</p>
+                              <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                                risk.severity === 'high' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'
+                                : risk.severity === 'medium' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
+                                : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
+                              }`}>
+                                {risk.severity}
+                              </span>
+                            </div>
+                            <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">{risk.description}</p>
+                            <p className="text-[9px] text-gray-400 mt-1">{risk.source}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Recommended Next Moves */}
+                {founderBriefing.recommendedActions.length > 0 && (
+                  <div>
+                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">Recommended Next Moves</p>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                      {founderBriefing.recommendedActions.slice(0, 3).map((rec, i) => (
+                        <div key={i} className="bg-white dark:bg-gray-700/50 border border-gray-100 dark:border-gray-600 rounded-lg p-3">
+                          <div className="flex items-center gap-2 mb-1">
+                            <Zap size={12} className="text-amber-500 flex-shrink-0" />
+                            <p className="text-xs font-medium text-gray-900 dark:text-white line-clamp-1">{rec.title}</p>
+                          </div>
+                          <p className="text-[10px] text-gray-500 dark:text-gray-400 line-clamp-2">{rec.rationale}</p>
+                          <div className="flex items-center gap-2 mt-2">
+                            <span className="text-[9px] text-gray-400">Priority: {rec.priority}</span>
+                            <span className={`text-[9px] px-1.5 py-0.5 rounded ${
+                              rec.effort === 'low' ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-300'
+                              : rec.effort === 'medium' ? 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-300'
+                              : 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-300'
+                            }`}>
+                              {rec.effort} effort
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Signal count footer */}
+                <div className="text-center pt-2 border-t border-gray-100 dark:border-gray-700">
+                  <p className="text-[10px] text-gray-400">
+                    {founderBriefing.signalCount} signals analysed from radar, early warnings & strategy implications
+                  </p>
+                </div>
               </div>
             )}
           </CockpitCard>
