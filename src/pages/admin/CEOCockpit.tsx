@@ -19,7 +19,7 @@ import {
   Zap,
   Globe,
   ListChecks,
-  Map,
+  Map as MapIcon,
   Activity,
   Layers,
   BarChart3,
@@ -1060,7 +1060,7 @@ const CEOCockpit: React.FC = () => {
           <CockpitCard
             title="Product Roadmap"
             subtitle={activeMilestone?.name || 'No active milestone'}
-            icon={<Map size={18} />}
+            icon={<MapIcon size={18} />}
             status={roadmapStats.inProgress > 0 ? 'active' : 'pending'}
           >
             <div className="space-y-2">
