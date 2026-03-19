@@ -24,6 +24,10 @@ import {
   Layers,
   BarChart3,
   ClipboardList,
+  Check,
+  X,
+  CheckCircle2,
+  UserCircle,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import CockpitCard from '@/components/cockpit/CockpitCard';
@@ -46,6 +50,15 @@ import { decisionMemoryEngine } from '@/chief-of-staff/decision-memory/decisionM
 import { decisionPatterns, type DecisionPattern } from '@/chief-of-staff/decision-memory/decisionPatterns';
 import { generateFounderBriefing, type FounderBriefing } from '@/lib/founderBriefing';
 import type { ScoredAction } from '@/lib/actionIntelligence';
+import {
+  trackAction,
+  markActionAccepted,
+  markActionIgnored,
+  markActionCompleted,
+  getFounderProfile,
+  type ActionHistoryRecord,
+  type FounderProfile,
+} from '@/lib/actionFeedback';
 
 const today = new Date().toLocaleDateString('en-SG', {
   weekday: 'long',
@@ -129,6 +142,11 @@ const CEOCockpit: React.FC = () => {
   const [, setWidgetTick] = useState(0);
   const [memoryPatterns, setMemoryPatterns] = useState<DecisionPattern[]>([]);
   const [memoryStats, setMemoryStats] = useState<{ totalMemories: number; topEntity: string | null; topAction: string | null; avgConfidence: number }>({ totalMemories: 0, topEntity: null, topAction: null, avgConfidence: 0 });
+
+  // Decision Loop Engine state — CTW-COCKPIT-02D
+  const [trackedActions, setTrackedActions] = useState<Map<number, ActionHistoryRecord>>(new Map());
+  const [actionUpdating, setActionUpdating] = useState<string | null>(null);
+  const [founderProfile, setFounderProfile] = useState<FounderProfile | null>(null);
   const handleActionCenterUpdate = () => {
     setWidgetTick((t) => t + 1);
     // Refresh decision memory widget
@@ -225,6 +243,16 @@ const CEOCockpit: React.FC = () => {
     try {
       const briefingData = await generateFounderBriefing();
       setFounderBriefing(briefingData);
+
+      // Auto-track recommended actions in history
+      const tracked = new Map<number, ActionHistoryRecord>();
+      for (let i = 0; i < briefingData.recommendedActions.length; i++) {
+        const rec = briefingData.recommendedActions[i];
+        const source = briefingData.topPriorities[i]?.source || 'strategy';
+        const record = await trackAction(rec.title, source as ActionHistoryRecord['source'], rec.priority);
+        if (record) tracked.set(i, record);
+      }
+      setTrackedActions(tracked);
     } catch {
       // silent fail — supplementary intelligence
     } finally {
@@ -232,8 +260,63 @@ const CEOCockpit: React.FC = () => {
     }
   };
 
+  const loadFounderProfile = async () => {
+    try {
+      const profile = await getFounderProfile();
+      setFounderProfile(profile);
+    } catch {
+      // silent fail
+    }
+  };
+
+  const handleAcceptAction = async (index: number) => {
+    const record = trackedActions.get(index);
+    if (!record) return;
+    setActionUpdating(record.id);
+    const ok = await markActionAccepted(record.id);
+    if (ok) {
+      setTrackedActions((prev) => {
+        const next = new Map(prev);
+        next.set(index, { ...record, status: 'accepted' });
+        return next;
+      });
+    }
+    setActionUpdating(null);
+  };
+
+  const handleIgnoreAction = async (index: number) => {
+    const record = trackedActions.get(index);
+    if (!record) return;
+    setActionUpdating(record.id);
+    const ok = await markActionIgnored(record.id);
+    if (ok) {
+      setTrackedActions((prev) => {
+        const next = new Map(prev);
+        next.set(index, { ...record, status: 'ignored' });
+        return next;
+      });
+    }
+    setActionUpdating(null);
+  };
+
+  const handleCompleteAction = async (index: number) => {
+    const record = trackedActions.get(index);
+    if (!record) return;
+    setActionUpdating(record.id);
+    const ok = await markActionCompleted(record.id, 'success');
+    if (ok) {
+      setTrackedActions((prev) => {
+        const next = new Map(prev);
+        next.set(index, { ...record, status: 'completed', outcome: 'success' });
+        return next;
+      });
+      loadFounderProfile(); // Refresh profile after completion
+    }
+    setActionUpdating(null);
+  };
+
   useEffect(() => {
-    loadInbox(); loadCRCNews(); loadBriefing(); loadLinkedIn(); loadRadar(); loadCompetitiveIntel(); loadFounderIntelligence();
+    loadInbox(); loadCRCNews(); loadBriefing(); loadLinkedIn(); loadRadar(); loadCompetitiveIntel(); loadFounderIntelligence(); loadFounderProfile();
     // Load Chief-of-Staff strategy digest (synchronous)
     setDigest(strategyDigest.generate());
     // Load decision memory
@@ -584,31 +667,125 @@ const CEOCockpit: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Recommended Next Moves */}
+                {/* Recommended Next Moves — with Decision Loop buttons */}
                 {founderBriefing.recommendedActions.length > 0 && (
                   <div>
                     <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">Recommended Next Moves</p>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                      {founderBriefing.recommendedActions.slice(0, 3).map((rec, i) => (
-                        <div key={i} className="bg-white dark:bg-gray-700/50 border border-gray-100 dark:border-gray-600 rounded-lg p-3">
-                          <div className="flex items-center gap-2 mb-1">
-                            <Zap size={12} className="text-amber-500 flex-shrink-0" />
-                            <p className="text-xs font-medium text-gray-900 dark:text-white line-clamp-1">{rec.title}</p>
+                      {founderBriefing.recommendedActions.slice(0, 3).map((rec, i) => {
+                        const tracked = trackedActions.get(i);
+                        const status = tracked?.status || 'suggested';
+                        const isUpdating = tracked && actionUpdating === tracked.id;
+                        return (
+                          <div key={i} className={`bg-white dark:bg-gray-700/50 border rounded-lg p-3 ${
+                            status === 'accepted' ? 'border-emerald-300 dark:border-emerald-600'
+                            : status === 'completed' ? 'border-blue-300 dark:border-blue-600'
+                            : status === 'ignored' ? 'border-gray-200 dark:border-gray-700 opacity-60'
+                            : 'border-gray-100 dark:border-gray-600'
+                          }`}>
+                            <div className="flex items-center gap-2 mb-1">
+                              <Zap size={12} className="text-amber-500 flex-shrink-0" />
+                              <p className="text-xs font-medium text-gray-900 dark:text-white line-clamp-1">{rec.title}</p>
+                            </div>
+                            <p className="text-[10px] text-gray-500 dark:text-gray-400 line-clamp-2">{rec.rationale}</p>
+                            <div className="flex items-center gap-2 mt-2">
+                              <span className="text-[9px] text-gray-400">Priority: {rec.priority}</span>
+                              <span className={`text-[9px] px-1.5 py-0.5 rounded ${
+                                rec.effort === 'low' ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-300'
+                                : rec.effort === 'medium' ? 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-300'
+                                : 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-300'
+                              }`}>
+                                {rec.effort} effort
+                              </span>
+                            </div>
+                            {/* Decision Loop Action Buttons */}
+                            <div className="flex items-center gap-1.5 mt-3 pt-2 border-t border-gray-100 dark:border-gray-600">
+                              {status === 'suggested' && (
+                                <>
+                                  <button
+                                    onClick={() => handleAcceptAction(i)}
+                                    disabled={!!isUpdating}
+                                    className="flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-300 dark:hover:bg-emerald-900/50 transition-colors"
+                                  >
+                                    <Check size={10} /> Accept
+                                  </button>
+                                  <button
+                                    onClick={() => handleIgnoreAction(i)}
+                                    disabled={!!isUpdating}
+                                    className="flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium bg-gray-50 text-gray-500 hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-400 dark:hover:bg-gray-600 transition-colors"
+                                  >
+                                    <X size={10} /> Ignore
+                                  </button>
+                                </>
+                              )}
+                              {status === 'accepted' && (
+                                <>
+                                  <span className="flex items-center gap-1 text-[10px] font-medium text-emerald-600 dark:text-emerald-400">
+                                    <Check size={10} /> Accepted
+                                  </span>
+                                  <button
+                                    onClick={() => handleCompleteAction(i)}
+                                    disabled={!!isUpdating}
+                                    className="flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium bg-blue-50 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-300 dark:hover:bg-blue-900/50 transition-colors ml-auto"
+                                  >
+                                    <CheckCircle2 size={10} /> Complete
+                                  </button>
+                                </>
+                              )}
+                              {status === 'completed' && (
+                                <span className="flex items-center gap-1 text-[10px] font-medium text-blue-600 dark:text-blue-400">
+                                  <CheckCircle2 size={10} /> Completed
+                                </span>
+                              )}
+                              {status === 'ignored' && (
+                                <span className="flex items-center gap-1 text-[10px] font-medium text-gray-400">
+                                  <X size={10} /> Ignored
+                                </span>
+                              )}
+                              {isUpdating && <RefreshCw size={10} className="animate-spin text-gray-400 ml-auto" />}
+                            </div>
                           </div>
-                          <p className="text-[10px] text-gray-500 dark:text-gray-400 line-clamp-2">{rec.rationale}</p>
-                          <div className="flex items-center gap-2 mt-2">
-                            <span className="text-[9px] text-gray-400">Priority: {rec.priority}</span>
-                            <span className={`text-[9px] px-1.5 py-0.5 rounded ${
-                              rec.effort === 'low' ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-300'
-                              : rec.effort === 'medium' ? 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-300'
-                              : 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-300'
-                            }`}>
-                              {rec.effort} effort
-                            </span>
-                          </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
+                  </div>
+                )}
+
+                {/* Founder Behaviour Profile — CTW-COCKPIT-02D */}
+                {founderProfile && founderProfile.totalActions > 0 && (
+                  <div className="bg-gradient-to-r from-[#0A385A]/5 to-purple-500/5 dark:from-[#0A385A]/20 dark:to-purple-500/20 rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <UserCircle size={14} className="text-purple-500" />
+                      <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Founder Behaviour Profile</p>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      <div className="text-center">
+                        <p className="text-lg font-bold text-gray-900 dark:text-white">{founderProfile.totalActions}</p>
+                        <p className="text-[10px] text-gray-500">Total Actions</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">{founderProfile.acceptedPercent}%</p>
+                        <p className="text-[10px] text-gray-500">Accepted</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-lg font-bold text-blue-600 dark:text-blue-400">{founderProfile.completedPercent}%</p>
+                        <p className="text-[10px] text-gray-500">Completed</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-lg font-bold text-amber-600 dark:text-amber-400">{founderProfile.successRate}%</p>
+                        <p className="text-[10px] text-gray-500">Success Rate</p>
+                      </div>
+                    </div>
+                    {founderProfile.preferredSources.length > 0 && (
+                      <div className="mt-3 flex items-center gap-2 flex-wrap">
+                        <span className="text-[10px] text-gray-400">Preferred sources:</span>
+                        {founderProfile.preferredSources.slice(0, 3).map((ps) => (
+                          <span key={ps.source} className="text-[10px] px-1.5 py-0.5 rounded bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 capitalize">
+                            {ps.source.replace('_', ' ')} ({ps.count})
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
 
