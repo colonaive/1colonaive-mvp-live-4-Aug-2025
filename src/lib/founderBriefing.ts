@@ -13,6 +13,7 @@ import {
   earlyWarningsToActions,
   strategyImplicationsToActions,
 } from '@/lib/actionIntelligence';
+import { generateCrossProjectBriefing, type CrossProjectBriefing } from '@/lib/projectSignals';
 import { competitiveIntelligenceService } from '@/services/competitiveIntelligenceService';
 import { radarService } from '@/services/radarService';
 
@@ -25,6 +26,7 @@ export interface FounderBriefing {
   criticalRisks: RiskItem[];
   recommendedActions: RecommendedAction[];
   signalCount: number;
+  crossProjectIntelligence: CrossProjectBriefing | null;
 }
 
 export interface RiskItem {
@@ -65,6 +67,14 @@ export async function generateFounderBriefing(): Promise<FounderBriefing> {
     competitiveIntelligenceService.fetchStrategyImplications(10).catch(() => []),
   ]);
 
+  // Cross-project intelligence
+  let crossProjectIntelligence: CrossProjectBriefing | null = null;
+  try {
+    crossProjectIntelligence = generateCrossProjectBriefing();
+  } catch {
+    // silent fail — cross-project is supplementary
+  }
+
   // Convert to action candidates
   const allCandidates: ActionCandidate[] = [
     ...radarSignalsToActions(radarSignals),
@@ -86,6 +96,7 @@ export async function generateFounderBriefing(): Promise<FounderBriefing> {
     allCandidates.length,
     topPriorities,
     criticalRisks,
+    crossProjectIntelligence,
   );
 
   return {
@@ -95,6 +106,7 @@ export async function generateFounderBriefing(): Promise<FounderBriefing> {
     criticalRisks,
     recommendedActions,
     signalCount: allCandidates.length,
+    crossProjectIntelligence,
   };
 }
 
@@ -171,6 +183,7 @@ function buildExecutiveSummary(
   totalSignals: number,
   topPriorities: ScoredAction[],
   risks: RiskItem[],
+  crossProject: CrossProjectBriefing | null,
 ): string {
   const highRiskCount = risks.filter((r) => r.severity === 'high').length;
   const topAction = topPriorities[0];
@@ -187,6 +200,10 @@ function buildExecutiveSummary(
     parts.push(`${highRiskCount} critical risk${highRiskCount > 1 ? 's' : ''} flagged requiring immediate attention.`);
   } else {
     parts.push('No critical risks detected in current signal landscape.');
+  }
+
+  if (crossProject) {
+    parts.push(`Cross-project focus: ${crossProject.topProjectLabel} (urgency leader).`);
   }
 
   return parts.join(' ');

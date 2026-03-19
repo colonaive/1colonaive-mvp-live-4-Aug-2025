@@ -49,6 +49,7 @@ import { emailComposer } from '@/chief-of-staff/action-center/emailComposer';
 import { decisionMemoryEngine } from '@/chief-of-staff/decision-memory/decisionMemoryEngine';
 import { decisionPatterns, type DecisionPattern } from '@/chief-of-staff/decision-memory/decisionPatterns';
 import { generateFounderBriefing, type FounderBriefing } from '@/lib/founderBriefing';
+import { generateCrossProjectBriefing, type CrossProjectBriefing, type ProjectId } from '@/lib/projectSignals';
 import type { ScoredAction } from '@/lib/actionIntelligence';
 import {
   trackAction,
@@ -147,6 +148,9 @@ const CEOCockpit: React.FC = () => {
   const [trackedActions, setTrackedActions] = useState<Map<number, ActionHistoryRecord>>(new Map());
   const [actionUpdating, setActionUpdating] = useState<string | null>(null);
   const [founderProfile, setFounderProfile] = useState<FounderProfile | null>(null);
+
+  // Cross-Project Intelligence state — CTW-COCKPIT-02E
+  const [crossProjectBriefing, setCrossProjectBriefing] = useState<CrossProjectBriefing | null>(null);
   const handleActionCenterUpdate = () => {
     setWidgetTick((t) => t + 1);
     // Refresh decision memory widget
@@ -317,6 +321,8 @@ const CEOCockpit: React.FC = () => {
 
   useEffect(() => {
     loadInbox(); loadCRCNews(); loadBriefing(); loadLinkedIn(); loadRadar(); loadCompetitiveIntel(); loadFounderIntelligence(); loadFounderProfile();
+    // Load Cross-Project Intelligence (synchronous)
+    try { setCrossProjectBriefing(generateCrossProjectBriefing()); } catch { /* silent */ }
     // Load Chief-of-Staff strategy digest (synchronous)
     setDigest(strategyDigest.generate());
     // Load decision memory
@@ -794,6 +800,113 @@ const CEOCockpit: React.FC = () => {
                   <p className="text-[10px] text-gray-400">
                     {founderBriefing.signalCount} signals analysed from radar, early warnings & strategy implications
                   </p>
+                </div>
+              </div>
+            )}
+          </CockpitCard>
+        </CockpitSection>
+
+        {/* === GLOBAL INTELLIGENCE — Cross-Project Intelligence CTW-COCKPIT-02E === */}
+        <CockpitSection columns={1}>
+          <CockpitCard
+            title="Global Intelligence"
+            subtitle="Cross-project priorities, focus shifts & portfolio health"
+            icon={<Globe size={18} />}
+            status={crossProjectBriefing ? 'active' : 'pending'}
+            lastUpdated={crossProjectBriefing ? new Date(crossProjectBriefing.generatedAt).toLocaleTimeString('en-SG', { hour: '2-digit', minute: '2-digit' }) : undefined}
+          >
+            {!crossProjectBriefing ? (
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <Globe size={32} className="text-gray-300 dark:text-gray-600 mb-3" />
+                <p className="text-xs text-gray-400">Cross-project intelligence unavailable.</p>
+              </div>
+            ) : (
+              <div className="space-y-5">
+                {/* Top Project Banner */}
+                <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-lg p-4 border border-indigo-100 dark:border-indigo-800/30">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Target size={14} className="text-indigo-600 dark:text-indigo-400" />
+                    <p className="text-xs font-medium text-indigo-700 dark:text-indigo-300 uppercase tracking-wide">Top Project Right Now</p>
+                  </div>
+                  <p className="text-sm font-semibold text-gray-900 dark:text-white">{crossProjectBriefing.topProjectLabel}</p>
+                  <p className="text-xs text-gray-600 dark:text-gray-300 mt-1">{crossProjectBriefing.topProjectReason}</p>
+                </div>
+
+                {/* Focus Shift Advice */}
+                <div className="bg-amber-50/50 dark:bg-amber-900/10 rounded-lg p-3 border border-amber-100 dark:border-amber-800/20">
+                  <div className="flex items-start gap-2">
+                    <Zap size={14} className="text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
+                    <p className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">{crossProjectBriefing.focusShiftAdvice}</p>
+                  </div>
+                </div>
+
+                {/* Global Priorities + Project Health side by side */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Top Cross-Project Actions */}
+                  <div>
+                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">Top Cross-Project Actions</p>
+                    {crossProjectBriefing.globalPriorities.length === 0 ? (
+                      <p className="text-xs text-gray-400 italic">No cross-project priorities identified.</p>
+                    ) : (
+                      <div className="space-y-2">
+                        {crossProjectBriefing.globalPriorities.map((gp) => (
+                          <div key={`gp-${gp.rank}`} className="bg-white dark:bg-gray-700/50 border border-gray-100 dark:border-gray-600 rounded-lg p-3">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2">
+                                  <span className="inline-block w-5 h-5 rounded-full bg-gray-100 dark:bg-gray-600 text-[10px] font-bold text-gray-600 dark:text-gray-300 flex items-center justify-center">{gp.rank}</span>
+                                  <p className="text-xs font-medium text-gray-900 dark:text-white line-clamp-2">{gp.title}</p>
+                                </div>
+                                <p className="text-[10px] text-gray-400 mt-1 ml-7">{gp.reason.slice(0, 120)}{gp.reason.length > 120 ? '...' : ''}</p>
+                              </div>
+                              <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                                <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold ${
+                                  gp.score >= 70 ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'
+                                  : gp.score >= 50 ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
+                                  : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'
+                                }`}>{gp.score}</span>
+                                <span className={`text-[9px] px-1.5 py-0.5 rounded ${
+                                  ({ colonaive: 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300', durmah: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300', sciencehod: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300', sgrenovate: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300' } as Record<ProjectId, string>)[gp.project] || 'bg-gray-100 text-gray-600'
+                                }`}>{gp.projectLabel}</span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Portfolio Health */}
+                  <div>
+                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">Portfolio Health</p>
+                    <div className="space-y-2">
+                      {crossProjectBriefing.projectSummaries.map((proj) => (
+                        <div key={proj.project} className="bg-white dark:bg-gray-700/50 border border-gray-100 dark:border-gray-600 rounded-lg p-3">
+                          <div className="flex items-center justify-between mb-2">
+                            <p className="text-xs font-medium text-gray-900 dark:text-white">{proj.label}</p>
+                            <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold ${
+                              proj.urgency_score >= 70 ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'
+                              : proj.urgency_score >= 50 ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
+                              : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+                            }`}>Urgency: {proj.urgency_score}</span>
+                          </div>
+                          <div className="w-full bg-gray-100 dark:bg-gray-600 rounded-full h-1.5 mb-2">
+                            <div
+                              className={`h-1.5 rounded-full ${
+                                proj.urgency_score >= 70 ? 'bg-red-500' : proj.urgency_score >= 50 ? 'bg-amber-500' : 'bg-emerald-500'
+                              }`}
+                              style={{ width: `${proj.urgency_score}%` }}
+                            />
+                          </div>
+                          <div className="flex gap-3 text-[10px] text-gray-400">
+                            <span>{proj.signals.length} signals</span>
+                            <span>{proj.risks.length} risks</span>
+                            <span>{proj.opportunities.length} opportunities</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
