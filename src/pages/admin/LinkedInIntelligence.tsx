@@ -21,7 +21,10 @@ import {
   Wand2,
   RotateCcw,
   Palette,
+  ScrollText,
+  RotateCw,
 } from 'lucide-react';
+import type { CockpitAction, ActionType } from '@/types/action';
 import { cockpitService, type LinkedInPost } from '@/services/cockpitService';
 import { competitiveIntelligenceService } from '@/services/competitiveIntelligenceService';
 import { useNavigate } from 'react-router-dom';
@@ -261,6 +264,35 @@ const LinkedInIntelligence: React.FC = () => {
   const [improvingPrompt, setImprovingPrompt] = useState(false);
   const [selectedStylePreset, setSelectedStylePreset] = useState('');
 
+  // Action engine state
+  const [actions, setActions] = useState<CockpitAction[]>([]);
+  const [showActionLog, setShowActionLog] = useState(true);
+  const actionIdRef = useRef(0);
+
+  const createAction = useCallback(
+    (type: ActionType, input: Record<string, unknown>, retryFn?: () => void): string => {
+      const id = `action-${++actionIdRef.current}`;
+      const action: CockpitAction = {
+        id,
+        type,
+        status: 'pending',
+        input,
+        created_at: new Date().toISOString(),
+        retry: retryFn,
+      };
+      setActions((prev) => [action, ...prev]);
+      return id;
+    },
+    [],
+  );
+
+  const updateAction = useCallback(
+    (id: string, updates: Partial<CockpitAction>) => {
+      setActions((prev) => prev.map((a) => (a.id === id ? { ...a, ...updates } : a)));
+    },
+    [],
+  );
+
   // Editor state — all fields synced live to preview
   const [editTitle, setEditTitle] = useState('');
   const [editContent, setEditContent] = useState('');
@@ -366,14 +398,19 @@ const LinkedInIntelligence: React.FC = () => {
 
   const handleGenerate = async () => {
     setGenerating(true);
+    const actionId = createAction('generate_post', { source: 'crc_news' }, handleGenerate);
+    updateAction(actionId, { status: 'running' });
     try {
       const result = await cockpitService.generateLinkedInPosts();
       if (result.generated > 0) {
         await loadPosts();
       }
+      updateAction(actionId, { status: 'success', output: result });
       addToast(`Generated ${result.generated} new post(s) from ${result.scanned} articles.`, 'success');
     } catch (err: unknown) {
-      addToast(err instanceof Error ? err.message : 'Generation failed', 'error');
+      const errorMsg = err instanceof Error ? err.message : 'Generation failed';
+      updateAction(actionId, { status: 'failed', error: errorMsg });
+      addToast(errorMsg, 'error');
     } finally {
       setGenerating(false);
     }
@@ -426,15 +463,20 @@ const LinkedInIntelligence: React.FC = () => {
   const handleGenerateImage = async () => {
     if (!editImagePrompt || !selectedId) return;
     setGeneratingImage(true);
+    const actionId = createAction('generate_image', { prompt: editImagePrompt, postId: selectedId }, handleGenerateImage);
+    updateAction(actionId, { status: 'running' });
     addToast('Generating image with AI...', 'info');
     try {
       const result = await cockpitService.generatePostImage(editImagePrompt, selectedId);
       setEditImageUrl(result.image_url);
       await loadPosts();
+      updateAction(actionId, { status: 'success', output: result });
       addToast('Image generated successfully.', 'success');
     } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : 'Image generation failed';
+      updateAction(actionId, { status: 'failed', error: errorMsg });
       addToast(
-        `Image generation failed. ${err instanceof Error ? err.message : ''} You can still publish without an image.`,
+        `Image generation failed. ${errorMsg} You can still publish without an image.`,
         'error',
       );
     } finally {
@@ -445,6 +487,8 @@ const LinkedInIntelligence: React.FC = () => {
   const handleImprovePrompt = async () => {
     if (!editImagePrompt) return;
     setImprovingPrompt(true);
+    const actionId = createAction('improve_prompt', { prompt: editImagePrompt, style: selectedStylePreset }, handleImprovePrompt);
+    updateAction(actionId, { status: 'running' });
     addToast('Improving image prompt with AI...', 'info');
     try {
       const result = await cockpitService.improveImagePrompt(
@@ -452,9 +496,12 @@ const LinkedInIntelligence: React.FC = () => {
         selectedStylePreset || undefined,
       );
       setEditImagePrompt(result.improved_prompt);
+      updateAction(actionId, { status: 'success', output: result });
       addToast('Prompt improved! Review and generate when ready.', 'success');
     } catch (err: unknown) {
-      addToast(err instanceof Error ? err.message : 'Prompt improvement failed', 'error');
+      const errorMsg = err instanceof Error ? err.message : 'Prompt improvement failed';
+      updateAction(actionId, { status: 'failed', error: errorMsg });
+      addToast(errorMsg, 'error');
     } finally {
       setImprovingPrompt(false);
     }
@@ -473,6 +520,8 @@ const LinkedInIntelligence: React.FC = () => {
   const handlePublishToLinkedIn = async () => {
     if (!selectedId || !selectedPost) return;
     setPublishing(true);
+    const actionId = createAction('publish_post', { postId: selectedId, title: editTitle }, handlePublishToLinkedIn);
+    updateAction(actionId, { status: 'running' });
     addToast('Publishing to LinkedIn...', 'info');
     try {
       const fullText = `${editTitle}\n\n${editContent}\n\n${editHashtags}`;
@@ -484,13 +533,18 @@ const LinkedInIntelligence: React.FC = () => {
       );
       if (result.success) {
         await loadPosts();
+        updateAction(actionId, { status: 'success', output: result });
         addToast('Published to LinkedIn!', 'success');
         setSelectedId(null);
       } else {
-        addToast(result.error || 'LinkedIn publish failed', 'error');
+        const errorMsg = result.error || 'LinkedIn publish failed';
+        updateAction(actionId, { status: 'failed', error: errorMsg });
+        addToast(errorMsg, 'error');
       }
     } catch (err: unknown) {
-      addToast(err instanceof Error ? err.message : 'Publish failed', 'error');
+      const errorMsg = err instanceof Error ? err.message : 'Publish failed';
+      updateAction(actionId, { status: 'failed', error: errorMsg });
+      addToast(errorMsg, 'error');
     } finally {
       setPublishing(false);
     }
@@ -498,17 +552,23 @@ const LinkedInIntelligence: React.FC = () => {
 
   const handleRadarGenerate = async () => {
     setRadarGenerating(true);
+    const actionId = createAction('radar_generate', { source: 'radar_signals' }, handleRadarGenerate);
+    updateAction(actionId, { status: 'running' });
     addToast('Generating posts from Radar signals...', 'info');
     try {
       const result = await competitiveIntelligenceService.generateRadarLinkedInPosts();
       if (result.ok) {
         await loadPosts();
+        updateAction(actionId, { status: 'success', output: result });
         addToast(`Generated ${result.generated || 0} post(s) from ${result.scanned || 0} radar signals.`, 'success');
       } else {
+        updateAction(actionId, { status: 'failed', error: 'Radar generation returned no results' });
         addToast('Radar generation returned no results', 'error');
       }
     } catch (err: unknown) {
-      addToast(err instanceof Error ? err.message : 'Radar generation failed', 'error');
+      const errorMsg = err instanceof Error ? err.message : 'Radar generation failed';
+      updateAction(actionId, { status: 'failed', error: errorMsg });
+      addToast(errorMsg, 'error');
     } finally {
       setRadarGenerating(false);
     }
@@ -520,6 +580,8 @@ const LinkedInIntelligence: React.FC = () => {
       return;
     }
     setManualGenerating(true);
+    const actionId = createAction('manual_generate', { url: manualUrl, text: manualText?.slice(0, 100) }, handleManualGenerate);
+    updateAction(actionId, { status: 'running' });
     addToast('Generating post from manual source...', 'info');
     try {
       const result = await cockpitService.generateFromManualSource(
@@ -531,12 +593,17 @@ const LinkedInIntelligence: React.FC = () => {
         setSelectedId(result.post.id);
         setManualUrl('');
         setManualText('');
+        updateAction(actionId, { status: 'success', output: result });
         addToast('Post generated! Select it in the list to edit.', 'success');
       } else {
-        addToast(result.error || 'Generation failed', 'error');
+        const errorMsg = result.error || 'Generation failed';
+        updateAction(actionId, { status: 'failed', error: errorMsg });
+        addToast(errorMsg, 'error');
       }
     } catch (err: unknown) {
-      addToast(err instanceof Error ? err.message : 'Manual generation failed', 'error');
+      const errorMsg = err instanceof Error ? err.message : 'Manual generation failed';
+      updateAction(actionId, { status: 'failed', error: errorMsg });
+      addToast(errorMsg, 'error');
     } finally {
       setManualGenerating(false);
     }
@@ -592,6 +659,12 @@ const LinkedInIntelligence: React.FC = () => {
                 onClick={() => setShowPreview((v) => !v)}
                 icon={showPreview ? <Eye size={13} /> : <EyeOff size={13} />}
                 label="Preview"
+              />
+              <PanelToggle
+                active={showActionLog}
+                onClick={() => setShowActionLog((v) => !v)}
+                icon={<ScrollText size={13} />}
+                label="Actions"
               />
             </div>
           </div>
@@ -1072,6 +1145,95 @@ const LinkedInIntelligence: React.FC = () => {
           </div>
           )}
         </div>
+
+        {/* Action Log Panel */}
+        {showActionLog && (
+          <div className="mt-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div className="p-3 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <ScrollText size={14} className="text-gray-500" />
+                <h2 className="text-sm font-semibold text-gray-900 dark:text-white">Action Log</h2>
+                {actions.length > 0 && (
+                  <span className="text-[10px] bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 px-1.5 py-0.5 rounded">
+                    {actions.length}
+                  </span>
+                )}
+              </div>
+              {actions.length > 0 && (
+                <button
+                  onClick={() => setActions([])}
+                  className="text-[10px] text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+            <div className="max-h-56 overflow-y-auto">
+              {actions.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-8 text-center">
+                  <ScrollText size={24} className="text-gray-300 dark:text-gray-600 mb-2" />
+                  <p className="text-[11px] text-gray-400">No actions yet. Actions are logged as you generate posts, images, and prompts.</p>
+                </div>
+              ) : (
+                <table className="w-full text-[11px]">
+                  <thead>
+                    <tr className="border-b border-gray-100 dark:border-gray-700 text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                      <th className="text-left px-3 py-2 font-medium">Status</th>
+                      <th className="text-left px-3 py-2 font-medium">Action</th>
+                      <th className="text-left px-3 py-2 font-medium hidden sm:table-cell">Details</th>
+                      <th className="text-left px-3 py-2 font-medium">Time</th>
+                      <th className="text-right px-3 py-2 font-medium">Retry</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {actions.map((action) => (
+                      <tr key={action.id} className="border-b border-gray-50 dark:border-gray-700/50 last:border-0">
+                        <td className="px-3 py-2">
+                          <span
+                            className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium ${
+                              action.status === 'pending'
+                                ? 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
+                                : action.status === 'running'
+                                  ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                                  : action.status === 'success'
+                                    ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+                                    : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'
+                            }`}
+                          >
+                            {action.status === 'running' && <RefreshCw size={10} className="animate-spin" />}
+                            {action.status === 'success' && <CheckCircle size={10} />}
+                            {action.status === 'failed' && <AlertCircle size={10} />}
+                            {action.status}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2 text-gray-700 dark:text-gray-300 font-medium">
+                          {action.type.replace(/_/g, ' ')}
+                        </td>
+                        <td className="px-3 py-2 text-gray-500 dark:text-gray-400 hidden sm:table-cell max-w-[200px] truncate">
+                          {action.error || (action.output ? 'Completed' : '—')}
+                        </td>
+                        <td className="px-3 py-2 text-gray-400 whitespace-nowrap">
+                          {new Date(action.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                        </td>
+                        <td className="px-3 py-2 text-right">
+                          {action.status === 'failed' && action.retry && (
+                            <button
+                              onClick={action.retry}
+                              className="inline-flex items-center gap-1 px-2 py-1 rounded bg-amber-500 hover:bg-amber-600 text-white text-[10px] font-medium transition-colors"
+                            >
+                              <RotateCw size={10} />
+                              Retry
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
