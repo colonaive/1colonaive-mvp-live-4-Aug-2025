@@ -28,6 +28,7 @@ import type { CockpitAction, ActionType } from '@/types/action';
 import { cockpitService, type LinkedInPost } from '@/services/cockpitService';
 import { competitiveIntelligenceService } from '@/services/competitiveIntelligenceService';
 import { useNavigate } from 'react-router-dom';
+import { injectStrategicLayer } from '@/lib/strategy/colonaiveMessaging';
 
 /* ── toast notification ── */
 
@@ -386,8 +387,10 @@ const LinkedInIntelligence: React.FC = () => {
     if (selectedPost) {
       setEditTitle(selectedPost.title);
       setEditContent(
-        selectedPost.draft_content ||
-        'Key update generated from CRC intelligence. Review content before publishing.'
+        injectStrategicLayer(
+          selectedPost.draft_content ||
+          'Key update generated from CRC intelligence. Review content before publishing.'
+        )
       );
       setEditHashtags(selectedPost.hashtags || '');
       setEditImagePrompt(selectedPost.image_prompt || '');
