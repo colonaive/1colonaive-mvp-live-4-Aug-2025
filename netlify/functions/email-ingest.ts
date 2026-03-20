@@ -98,6 +98,7 @@ interface ClassificationResult {
   classification: 'take_action' | 'investigate' | 'informational' | 'ignore';
   reason: string;
   keywordMatches: string[];
+  confidence: 'high' | 'medium' | 'low';
 }
 
 function classifyEmail(subject: string, bodyPreview: string, senderEmail: string): ClassificationResult {
@@ -115,6 +116,7 @@ function classifyEmail(subject: string, bodyPreview: string, senderEmail: string
       classification: 'ignore',
       reason: `Auto-detected: ${matchedKeywords.join(', ')}`,
       keywordMatches: matchedKeywords,
+      confidence: 'high', // direct pattern match
     };
   }
 
@@ -130,6 +132,7 @@ function classifyEmail(subject: string, bodyPreview: string, senderEmail: string
       classification: 'take_action',
       reason: `Logistics/critical: ${logisticsMatches.join(', ')}`,
       keywordMatches: logisticsMatches,
+      confidence: 'high', // direct keyword match in subject/body
     };
   }
 
@@ -140,11 +143,20 @@ function classifyEmail(subject: string, bodyPreview: string, senderEmail: string
       actionMatches.push(kw);
     }
   }
-  if (actionMatches.length >= 1) {
+  if (actionMatches.length >= 2) {
     return {
       classification: 'take_action',
       reason: `Action required: ${actionMatches.join(', ')}`,
       keywordMatches: actionMatches,
+      confidence: 'high', // multiple keyword matches
+    };
+  }
+  if (actionMatches.length === 1) {
+    return {
+      classification: 'take_action',
+      reason: `Action required: ${actionMatches.join(', ')}`,
+      keywordMatches: actionMatches,
+      confidence: 'medium', // single keyword match
     };
   }
 
@@ -160,6 +172,7 @@ function classifyEmail(subject: string, bodyPreview: string, senderEmail: string
       classification: 'investigate',
       reason: `Needs review: ${investigateMatches.join(', ')}`,
       keywordMatches: investigateMatches,
+      confidence: investigateMatches.length >= 2 ? 'medium' : 'low', // pattern match
     };
   }
 
@@ -168,6 +181,7 @@ function classifyEmail(subject: string, bodyPreview: string, senderEmail: string
     classification: 'informational',
     reason: 'No action keywords detected',
     keywordMatches: [],
+    confidence: 'low', // no direct evidence
   };
 }
 
@@ -265,7 +279,7 @@ async function ingestEmails(supabase: any) {
     // Classify
     const classification = classifyEmail(subject, bodyPreview, senderEmail);
 
-    // Insert email
+    // Insert email with source tagging
     const { data: inserted, error: insertError } = await supabase
       .from('ceo_emails')
       .insert({
@@ -279,6 +293,8 @@ async function ingestEmails(supabase: any) {
         classification: classification.classification,
         classification_reason: classification.reason,
         keyword_matches: classification.keywordMatches,
+        source_origin: 'direct_email',
+        confidence_level: classification.confidence,
       })
       .select('id')
       .single();
@@ -305,6 +321,8 @@ async function ingestEmails(supabase: any) {
         title: task.title,
         description: task.description,
         priority: task.priority,
+        source_origin: 'direct_email',
+        confidence_level: classification.confidence,
       });
       if (!taskError) tasksCreated++;
     }
@@ -318,6 +336,8 @@ async function ingestEmails(supabase: any) {
         title: risk.title,
         description: risk.description,
         severity: risk.severity,
+        source_origin: 'direct_email',
+        confidence_level: classification.confidence,
       });
       if (!riskError) risksCreated++;
     }

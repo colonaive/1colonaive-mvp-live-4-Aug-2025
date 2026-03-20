@@ -731,11 +731,72 @@ const CEOCockpit: React.FC = () => {
               </div>
             ) : (
               <div className="space-y-5">
+                {/* Guardrail Status Banner */}
+                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800">
+                  <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 uppercase tracking-wider">Guardrail: Strict Mode</span>
+                  <span className="text-[10px] text-emerald-600 dark:text-emerald-400">|</span>
+                  <span className="text-[10px] text-emerald-600 dark:text-emerald-400">Verified sources only</span>
+                  <span className="text-[10px] text-emerald-600 dark:text-emerald-400">|</span>
+                  <span className="text-[10px] text-gray-500 dark:text-gray-400">
+                    <span title="HIGH confidence">●</span> HIGH &nbsp;
+                    <span title="MEDIUM confidence">◐</span> MED &nbsp;
+                    <span title="LOW confidence">○</span> LOW
+                  </span>
+                </div>
+
                 {/* Executive Summary */}
                 <div className="bg-gradient-to-r from-[#0A385A]/5 to-[#0F766E]/5 dark:from-[#0A385A]/20 dark:to-[#0F766E]/20 rounded-lg p-4">
                   <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Executive Summary</p>
                   <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed">{founderBriefing.executiveSummary}</p>
                 </div>
+
+                {/* Email Intelligence Section */}
+                {founderBriefing.emailIntelligence && founderBriefing.emailIntelligence.totalIngested > 0 && (
+                  <div className="bg-white dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700 rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Email Intelligence</p>
+                      <span className="text-[10px] px-2 py-0.5 rounded bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+                        {founderBriefing.emailIntelligence.totalIngested} ingested
+                      </span>
+                    </div>
+                    {founderBriefing.emailIntelligence.takeAction.length > 0 && (
+                      <div className="mb-3">
+                        <p className="text-[10px] font-medium text-red-600 dark:text-red-400 uppercase mb-1">Execute Now</p>
+                        <div className="space-y-1">
+                          {founderBriefing.emailIntelligence.takeAction.slice(0, 5).map((email) => (
+                            <div key={email.id} className="flex items-center gap-2 text-xs text-gray-700 dark:text-gray-300">
+                              <span title={`Confidence: ${email.confidence_level}`} className="flex-shrink-0">
+                                {email.confidence_level === 'high' ? '●' : email.confidence_level === 'medium' ? '◐' : '○'}
+                              </span>
+                              <span className="text-[10px] px-1 py-0.5 rounded bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300 flex-shrink-0">
+                                {email.source_origin === 'direct_email' ? 'Email' : email.source_origin === 'manual_entry' ? 'Manual' : 'AI'}
+                              </span>
+                              <span className="truncate">{email.sender_name} — {email.subject}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {founderBriefing.emailIntelligence.investigate.length > 0 && (
+                      <div>
+                        <p className="text-[10px] font-medium text-amber-600 dark:text-amber-400 uppercase mb-1">Watch</p>
+                        <div className="space-y-1">
+                          {founderBriefing.emailIntelligence.investigate.slice(0, 3).map((email) => (
+                            <div key={email.id} className="flex items-center gap-2 text-xs text-gray-700 dark:text-gray-300">
+                              <span title={`Confidence: ${email.confidence_level}`} className="flex-shrink-0">
+                                {email.confidence_level === 'high' ? '●' : email.confidence_level === 'medium' ? '◐' : '○'}
+                              </span>
+                              <span className="text-[10px] px-1 py-0.5 rounded bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300 flex-shrink-0">
+                                {email.source_origin === 'direct_email' ? 'Email' : email.source_origin === 'manual_entry' ? 'Manual' : 'AI'}
+                              </span>
+                              <span className="truncate">{email.sender_name} — {email.subject}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* Top 3 Priorities + Risks side by side */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -932,7 +993,10 @@ const CEOCockpit: React.FC = () => {
                 {/* Signal count footer */}
                 <div className="text-center pt-2 border-t border-gray-100 dark:border-gray-700">
                   <p className="text-[10px] text-gray-400">
-                    {founderBriefing.signalCount} signals analysed from radar, early warnings & strategy implications
+                    {founderBriefing.signalCount} signals analysed from radar, early warnings, strategy implications & email intelligence
+                  </p>
+                  <p className="text-[9px] text-emerald-500 dark:text-emerald-400 mt-0.5">
+                    Intelligence Guardrails Active — Verified Sources Only
                   </p>
                 </div>
               </div>

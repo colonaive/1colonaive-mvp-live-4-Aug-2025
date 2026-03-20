@@ -1,9 +1,13 @@
 /**
- * Founder Briefing Engine — CTW-COCKPIT-02C / CTW-COCKPIT-02D.1
+ * Founder Briefing Engine — CTW-COCKPIT-02C / CTW-COCKPIT-02D.1 / CTW-COCKPIT-02D.3
  *
  * Synthesizes intelligence from multiple cockpit data sources into
  * an actionable founder briefing with priorities, risks, and recommendations.
- * Now includes email intelligence from ceo_emails classification pipeline.
+ * Includes email intelligence from ceo_emails classification pipeline.
+ *
+ * GUARDRAIL: Strict mode — only direct_email and manual_entry sources included.
+ * No inferred_ai sources unless explicitly verified.
+ * No auto-expansion of acronyms — uses ceo_verified_facts lookup.
  */
 
 import {
@@ -19,6 +23,10 @@ import { competitiveIntelligenceService } from '@/services/competitiveIntelligen
 import { radarService } from '@/services/radarService';
 import { supabase } from '@/supabase';
 
+/* ── Constants ── */
+
+const TRUSTED_SOURCES = ['direct_email', 'manual_entry'];
+
 /* ── Types ── */
 
 export interface EmailIntelligenceItem {
@@ -29,6 +37,8 @@ export interface EmailIntelligenceItem {
   classification_reason: string;
   keyword_matches: string[];
   received_at: string;
+  confidence_level: 'high' | 'medium' | 'low';
+  source_origin: string;
 }
 
 export interface FounderBriefing {
@@ -44,6 +54,7 @@ export interface FounderBriefing {
     investigate: EmailIntelligenceItem[];
     totalIngested: number;
   } | null;
+  guardrailStatus: 'strict' | 'relaxed';
 }
 
 export interface RiskItem {
@@ -73,8 +84,7 @@ const RISK_KEYWORDS = [
 
 /**
  * Generate a complete founder intelligence briefing.
- * Pulls from radar signals, early warnings, strategy implications,
- * and competitive intelligence.
+ * GUARDRAIL: Only trusted sources (direct_email, manual_entry) are included.
  */
 export async function generateFounderBriefing(): Promise<FounderBriefing> {
   // Fetch all intelligence sources in parallel (including email intelligence)
@@ -93,7 +103,7 @@ export async function generateFounderBriefing(): Promise<FounderBriefing> {
     // silent fail — cross-project is supplementary
   }
 
-  // Convert to action candidates — include email-derived actions
+  // Convert to action candidates — include email-derived actions (trusted only)
   const allCandidates: ActionCandidate[] = [
     ...radarSignalsToActions(radarSignals),
     ...earlyWarningsToActions(earlyWarnings),
@@ -107,9 +117,10 @@ export async function generateFounderBriefing(): Promise<FounderBriefing> {
   // Extract risks from early warnings + email-derived risks
   const criticalRisks = extractRisks(earlyWarnings, strategyImplications);
 
-  // Inject email-derived risks
+  // Inject email-derived risks (only from trusted, high/medium confidence sources)
   if (emailIntel) {
     for (const email of emailIntel.takeAction) {
+      if (email.confidence_level === 'low') continue; // guardrail: skip low confidence
       const riskKeywords = ['recall', 'customs', 'clearance', 'cold chain', 'compliance', 'violation'];
       const hasRisk = email.keyword_matches.some((kw: string) => riskKeywords.includes(kw));
       if (hasRisk && criticalRisks.length < 7) {
@@ -144,6 +155,7 @@ export async function generateFounderBriefing(): Promise<FounderBriefing> {
     signalCount: allCandidates.length,
     crossProjectIntelligence,
     emailIntelligence: emailIntel,
+    guardrailStatus: 'strict',
   };
 }
 
@@ -159,14 +171,16 @@ async function fetchEmailIntelligence(): Promise<{
   const [takeActionRes, investigateRes, countRes] = await Promise.all([
     supabase
       .from('ceo_emails')
-      .select('id, sender_name, subject, classification, classification_reason, keyword_matches, received_at')
+      .select('id, sender_name, subject, classification, classification_reason, keyword_matches, received_at, confidence_level, source_origin')
       .eq('classification', 'take_action')
+      .in('source_origin', TRUSTED_SOURCES)
       .gte('received_at', yesterday)
       .order('received_at', { ascending: false }),
     supabase
       .from('ceo_emails')
-      .select('id, sender_name, subject, classification, classification_reason, keyword_matches, received_at')
+      .select('id, sender_name, subject, classification, classification_reason, keyword_matches, received_at, confidence_level, source_origin')
       .eq('classification', 'investigate')
+      .in('source_origin', TRUSTED_SOURCES)
       .gte('received_at', yesterday)
       .order('received_at', { ascending: false }),
     supabase
@@ -187,7 +201,7 @@ function emailsToActions(emails: EmailIntelligenceItem[]): ActionCandidate[] {
     id: `email-${email.id}`,
     title: email.subject,
     description: `From ${email.sender_name}. ${email.classification_reason}`,
-    source: 'email',
+    source: 'email' as const,
     created_at: email.received_at,
   }));
 }
@@ -272,7 +286,7 @@ function buildExecutiveSummary(
 
   const parts: string[] = [];
 
-  parts.push(`${totalSignals} intelligence signals analysed across radar, early warnings, and strategy implications.`);
+  parts.push(`${totalSignals} intelligence signals analysed across radar, early warnings, strategy implications, and email intelligence.`);
 
   if (topAction) {
     parts.push(`Top priority: "${topAction.title}" (score: ${topAction.scores.priority}/100).`);
@@ -287,6 +301,8 @@ function buildExecutiveSummary(
   if (crossProject) {
     parts.push(`Cross-project focus: ${crossProject.topProjectLabel} (urgency leader).`);
   }
+
+  parts.push('Guardrail: STRICT MODE active — only verified sources included.');
 
   return parts.join(' ');
 }

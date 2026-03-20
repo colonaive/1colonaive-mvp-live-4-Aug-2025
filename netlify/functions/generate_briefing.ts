@@ -42,33 +42,41 @@ function getSupabase() {
 
 /* ---------- data gatherers ---------- */
 
+// STRICT MODE: Only include direct_email and manual_entry sources.
+// Exclude inferred_ai unless explicitly verified.
+const TRUSTED_SOURCES = ['direct_email', 'manual_entry'];
+
 async function fetchActionableEmails(supabase: any): Promise<{ takeAction: string[]; watch: string[] }> {
   try {
     const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
 
     const { data: actionEmails } = await supabase
       .from('ceo_emails')
-      .select('sender_name, subject, classification_reason, keyword_matches')
+      .select('sender_name, subject, classification_reason, keyword_matches, confidence_level, source_origin')
       .eq('classification', 'take_action')
+      .in('source_origin', TRUSTED_SOURCES)
       .gte('received_at', yesterday)
       .order('received_at', { ascending: false })
       .limit(10);
 
     const { data: watchEmails } = await supabase
       .from('ceo_emails')
-      .select('sender_name, subject, classification_reason')
+      .select('sender_name, subject, classification_reason, confidence_level, source_origin')
       .eq('classification', 'investigate')
+      .in('source_origin', TRUSTED_SOURCES)
       .gte('received_at', yesterday)
       .order('received_at', { ascending: false })
       .limit(10);
 
+    const confBadge = (level: string) => level === 'high' ? '●' : level === 'medium' ? '◐' : '○';
+
     const takeAction = (actionEmails || []).map((m: any) => {
       const keywords = m.keyword_matches?.length ? ` [${m.keyword_matches.join(', ')}]` : '';
-      return `⚡ ${m.sender_name} — ${m.subject}${keywords}`;
+      return `${confBadge(m.confidence_level)} ⚡ ${m.sender_name} — ${m.subject}${keywords}`;
     });
 
     const watch = (watchEmails || []).map((m: any) =>
-      `👁 ${m.sender_name} — ${m.subject}`,
+      `${confBadge(m.confidence_level)} 👁 ${m.sender_name} — ${m.subject}`,
     );
 
     return {
@@ -88,13 +96,15 @@ async function fetchOpenTasks(supabase: any): Promise<string[]> {
   try {
     const { data: tasks } = await supabase
       .from('ceo_tasks')
-      .select('title, priority, created_at')
+      .select('title, priority, confidence_level, source_origin')
       .eq('status', 'open')
+      .in('source_origin', TRUSTED_SOURCES)
       .order('created_at', { ascending: false })
       .limit(5);
 
     if (!tasks?.length) return ['No open tasks'];
-    return tasks.map((t: any) => `[${t.priority.toUpperCase()}] ${t.title}`);
+    const confBadge = (level: string) => level === 'high' ? '●' : level === 'medium' ? '◐' : '○';
+    return tasks.map((t: any) => `${confBadge(t.confidence_level)} [${t.priority.toUpperCase()}] ${t.title}`);
   } catch {
     return ['Tasks unavailable'];
   }
@@ -104,13 +114,15 @@ async function fetchOpenRisks(supabase: any): Promise<string[]> {
   try {
     const { data: risks } = await supabase
       .from('ceo_risks')
-      .select('title, severity')
+      .select('title, severity, confidence_level, source_origin')
       .eq('status', 'open')
+      .in('source_origin', TRUSTED_SOURCES)
       .order('created_at', { ascending: false })
       .limit(5);
 
     if (!risks?.length) return ['No open risks'];
-    return risks.map((r: any) => `[${r.severity.toUpperCase()}] ${r.title}`);
+    const confBadge = (level: string) => level === 'high' ? '●' : level === 'medium' ? '◐' : '○';
+    return risks.map((r: any) => `${confBadge(r.confidence_level)} [${r.severity.toUpperCase()}] ${r.title}`);
   } catch {
     return ['Risks unavailable'];
   }
@@ -207,6 +219,8 @@ interface BriefingSection {
 
 function buildBriefingText(date: string, sections: BriefingSection[]): string {
   let text = `Daily Executive Briefing\nDate: ${date}\n`;
+  text += `Confidence: ● HIGH (direct source) | ◐ MEDIUM (pattern match) | ○ LOW (needs verification)\n`;
+  text += `Guardrail: STRICT MODE — only direct_email and manual_entry sources included\n`;
   for (const s of sections) {
     text += `\n${s.heading}\n`;
     for (const item of s.items) {
@@ -220,6 +234,9 @@ function buildBriefingHtml(date: string, sections: BriefingSection[]): string {
   let html = `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">`;
   html += `<h2 style="color:#0A385A;border-bottom:2px solid #0F766E;padding-bottom:8px;">Daily Executive Briefing</h2>`;
   html += `<p style="color:#666;font-size:14px;">Date: ${date}</p>`;
+  html += `<p style="color:#0F766E;font-size:12px;background:#f0fdf4;padding:6px 10px;border-radius:4px;border-left:3px solid #0F766E;">`;
+  html += `<strong>Guardrail:</strong> STRICT MODE — only verified sources (direct_email, manual_entry) included<br/>`;
+  html += `<strong>Confidence:</strong> ● HIGH (direct source) &nbsp; ◐ MEDIUM (pattern match) &nbsp; ○ LOW (needs verification)</p>`;
   for (const s of sections) {
     html += `<h3 style="color:#0F766E;margin-top:20px;">${s.heading}</h3><ul style="color:#333;font-size:14px;line-height:1.6;">`;
     for (const item of s.items) {
@@ -228,7 +245,7 @@ function buildBriefingHtml(date: string, sections: BriefingSection[]): string {
     html += `</ul>`;
   }
   html += `<hr style="margin-top:24px;border:none;border-top:1px solid #ddd;"/>`;
-  html += `<p style="color:#999;font-size:12px;">COLONAiVE CEO Cockpit — Automated Daily Briefing</p></div>`;
+  html += `<p style="color:#999;font-size:12px;">COLONAiVE CEO Cockpit — Automated Daily Briefing | Intelligence Guardrails Active</p></div>`;
   return html;
 }
 
