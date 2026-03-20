@@ -2,7 +2,7 @@
  * Relationship Priority Engine — CTW-COCKPIT-03B
  *
  * Rule-based scoring engine for CEO contacts.
- * No ML. Deterministic scoring across 5 dimensions.
+ * No ML. Deterministic scoring across 6 dimensions (incl. execution weight).
  *
  * Doctrine guardrail: COLONAiVE contacts must use movement-first tone,
  * no hard-sell, colonoscopy remains gold standard.
@@ -36,6 +36,7 @@ export interface CEOContact {
   recency_score: number;
   momentum_score: number;
   cross_project_score: number;
+  execution_weight: number;
   total_score: number;
   priority_level: PriorityLevel;
   follow_up_action: FollowUpAction | null;
@@ -100,12 +101,34 @@ function computeCrossProject(projectTags: string[]): number {
 }
 
 /**
+ * Execution Weight (0–20)
+ * Reflects real-world urgency and revenue leverage.
+ * MyScienceHOD + high momentum → 15–20
+ * Investor + high momentum → 15–20
+ * COLONAiVE → 5–10
+ * Others → 0–5
+ */
+function computeExecutionWeight(
+  role: CEOContactRole,
+  projectTags: string[],
+  momentumScore: number
+): number {
+  if (projectTags.includes('MyScienceHOD') && momentumScore >= 10) return 18;
+  if (role === 'investor' && momentumScore >= 10) return 17;
+  if (projectTags.includes('MyScienceHOD')) return 12;
+  if (role === 'investor') return 10;
+  if (projectTags.includes('COLONAiVE')) return 8;
+  return 3;
+}
+
+/**
  * Classify priority level from total score.
+ * Updated thresholds for 120-point scale.
  */
 function classifyPriority(totalScore: number): PriorityLevel {
-  if (totalScore >= 80) return 'critical';
-  if (totalScore >= 60) return 'active';
-  if (totalScore >= 40) return 'warm';
+  if (totalScore >= 90) return 'critical';
+  if (totalScore >= 70) return 'active';
+  if (totalScore >= 50) return 'warm';
   return 'passive';
 }
 
@@ -150,6 +173,7 @@ export function computeScores(contact: {
   strategic_value_score: number;
   recency_score: number;
   cross_project_score: number;
+  execution_weight: number;
   total_score: number;
   priority_level: PriorityLevel;
   follow_up_action: FollowUpAction;
@@ -158,14 +182,16 @@ export function computeScores(contact: {
   const strategic_value_score = computeStrategicValue(contact.role);
   const recency_score = computeRecency(contact.last_interaction_at);
   const cross_project_score = computeCrossProject(contact.project_tags);
+  const execution_weight = computeExecutionWeight(contact.role, contact.project_tags, contact.momentum_score);
 
   const total_score = Math.min(
-    100,
+    120,
     strategic_value_score +
       contact.responsiveness_score +
       recency_score +
       contact.momentum_score +
-      cross_project_score
+      cross_project_score +
+      execution_weight
   );
 
   const priority_level = classifyPriority(total_score);
@@ -176,6 +202,7 @@ export function computeScores(contact: {
     strategic_value_score,
     recency_score,
     cross_project_score,
+    execution_weight,
     total_score,
     priority_level,
     follow_up_action,

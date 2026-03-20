@@ -8,7 +8,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { ArrowLeft, Users, Crown, TrendingUp, RefreshCw, Plus, Trash2, Edit3, AlertTriangle, Star, Zap, Clock, Target } from 'lucide-react';
+import { ArrowLeft, Users, Crown, TrendingUp, RefreshCw, Plus, Trash2, Edit3, AlertTriangle, Star, Zap, Clock, Target, Flame } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import CockpitCard from '@/components/cockpit/CockpitCard';
 import CockpitSection from '@/components/cockpit/CockpitSection';
@@ -177,6 +177,12 @@ function ContactModal({
               className="w-full"
             />
           </div>
+          {/* Execution Weight (display only — auto-computed) */}
+          <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-md">
+            <div className="text-sm font-medium text-gray-500 dark:text-gray-400">
+              Execution Weight: <span className="text-gray-900 dark:text-white">auto-computed from project + role + momentum</span>
+            </div>
+          </div>
           {/* Last Interaction */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Last Interaction</label>
@@ -263,26 +269,34 @@ function ContactCard({
         </div>
       </div>
 
+      {/* Execution Weight Badge */}
+      {contact.execution_weight >= 15 && (
+        <div className="mb-2 flex items-center gap-1.5 px-2 py-1 bg-orange-100 dark:bg-orange-900/30 rounded text-[11px] font-bold text-orange-700 dark:text-orange-400">
+          <Flame size={12} />
+          High Execution Priority
+        </div>
+      )}
+
       {/* Score Bar */}
       <div className="mb-3">
         <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
           <span>Score</span>
-          <span className="font-bold text-gray-900 dark:text-white">{contact.total_score}/100</span>
+          <span className="font-bold text-gray-900 dark:text-white">{contact.total_score}/120</span>
         </div>
         <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
           <div
             className={`h-2 rounded-full transition-all ${
-              contact.total_score >= 80 ? 'bg-red-500' :
-              contact.total_score >= 60 ? 'bg-amber-500' :
-              contact.total_score >= 40 ? 'bg-blue-500' : 'bg-gray-400'
+              contact.total_score >= 90 ? 'bg-red-500' :
+              contact.total_score >= 70 ? 'bg-amber-500' :
+              contact.total_score >= 50 ? 'bg-blue-500' : 'bg-gray-400'
             }`}
-            style={{ width: `${contact.total_score}%` }}
+            style={{ width: `${Math.round((contact.total_score / 120) * 100)}%` }}
           />
         </div>
       </div>
 
       {/* Score Breakdown */}
-      <div className="grid grid-cols-5 gap-1 mb-3 text-[10px] text-center">
+      <div className="grid grid-cols-6 gap-1 mb-3 text-[10px] text-center">
         <div>
           <div className="text-gray-400">Strategic</div>
           <div className="font-bold text-gray-700 dark:text-gray-300">{contact.strategic_value_score}</div>
@@ -302,6 +316,10 @@ function ContactCard({
         <div>
           <div className="text-gray-400">Cross-Proj</div>
           <div className="font-bold text-gray-700 dark:text-gray-300">{contact.cross_project_score}</div>
+        </div>
+        <div>
+          <div className={`${contact.execution_weight >= 15 ? 'text-orange-500 font-bold' : 'text-gray-400'}`}>Exec Wt</div>
+          <div className={`font-bold ${contact.execution_weight >= 15 ? 'text-orange-600' : 'text-gray-700 dark:text-gray-300'}`}>{contact.execution_weight}</div>
         </div>
       </div>
 
@@ -452,11 +470,11 @@ export default function RelationshipPriority() {
           </CockpitCard>
           <CockpitCard title="Critical Priority" icon={<Zap size={18} />} status={criticalCount > 0 ? 'active' : 'pending'}>
             <div className="text-3xl font-bold text-red-600">{criticalCount}</div>
-            <div className="text-xs text-gray-500 mt-1">Score 80–100</div>
+            <div className="text-xs text-gray-500 mt-1">Score 90–120</div>
           </CockpitCard>
           <CockpitCard title="Active Priority" icon={<TrendingUp size={18} />} status={activeCount > 0 ? 'active' : 'pending'}>
             <div className="text-3xl font-bold text-amber-600">{activeCount}</div>
-            <div className="text-xs text-gray-500 mt-1">Score 60–79</div>
+            <div className="text-xs text-gray-500 mt-1">Score 70–89</div>
           </CockpitCard>
         </CockpitSection>
 
