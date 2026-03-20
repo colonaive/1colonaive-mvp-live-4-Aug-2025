@@ -1,0 +1,307 @@
+/**
+ * Relationship Priority Engine — CTW-COCKPIT-03B
+ *
+ * Rule-based scoring engine for CEO contacts.
+ * No ML. Deterministic scoring across 5 dimensions.
+ *
+ * Doctrine guardrail: COLONAiVE contacts must use movement-first tone,
+ * no hard-sell, colonoscopy remains gold standard.
+ */
+
+import { supabase } from '@/supabase';
+
+/* ── Types ── */
+
+export type CEOContactRole =
+  | 'investor' | 'regulator' | 'kol' | 'clinician'
+  | 'partner' | 'corporate' | 'government' | 'academic' | 'other';
+
+export type ProjectTag = 'COLONAiVE' | 'Durmah' | 'SG Renovate' | 'MyScienceHOD';
+
+export type PriorityLevel = 'critical' | 'active' | 'warm' | 'passive';
+
+export type FollowUpAction = 'follow_up' | 'nurture' | 'convert' | 'hold';
+
+export type FollowUpMessageType = 'strategic' | 'update' | 'ask' | 'relationship';
+
+export interface CEOContact {
+  id: string;
+  name: string;
+  organisation: string | null;
+  role: CEOContactRole;
+  project_tags: string[];
+  last_interaction_at: string | null;
+  responsiveness_score: number;
+  strategic_value_score: number;
+  recency_score: number;
+  momentum_score: number;
+  cross_project_score: number;
+  total_score: number;
+  priority_level: PriorityLevel;
+  follow_up_action: FollowUpAction | null;
+  follow_up_message_type: FollowUpMessageType | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+/* ── Scoring Engine ── */
+
+/**
+ * Strategic Value (0–40)
+ * Investor / Regulator / KOL / Government → 35–40
+ * Clinician / Partner → 20–30
+ * Corporate / Academic → 10–20
+ * Other → 5
+ */
+function computeStrategicValue(role: CEOContactRole): number {
+  const scores: Record<CEOContactRole, number> = {
+    investor: 38,
+    regulator: 40,
+    kol: 36,
+    government: 35,
+    clinician: 28,
+    partner: 25,
+    corporate: 18,
+    academic: 15,
+    other: 5,
+  };
+  return scores[role] ?? 5;
+}
+
+/**
+ * Recency Score (0–15)
+ * Based on days since last interaction.
+ */
+function computeRecency(lastInteraction: string | null): number {
+  if (!lastInteraction) return 0;
+  const daysSince = Math.floor(
+    (Date.now() - new Date(lastInteraction).getTime()) / (1000 * 60 * 60 * 24)
+  );
+  if (daysSince <= 3) return 15;
+  if (daysSince <= 7) return 12;
+  if (daysSince <= 14) return 10;
+  if (daysSince <= 30) return 7;
+  if (daysSince <= 60) return 4;
+  return 1;
+}
+
+/**
+ * Cross-Project Score (0–10)
+ * Based on number of project tags.
+ */
+function computeCrossProject(projectTags: string[]): number {
+  const count = projectTags.length;
+  if (count >= 4) return 10;
+  if (count === 3) return 8;
+  if (count === 2) return 5;
+  if (count === 1) return 2;
+  return 0;
+}
+
+/**
+ * Classify priority level from total score.
+ */
+function classifyPriority(totalScore: number): PriorityLevel {
+  if (totalScore >= 80) return 'critical';
+  if (totalScore >= 60) return 'active';
+  if (totalScore >= 40) return 'warm';
+  return 'passive';
+}
+
+/**
+ * Determine follow-up action based on priority and recency.
+ */
+function determineFollowUpAction(
+  priority: PriorityLevel,
+  recencyScore: number
+): FollowUpAction {
+  if (priority === 'critical' && recencyScore <= 7) return 'follow_up';
+  if (priority === 'critical') return 'convert';
+  if (priority === 'active' && recencyScore <= 4) return 'follow_up';
+  if (priority === 'active') return 'nurture';
+  if (priority === 'warm') return 'nurture';
+  return 'hold';
+}
+
+/**
+ * Determine message type based on role and priority.
+ */
+function determineMessageType(
+  role: CEOContactRole,
+  priority: PriorityLevel
+): FollowUpMessageType {
+  if (role === 'investor' || role === 'regulator' || role === 'government') return 'strategic';
+  if (priority === 'critical') return 'ask';
+  if (priority === 'active') return 'update';
+  return 'relationship';
+}
+
+/**
+ * Compute all scores for a contact and return updates.
+ */
+export function computeScores(contact: {
+  role: CEOContactRole;
+  project_tags: string[];
+  last_interaction_at: string | null;
+  responsiveness_score: number;
+  momentum_score: number;
+}): {
+  strategic_value_score: number;
+  recency_score: number;
+  cross_project_score: number;
+  total_score: number;
+  priority_level: PriorityLevel;
+  follow_up_action: FollowUpAction;
+  follow_up_message_type: FollowUpMessageType;
+} {
+  const strategic_value_score = computeStrategicValue(contact.role);
+  const recency_score = computeRecency(contact.last_interaction_at);
+  const cross_project_score = computeCrossProject(contact.project_tags);
+
+  const total_score = Math.min(
+    100,
+    strategic_value_score +
+      contact.responsiveness_score +
+      recency_score +
+      contact.momentum_score +
+      cross_project_score
+  );
+
+  const priority_level = classifyPriority(total_score);
+  const follow_up_action = determineFollowUpAction(priority_level, recency_score);
+  const follow_up_message_type = determineMessageType(contact.role, priority_level);
+
+  return {
+    strategic_value_score,
+    recency_score,
+    cross_project_score,
+    total_score,
+    priority_level,
+    follow_up_action,
+    follow_up_message_type,
+  };
+}
+
+/* ── CRUD ── */
+
+export async function fetchCEOContacts(): Promise<CEOContact[]> {
+  const { data, error } = await supabase
+    .from('ceo_contacts')
+    .select('*')
+    .order('total_score', { ascending: false });
+  if (error) { console.error('fetchCEOContacts error:', error); return []; }
+  return (data || []) as CEOContact[];
+}
+
+export async function getTopPriorityContacts(limit: number = 5): Promise<CEOContact[]> {
+  const { data, error } = await supabase
+    .from('ceo_contacts')
+    .select('*')
+    .order('total_score', { ascending: false })
+    .limit(limit);
+  if (error) { console.error('getTopPriorityContacts error:', error); return []; }
+  return (data || []) as CEOContact[];
+}
+
+export async function createCEOContact(
+  contact: Omit<CEOContact, 'id' | 'created_at' | 'updated_at' | 'total_score' | 'priority_level' | 'strategic_value_score' | 'recency_score' | 'cross_project_score' | 'follow_up_action' | 'follow_up_message_type'>
+): Promise<CEOContact | null> {
+  const scores = computeScores({
+    role: contact.role,
+    project_tags: contact.project_tags,
+    last_interaction_at: contact.last_interaction_at,
+    responsiveness_score: contact.responsiveness_score,
+    momentum_score: contact.momentum_score,
+  });
+
+  const { data, error } = await supabase
+    .from('ceo_contacts')
+    .insert({ ...contact, ...scores })
+    .select()
+    .single();
+  if (error) { console.error('createCEOContact error:', error); return null; }
+  return data as CEOContact;
+}
+
+export async function updateCEOContact(
+  id: string,
+  updates: Partial<Omit<CEOContact, 'id' | 'created_at' | 'updated_at'>>
+): Promise<CEOContact | null> {
+  // If scoring-relevant fields changed, recompute
+  const { data: existing } = await supabase
+    .from('ceo_contacts')
+    .select('*')
+    .eq('id', id)
+    .single();
+  if (!existing) return null;
+
+  const merged = { ...existing, ...updates };
+  const scores = computeScores({
+    role: merged.role,
+    project_tags: merged.project_tags,
+    last_interaction_at: merged.last_interaction_at,
+    responsiveness_score: merged.responsiveness_score,
+    momentum_score: merged.momentum_score,
+  });
+
+  const { data, error } = await supabase
+    .from('ceo_contacts')
+    .update({ ...updates, ...scores })
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) { console.error('updateCEOContact error:', error); return null; }
+  return data as CEOContact;
+}
+
+export async function deleteCEOContact(id: string): Promise<boolean> {
+  const { error } = await supabase.from('ceo_contacts').delete().eq('id', id);
+  if (error) { console.error('deleteCEOContact error:', error); return false; }
+  return true;
+}
+
+/**
+ * Recalculate scores for ALL contacts (batch refresh).
+ */
+export async function recalculateAllScores(): Promise<number> {
+  const contacts = await fetchCEOContacts();
+  let updated = 0;
+
+  for (const contact of contacts) {
+    const scores = computeScores({
+      role: contact.role as CEOContactRole,
+      project_tags: contact.project_tags,
+      last_interaction_at: contact.last_interaction_at,
+      responsiveness_score: contact.responsiveness_score,
+      momentum_score: contact.momentum_score,
+    });
+
+    const { error } = await supabase
+      .from('ceo_contacts')
+      .update(scores)
+      .eq('id', contact.id);
+
+    if (!error) updated++;
+  }
+
+  return updated;
+}
+
+/* ── Doctrine Guardrail ── */
+
+/**
+ * Returns true if contact is COLONAiVE-tagged (doctrine restrictions apply).
+ * COLONAiVE contacts: no hard-sell, movement-first tone, colonoscopy = gold standard.
+ */
+export function isColonAiVEContact(contact: CEOContact): boolean {
+  return contact.project_tags.includes('COLONAiVE');
+}
+
+/**
+ * Get doctrine-safe follow-up guidance for a contact.
+ */
+export function getDoctrineGuidance(contact: CEOContact): string | null {
+  if (!isColonAiVEContact(contact)) return null;
+  return 'COLONAiVE Doctrine: Movement-first tone. No hard-sell. Colonoscopy remains gold standard. Blood test is complementary screening, not replacement.';
+}

@@ -21,6 +21,7 @@ import CEOCockpit from './pages/admin/CEOCockpit';
 import LinkedInIntelligence from './pages/admin/LinkedInIntelligence';
 import RelationshipIntelligence from './pages/admin/RelationshipIntelligence';
 import CRCRadar from './pages/admin/CRCRadar';
+import RelationshipPriority from './pages/admin/RelationshipPriority';
 
 // Public Research
 import ResearchRadar from './pages/ResearchRadar';
@@ -346,6 +347,10 @@ const MainRoutes = () => {
           <Route
             path="/admin/crc-radar"
             element={<ProtectedAdminRoute><CRCRadar /></ProtectedAdminRoute>}
+          />
+          <Route
+            path="/admin/cockpit/relationships"
+            element={<ProtectedAdminRoute><RelationshipPriority /></ProtectedAdminRoute>}
           />
 
 
