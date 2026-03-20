@@ -19,6 +19,8 @@ import {
   deleteCEOContact,
   toggleContactVerified,
   recalculateAllScores,
+  syncEmailIntelligence,
+  logInteraction,
   getDoctrineGuidance,
   type CEOContact,
   type CEOContactRole,
@@ -225,6 +227,74 @@ function ContactModal({
   );
 }
 
+/* ── Log Interaction Modal ── */
+
+function LogInteractionModal({
+  contactName,
+  onSave,
+  onClose,
+}: {
+  contactName: string;
+  onSave: (subject: string, direction: 'inbound' | 'outbound') => void;
+  onClose: () => void;
+}) {
+  const [subject, setSubject] = useState('');
+  const [direction, setDirection] = useState<'inbound' | 'outbound'>('outbound');
+
+  return (
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full">
+        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            Log Interaction — {contactName}
+          </h3>
+        </div>
+        <div className="p-6 space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Direction</label>
+            <div className="flex gap-2">
+              {(['outbound', 'inbound'] as const).map(d => (
+                <button
+                  key={d}
+                  type="button"
+                  onClick={() => setDirection(d)}
+                  className={`px-3 py-1.5 rounded-md text-sm font-medium ${
+                    direction === d ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'
+                  }`}
+                >
+                  {d === 'outbound' ? 'Sent' : 'Received'}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Subject / Description *</label>
+            <input
+              type="text"
+              value={subject}
+              onChange={e => setSubject(e.target.value)}
+              placeholder="e.g. Follow-up on validation protocol"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+            />
+          </div>
+        </div>
+        <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-3">
+          <button onClick={onClose} className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 dark:text-gray-400">
+            Cancel
+          </button>
+          <button
+            onClick={() => { if (subject.trim()) onSave(subject.trim(), direction); }}
+            disabled={!subject.trim()}
+            className="px-4 py-2 text-sm bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50"
+          >
+            Log Interaction
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ── Contact Card ── */
 
 function ContactCard({
@@ -233,12 +303,14 @@ function ContactCard({
   onEdit,
   onDelete,
   onToggleVerified,
+  onLogInteraction,
 }: {
   contact: CEOContact;
   rank?: number;
   onEdit: () => void;
   onDelete: () => void;
   onToggleVerified: () => void;
+  onLogInteraction: () => void;
 }) {
   const priority = PRIORITY_CONFIG[contact.priority_level];
   const doctrine = getDoctrineGuidance(contact);
@@ -274,6 +346,9 @@ function ContactCard({
           </span>
           <button onClick={onToggleVerified} className={`${contact.is_verified ? 'text-emerald-500 hover:text-yellow-500' : 'text-yellow-500 hover:text-emerald-500'}`} title={contact.is_verified ? 'Mark Unverified' : 'Mark Verified'}>
             <ShieldCheck size={14} />
+          </button>
+          <button onClick={onLogInteraction} className="text-gray-400 hover:text-blue-600" title="Log Interaction">
+            <Mail size={14} />
           </button>
           <button onClick={onEdit} className="text-gray-400 hover:text-teal-600" title="Edit">
             <Edit3 size={14} />
@@ -420,6 +495,8 @@ export default function RelationshipPriority() {
   const [modalContact, setModalContact] = useState<CEOContact | null | 'new'>(null);
   const [filterProject, setFilterProject] = useState<string>('all');
   const [showVerifiedOnly, setShowVerifiedOnly] = useState(true);
+  const [syncing, setSyncing] = useState(false);
+  const [logContact, setLogContact] = useState<CEOContact | null>(null);
 
   const loadContacts = useCallback(async () => {
     setLoading(true);
@@ -457,6 +534,21 @@ export default function RelationshipPriority() {
     await loadContacts();
   };
 
+  const handleSyncEmail = async () => {
+    setSyncing(true);
+    await syncEmailIntelligence();
+    await loadContacts();
+    setSyncing(false);
+  };
+
+  const handleLogInteraction = async (subject: string, direction: 'inbound' | 'outbound') => {
+    if (!logContact) return;
+    await logInteraction(logContact.name, subject, direction);
+    setLogContact(null);
+    // Re-sync after logging to update counts
+    await handleSyncEmail();
+  };
+
   // Filter
   const verifiedFiltered = showVerifiedOnly
     ? contacts.filter(c => c.is_verified)
@@ -492,6 +584,14 @@ export default function RelationshipPriority() {
               </div>
             </div>
             <div className="flex items-center gap-3">
+              <button
+                onClick={handleSyncEmail}
+                disabled={syncing}
+                className="flex items-center gap-2 px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-md text-sm transition-colors disabled:opacity-50"
+              >
+                <Mail size={14} className={syncing ? 'animate-pulse' : ''} />
+                Sync Email
+              </button>
               <button
                 onClick={handleRecalculate}
                 disabled={recalculating}
@@ -550,6 +650,7 @@ export default function RelationshipPriority() {
                     onEdit={() => setModalContact(c)}
                     onDelete={() => handleDelete(c.id)}
                     onToggleVerified={() => handleToggleVerified(c)}
+                    onLogInteraction={() => setLogContact(c)}
                   />
                 ))}
               </div>
@@ -609,18 +710,28 @@ export default function RelationshipPriority() {
                 onEdit={() => setModalContact(c)}
                 onDelete={() => handleDelete(c.id)}
                 onToggleVerified={() => handleToggleVerified(c)}
+                onLogInteraction={() => setLogContact(c)}
               />
             ))}
           </div>
         )}
       </div>
 
-      {/* Modal */}
+      {/* Contact Modal */}
       {modalContact !== null && (
         <ContactModal
           contact={modalContact === 'new' ? null : modalContact}
           onSave={handleSave}
           onClose={() => setModalContact(null)}
+        />
+      )}
+
+      {/* Log Interaction Modal */}
+      {logContact && (
+        <LogInteractionModal
+          contactName={logContact.name}
+          onSave={handleLogInteraction}
+          onClose={() => setLogContact(null)}
         />
       )}
     </div>

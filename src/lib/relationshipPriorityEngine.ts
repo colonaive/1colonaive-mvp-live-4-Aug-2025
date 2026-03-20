@@ -311,6 +311,100 @@ export async function autoVerifyByEmailCount(threshold: number = 3): Promise<num
   return data?.length ?? 0;
 }
 
+/**
+ * Log a real interaction to email_activity and link to contact.
+ */
+export async function logInteraction(contactName: string, subject: string, direction: 'inbound' | 'outbound' = 'outbound'): Promise<boolean> {
+  const { error } = await supabase
+    .from('email_activity')
+    .insert({
+      direction,
+      to_address: contactName,
+      subject,
+      status: 'sent',
+      context_source: 'cockpit-manual',
+      sent_at: new Date().toISOString(),
+    });
+  if (error) { console.error('logInteraction error:', error); return false; }
+  return true;
+}
+
+/**
+ * Sync email intelligence: cross-reference email_activity with ceo_contacts.
+ * Updates source_email_count, applies auto-verification, boosts responsiveness.
+ * Returns summary of changes.
+ */
+export async function syncEmailIntelligence(): Promise<{
+  synced: number;
+  autoVerified: string[];
+  emailCounts: Record<string, number>;
+}> {
+  const result = { synced: 0, autoVerified: [] as string[], emailCounts: {} as Record<string, number> };
+
+  // Fetch all contacts and emails
+  const contacts = await fetchCEOContacts();
+  const { data: emails, error: emailError } = await supabase
+    .from('email_activity')
+    .select('to_address, cc_address, subject, sent_at');
+  if (emailError || !emails) return result;
+
+  for (const contact of contacts) {
+    // Match emails where contact name appears in to_address, cc_address, or subject
+    const matched = emails.filter(e =>
+      (e.to_address && e.to_address.toLowerCase().includes(contact.name.toLowerCase())) ||
+      (e.cc_address && e.cc_address.toLowerCase().includes(contact.name.toLowerCase())) ||
+      (e.subject && e.subject.toLowerCase().includes(contact.name.toLowerCase()))
+    );
+
+    const emailCount = matched.length;
+    result.emailCounts[contact.name] = emailCount;
+
+    // Compute responsiveness boost from email frequency
+    let responsivenessBoost = 0;
+    if (emailCount >= 5) responsivenessBoost = 5;
+    else if (emailCount >= 3) responsivenessBoost = 3;
+    else if (emailCount >= 1) responsivenessBoost = 1;
+
+    const newResponsiveness = Math.min(20, contact.responsiveness_score + responsivenessBoost);
+
+    // Find most recent email for recency
+    const mostRecent = matched
+      .filter(e => e.sent_at)
+      .sort((a, b) => new Date(b.sent_at).getTime() - new Date(a.sent_at).getTime())[0];
+
+    // Update last_interaction_at if email is more recent
+    const updates: Record<string, unknown> = {
+      source_email_count: emailCount,
+      responsiveness_score: newResponsiveness,
+    };
+
+    if (mostRecent?.sent_at) {
+      const emailDate = new Date(mostRecent.sent_at);
+      const currentLast = contact.last_interaction_at ? new Date(contact.last_interaction_at) : new Date(0);
+      if (emailDate > currentLast) {
+        updates.last_interaction_at = mostRecent.sent_at;
+      }
+    }
+
+    // Auto-verify if email count >= 3
+    if (emailCount >= 3 && !contact.is_verified) {
+      updates.is_verified = true;
+      result.autoVerified.push(contact.name);
+    }
+
+    const { error } = await supabase
+      .from('ceo_contacts')
+      .update(updates)
+      .eq('id', contact.id);
+    if (!error) result.synced++;
+  }
+
+  // Recalculate all scores after sync
+  await recalculateAllScores();
+
+  return result;
+}
+
 export async function deleteCEOContact(id: string): Promise<boolean> {
   const { error } = await supabase.from('ceo_contacts').delete().eq('id', id);
   if (error) { console.error('deleteCEOContact error:', error); return false; }
