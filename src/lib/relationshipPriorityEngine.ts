@@ -41,6 +41,7 @@ export interface CEOContact {
   priority_level: PriorityLevel;
   follow_up_action: FollowUpAction | null;
   follow_up_message_type: FollowUpMessageType | null;
+  is_verified: boolean;
   notes: string | null;
   created_at: string;
   updated_at: string;
@@ -225,6 +226,7 @@ export async function getTopPriorityContacts(limit: number = 5): Promise<CEOCont
   const { data, error } = await supabase
     .from('ceo_contacts')
     .select('*')
+    .eq('is_verified', true)
     .order('total_score', { ascending: false })
     .limit(limit);
   if (error) { console.error('getTopPriorityContacts error:', error); return []; }
@@ -280,6 +282,15 @@ export async function updateCEOContact(
     .single();
   if (error) { console.error('updateCEOContact error:', error); return null; }
   return data as CEOContact;
+}
+
+export async function toggleContactVerified(id: string, isVerified: boolean): Promise<boolean> {
+  const { error } = await supabase
+    .from('ceo_contacts')
+    .update({ is_verified: isVerified })
+    .eq('id', id);
+  if (error) { console.error('toggleContactVerified error:', error); return false; }
+  return true;
 }
 
 export async function deleteCEOContact(id: string): Promise<boolean> {

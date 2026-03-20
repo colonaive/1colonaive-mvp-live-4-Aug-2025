@@ -8,7 +8,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { ArrowLeft, Users, Crown, TrendingUp, RefreshCw, Plus, Trash2, Edit3, AlertTriangle, Star, Zap, Clock, Target, Flame } from 'lucide-react';
+import { ArrowLeft, Users, Crown, TrendingUp, RefreshCw, Plus, Trash2, Edit3, AlertTriangle, Star, Zap, Clock, Target, Flame, ShieldCheck, ShieldAlert } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import CockpitCard from '@/components/cockpit/CockpitCard';
 import CockpitSection from '@/components/cockpit/CockpitSection';
@@ -17,6 +17,7 @@ import {
   createCEOContact,
   updateCEOContact,
   deleteCEOContact,
+  toggleContactVerified,
   recalculateAllScores,
   getDoctrineGuidance,
   type CEOContact,
@@ -231,11 +232,13 @@ function ContactCard({
   rank,
   onEdit,
   onDelete,
+  onToggleVerified,
 }: {
   contact: CEOContact;
   rank?: number;
   onEdit: () => void;
   onDelete: () => void;
+  onToggleVerified: () => void;
 }) {
   const priority = PRIORITY_CONFIG[contact.priority_level];
   const doctrine = getDoctrineGuidance(contact);
@@ -257,9 +260,21 @@ function ContactCard({
           </div>
         </div>
         <div className="flex items-center gap-2">
+          {contact.is_verified ? (
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 flex items-center gap-1">
+              <ShieldCheck size={10} /> Verified
+            </span>
+          ) : (
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400 flex items-center gap-1">
+              <ShieldAlert size={10} /> Unverified
+            </span>
+          )}
           <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${priority.bg} ${priority.color}`}>
             {priority.label}
           </span>
+          <button onClick={onToggleVerified} className={`${contact.is_verified ? 'text-emerald-500 hover:text-yellow-500' : 'text-yellow-500 hover:text-emerald-500'}`} title={contact.is_verified ? 'Mark Unverified' : 'Mark Verified'}>
+            <ShieldCheck size={14} />
+          </button>
           <button onClick={onEdit} className="text-gray-400 hover:text-teal-600" title="Edit">
             <Edit3 size={14} />
           </button>
@@ -379,6 +394,7 @@ export default function RelationshipPriority() {
   const [recalculating, setRecalculating] = useState(false);
   const [modalContact, setModalContact] = useState<CEOContact | null | 'new'>(null);
   const [filterProject, setFilterProject] = useState<string>('all');
+  const [showVerifiedOnly, setShowVerifiedOnly] = useState(true);
 
   const loadContacts = useCallback(async () => {
     setLoading(true);
@@ -411,14 +427,23 @@ export default function RelationshipPriority() {
     await loadContacts();
   };
 
-  // Filter
-  const filtered = filterProject === 'all'
-    ? contacts
-    : contacts.filter(c => c.project_tags.includes(filterProject));
+  const handleToggleVerified = async (contact: CEOContact) => {
+    await toggleContactVerified(contact.id, !contact.is_verified);
+    await loadContacts();
+  };
 
-  const top5 = contacts.slice(0, 5);
-  const criticalCount = contacts.filter(c => c.priority_level === 'critical').length;
-  const activeCount = contacts.filter(c => c.priority_level === 'active').length;
+  // Filter
+  const verifiedFiltered = showVerifiedOnly
+    ? contacts.filter(c => c.is_verified)
+    : contacts;
+  const filtered = filterProject === 'all'
+    ? verifiedFiltered
+    : verifiedFiltered.filter(c => c.project_tags.includes(filterProject));
+
+  const verifiedContacts = contacts.filter(c => c.is_verified);
+  const top5 = verifiedContacts.slice(0, 5);
+  const criticalCount = verifiedContacts.filter(c => c.priority_level === 'critical').length;
+  const activeCount = verifiedContacts.filter(c => c.priority_level === 'active').length;
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -499,6 +524,7 @@ export default function RelationshipPriority() {
                     rank={i + 1}
                     onEdit={() => setModalContact(c)}
                     onDelete={() => handleDelete(c.id)}
+                    onToggleVerified={() => handleToggleVerified(c)}
                   />
                 ))}
               </div>
@@ -507,29 +533,42 @@ export default function RelationshipPriority() {
         </CockpitSection>
 
         {/* All Contacts */}
-        <div className="mb-4 flex items-center gap-3">
-          <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">All Contacts</h2>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setFilterProject('all')}
-              className={`px-3 py-1 rounded-full text-xs font-medium ${
-                filterProject === 'all' ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'
-              }`}
-            >
-              All
-            </button>
-            {PROJECT_OPTIONS.map(p => (
+        <div className="mb-4 flex items-center justify-between flex-wrap gap-3">
+          <div className="flex items-center gap-3">
+            <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">All Contacts</h2>
+            <div className="flex gap-2">
               <button
-                key={p}
-                onClick={() => setFilterProject(p)}
+                onClick={() => setFilterProject('all')}
                 className={`px-3 py-1 rounded-full text-xs font-medium ${
-                  filterProject === p ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'
+                  filterProject === 'all' ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'
                 }`}
               >
-                {p}
+                All
               </button>
-            ))}
+              {PROJECT_OPTIONS.map(p => (
+                <button
+                  key={p}
+                  onClick={() => setFilterProject(p)}
+                  className={`px-3 py-1 rounded-full text-xs font-medium ${
+                    filterProject === p ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'
+                  }`}
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
           </div>
+          <button
+            onClick={() => setShowVerifiedOnly(!showVerifiedOnly)}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+              showVerifiedOnly
+                ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'
+            }`}
+          >
+            <ShieldCheck size={13} />
+            {showVerifiedOnly ? 'Verified Only' : 'Show All'}
+          </button>
         </div>
 
         {loading ? (
@@ -544,6 +583,7 @@ export default function RelationshipPriority() {
                 contact={c}
                 onEdit={() => setModalContact(c)}
                 onDelete={() => handleDelete(c.id)}
+                onToggleVerified={() => handleToggleVerified(c)}
               />
             ))}
           </div>
