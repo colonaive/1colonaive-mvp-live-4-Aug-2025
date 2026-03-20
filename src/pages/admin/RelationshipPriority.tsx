@@ -8,7 +8,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { ArrowLeft, Users, Crown, TrendingUp, RefreshCw, Plus, Trash2, Edit3, AlertTriangle, Star, Zap, Clock, Target, Flame, ShieldCheck, ShieldAlert } from 'lucide-react';
+import { ArrowLeft, Users, Crown, TrendingUp, RefreshCw, Plus, Trash2, Edit3, AlertTriangle, Star, Zap, Clock, Target, Flame, ShieldCheck, ShieldAlert, Mail } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import CockpitCard from '@/components/cockpit/CockpitCard';
 import CockpitSection from '@/components/cockpit/CockpitSection';
@@ -348,6 +348,31 @@ function ContactCard({
             {tag}
           </span>
         ))}
+      </div>
+
+      {/* Source Signals */}
+      <div className="flex flex-wrap gap-1.5 mb-2">
+        {contact.source_email_count > 0 && (
+          <span className={`flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium ${
+            contact.source_email_count >= 3
+              ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+              : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'
+          }`}>
+            <Mail size={10} />
+            {contact.source_email_count} email{contact.source_email_count !== 1 ? 's' : ''}
+            {contact.source_email_count >= 3 && ' (auto-verified)'}
+          </span>
+        )}
+        {contact.source_manual && (
+          <span className="flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+            <ShieldCheck size={10} /> Manual
+          </span>
+        )}
+        {contact.source_linkedin && (
+          <span className="flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-400">
+            LinkedIn
+          </span>
+        )}
       </div>
 
       {/* Follow-up Action */}

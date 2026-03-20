@@ -42,6 +42,9 @@ export interface CEOContact {
   follow_up_action: FollowUpAction | null;
   follow_up_message_type: FollowUpMessageType | null;
   is_verified: boolean;
+  source_email_count: number;
+  source_linkedin: boolean;
+  source_manual: boolean;
   notes: string | null;
   created_at: string;
   updated_at: string;
@@ -287,10 +290,25 @@ export async function updateCEOContact(
 export async function toggleContactVerified(id: string, isVerified: boolean): Promise<boolean> {
   const { error } = await supabase
     .from('ceo_contacts')
-    .update({ is_verified: isVerified })
+    .update({ is_verified: isVerified, source_manual: isVerified })
     .eq('id', id);
   if (error) { console.error('toggleContactVerified error:', error); return false; }
   return true;
+}
+
+/**
+ * Auto-verify contacts with source_email_count >= threshold.
+ * Returns count of newly auto-verified contacts.
+ */
+export async function autoVerifyByEmailCount(threshold: number = 3): Promise<number> {
+  const { data, error } = await supabase
+    .from('ceo_contacts')
+    .update({ is_verified: true })
+    .eq('is_verified', false)
+    .gte('source_email_count', threshold)
+    .select('id');
+  if (error) { console.error('autoVerifyByEmailCount error:', error); return 0; }
+  return data?.length ?? 0;
 }
 
 export async function deleteCEOContact(id: string): Promise<boolean> {
