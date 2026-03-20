@@ -42,6 +42,81 @@ function getSupabase() {
 
 /* ---------- data gatherers ---------- */
 
+async function fetchActionableEmails(supabase: any): Promise<{ takeAction: string[]; watch: string[] }> {
+  try {
+    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+
+    const { data: actionEmails } = await supabase
+      .from('ceo_emails')
+      .select('sender_name, subject, classification_reason, keyword_matches')
+      .eq('classification', 'take_action')
+      .gte('received_at', yesterday)
+      .order('received_at', { ascending: false })
+      .limit(10);
+
+    const { data: watchEmails } = await supabase
+      .from('ceo_emails')
+      .select('sender_name, subject, classification_reason')
+      .eq('classification', 'investigate')
+      .gte('received_at', yesterday)
+      .order('received_at', { ascending: false })
+      .limit(10);
+
+    const takeAction = (actionEmails || []).map((m: any) => {
+      const keywords = m.keyword_matches?.length ? ` [${m.keyword_matches.join(', ')}]` : '';
+      return `⚡ ${m.sender_name} — ${m.subject}${keywords}`;
+    });
+
+    const watch = (watchEmails || []).map((m: any) =>
+      `👁 ${m.sender_name} — ${m.subject}`,
+    );
+
+    return {
+      takeAction: takeAction.length > 0 ? takeAction : ['No action-required emails in last 24h'],
+      watch: watch.length > 0 ? watch : ['No watch-list emails in last 24h'],
+    };
+  } catch (e: any) {
+    console.error('Actionable email fetch error:', e?.message);
+    return {
+      takeAction: ['Email intelligence unavailable'],
+      watch: ['Email intelligence unavailable'],
+    };
+  }
+}
+
+async function fetchOpenTasks(supabase: any): Promise<string[]> {
+  try {
+    const { data: tasks } = await supabase
+      .from('ceo_tasks')
+      .select('title, priority, created_at')
+      .eq('status', 'open')
+      .order('created_at', { ascending: false })
+      .limit(5);
+
+    if (!tasks?.length) return ['No open tasks'];
+    return tasks.map((t: any) => `[${t.priority.toUpperCase()}] ${t.title}`);
+  } catch {
+    return ['Tasks unavailable'];
+  }
+}
+
+async function fetchOpenRisks(supabase: any): Promise<string[]> {
+  try {
+    const { data: risks } = await supabase
+      .from('ceo_risks')
+      .select('title, severity')
+      .eq('status', 'open')
+      .order('created_at', { ascending: false })
+      .limit(5);
+
+    if (!risks?.length) return ['No open risks'];
+    return risks.map((r: any) => `[${r.severity.toUpperCase()}] ${r.title}`);
+  } catch {
+    return ['Risks unavailable'];
+  }
+}
+
+// Legacy fallback: fetch directly from Graph if ceo_emails is empty
 async function fetchInboxHighlights(): Promise<string[]> {
   try {
     const tenant = process.env.OUTLOOK_TENANT_ID;
@@ -264,17 +339,37 @@ export async function handler(event: any) {
     const dateStr = sgDateString();
     const dateISO = todayISO();
 
-    const [inbox, crc] = await Promise.all([
-      fetchInboxHighlights(),
+    // Check if ceo_emails has data; if so, use classified intelligence
+    const { count: emailCount } = await supabase
+      .from('ceo_emails')
+      .select('*', { count: 'exact', head: true })
+      .gte('received_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
+
+    const useEmailIntelligence = (emailCount || 0) > 0;
+
+    const [actionableEmails, inbox, crc, tasks, risks] = await Promise.all([
+      useEmailIntelligence ? fetchActionableEmails(supabase) : Promise.resolve(null),
+      useEmailIntelligence ? Promise.resolve(['See classified emails below']) : fetchInboxHighlights(),
       fetchCRCHighlights(supabase),
+      fetchOpenTasks(supabase),
+      fetchOpenRisks(supabase),
     ]);
 
-    const sections: BriefingSection[] = [
-      { heading: 'Inbox Highlights', items: inbox },
-      { heading: 'CRC Intelligence', items: crc },
-      { heading: 'Regulatory Status', items: getRegulatoryStatus() },
-      { heading: 'Clinical & Project Updates', items: getProjectUpdates() },
-    ];
+    const sections: BriefingSection[] = [];
+
+    // TODAY (Execute) — take_action emails
+    if (actionableEmails) {
+      sections.push({ heading: 'TODAY — Execute Now', items: actionableEmails.takeAction });
+      sections.push({ heading: 'WATCH — Monitor', items: actionableEmails.watch });
+    } else {
+      sections.push({ heading: 'Inbox Highlights', items: inbox });
+    }
+
+    sections.push({ heading: 'Open Tasks', items: tasks });
+    sections.push({ heading: 'Open Risks', items: risks });
+    sections.push({ heading: 'CRC Intelligence', items: crc });
+    sections.push({ heading: 'Regulatory Status', items: getRegulatoryStatus() });
+    sections.push({ heading: 'Clinical & Project Updates', items: getProjectUpdates() });
 
     const content = buildBriefingText(dateStr, sections);
     const html = buildBriefingHtml(dateStr, sections);

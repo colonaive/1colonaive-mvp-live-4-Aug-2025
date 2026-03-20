@@ -14,7 +14,7 @@ export interface ActionCandidate {
   id: string;
   title: string;
   description: string;
-  source: 'radar' | 'early_warning' | 'strategy' | 'linkedin' | 'task' | 'custom';
+  source: 'radar' | 'early_warning' | 'strategy' | 'linkedin' | 'task' | 'custom' | 'email';
   sourceId?: string;
   created_at: string;
   /** Raw scores populated by the engine */

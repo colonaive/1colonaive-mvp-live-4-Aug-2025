@@ -1,8 +1,9 @@
 /**
- * Founder Briefing Engine — CTW-COCKPIT-02C
+ * Founder Briefing Engine — CTW-COCKPIT-02C / CTW-COCKPIT-02D.1
  *
  * Synthesizes intelligence from multiple cockpit data sources into
  * an actionable founder briefing with priorities, risks, and recommendations.
+ * Now includes email intelligence from ceo_emails classification pipeline.
  */
 
 import {
@@ -16,8 +17,19 @@ import {
 import { generateCrossProjectBriefing, type CrossProjectBriefing } from '@/lib/projectSignals';
 import { competitiveIntelligenceService } from '@/services/competitiveIntelligenceService';
 import { radarService } from '@/services/radarService';
+import { supabase } from '@/supabase';
 
 /* ── Types ── */
+
+export interface EmailIntelligenceItem {
+  id: string;
+  sender_name: string;
+  subject: string;
+  classification: string;
+  classification_reason: string;
+  keyword_matches: string[];
+  received_at: string;
+}
 
 export interface FounderBriefing {
   generatedAt: string;
@@ -27,6 +39,11 @@ export interface FounderBriefing {
   recommendedActions: RecommendedAction[];
   signalCount: number;
   crossProjectIntelligence: CrossProjectBriefing | null;
+  emailIntelligence: {
+    takeAction: EmailIntelligenceItem[];
+    investigate: EmailIntelligenceItem[];
+    totalIngested: number;
+  } | null;
 }
 
 export interface RiskItem {
@@ -60,11 +77,12 @@ const RISK_KEYWORDS = [
  * and competitive intelligence.
  */
 export async function generateFounderBriefing(): Promise<FounderBriefing> {
-  // Fetch all intelligence sources in parallel
-  const [radarSignals, earlyWarnings, strategyImplications] = await Promise.all([
+  // Fetch all intelligence sources in parallel (including email intelligence)
+  const [radarSignals, earlyWarnings, strategyImplications, emailIntel] = await Promise.all([
     radarService.fetchTopSignals(7, 10).catch(() => []),
     competitiveIntelligenceService.fetchEarlyWarningSignals(10).catch(() => []),
     competitiveIntelligenceService.fetchStrategyImplications(10).catch(() => []),
+    fetchEmailIntelligence().catch(() => null),
   ]);
 
   // Cross-project intelligence
@@ -75,18 +93,36 @@ export async function generateFounderBriefing(): Promise<FounderBriefing> {
     // silent fail — cross-project is supplementary
   }
 
-  // Convert to action candidates
+  // Convert to action candidates — include email-derived actions
   const allCandidates: ActionCandidate[] = [
     ...radarSignalsToActions(radarSignals),
     ...earlyWarningsToActions(earlyWarnings),
     ...strategyImplicationsToActions(strategyImplications),
+    ...emailsToActions(emailIntel?.takeAction || []),
   ];
 
   // Score and rank
   const topPriorities = getNextBestActions(allCandidates, 3);
 
-  // Extract risks from early warnings
+  // Extract risks from early warnings + email-derived risks
   const criticalRisks = extractRisks(earlyWarnings, strategyImplications);
+
+  // Inject email-derived risks
+  if (emailIntel) {
+    for (const email of emailIntel.takeAction) {
+      const riskKeywords = ['recall', 'customs', 'clearance', 'cold chain', 'compliance', 'violation'];
+      const hasRisk = email.keyword_matches.some((kw: string) => riskKeywords.includes(kw));
+      if (hasRisk && criticalRisks.length < 7) {
+        criticalRisks.push({
+          id: `risk-email-${email.id}`,
+          title: email.subject,
+          severity: 'high',
+          source: `Email from ${email.sender_name}`,
+          description: email.classification_reason,
+        });
+      }
+    }
+  }
 
   // Generate recommended actions
   const recommendedActions = generateRecommendations(topPriorities, criticalRisks);
@@ -107,7 +143,53 @@ export async function generateFounderBriefing(): Promise<FounderBriefing> {
     recommendedActions,
     signalCount: allCandidates.length,
     crossProjectIntelligence,
+    emailIntelligence: emailIntel,
   };
+}
+
+/* ── Email Intelligence ── */
+
+async function fetchEmailIntelligence(): Promise<{
+  takeAction: EmailIntelligenceItem[];
+  investigate: EmailIntelligenceItem[];
+  totalIngested: number;
+}> {
+  const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+
+  const [takeActionRes, investigateRes, countRes] = await Promise.all([
+    supabase
+      .from('ceo_emails')
+      .select('id, sender_name, subject, classification, classification_reason, keyword_matches, received_at')
+      .eq('classification', 'take_action')
+      .gte('received_at', yesterday)
+      .order('received_at', { ascending: false }),
+    supabase
+      .from('ceo_emails')
+      .select('id, sender_name, subject, classification, classification_reason, keyword_matches, received_at')
+      .eq('classification', 'investigate')
+      .gte('received_at', yesterday)
+      .order('received_at', { ascending: false }),
+    supabase
+      .from('ceo_emails')
+      .select('*', { count: 'exact', head: true })
+      .gte('received_at', yesterday),
+  ]);
+
+  return {
+    takeAction: (takeActionRes.data || []) as EmailIntelligenceItem[],
+    investigate: (investigateRes.data || []) as EmailIntelligenceItem[],
+    totalIngested: countRes.count || 0,
+  };
+}
+
+function emailsToActions(emails: EmailIntelligenceItem[]): ActionCandidate[] {
+  return emails.map((email) => ({
+    id: `email-${email.id}`,
+    title: email.subject,
+    description: `From ${email.sender_name}. ${email.classification_reason}`,
+    source: 'email',
+    created_at: email.received_at,
+  }));
 }
 
 /* ── Helpers ── */
