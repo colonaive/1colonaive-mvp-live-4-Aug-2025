@@ -732,7 +732,7 @@ const CEOCockpit: React.FC = () => {
             ) : (
               <div className="space-y-5">
                 {/* Guardrail Status Banner */}
-                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800">
+                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 flex-wrap">
                   <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 uppercase tracking-wider">Guardrail: Strict Mode</span>
                   <span className="text-[10px] text-emerald-600 dark:text-emerald-400">|</span>
                   <span className="text-[10px] text-emerald-600 dark:text-emerald-400">Verified sources only</span>
@@ -741,6 +741,10 @@ const CEOCockpit: React.FC = () => {
                     <span title="HIGH confidence">●</span> HIGH &nbsp;
                     <span title="MEDIUM confidence">◐</span> MED &nbsp;
                     <span title="LOW confidence">○</span> LOW
+                  </span>
+                  <span className="text-[10px] text-emerald-600 dark:text-emerald-400">|</span>
+                  <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 font-medium">
+                    Founder Verified Facts Active
                   </span>
                 </div>
 
@@ -768,8 +772,12 @@ const CEOCockpit: React.FC = () => {
                               <span title={`Confidence: ${email.confidence_level}`} className="flex-shrink-0">
                                 {email.confidence_level === 'high' ? '●' : email.confidence_level === 'medium' ? '◐' : '○'}
                               </span>
-                              <span className="text-[10px] px-1 py-0.5 rounded bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300 flex-shrink-0">
-                                {email.source_origin === 'direct_email' ? 'Email' : email.source_origin === 'manual_entry' ? 'Manual' : 'AI'}
+                              <span className={`text-[10px] px-1 py-0.5 rounded flex-shrink-0 ${
+                                email.source_origin === 'direct_email' ? 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300'
+                                : email.source_origin === 'manual_entry' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
+                                : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400'
+                              }`}>
+                                {email.source_origin === 'direct_email' ? 'Email' : email.source_origin === 'manual_entry' ? 'Founder Verified' : 'AI'}
                               </span>
                               <span className="truncate">{email.sender_name} — {email.subject}</span>
                             </div>
@@ -786,8 +794,12 @@ const CEOCockpit: React.FC = () => {
                               <span title={`Confidence: ${email.confidence_level}`} className="flex-shrink-0">
                                 {email.confidence_level === 'high' ? '●' : email.confidence_level === 'medium' ? '◐' : '○'}
                               </span>
-                              <span className="text-[10px] px-1 py-0.5 rounded bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300 flex-shrink-0">
-                                {email.source_origin === 'direct_email' ? 'Email' : email.source_origin === 'manual_entry' ? 'Manual' : 'AI'}
+                              <span className={`text-[10px] px-1 py-0.5 rounded flex-shrink-0 ${
+                                email.source_origin === 'direct_email' ? 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300'
+                                : email.source_origin === 'manual_entry' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
+                                : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400'
+                              }`}>
+                                {email.source_origin === 'direct_email' ? 'Email' : email.source_origin === 'manual_entry' ? 'Founder Verified' : 'AI'}
                               </span>
                               <span className="truncate">{email.sender_name} — {email.subject}</span>
                             </div>

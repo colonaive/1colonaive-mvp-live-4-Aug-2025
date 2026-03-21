@@ -201,12 +201,33 @@ function getRegulatoryStatus(): string[] {
   ];
 }
 
-function getProjectUpdates(): string[] {
+async function getProjectUpdates(supabase: any): Promise<string[]> {
+  // Load verified facts to ensure correct definitions
+  let verifiedFacts: Record<string, { definition: string; linked_to: string | null }> = {};
+  try {
+    const { data } = await supabase
+      .from('ceo_verified_facts')
+      .select('entity, correct_definition, linked_to')
+      .eq('is_locked', true);
+    if (data) {
+      for (const f of data) {
+        verifiedFacts[f.entity] = { definition: f.correct_definition, linked_to: f.linked_to };
+      }
+    }
+  } catch {
+    // fallback to hardcoded if DB unavailable
+  }
+
+  const scrs = verifiedFacts['SCRS']?.definition || 'Society of Colorectal Surgeons (Singapore)';
+  const smiles = verifiedFacts['SMILES']?.definition || 'SMILES Multi-Centre Study';
+  const smilesLinked = verifiedFacts['SMILES']?.linked_to;
+  const smilesAttrib = smilesLinked ? ` (${smilesLinked})` : ' (Prof Lawrence Ho)';
+
   return [
     'KTPH Investigator Study — proposed (Dr Daniel Lee)',
-    'SCRS Engagement — proposed (Singapore Cancer Registry Society)',
+    `SCRS Engagement — proposed (${scrs})`,
     'Temasek Research Partnership — proposed',
-    'SMILES Multi-Centre Study — proposed (Prof Lawrence Ho)',
+    `${smiles} — proposed${smilesAttrib}`,
   ];
 }
 
@@ -385,8 +406,9 @@ export async function handler(event: any) {
     sections.push({ heading: 'Open Tasks', items: tasks });
     sections.push({ heading: 'Open Risks', items: risks });
     sections.push({ heading: 'CRC Intelligence', items: crc });
+    const projectUpdates = await getProjectUpdates(supabase);
     sections.push({ heading: 'Regulatory Status', items: getRegulatoryStatus() });
-    sections.push({ heading: 'Clinical & Project Updates', items: getProjectUpdates() });
+    sections.push({ heading: 'Clinical & Project Updates', items: projectUpdates });
 
     const content = buildBriefingText(dateStr, sections);
     const html = buildBriefingHtml(dateStr, sections);
