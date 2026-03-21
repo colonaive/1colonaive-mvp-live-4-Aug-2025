@@ -25,8 +25,10 @@ import {
   dismissPrediction,
   getConfidenceLabel,
   getTimeframeLabel,
+  getPredictionAction,
   type CEOPrediction,
 } from '@/lib/predictiveEngine';
+import { getActionTypeLabel } from '@/lib/preemptiveActionEngine';
 import { taskEngine } from '@/chief-of-staff/tasks/taskEngine';
 import { operationsEngine } from '@/chief-of-staff/operations/operationsEngine';
 import { investorGenerator } from '@/chief-of-staff/investors/investorGenerator';
@@ -264,38 +266,52 @@ const CEOCockpit: React.FC = () => {
               {predictions.map((pred) => {
                 const conf = getConfidenceLabel(pred.confidence_score);
                 const timeframe = getTimeframeLabel(pred.predicted_date);
+                const action = getPredictionAction(pred);
+                const actionLabel = getActionTypeLabel(action.action_type);
                 return (
                   <div
                     key={pred.id}
-                    className="flex items-center gap-3 bg-purple-50/50 dark:bg-purple-900/10 rounded-xl border border-purple-200/50 dark:border-purple-800/30 px-4 py-3"
+                    className="bg-purple-50/50 dark:bg-purple-900/10 rounded-xl border border-purple-200/50 dark:border-purple-800/30 px-4 py-3"
                   >
-                    <span className="text-purple-500 flex-shrink-0 text-base">&#128302;</span>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 dark:text-white">
-                        {pred.predicted_event_name}{' '}
-                        <span className={`text-xs font-normal ${conf.color}`}>({conf.label})</span>
-                      </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                        Expected: {timeframe} &middot; Based on {pred.source_event_ids.length} prior occurrence{pred.source_event_ids.length !== 1 ? 's' : ''}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      <button
-                        onClick={() => navigate(`/admin/workroom?prediction_type=${encodeURIComponent(pred.event_type)}&prediction_name=${encodeURIComponent(pred.predicted_event_name)}`)}
-                        className="px-3 py-1.5 rounded-lg text-[11px] font-medium bg-purple-100 text-purple-700 hover:bg-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:hover:bg-purple-900/50 transition-colors"
-                      >
-                        Prepare Action Plan
-                      </button>
-                      <button
-                        onClick={() => {
-                          dismissPrediction(pred.id);
-                          setPredictions((prev) => prev.filter((p) => p.id !== pred.id));
-                        }}
-                        className="text-gray-300 hover:text-gray-500 dark:text-gray-600 dark:hover:text-gray-400"
-                        title="Dismiss prediction"
-                      >
-                        <X size={14} />
-                      </button>
+                    <div className="flex items-start gap-3">
+                      <span className="text-purple-500 flex-shrink-0 text-base mt-0.5">&#128302;</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">
+                          {pred.predicted_event_name}{' '}
+                          <span className={`text-xs font-normal ${conf.color}`}>({conf.label})</span>
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                          Expected: {timeframe} &middot; Based on {pred.source_event_ids.length} prior occurrence{pred.source_event_ids.length !== 1 ? 's' : ''}
+                        </p>
+                        {/* Pre-emptive Action */}
+                        <div className="mt-2 bg-white/60 dark:bg-gray-800/40 rounded-lg px-3 py-2 border border-purple-100 dark:border-purple-800/20">
+                          <p className="text-xs text-gray-700 dark:text-gray-300">
+                            <span className={`font-medium ${actionLabel.color}`}>Action:</span>{' '}
+                            {action.recommended_action}
+                          </p>
+                          <p className="text-[10px] text-red-500 dark:text-red-400 mt-0.5">
+                            Risk: {action.risk_context}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <button
+                          onClick={() => navigate(`/admin/workroom?prediction_type=${encodeURIComponent(pred.event_type)}&prediction_name=${encodeURIComponent(pred.predicted_event_name)}`)}
+                          className="px-3 py-1.5 rounded-lg text-[11px] font-medium bg-[#0A385A] text-white hover:bg-[#0A385A]/90 transition-colors"
+                        >
+                          Execute in Work Room
+                        </button>
+                        <button
+                          onClick={() => {
+                            dismissPrediction(pred.id);
+                            setPredictions((prev) => prev.filter((p) => p.id !== pred.id));
+                          }}
+                          className="text-gray-300 hover:text-gray-500 dark:text-gray-600 dark:hover:text-gray-400"
+                          title="Dismiss prediction"
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 );

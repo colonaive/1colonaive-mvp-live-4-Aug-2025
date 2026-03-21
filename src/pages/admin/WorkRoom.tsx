@@ -23,7 +23,8 @@ import { emailComposer } from '@/chief-of-staff/action-center/emailComposer';
 import { decisionMemoryEngine } from '@/chief-of-staff/decision-memory/decisionMemoryEngine';
 import { decisionPatterns, type DecisionPattern } from '@/chief-of-staff/decision-memory/decisionPatterns';
 import { getTopEvents, updateEventStatus, resolveEvent, type CEOEvent } from '@/lib/eventConsolidationEngine';
-import { Lightbulb } from 'lucide-react';
+import { generatePreemptiveAction, getActionTypeLabel, type PreemptiveAction } from '@/lib/preemptiveActionEngine';
+import { Lightbulb, Mail, ListTodo, ClipboardCheck } from 'lucide-react';
 
 const statusBadge = (status: string) => {
   const colors: Record<string, string> = {
@@ -57,6 +58,7 @@ export default function WorkRoom() {
   const [memoryPatterns, setMemoryPatterns] = useState<DecisionPattern[]>(() => decisionPatterns.getTopPatterns(5));
   const [memoryStats, setMemoryStats] = useState(() => decisionMemoryEngine.getStats());
   const [activeEvent, setActiveEvent] = useState<CEOEvent | null>(null);
+  const [preemptiveAction, setPreemptiveAction] = useState<PreemptiveAction | null>(null);
 
   const [resolving, setResolving] = useState(false);
 
@@ -83,6 +85,14 @@ export default function WorkRoom() {
     setActiveEvent({ ...activeEvent, status: 'resolved', resolved_at: new Date().toISOString() });
     setResolving(false);
   };
+
+  // Compute pre-emptive action when opened from a prediction
+  useEffect(() => {
+    if (predictionName && predictionType) {
+      const action = generatePreemptiveAction(predictionName, predictionType);
+      setPreemptiveAction(action);
+    }
+  }, [predictionName, predictionType]);
 
   // Ensure decision memory is loaded
   React.useEffect(() => {
@@ -172,17 +182,14 @@ export default function WorkRoom() {
           </section>
         )}
 
-        {/* === PREDICTION CONTEXT BANNER (if linked from predicted risk) === */}
+        {/* === PREDICTION CONTEXT BANNER + PRE-EMPTIVE ACTION (if linked from predicted risk) === */}
         {predictionName && !activeEvent && (
-          <section className="bg-gradient-to-r from-purple-50 to-purple-100/50 dark:from-purple-900/20 dark:to-purple-800/10 rounded-xl border border-purple-200/50 dark:border-purple-800/30 p-4">
+          <section className="bg-gradient-to-r from-purple-50 to-purple-100/50 dark:from-purple-900/20 dark:to-purple-800/10 rounded-xl border border-purple-200/50 dark:border-purple-800/30 p-4 space-y-3">
             <div className="flex items-start gap-3">
               <Lightbulb size={18} className="text-purple-500 flex-shrink-0 mt-0.5" />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-gray-900 dark:text-white">
                   Predicted: {predictionName}
-                </p>
-                <p className="text-xs text-gray-600 dark:text-gray-300 mt-1">
-                  <span className="font-medium">Objective:</span> Prepare an action plan for this predicted event based on recurring patterns.
                 </p>
                 {predictionType && (
                   <p className="text-xs text-purple-600 dark:text-purple-400 mt-1">
@@ -194,6 +201,53 @@ export default function WorkRoom() {
                 Predicted
               </span>
             </div>
+
+            {/* Pre-emptive Action Card */}
+            {preemptiveAction && (
+              <div className="bg-white/70 dark:bg-gray-800/50 rounded-lg border border-purple-100 dark:border-purple-800/20 p-3 space-y-3">
+                <div>
+                  <p className="text-xs font-medium text-gray-900 dark:text-white">
+                    <span className={getActionTypeLabel(preemptiveAction.action_type).color}>
+                      Suggested Action:
+                    </span>{' '}
+                    {preemptiveAction.recommended_action}
+                  </p>
+                  <p className="text-[10px] text-red-500 dark:text-red-400 mt-1">
+                    Risk: {preemptiveAction.risk_context}
+                  </p>
+                </div>
+
+                {/* Quick Execution Options */}
+                <div className="flex flex-wrap gap-2">
+                  {preemptiveAction.quick_options.map((opt) => {
+                    const icons = { draft_email: Mail, create_task: ListTodo, log_check: ClipboardCheck };
+                    const Icon = icons[opt.type] || ClipboardCheck;
+                    return (
+                      <button
+                        key={opt.type}
+                        onClick={() => {
+                          // Pre-load the prompt into the Chief of Staff chat input
+                          const chatInput = document.querySelector<HTMLInputElement>('[data-chat-input]');
+                          if (chatInput) {
+                            const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+                              window.HTMLInputElement.prototype, 'value'
+                            )?.set;
+                            nativeInputValueSetter?.call(chatInput, opt.prompt);
+                            chatInput.dispatchEvent(new Event('input', { bubbles: true }));
+                            chatInput.focus();
+                            chatInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                          }
+                        }}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium bg-[#0A385A]/10 text-[#0A385A] hover:bg-[#0A385A]/20 dark:bg-[#0A385A]/30 dark:text-teal-300 dark:hover:bg-[#0A385A]/40 transition-colors"
+                      >
+                        <Icon size={12} />
+                        {opt.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </section>
         )}
 

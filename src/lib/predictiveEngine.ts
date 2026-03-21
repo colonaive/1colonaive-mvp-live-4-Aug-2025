@@ -13,6 +13,7 @@
 
 import { supabase } from '@/supabase';
 import type { EventType } from '@/lib/eventConsolidationEngine';
+import { generatePreemptiveAction, type PreemptiveAction } from '@/lib/preemptiveActionEngine';
 
 /* ── Types ── */
 
@@ -24,8 +25,18 @@ export interface CEOPrediction {
   confidence_score: number;
   source_event_ids: string[];
   status: 'active' | 'dismissed' | 'occurred' | 'expired';
+  recommended_action: string | null;
+  action_generated_at: string | null;
   created_at: string;
   updated_at: string;
+}
+
+/**
+ * Get the pre-emptive action for a prediction (computed, not stored).
+ * Used by UI to display action details and quick options.
+ */
+export function getPredictionAction(prediction: CEOPrediction): PreemptiveAction {
+  return generatePreemptiveAction(prediction.predicted_event_name, prediction.event_type);
 }
 
 interface ResolvedEvent {
@@ -225,13 +236,18 @@ export async function generatePredictions(): Promise<CEOPrediction[]> {
     const sixtyDaysOut = new Date(now.getTime() + 60 * 24 * 60 * 60 * 1000);
     if (predictedDate < now || predictedDate > sixtyDaysOut) continue;
 
+    const predName = generatePredictionName(group);
+    const action = generatePreemptiveAction(predName, group.event_type);
+
     predictions.push({
       event_type: group.event_type as EventType,
-      predicted_event_name: generatePredictionName(group),
+      predicted_event_name: predName,
       predicted_date: predictedDate.toISOString().split('T')[0],
       confidence_score: confidence,
       source_event_ids: group.events.map((e) => e.id),
       status: 'active',
+      recommended_action: action.recommended_action,
+      action_generated_at: new Date().toISOString(),
     });
   }
 

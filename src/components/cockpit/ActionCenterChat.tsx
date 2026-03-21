@@ -784,6 +784,7 @@ const ActionCenterChat: React.FC<ActionCenterChatProps> = ({ onAction }) => {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
+          data-chat-input
           placeholder={pendingAction ? `Describe the ${pendingAction.type.replace('-', ' ')}...` : isListening ? 'Listening...' : 'Type a message or instruction...'}
           className="flex-1 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 text-xs text-gray-800 dark:text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-teal-500"
         />
