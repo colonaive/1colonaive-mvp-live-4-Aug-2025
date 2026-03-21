@@ -24,8 +24,8 @@ import { decisionMemoryEngine } from '@/chief-of-staff/decision-memory/decisionM
 import { decisionPatterns, type DecisionPattern } from '@/chief-of-staff/decision-memory/decisionPatterns';
 import { getTopEvents, updateEventStatus, resolveEvent, type CEOEvent } from '@/lib/eventConsolidationEngine';
 import { generatePreemptiveAction, getActionTypeLabel, type PreemptiveAction } from '@/lib/preemptiveActionEngine';
-import { logActionExecution, updatePredictionActionStatus } from '@/lib/predictiveEngine';
-import { Lightbulb, Mail, ListTodo, ClipboardCheck } from 'lucide-react';
+import { logActionExecution, updatePredictionActionStatus, submitActionFeedback } from '@/lib/predictiveEngine';
+import { Lightbulb, Mail, ListTodo, ClipboardCheck, ThumbsUp, ThumbsDown, PenLine, MessageSquare } from 'lucide-react';
 
 const statusBadge = (status: string) => {
   const colors: Record<string, string> = {
@@ -64,6 +64,20 @@ export default function WorkRoom() {
 
   const [resolving, setResolving] = useState(false);
 
+  // Outcome feedback state
+  const [feedbackLogId, setFeedbackLogId] = useState<string | null>(null);
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState<string | null>(null);
+  const [feedbackNotes, setFeedbackNotes] = useState('');
+  const [showNotesInput, setShowNotesInput] = useState(false);
+
+  const handleFeedback = async (feedback: 'useful' | 'not_useful' | 'modified') => {
+    if (!feedbackLogId) return;
+    await submitActionFeedback(feedbackLogId, feedback, feedbackNotes || undefined);
+    setFeedbackSubmitted(feedback);
+    setShowNotesInput(false);
+    setFeedbackNotes('');
+  };
+
   // Load event context if event_id is present — transition to in_progress
   useEffect(() => {
     if (!eventId) return;
@@ -84,7 +98,11 @@ export default function WorkRoom() {
     if (!activeEvent) return;
     setResolving(true);
     await resolveEvent(activeEvent.id).catch(() => {});
-    await logActionExecution('event', activeEvent.id, 'resolved').catch(() => {});
+    const logId = await logActionExecution('event', activeEvent.id, 'resolved').catch(() => null);
+    if (logId) {
+      setFeedbackLogId(logId);
+      setFeedbackSubmitted(null);
+    }
     setActiveEvent({ ...activeEvent, status: 'resolved', resolved_at: new Date().toISOString() });
     setResolving(false);
   };
@@ -228,10 +246,14 @@ export default function WorkRoom() {
                     return (
                       <button
                         key={opt.type}
-                        onClick={() => {
+                        onClick={async () => {
                           // Log the action execution
                           if (predictionId) {
-                            logActionExecution('prediction', predictionId, opt.type).catch(() => {});
+                            const logId = await logActionExecution('prediction', predictionId, opt.type).catch(() => null);
+                            if (logId) {
+                              setFeedbackLogId(logId);
+                              setFeedbackSubmitted(null);
+                            }
                             updatePredictionActionStatus(predictionId, 'executed').catch(() => {});
                           }
                           // Pre-load the prompt into the Chief of Staff chat input
@@ -254,6 +276,60 @@ export default function WorkRoom() {
                     );
                   })}
                 </div>
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* === ACTION OUTCOME FEEDBACK === */}
+        {feedbackLogId && (
+          <section className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <MessageSquare size={14} className="text-[#0F766E]" />
+              <p className="text-xs font-semibold text-gray-900 dark:text-white">Was this action useful?</p>
+            </div>
+            {feedbackSubmitted ? (
+              <p className="text-xs text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
+                <CheckCircle2 size={14} />
+                Feedback recorded: <span className="font-medium">{feedbackSubmitted.replace('_', ' ')}</span>
+              </p>
+            ) : (
+              <div className="space-y-3">
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleFeedback('useful')}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-300 dark:hover:bg-emerald-900/50 transition-colors"
+                  >
+                    <ThumbsUp size={12} /> Yes
+                  </button>
+                  <button
+                    onClick={() => handleFeedback('not_useful')}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium bg-red-50 text-red-700 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-300 dark:hover:bg-red-900/50 transition-colors"
+                  >
+                    <ThumbsDown size={12} /> No
+                  </button>
+                  <button
+                    onClick={() => handleFeedback('modified')}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium bg-amber-50 text-amber-700 hover:bg-amber-100 dark:bg-amber-900/30 dark:text-amber-300 dark:hover:bg-amber-900/50 transition-colors"
+                  >
+                    <PenLine size={12} /> Modified
+                  </button>
+                  <button
+                    onClick={() => setShowNotesInput(!showNotesInput)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium bg-gray-50 text-gray-600 hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 transition-colors"
+                  >
+                    <MessageSquare size={12} /> Add Note
+                  </button>
+                </div>
+                {showNotesInput && (
+                  <input
+                    type="text"
+                    value={feedbackNotes}
+                    onChange={(e) => setFeedbackNotes(e.target.value)}
+                    placeholder="Optional: why was this useful or not?"
+                    className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-xs text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#0F766E]"
+                  />
+                )}
               </div>
             )}
           </section>

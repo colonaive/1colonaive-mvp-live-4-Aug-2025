@@ -369,20 +369,41 @@ export async function updatePredictionActionStatus(
 
 /**
  * Log an action execution (for Work Room tracking).
+ * Returns the inserted log ID for feedback tracking.
  */
 export async function logActionExecution(
   sourceType: 'event' | 'prediction',
   sourceId: string,
   actionType: string,
-): Promise<void> {
+): Promise<string | null> {
   try {
-    await supabase.from('ceo_action_logs').insert({
+    const { data } = await supabase.from('ceo_action_logs').insert({
       source_type: sourceType,
       source_id: sourceId,
       action_type: actionType,
-    });
+    }).select('id').single();
+    return data?.id ?? null;
   } catch {
     // Silent fail — logging is non-blocking
+    return null;
+  }
+}
+
+/**
+ * Submit outcome feedback for a logged action.
+ */
+export async function submitActionFeedback(
+  logId: string,
+  feedback: 'useful' | 'not_useful' | 'modified',
+  notes?: string,
+): Promise<void> {
+  try {
+    await supabase.from('ceo_action_logs').update({
+      outcome_feedback: feedback,
+      feedback_notes: notes || null,
+    }).eq('id', logId);
+  } catch {
+    // Silent fail — feedback is non-blocking
   }
 }
 
