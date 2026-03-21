@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import {
   Newspaper,
   Users,
@@ -12,6 +12,7 @@ import {
   ClipboardList,
   Inbox,
   Wrench,
+  AlertTriangle,
 } from 'lucide-react';
 import ActionCenterChat from '@/components/cockpit/ActionCenterChat';
 import { chatEngine } from '@/chief-of-staff/action-center/chatEngine';
@@ -19,6 +20,7 @@ import { promptGenerator } from '@/chief-of-staff/action-center/promptGenerator'
 import { emailComposer } from '@/chief-of-staff/action-center/emailComposer';
 import { decisionMemoryEngine } from '@/chief-of-staff/decision-memory/decisionMemoryEngine';
 import { decisionPatterns, type DecisionPattern } from '@/chief-of-staff/decision-memory/decisionPatterns';
+import { getTopEvents, type CEOEvent } from '@/lib/eventConsolidationEngine';
 
 const statusBadge = (status: string) => {
   const colors: Record<string, string> = {
@@ -43,9 +45,22 @@ const quickActions = [
 ];
 
 export default function WorkRoom() {
+  const [searchParams] = useSearchParams();
+  const eventId = searchParams.get('event_id');
+
   const [, setWidgetTick] = useState(0);
   const [memoryPatterns, setMemoryPatterns] = useState<DecisionPattern[]>(() => decisionPatterns.getTopPatterns(5));
   const [memoryStats, setMemoryStats] = useState(() => decisionMemoryEngine.getStats());
+  const [activeEvent, setActiveEvent] = useState<CEOEvent | null>(null);
+
+  // Load event context if event_id is present
+  useEffect(() => {
+    if (!eventId) return;
+    getTopEvents(10).then((events) => {
+      const found = events.find((e) => e.id === eventId);
+      if (found) setActiveEvent(found);
+    }).catch(() => {});
+  }, [eventId]);
 
   // Ensure decision memory is loaded
   React.useEffect(() => {
@@ -84,6 +99,40 @@ export default function WorkRoom() {
       </div>
 
       <div className="max-w-5xl mx-auto px-6 py-6 space-y-6">
+
+        {/* === EVENT CONTEXT BANNER (if linked from cockpit) === */}
+        {activeEvent && (
+          <section className="bg-gradient-to-r from-[#0A385A]/5 to-[#0F766E]/5 dark:from-[#0A385A]/20 dark:to-[#0F766E]/20 rounded-xl border border-[#0F766E]/20 p-4">
+            <div className="flex items-start gap-3">
+              <AlertTriangle size={18} className={
+                activeEvent.risk_level === 'critical' ? 'text-red-500' :
+                activeEvent.risk_level === 'high' ? 'text-amber-500' :
+                'text-[#0F766E]'
+              } />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-gray-900 dark:text-white">{activeEvent.event_name}</p>
+                {activeEvent.next_action && (
+                  <p className="text-xs text-gray-600 dark:text-gray-300 mt-1">
+                    <span className="font-medium">Next:</span> {activeEvent.next_action}
+                  </p>
+                )}
+                {activeEvent.risk_summary && activeEvent.risk_summary !== 'No identified risks' && (
+                  <p className="text-xs text-red-500 dark:text-red-400 mt-1">
+                    <span className="font-medium">Risk:</span> {activeEvent.risk_summary}
+                  </p>
+                )}
+                <p className="text-[10px] text-gray-400 mt-1">{activeEvent.summary}</p>
+              </div>
+              <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-medium uppercase flex-shrink-0 ${
+                activeEvent.risk_level === 'critical' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' :
+                activeEvent.risk_level === 'high' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' :
+                'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
+              }`}>
+                {activeEvent.risk_level}
+              </span>
+            </div>
+          </section>
+        )}
 
         {/* === ASK CHIEF OF STAFF (AI Chat) === */}
         <section>

@@ -5,12 +5,9 @@ import {
   ChevronUp,
   RefreshCw,
   Target,
-  AlertTriangle,
   BarChart3,
-  Activity,
   Inbox,
   Shield,
-  Brain,
   Linkedin,
   Radar,
   UserCircle,
@@ -20,8 +17,8 @@ import {
   Briefcase,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { getTodayFocus, dismissNudge, type TodayFocus } from '@/lib/proactiveEngine';
-import { generateFounderBriefing, type FounderBriefing } from '@/lib/founderBriefing';
+import { consolidateEvents, getTopEvents, type CEOEvent } from '@/lib/eventConsolidationEngine';
+import { dismissNudge, generateProactiveSignals, type ProactiveNudge } from '@/lib/proactiveEngine';
 import { taskEngine } from '@/chief-of-staff/tasks/taskEngine';
 import { operationsEngine } from '@/chief-of-staff/operations/operationsEngine';
 import { investorGenerator } from '@/chief-of-staff/investors/investorGenerator';
@@ -33,33 +30,52 @@ const today = new Date().toLocaleDateString('en-SG', {
   day: 'numeric',
 });
 
+/* ── Risk level badge colors ── */
+
+const riskColors: Record<string, { bg: string; text: string; dot: string }> = {
+  critical: { bg: 'bg-red-100 dark:bg-red-900/30', text: 'text-red-700 dark:text-red-300', dot: 'bg-red-500' },
+  high: { bg: 'bg-amber-100 dark:bg-amber-900/30', text: 'text-amber-700 dark:text-amber-300', dot: 'bg-amber-500' },
+  medium: { bg: 'bg-blue-100 dark:bg-blue-900/30', text: 'text-blue-700 dark:text-blue-300', dot: 'bg-blue-500' },
+  low: { bg: 'bg-gray-100 dark:bg-gray-700', text: 'text-gray-600 dark:text-gray-400', dot: 'bg-gray-400' },
+};
+
+const eventTypeLabels: Record<string, string> = {
+  logistics: 'Logistics',
+  investor: 'Investor',
+  regulatory: 'Regulatory',
+  product: 'Product',
+  clinical: 'Clinical',
+  partnership: 'Partnership',
+  general: 'General',
+};
+
 const CEOCockpit: React.FC = () => {
   const navigate = useNavigate();
 
-  // Section 1: Today's events
-  const [todayFocus, setTodayFocus] = useState<TodayFocus | null>(null);
-  const [todayLoading, setTodayLoading] = useState(true);
+  // Section 1: Consolidated events
+  const [events, setEvents] = useState<CEOEvent[]>([]);
+  const [eventsLoading, setEventsLoading] = useState(true);
+  const [nudges, setNudges] = useState<ProactiveNudge[]>([]);
 
-  // Section 2: Priority snapshot (collapsible)
+  // Section 2: Priority snapshot (collapsible) — kept for deep-dive
   const [priorityOpen, setPriorityOpen] = useState(false);
-  const [founderBriefing, setFounderBriefing] = useState<FounderBriefing | null>(null);
-  const [founderLoading, setFounderLoading] = useState(true);
 
   // Section 3: KPI snapshot (collapsible)
   const [kpiOpen, setKpiOpen] = useState(false);
 
   useEffect(() => {
-    setTodayLoading(true);
-    getTodayFocus()
-      .then((f) => setTodayFocus(f))
-      .catch(() => {})
-      .finally(() => setTodayLoading(false));
+    setEventsLoading(true);
 
-    setFounderLoading(true);
-    generateFounderBriefing()
-      .then((b) => setFounderBriefing(b))
-      .catch(() => {})
-      .finally(() => setFounderLoading(false));
+    // Run consolidation pipeline + nudges in parallel
+    Promise.all([
+      consolidateEvents().catch(() => getTopEvents(5).catch(() => [])),
+      generateProactiveSignals().catch(() => []),
+    ])
+      .then(([consolidatedEvents, proactiveNudges]) => {
+        setEvents(consolidatedEvents);
+        setNudges(proactiveNudges);
+      })
+      .finally(() => setEventsLoading(false));
   }, []);
 
   // KPI data (synchronous)
@@ -89,19 +105,19 @@ const CEOCockpit: React.FC = () => {
       <div className="max-w-5xl mx-auto px-6 py-6 space-y-6">
 
         {/* ============================================================
-            SECTION 1 — TODAY: Execute Now
+            SECTION 1 — Consolidated Events
             ============================================================ */}
         <section>
           <h2 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wide mb-3">
             Today — Execute Now
           </h2>
 
-          {todayLoading ? (
+          {eventsLoading ? (
             <div className="flex items-center justify-center py-10 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
               <RefreshCw size={18} className="animate-spin text-gray-400" />
-              <span className="ml-2 text-sm text-gray-400">Scanning for priorities...</span>
+              <span className="ml-2 text-sm text-gray-400">Consolidating events...</span>
             </div>
-          ) : !todayFocus || todayFocus.topPriorities.length === 0 ? (
+          ) : events.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-10 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 text-center">
               <Zap size={28} className="text-gray-300 dark:text-gray-600 mb-2" />
               <p className="text-sm text-gray-400">No consolidated events require attention right now.</p>
@@ -110,36 +126,48 @@ const CEOCockpit: React.FC = () => {
             <div className="space-y-3">
               {/* Event cards — max 5 */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                {todayFocus.topPriorities.slice(0, 5).map((gp) => {
-                  const projectColors: Record<string, string> = {
-                    colonaive: 'border-l-teal-500',
-                    durmah: 'border-l-blue-500',
-                    sciencehod: 'border-l-purple-500',
-                    sgrenovate: 'border-l-orange-500',
-                  };
+                {events.slice(0, 5).map((evt) => {
+                  const colors = riskColors[evt.risk_level] || riskColors.low;
                   return (
                     <div
-                      key={`ev-${gp.rank}`}
-                      className={`bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 border-l-4 ${projectColors[gp.project] || 'border-l-gray-400'} p-4 flex flex-col justify-between`}
+                      key={evt.id}
+                      className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 flex flex-col justify-between"
                     >
                       <div>
+                        {/* Header: risk dot + type badge + priority */}
                         <div className="flex items-center gap-2 mb-2">
-                          <span className={`inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold ${
-                            gp.rank === 1 ? 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300'
-                            : gp.rank === 2 ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
-                            : 'bg-gray-100 text-gray-600 dark:bg-gray-600 dark:text-gray-300'
-                          }`}>{gp.rank}</span>
-                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 uppercase font-medium">
-                            {gp.projectLabel}
+                          <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${colors.dot}`} />
+                          <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-medium uppercase ${colors.bg} ${colors.text}`}>
+                            {eventTypeLabels[evt.event_type] || evt.event_type}
                           </span>
+                          <span className="text-[10px] text-gray-400 ml-auto">{evt.priority_score}/100</span>
                         </div>
-                        <p className="text-sm font-medium text-gray-900 dark:text-white leading-snug">{gp.title}</p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
-                          <span className="font-medium text-gray-600 dark:text-gray-300">Next:</span> {gp.reason.slice(0, 100)}
+
+                        {/* Event name */}
+                        <p className="text-sm font-medium text-gray-900 dark:text-white leading-snug line-clamp-2">
+                          {evt.event_name}
                         </p>
+
+                        {/* Next action */}
+                        {evt.next_action && (
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
+                            <span className="font-medium text-gray-600 dark:text-gray-300">Next:</span> {evt.next_action}
+                          </p>
+                        )}
+
+                        {/* Risk summary */}
+                        {evt.risk_summary && evt.risk_summary !== 'No identified risks' && (
+                          <p className="text-xs text-red-500 dark:text-red-400 mt-1 line-clamp-1">
+                            <span className="font-medium">Risk:</span> {evt.risk_summary}
+                          </p>
+                        )}
+
+                        {/* Signal count */}
+                        <p className="text-[10px] text-gray-400 mt-2">{evt.summary}</p>
                       </div>
+
                       <button
-                        onClick={() => navigate('/admin/workroom')}
+                        onClick={() => navigate(`/admin/workroom?event_id=${evt.id}`)}
                         className="mt-3 w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-[#0A385A] hover:bg-[#0A385A]/90 text-white text-xs font-medium transition-colors"
                       >
                         Open Work Room
@@ -151,9 +179,9 @@ const CEOCockpit: React.FC = () => {
               </div>
 
               {/* Nudges (inline, compact) */}
-              {todayFocus.nudges.length > 0 && (
+              {nudges.length > 0 && (
                 <div className="space-y-1.5">
-                  {todayFocus.nudges.slice(0, 3).map((nudge) => (
+                  {nudges.slice(0, 3).map((nudge) => (
                     <div
                       key={nudge.id}
                       className={`flex items-center gap-2 rounded-lg px-3 py-2 ${
@@ -173,7 +201,7 @@ const CEOCockpit: React.FC = () => {
                       <button
                         onClick={() => {
                           dismissNudge(nudge.id);
-                          setTodayFocus((prev) => prev ? { ...prev, nudges: prev.nudges.filter((n) => n.id !== nudge.id) } : prev);
+                          setNudges((prev) => prev.filter((n) => n.id !== nudge.id));
                         }}
                         className="text-gray-300 hover:text-gray-500 dark:text-gray-600 dark:hover:text-gray-400 flex-shrink-0"
                         title="Dismiss"
@@ -187,17 +215,15 @@ const CEOCockpit: React.FC = () => {
 
               {/* Footer */}
               <div className="flex items-center gap-4 text-[10px] text-gray-400">
-                <span>{todayFocus.nudges.length} nudge{todayFocus.nudges.length !== 1 ? 's' : ''}</span>
-                {todayFocus.upcomingCount > 0 && (
-                  <span className="text-blue-500">{todayFocus.upcomingCount} upcoming (48h)</span>
-                )}
+                <span>{events.length} event{events.length !== 1 ? 's' : ''} consolidated</span>
+                <span>{nudges.length} nudge{nudges.length !== 1 ? 's' : ''}</span>
               </div>
             </div>
           )}
         </section>
 
         {/* ============================================================
-            SECTION 2 — Priority Snapshot (collapsible)
+            SECTION 2 — Priority Snapshot (collapsible, deep-dive)
             ============================================================ */}
         <section className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
           <button
@@ -206,10 +232,10 @@ const CEOCockpit: React.FC = () => {
           >
             <div className="flex items-center gap-2">
               <Target size={16} className="text-[#0F766E]" />
-              <span className="text-sm font-semibold text-gray-900 dark:text-white">Priority Snapshot</span>
-              {founderBriefing && (
+              <span className="text-sm font-semibold text-gray-900 dark:text-white">Event Detail</span>
+              {events.length > 0 && (
                 <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400">
-                  {founderBriefing.topPriorities.length} priorities &middot; {founderBriefing.criticalRisks.length} risks
+                  {events.length} event{events.length !== 1 ? 's' : ''} &middot; {events.filter((e) => e.risk_level === 'critical' || e.risk_level === 'high').length} high-risk
                 </span>
               )}
             </div>
@@ -218,60 +244,31 @@ const CEOCockpit: React.FC = () => {
 
           {priorityOpen && (
             <div className="px-5 pb-4 border-t border-gray-100 dark:border-gray-700 pt-3">
-              {founderLoading ? (
-                <div className="flex items-center justify-center py-6">
-                  <RefreshCw size={16} className="animate-spin text-gray-400" />
-                  <span className="ml-2 text-xs text-gray-400">Loading intelligence...</span>
-                </div>
-              ) : !founderBriefing ? (
-                <p className="text-xs text-gray-400 text-center py-4">No intelligence data available.</p>
+              {events.length === 0 ? (
+                <p className="text-xs text-gray-400 text-center py-4">No events to show.</p>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Top Priorities */}
-                  <div>
-                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2 flex items-center gap-1">
-                      <Target size={12} /> Top Priorities
-                    </p>
-                    {founderBriefing.topPriorities.length === 0 ? (
-                      <p className="text-xs text-gray-400 italic">None identified.</p>
-                    ) : (
-                      <ul className="space-y-1.5">
-                        {founderBriefing.topPriorities.slice(0, 5).map((a) => (
-                          <li key={a.id} className="flex items-start gap-2 text-xs text-gray-700 dark:text-gray-300">
-                            <span className={`mt-0.5 w-2 h-2 rounded-full flex-shrink-0 ${
-                              a.scores.priority >= 70 ? 'bg-red-500' : a.scores.priority >= 50 ? 'bg-amber-500' : 'bg-emerald-500'
-                            }`} />
-                            <span className="line-clamp-1">{a.title}</span>
-                            <span className="ml-auto text-[10px] text-gray-400 flex-shrink-0">{a.scores.priority}/100</span>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-
-                  {/* Critical Risks */}
-                  <div>
-                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2 flex items-center gap-1">
-                      <AlertTriangle size={12} /> Critical Risks
-                    </p>
-                    {founderBriefing.criticalRisks.length === 0 ? (
-                      <p className="text-xs text-emerald-600 dark:text-emerald-400">No critical risks. Signal landscape clear.</p>
-                    ) : (
-                      <ul className="space-y-1.5">
-                        {founderBriefing.criticalRisks.slice(0, 5).map((r) => (
-                          <li key={r.id} className="flex items-start gap-2 text-xs text-gray-700 dark:text-gray-300">
-                            <span className={`mt-0.5 w-2 h-2 rounded-full flex-shrink-0 ${
-                              r.severity === 'high' ? 'bg-red-500' : r.severity === 'medium' ? 'bg-amber-500' : 'bg-gray-400'
-                            }`} />
-                            <span className="line-clamp-1">{r.title}</span>
-                            <span className={`ml-auto text-[10px] flex-shrink-0 uppercase font-medium ${
-                              r.severity === 'high' ? 'text-red-500' : r.severity === 'medium' ? 'text-amber-500' : 'text-gray-400'
-                            }`}>{r.severity}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
+                <div className="space-y-3">
+                  {events.map((evt) => {
+                    const colors = riskColors[evt.risk_level] || riskColors.low;
+                    return (
+                      <div key={evt.id} className="flex items-start gap-3 text-xs">
+                        <span className={`mt-1 w-2 h-2 rounded-full flex-shrink-0 ${colors.dot}`} />
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-gray-900 dark:text-white">{evt.event_name}</p>
+                          <p className="text-gray-500 dark:text-gray-400 mt-0.5">{evt.next_action}</p>
+                          {evt.risk_summary && evt.risk_summary !== 'No identified risks' && (
+                            <p className="text-red-500 dark:text-red-400 mt-0.5">Risk: {evt.risk_summary}</p>
+                          )}
+                        </div>
+                        <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                          <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium uppercase ${colors.bg} ${colors.text}`}>
+                            {evt.risk_level}
+                          </span>
+                          <span className="text-[10px] text-gray-400">{evt.priority_score}/100</span>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </div>
