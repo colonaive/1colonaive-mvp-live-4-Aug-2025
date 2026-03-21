@@ -8,6 +8,7 @@
  * the system must answer "What should I do NOW to prevent this?"
  */
 
+import { supabase } from '@/supabase';
 import type { EventType } from '@/lib/eventConsolidationEngine';
 
 /* ── Types ── */
@@ -211,10 +212,12 @@ const FALLBACK_BY_TYPE: Record<string, PreemptiveAction> = {
 /**
  * Generate a pre-emptive action for a prediction.
  * Matches against known patterns — no hallucinated actions.
+ * Logs unmatched predictions for future training.
  */
 export function generatePreemptiveAction(
   predictedEventName: string,
   eventType: string,
+  predictionId?: string,
 ): PreemptiveAction {
   const nameLower = predictedEventName.toLowerCase();
 
@@ -235,8 +238,34 @@ export function generatePreemptiveAction(
     };
   }
 
-  // Fallback by event type
-  return FALLBACK_BY_TYPE[eventType] || FALLBACK_BY_TYPE.general;
+  // No rule match — log to ceo_unmatched_predictions for future training
+  logUnmatchedPrediction(predictionId || null, eventType, predictedEventName);
+
+  // Fallback: universal safe action
+  const fallback = FALLBACK_BY_TYPE[eventType] || FALLBACK_BY_TYPE.general;
+  return {
+    ...fallback,
+    recommended_action: fallback.recommended_action || 'Review situation and determine next step',
+  };
+}
+
+/**
+ * Log an unmatched prediction for future rule development.
+ */
+function logUnmatchedPrediction(
+  predictionId: string | null,
+  eventType: string,
+  predictedEventName: string,
+): void {
+  try {
+    supabase.from('ceo_unmatched_predictions').insert({
+      prediction_id: predictionId,
+      event_type: eventType,
+      predicted_event_name: predictedEventName,
+    });
+  } catch {
+    // Silent fail — logging is non-blocking
+  }
 }
 
 /**

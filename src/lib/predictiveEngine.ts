@@ -27,9 +27,22 @@ export interface CEOPrediction {
   status: 'active' | 'dismissed' | 'occurred' | 'expired';
   recommended_action: string | null;
   action_generated_at: string | null;
+  action_status: 'pending' | 'executed' | 'ignored';
+  source_system: string;
   created_at: string;
   updated_at: string;
 }
+
+/* ── Hardening Constants ── */
+
+/** Only display predictions with confidence >= this threshold */
+const DISPLAY_CONFIDENCE_THRESHOLD = 55;
+/** Maximum predictions shown in cockpit */
+const MAX_COCKPIT_PREDICTIONS = 3;
+/** Events within this window (hours) are treated as one occurrence */
+const CLUSTER_DEDUP_HOURS = 48;
+/** Predictions expire after this many days past predicted_date */
+const PREDICTION_EXPIRY_DAYS = 2;
 
 /**
  * Get the pre-emptive action for a prediction (computed, not stored).
@@ -99,6 +112,33 @@ function groupByPattern(events: ResolvedEvent[]): PatternGroup[] {
   }
 
   return Array.from(groups.values());
+}
+
+/**
+ * Cluster-deduplicate events that occur within CLUSTER_DEDUP_HOURS of each other.
+ * Treats closely-spaced events as ONE occurrence to prevent false recurrence inflation.
+ */
+function clusterDedup(events: ResolvedEvent[]): ResolvedEvent[] {
+  if (events.length <= 1) return events;
+
+  const sorted = [...events].sort((a, b) => {
+    const dateA = new Date(a.resolved_at || a.created_at).getTime();
+    const dateB = new Date(b.resolved_at || b.created_at).getTime();
+    return dateA - dateB;
+  });
+
+  const deduped: ResolvedEvent[] = [sorted[0]];
+  const thresholdMs = CLUSTER_DEDUP_HOURS * 60 * 60 * 1000;
+
+  for (let i = 1; i < sorted.length; i++) {
+    const prevTime = new Date(deduped[deduped.length - 1].resolved_at || deduped[deduped.length - 1].created_at).getTime();
+    const currTime = new Date(sorted[i].resolved_at || sorted[i].created_at).getTime();
+    if (currTime - prevTime > thresholdMs) {
+      deduped.push(sorted[i]);
+    }
+  }
+
+  return deduped;
 }
 
 /**
@@ -213,7 +253,10 @@ export async function generatePredictions(): Promise<CEOPrediction[]> {
   const predictions: Omit<CEOPrediction, 'id' | 'created_at' | 'updated_at'>[] = [];
 
   for (const group of groups) {
-    if (group.events.length < 2) continue; // Need at least 2 occurrences
+    // Cluster-deduplicate: events within 48h count as ONE occurrence
+    group.events = clusterDedup(group.events);
+
+    if (group.events.length < 2) continue; // Need at least 2 real occurrences
 
     const gapAnalysis = calculateAverageGap(group.events);
     if (!gapAnalysis) continue;
@@ -222,7 +265,7 @@ export async function generatePredictions(): Promise<CEOPrediction[]> {
     if (avgGapDays <= 0 || avgGapDays > 180) continue; // Skip unreasonable gaps
 
     const confidence = computeConfidence(group, consistency);
-    if (confidence < 35) continue; // Skip low-confidence predictions
+    if (confidence < 35) continue; // Skip low-confidence predictions (kept in DB but not displayed if < 55)
 
     // Predict next occurrence: last event date + average gap
     const lastEventDate = group.events.reduce((latest, e) => {
@@ -248,22 +291,33 @@ export async function generatePredictions(): Promise<CEOPrediction[]> {
       status: 'active',
       recommended_action: action.recommended_action,
       action_generated_at: new Date().toISOString(),
+      action_status: 'pending',
+      source_system: 'colonaive',
     });
   }
 
-  // Step 5: Persist — expire old active predictions, insert fresh ones
+  // Step 5: Expire old predictions past their date + PREDICTION_EXPIRY_DAYS
   try {
+    const expiryThreshold = new Date(Date.now() - PREDICTION_EXPIRY_DAYS * 24 * 60 * 60 * 1000)
+      .toISOString().split('T')[0];
+    await supabase
+      .from('ceo_predictions')
+      .update({ status: 'expired', updated_at: new Date().toISOString() })
+      .eq('status', 'active')
+      .lt('predicted_date', expiryThreshold);
+
+    // Expire remaining active predictions to refresh
     await supabase
       .from('ceo_predictions')
       .update({ status: 'expired', updated_at: new Date().toISOString() })
       .eq('status', 'active');
 
     if (predictions.length > 0) {
-      // Sort by confidence (highest first), take top 5
+      // Sort by confidence (highest first), take top MAX_COCKPIT_PREDICTIONS
       predictions.sort((a, b) => b.confidence_score - a.confidence_score);
       await supabase
         .from('ceo_predictions')
-        .insert(predictions.slice(0, 5));
+        .insert(predictions.slice(0, MAX_COCKPIT_PREDICTIONS));
     }
   } catch {
     // Silent fail on persistence
@@ -275,6 +329,7 @@ export async function generatePredictions(): Promise<CEOPrediction[]> {
 
 /**
  * Fetch active predictions without re-generating.
+ * Only returns predictions with confidence >= DISPLAY_CONFIDENCE_THRESHOLD.
  * Used for fast cockpit rendering.
  */
 export async function getActivePredictions(): Promise<CEOPrediction[]> {
@@ -282,8 +337,9 @@ export async function getActivePredictions(): Promise<CEOPrediction[]> {
     .from('ceo_predictions')
     .select('*')
     .eq('status', 'active')
+    .gte('confidence_score', DISPLAY_CONFIDENCE_THRESHOLD)
     .order('confidence_score', { ascending: false })
-    .limit(5);
+    .limit(MAX_COCKPIT_PREDICTIONS);
 
   return (data || []) as CEOPrediction[];
 }
@@ -296,6 +352,38 @@ export async function dismissPrediction(predictionId: string): Promise<void> {
     .from('ceo_predictions')
     .update({ status: 'dismissed', updated_at: new Date().toISOString() })
     .eq('id', predictionId);
+}
+
+/**
+ * Mark a prediction's action as executed or ignored.
+ */
+export async function updatePredictionActionStatus(
+  predictionId: string,
+  status: 'executed' | 'ignored',
+): Promise<void> {
+  await supabase
+    .from('ceo_predictions')
+    .update({ action_status: status, updated_at: new Date().toISOString() })
+    .eq('id', predictionId);
+}
+
+/**
+ * Log an action execution (for Work Room tracking).
+ */
+export async function logActionExecution(
+  sourceType: 'event' | 'prediction',
+  sourceId: string,
+  actionType: string,
+): Promise<void> {
+  try {
+    await supabase.from('ceo_action_logs').insert({
+      source_type: sourceType,
+      source_id: sourceId,
+      action_type: actionType,
+    });
+  } catch {
+    // Silent fail — logging is non-blocking
+  }
 }
 
 /**

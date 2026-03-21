@@ -33,9 +33,14 @@ export interface CEOEvent {
   last_updated_at: string | null;
   recurrence_count: number;
   is_recurring: boolean;
+  is_stale: boolean;
+  source_system: string;
   created_at: string;
   updated_at: string;
 }
+
+/** Events without action for this many hours are flagged stale */
+const STALE_THRESHOLD_HOURS = 72;
 
 export type EventType = 'logistics' | 'investor' | 'regulatory' | 'product' | 'clinical' | 'partnership' | 'general';
 export type RiskLevel = 'low' | 'medium' | 'high' | 'critical';
@@ -385,6 +390,8 @@ export async function consolidateEvents(): Promise<CEOEvent[]> {
       last_updated_at: new Date().toISOString(),
       recurrence_count: recurrence.recurrence_count,
       is_recurring: recurrence.is_recurring,
+      is_stale: false,
+      source_system: 'colonaive',
     });
   }
 
@@ -620,4 +627,24 @@ export async function getRecurringEvents(): Promise<CEOEvent[]> {
     .limit(10);
 
   return (data || []) as CEOEvent[];
+}
+
+/**
+ * Detect and flag stale events.
+ * An event is stale if status != resolved AND last_updated_at > STALE_THRESHOLD_HOURS.
+ * Runs during consolidation to keep cockpit clean.
+ */
+export async function detectAndFlagStaleEvents(): Promise<void> {
+  const threshold = new Date(Date.now() - STALE_THRESHOLD_HOURS * 60 * 60 * 1000).toISOString();
+
+  try {
+    await supabase
+      .from('ceo_events')
+      .update({ is_stale: true, updated_at: new Date().toISOString() })
+      .neq('status', 'resolved')
+      .lt('last_updated_at', threshold)
+      .eq('is_stale', false);
+  } catch {
+    // Silent fail
+  }
 }

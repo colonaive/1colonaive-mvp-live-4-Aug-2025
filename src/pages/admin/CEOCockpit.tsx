@@ -22,13 +22,15 @@ import { dismissNudge, generateProactiveSignals, type ProactiveNudge } from '@/l
 import {
   generatePredictions,
   getActivePredictions,
-  dismissPrediction,
+  updatePredictionActionStatus,
+  logActionExecution,
   getConfidenceLabel,
   getTimeframeLabel,
   getPredictionAction,
   type CEOPrediction,
 } from '@/lib/predictiveEngine';
 import { getActionTypeLabel } from '@/lib/preemptiveActionEngine';
+import { detectAndFlagStaleEvents } from '@/lib/eventConsolidationEngine';
 import { taskEngine } from '@/chief-of-staff/tasks/taskEngine';
 import { operationsEngine } from '@/chief-of-staff/operations/operationsEngine';
 import { investorGenerator } from '@/chief-of-staff/investors/investorGenerator';
@@ -81,7 +83,8 @@ const CEOCockpit: React.FC = () => {
     setEventsLoading(true);
     setPredictionsLoading(true);
 
-    // Run consolidation pipeline + nudges + predictions in parallel
+    // Run stale detection, consolidation, nudges, predictions in parallel
+    detectAndFlagStaleEvents().catch(() => {});
     Promise.all([
       consolidateEvents().catch(() => getTopEvents(5).catch(() => [])),
       generateProactiveSignals().catch(() => []),
@@ -182,8 +185,18 @@ const CEOCockpit: React.FC = () => {
                           </p>
                         )}
 
+                        {/* Stale badge */}
+                        {evt.is_stale && (
+                          <div className="flex items-center gap-1 mt-2">
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300">
+                              Stale Issue
+                            </span>
+                            <span className="text-[10px] text-orange-500">No action taken for 3 days</span>
+                          </div>
+                        )}
+
                         {/* Recurring badge */}
-                        {evt.is_recurring && (
+                        {evt.is_recurring && !evt.is_stale && (
                           <div className="flex items-center gap-1 mt-2">
                             <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300">
                               Recurring Issue
@@ -294,20 +307,32 @@ const CEOCockpit: React.FC = () => {
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2 flex-shrink-0">
+                      <div className="flex items-center gap-1.5 flex-shrink-0">
                         <button
-                          onClick={() => navigate(`/admin/workroom?prediction_type=${encodeURIComponent(pred.event_type)}&prediction_name=${encodeURIComponent(pred.predicted_event_name)}`)}
+                          onClick={() => navigate(`/admin/workroom?prediction_type=${encodeURIComponent(pred.event_type)}&prediction_name=${encodeURIComponent(pred.predicted_event_name)}&prediction_id=${pred.id}`)}
                           className="px-3 py-1.5 rounded-lg text-[11px] font-medium bg-[#0A385A] text-white hover:bg-[#0A385A]/90 transition-colors"
                         >
                           Execute in Work Room
                         </button>
                         <button
                           onClick={() => {
-                            dismissPrediction(pred.id);
+                            updatePredictionActionStatus(pred.id, 'executed');
+                            logActionExecution('prediction', pred.id, 'mark_executed');
+                            setPredictions((prev) => prev.filter((p) => p.id !== pred.id));
+                          }}
+                          className="px-2.5 py-1.5 rounded-lg text-[11px] font-medium bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-300 transition-colors"
+                          title="Mark as executed"
+                        >
+                          Mark Executed
+                        </button>
+                        <button
+                          onClick={() => {
+                            updatePredictionActionStatus(pred.id, 'ignored');
+                            logActionExecution('prediction', pred.id, 'ignored');
                             setPredictions((prev) => prev.filter((p) => p.id !== pred.id));
                           }}
                           className="text-gray-300 hover:text-gray-500 dark:text-gray-600 dark:hover:text-gray-400"
-                          title="Dismiss prediction"
+                          title="Ignore prediction"
                         >
                           <X size={14} />
                         </button>

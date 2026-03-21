@@ -24,6 +24,7 @@ import { decisionMemoryEngine } from '@/chief-of-staff/decision-memory/decisionM
 import { decisionPatterns, type DecisionPattern } from '@/chief-of-staff/decision-memory/decisionPatterns';
 import { getTopEvents, updateEventStatus, resolveEvent, type CEOEvent } from '@/lib/eventConsolidationEngine';
 import { generatePreemptiveAction, getActionTypeLabel, type PreemptiveAction } from '@/lib/preemptiveActionEngine';
+import { logActionExecution, updatePredictionActionStatus } from '@/lib/predictiveEngine';
 import { Lightbulb, Mail, ListTodo, ClipboardCheck } from 'lucide-react';
 
 const statusBadge = (status: string) => {
@@ -53,6 +54,7 @@ export default function WorkRoom() {
   const eventId = searchParams.get('event_id');
   const predictionType = searchParams.get('prediction_type');
   const predictionName = searchParams.get('prediction_name');
+  const predictionId = searchParams.get('prediction_id');
 
   const [, setWidgetTick] = useState(0);
   const [memoryPatterns, setMemoryPatterns] = useState<DecisionPattern[]>(() => decisionPatterns.getTopPatterns(5));
@@ -82,6 +84,7 @@ export default function WorkRoom() {
     if (!activeEvent) return;
     setResolving(true);
     await resolveEvent(activeEvent.id).catch(() => {});
+    await logActionExecution('event', activeEvent.id, 'resolved').catch(() => {});
     setActiveEvent({ ...activeEvent, status: 'resolved', resolved_at: new Date().toISOString() });
     setResolving(false);
   };
@@ -226,6 +229,11 @@ export default function WorkRoom() {
                       <button
                         key={opt.type}
                         onClick={() => {
+                          // Log the action execution
+                          if (predictionId) {
+                            logActionExecution('prediction', predictionId, opt.type).catch(() => {});
+                            updatePredictionActionStatus(predictionId, 'executed').catch(() => {});
+                          }
                           // Pre-load the prompt into the Chief of Staff chat input
                           const chatInput = document.querySelector<HTMLInputElement>('[data-chat-input]');
                           if (chatInput) {

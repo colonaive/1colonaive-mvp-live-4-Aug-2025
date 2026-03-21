@@ -11,6 +11,12 @@
 # Environment variables for functions are set in Netlify Dashboard
 # SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, OPENAI_API_KEY, etc.
 
+# Unified intelligence API (cross-cockpit)
+[[redirects]]
+  from = "/api/fos/intelligence"
+  to = "/.netlify/functions/fos_intelligence"
+  status = 200
+
 # Route API calls to functions
 [[redirects]]
   from = "/api/*"
