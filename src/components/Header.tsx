@@ -1,7 +1,7 @@
 // /src/components/Header.tsx
 import React, { useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Menu, X, ChevronDown, Search } from "lucide-react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Menu, X, ChevronDown, Search, LayoutDashboard, Gauge, Wrench } from "lucide-react";
 import { Container } from "./ui/Container";
 import { useAuth } from "../contexts/AuthContext";
 import ColonaiveLogo from "./ColonaiveLogo";
@@ -113,6 +113,7 @@ export const Header = () => {
   const { user, isAuthenticated, signOut, userType } = useAuth();
 
 
+  const location = useLocation();
   const isAdmin = userType === "super_admin" || userType === "admin";
   const joinLinks = getJoinLinks(isAuthenticated);
 
@@ -431,6 +432,21 @@ export const Header = () => {
           <Link to="/clinical-trials" onClick={handleClose} className="text-white font-semibold py-2">
             Clinical Trials
           </Link>
+
+          {isAdmin && (
+            <>
+              <div className="border-t border-white/20 my-2" />
+              <Link to="/admin/dashboard" onClick={handleClose} className="text-teal-300 font-semibold py-2 flex items-center gap-2">
+                <LayoutDashboard className="w-4 h-4" /> Dashboard
+              </Link>
+              <Link to="/admin/ceo-cockpit" onClick={handleClose} className="text-teal-300 font-semibold py-2 flex items-center gap-2">
+                <Gauge className="w-4 h-4" /> CEO Cockpit
+              </Link>
+              <Link to="/admin/workroom" onClick={handleClose} className="text-teal-300 font-semibold py-2 flex items-center gap-2">
+                <Wrench className="w-4 h-4" /> Work Room
+              </Link>
+            </>
+          )}
         </nav>
       </div>
     );
@@ -521,6 +537,36 @@ export const Header = () => {
           {isOpen && renderMobileMenu()}
           {renderSearchBar()}
         </div>
+
+        {/* Admin Navigation Bar — visible only for super_admin / admin */}
+        {isAdmin && isAuthenticated && (
+          <div className="bg-[#003052] border-t border-white/10">
+            <Container className="flex items-center gap-1 h-10 overflow-x-auto">
+              {[
+                { label: "Dashboard", path: "/admin/dashboard", icon: LayoutDashboard },
+                { label: "CEO Cockpit", path: "/admin/ceo-cockpit", icon: Gauge },
+                { label: "Work Room", path: "/admin/workroom", icon: Wrench },
+              ].map((item) => {
+                const isActive = location.pathname === item.path;
+                return (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    onClick={handleClose}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded transition-colors whitespace-nowrap ${
+                      isActive
+                        ? "bg-white/15 text-teal-300"
+                        : "text-white/80 hover:text-white hover:bg-white/10"
+                    }`}
+                  >
+                    <item.icon className="w-3.5 h-3.5" />
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </Container>
+          </div>
+        )}
       </header>
     </>
   );
