@@ -92,6 +92,23 @@ function stripHtml(html: string): string {
     .trim();
 }
 
+/* ---------- System email detection ---------- */
+
+const SYSTEM_SENDER_DOMAINS = ['@colonaive.ai', '@durmah.ai'];
+const SYSTEM_SENDER_NAMES = ['founder intelligence', 'colonaive'];
+const SYSTEM_SUBJECT_PATTERNS = ['daily executive briefing', 'founder brief'];
+
+function isSystemEmail(subject: string, senderEmail: string, senderName: string): boolean {
+  const email = senderEmail.toLowerCase();
+  const name = senderName.toLowerCase();
+  const subj = subject.toLowerCase();
+
+  if (SYSTEM_SENDER_DOMAINS.some((d) => email.includes(d))) return true;
+  if (SYSTEM_SENDER_NAMES.some((n) => name.includes(n))) return true;
+  if (SYSTEM_SUBJECT_PATTERNS.some((p) => subj.includes(p))) return true;
+  return false;
+}
+
 /* ---------- Classification engine ---------- */
 
 interface ClassificationResult {
@@ -99,9 +116,21 @@ interface ClassificationResult {
   reason: string;
   keywordMatches: string[];
   confidence: 'high' | 'medium' | 'low';
+  isSystem: boolean;
 }
 
-function classifyEmail(subject: string, bodyPreview: string, senderEmail: string): ClassificationResult {
+function classifyEmail(subject: string, bodyPreview: string, senderEmail: string, senderName: string = ''): ClassificationResult {
+  // System email check — highest priority, always ignore
+  if (isSystemEmail(subject, senderEmail, senderName)) {
+    return {
+      classification: 'ignore',
+      reason: 'System-generated email (self-referential noise filter)',
+      keywordMatches: [],
+      confidence: 'high',
+      isSystem: true,
+    };
+  }
+
   const text = `${subject} ${bodyPreview} ${senderEmail}`.toLowerCase();
   const matchedKeywords: string[] = [];
 
@@ -116,7 +145,8 @@ function classifyEmail(subject: string, bodyPreview: string, senderEmail: string
       classification: 'ignore',
       reason: `Auto-detected: ${matchedKeywords.join(', ')}`,
       keywordMatches: matchedKeywords,
-      confidence: 'high', // direct pattern match
+      confidence: 'high',
+      isSystem: false,
     };
   }
 
@@ -132,7 +162,8 @@ function classifyEmail(subject: string, bodyPreview: string, senderEmail: string
       classification: 'take_action',
       reason: `Logistics/critical: ${logisticsMatches.join(', ')}`,
       keywordMatches: logisticsMatches,
-      confidence: 'high', // direct keyword match in subject/body
+      confidence: 'high',
+      isSystem: false,
     };
   }
 
@@ -148,7 +179,8 @@ function classifyEmail(subject: string, bodyPreview: string, senderEmail: string
       classification: 'take_action',
       reason: `Action required: ${actionMatches.join(', ')}`,
       keywordMatches: actionMatches,
-      confidence: 'high', // multiple keyword matches
+      confidence: 'high',
+      isSystem: false,
     };
   }
   if (actionMatches.length === 1) {
@@ -156,7 +188,8 @@ function classifyEmail(subject: string, bodyPreview: string, senderEmail: string
       classification: 'take_action',
       reason: `Action required: ${actionMatches.join(', ')}`,
       keywordMatches: actionMatches,
-      confidence: 'medium', // single keyword match
+      confidence: 'medium',
+      isSystem: false,
     };
   }
 
@@ -172,7 +205,8 @@ function classifyEmail(subject: string, bodyPreview: string, senderEmail: string
       classification: 'investigate',
       reason: `Needs review: ${investigateMatches.join(', ')}`,
       keywordMatches: investigateMatches,
-      confidence: investigateMatches.length >= 2 ? 'medium' : 'low', // pattern match
+      confidence: investigateMatches.length >= 2 ? 'medium' : 'low',
+      isSystem: false,
     };
   }
 
@@ -181,7 +215,8 @@ function classifyEmail(subject: string, bodyPreview: string, senderEmail: string
     classification: 'informational',
     reason: 'No action keywords detected',
     keywordMatches: [],
-    confidence: 'low', // no direct evidence
+    confidence: 'low',
+    isSystem: false,
   };
 }
 
@@ -276,8 +311,8 @@ async function ingestEmails(supabase: any) {
 
     if (existing && existing.length > 0) continue;
 
-    // Classify
-    const classification = classifyEmail(subject, bodyPreview, senderEmail);
+    // Classify (pass senderName for system detection)
+    const classification = classifyEmail(subject, bodyPreview, senderEmail, senderName);
 
     // Insert email with source tagging
     const { data: inserted, error: insertError } = await supabase
@@ -293,8 +328,9 @@ async function ingestEmails(supabase: any) {
         classification: classification.classification,
         classification_reason: classification.reason,
         keyword_matches: classification.keywordMatches,
-        source_origin: 'direct_email',
+        source_origin: classification.isSystem ? 'system_generated' : 'direct_email',
         confidence_level: classification.confidence,
+        is_system: classification.isSystem,
       })
       .select('id')
       .single();
@@ -311,6 +347,9 @@ async function ingestEmails(supabase: any) {
     }
 
     const emailId = inserted.id;
+
+    // System emails: no tasks or risks
+    if (classification.isSystem) continue;
 
     // Extract task
     const task = extractTaskFromEmail(emailId, subject, classification);
