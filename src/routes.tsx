@@ -23,6 +23,10 @@ import RelationshipIntelligence from './pages/admin/RelationshipIntelligence';
 import CRCRadar from './pages/admin/CRCRadar';
 import RelationshipPriority from './pages/admin/RelationshipPriority';
 import WorkRoom from './pages/admin/WorkRoom';
+import EmailIntelligencePage from './pages/admin/intelligence/EmailIntelligence';
+import FounderIntelligencePage from './pages/admin/intelligence/FounderIntelligence';
+import WeeklyStrategyPage from './pages/admin/intelligence/WeeklyStrategy';
+import RegulatoryTrackerPage from './pages/admin/intelligence/RegulatoryTracker';
 
 // Public Research
 import ResearchRadar from './pages/ResearchRadar';
@@ -356,6 +360,22 @@ const MainRoutes = () => {
           <Route
             path="/admin/workroom"
             element={<ProtectedAdminRoute><WorkRoom /></ProtectedAdminRoute>}
+          />
+          <Route
+            path="/admin/intelligence/email"
+            element={<ProtectedAdminRoute><EmailIntelligencePage /></ProtectedAdminRoute>}
+          />
+          <Route
+            path="/admin/intelligence/founder"
+            element={<ProtectedAdminRoute><FounderIntelligencePage /></ProtectedAdminRoute>}
+          />
+          <Route
+            path="/admin/intelligence/weekly"
+            element={<ProtectedAdminRoute><WeeklyStrategyPage /></ProtectedAdminRoute>}
+          />
+          <Route
+            path="/admin/intelligence/regulatory"
+            element={<ProtectedAdminRoute><RegulatoryTrackerPage /></ProtectedAdminRoute>}
           />
 
 
