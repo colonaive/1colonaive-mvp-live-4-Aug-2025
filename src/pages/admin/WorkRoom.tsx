@@ -23,6 +23,7 @@ import { emailComposer } from '@/chief-of-staff/action-center/emailComposer';
 import { decisionMemoryEngine } from '@/chief-of-staff/decision-memory/decisionMemoryEngine';
 import { decisionPatterns, type DecisionPattern } from '@/chief-of-staff/decision-memory/decisionPatterns';
 import { getTopEvents, updateEventStatus, resolveEvent, type CEOEvent } from '@/lib/eventConsolidationEngine';
+import { Lightbulb } from 'lucide-react';
 
 const statusBadge = (status: string) => {
   const colors: Record<string, string> = {
@@ -49,6 +50,8 @@ const quickActions = [
 export default function WorkRoom() {
   const [searchParams] = useSearchParams();
   const eventId = searchParams.get('event_id');
+  const predictionType = searchParams.get('prediction_type');
+  const predictionName = searchParams.get('prediction_name');
 
   const [, setWidgetTick] = useState(0);
   const [memoryPatterns, setMemoryPatterns] = useState<DecisionPattern[]>(() => decisionPatterns.getTopPatterns(5));
@@ -165,6 +168,31 @@ export default function WorkRoom() {
                   </button>
                 )}
               </div>
+            </div>
+          </section>
+        )}
+
+        {/* === PREDICTION CONTEXT BANNER (if linked from predicted risk) === */}
+        {predictionName && !activeEvent && (
+          <section className="bg-gradient-to-r from-purple-50 to-purple-100/50 dark:from-purple-900/20 dark:to-purple-800/10 rounded-xl border border-purple-200/50 dark:border-purple-800/30 p-4">
+            <div className="flex items-start gap-3">
+              <Lightbulb size={18} className="text-purple-500 flex-shrink-0 mt-0.5" />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                  Predicted: {predictionName}
+                </p>
+                <p className="text-xs text-gray-600 dark:text-gray-300 mt-1">
+                  <span className="font-medium">Objective:</span> Prepare an action plan for this predicted event based on recurring patterns.
+                </p>
+                {predictionType && (
+                  <p className="text-xs text-purple-600 dark:text-purple-400 mt-1">
+                    Category: {predictionType.charAt(0).toUpperCase() + predictionType.slice(1)}
+                  </p>
+                )}
+              </div>
+              <span className="inline-block px-2 py-0.5 rounded text-[10px] font-medium uppercase bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 flex-shrink-0">
+                Predicted
+              </span>
             </div>
           </section>
         )}
