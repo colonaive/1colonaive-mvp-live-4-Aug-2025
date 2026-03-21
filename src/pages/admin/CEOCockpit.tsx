@@ -209,6 +209,13 @@ const CEOCockpit: React.FC = () => {
 
                         {/* Signal count */}
                         <p className="text-[10px] text-gray-400 mt-2">{evt.summary}</p>
+
+                        {/* Source systems */}
+                        {Array.isArray(evt.source_system) && evt.source_system.length > 1 && (
+                          <p className="text-[10px] text-indigo-500 dark:text-indigo-400 mt-1">
+                            Sources: {evt.source_system.map((s: string) => s.charAt(0).toUpperCase() + s.slice(1)).join(' + ')}
+                          </p>
+                        )}
                       </div>
 
                       <button

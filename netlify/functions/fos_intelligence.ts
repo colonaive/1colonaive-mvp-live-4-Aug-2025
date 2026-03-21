@@ -33,7 +33,7 @@ export async function handler(event: any) {
 
     // Fetch all intelligence data in parallel
     const [eventsRes, predictionsRes, recurringRes, actionLogsRes] = await Promise.all([
-      // Active events (top 5)
+      // Active events (top 5) — source_system is jsonb array, use @> containment
       (() => {
         let q = supabase
           .from('ceo_events')
@@ -41,7 +41,7 @@ export async function handler(event: any) {
           .in('status', ['open', 'in_progress'])
           .order('priority_score', { ascending: false })
           .limit(5);
-        if (sourceSystem) q = q.eq('source_system', sourceSystem);
+        if (sourceSystem) q = q.contains('source_system', [sourceSystem]);
         return q;
       })(),
 
@@ -54,7 +54,7 @@ export async function handler(event: any) {
           .gte('confidence_score', 55)
           .order('confidence_score', { ascending: false })
           .limit(3);
-        if (sourceSystem) q = q.eq('source_system', sourceSystem);
+        if (sourceSystem) q = q.contains('source_system', [sourceSystem]);
         return q;
       })(),
 
@@ -67,7 +67,7 @@ export async function handler(event: any) {
           .in('status', ['open', 'in_progress'])
           .order('recurrence_count', { ascending: false })
           .limit(10);
-        if (sourceSystem) q = q.eq('source_system', sourceSystem);
+        if (sourceSystem) q = q.contains('source_system', [sourceSystem]);
         return q;
       })(),
 

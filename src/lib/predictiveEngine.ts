@@ -28,7 +28,7 @@ export interface CEOPrediction {
   recommended_action: string | null;
   action_generated_at: string | null;
   action_status: 'pending' | 'executed' | 'ignored';
-  source_system: string;
+  source_system: string[];
   created_at: string;
   updated_at: string;
 }
@@ -292,7 +292,7 @@ export async function generatePredictions(): Promise<CEOPrediction[]> {
       recommended_action: action.recommended_action,
       action_generated_at: new Date().toISOString(),
       action_status: 'pending',
-      source_system: 'colonaive',
+      source_system: ['colonaive'],
     });
   }
 

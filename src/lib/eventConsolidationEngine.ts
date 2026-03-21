@@ -34,7 +34,8 @@ export interface CEOEvent {
   recurrence_count: number;
   is_recurring: boolean;
   is_stale: boolean;
-  source_system: string;
+  event_fingerprint: string | null;
+  source_system: string[];
   created_at: string;
   updated_at: string;
 }
@@ -326,6 +327,89 @@ function generateRiskSummary(group: SignalGroup): string {
   return group.risks[0].title;
 }
 
+/* ── Global Event Identity (CTW-COCKPIT-02D.11) ── */
+
+/**
+ * Entity keywords used for fingerprint generation.
+ */
+const FINGERPRINT_ENTITIES = [
+  'ups', 'dhl', 'fedex', 'angsana', 'singlera', 'ktph', 'hsa', 'fda',
+  'nmpa', 'cdsco', 'investor', 'stripe', 'netlify', 'supabase',
+];
+
+/**
+ * Generate a deterministic fingerprint for an event.
+ * Combines: normalized keywords + entity + event_type.
+ * Example: "ups-shipment-clearance-logistics"
+ */
+export function generateEventFingerprint(eventName: string, eventType: EventType): string {
+  const lower = eventName.toLowerCase().replace(/[^a-z0-9\s]/g, '').trim();
+  const words = lower.split(/\s+/).filter((w) => w.length > 2);
+
+  // Extract entity
+  const entity = FINGERPRINT_ENTITIES.find((ek) => lower.includes(ek)) || 'general';
+
+  // Take up to 3 most significant keywords (excluding stop words and short words)
+  const stopWords = new Set(['the', 'and', 'for', 'from', 'with', 'this', 'that', 'has', 'are', 'was', 'will']);
+  const keywords = words
+    .filter((w) => !stopWords.has(w) && w !== entity)
+    .slice(0, 3);
+
+  return [entity, ...keywords, eventType].join('-');
+}
+
+/**
+ * Find an existing event with an exact fingerprint match across ALL source systems.
+ * Returns the matching event if found, null otherwise.
+ */
+async function findExistingByFingerprint(fingerprint: string): Promise<CEOEvent | null> {
+  const { data } = await supabase
+    .from('ceo_events')
+    .select('*')
+    .eq('event_fingerprint', fingerprint)
+    .in('status', ['open', 'in_progress'])
+    .limit(1);
+
+  if (data && data.length > 0) {
+    return data[0] as CEOEvent;
+  }
+  return null;
+}
+
+/**
+ * Merge new signal IDs into an existing event (cross-system dedup).
+ * Appends related IDs and adds source_system if not already present.
+ */
+async function mergeIntoExistingEvent(
+  existingEvent: CEOEvent,
+  newEmailIds: string[],
+  newTaskIds: string[],
+  newRiskIds: string[],
+  sourceSystem: string,
+): Promise<void> {
+  const mergedEmails = [...new Set([...existingEvent.related_email_ids, ...newEmailIds])];
+  const mergedTasks = [...new Set([...existingEvent.related_task_ids, ...newTaskIds])];
+  const mergedRisks = [...new Set([...existingEvent.related_risk_ids, ...newRiskIds])];
+
+  // Add source system if not already present
+  const currentSystems: string[] = Array.isArray(existingEvent.source_system)
+    ? existingEvent.source_system
+    : [existingEvent.source_system as unknown as string];
+  const mergedSystems = [...new Set([...currentSystems, sourceSystem])];
+
+  await supabase
+    .from('ceo_events')
+    .update({
+      related_email_ids: mergedEmails,
+      related_task_ids: mergedTasks,
+      related_risk_ids: mergedRisks,
+      source_system: mergedSystems,
+      last_updated_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', existingEvent.id);
+}
+
 /* ── Public API ── */
 
 /**
@@ -364,12 +448,29 @@ export async function consolidateEvents(): Promise<CEOEvent[]> {
   // Group signals
   const groups = groupSignals(emails, tasks, risks);
 
-  // Generate events from groups (with recurrence detection)
+  // Generate events from groups (with recurrence detection + fingerprint dedup)
   const events: Omit<CEOEvent, 'id' | 'created_at' | 'updated_at'>[] = [];
+  const mergedEventIds: string[] = []; // Track events that were merged (skip re-insert)
 
   for (const group of groups) {
     const { score, riskLevel } = computePriorityScore(group);
     const eventName = generateEventName(group);
+    const fingerprint = generateEventFingerprint(eventName, group.eventType);
+
+    // Cross-system matching: check for exact fingerprint match
+    const existingEvent = await findExistingByFingerprint(fingerprint);
+    if (existingEvent) {
+      // Merge into existing event instead of creating duplicate
+      await mergeIntoExistingEvent(
+        existingEvent,
+        group.emails.map((e) => e.id),
+        group.tasks.map((t) => t.id),
+        group.risks.map((r) => r.id),
+        'colonaive',
+      );
+      mergedEventIds.push(existingEvent.id);
+      continue;
+    }
 
     // Detect recurrence against past resolved events
     const recurrence = await detectRecurrence(eventName, group.eventType);
@@ -391,7 +492,8 @@ export async function consolidateEvents(): Promise<CEOEvent[]> {
       recurrence_count: recurrence.recurrence_count,
       is_recurring: recurrence.is_recurring,
       is_stale: false,
-      source_system: 'colonaive',
+      event_fingerprint: fingerprint,
+      source_system: ['colonaive'],
     });
   }
 
