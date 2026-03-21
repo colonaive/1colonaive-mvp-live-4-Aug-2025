@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   ArrowLeft, Target, RefreshCw, Zap, UserCircle, Globe,
-  Check, X, CheckCircle2,
+  Check, X, CheckCircle2, Repeat,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { generateFounderBriefing, type FounderBriefing } from '@/lib/founderBriefing';
@@ -16,6 +16,7 @@ import {
   type ActionHistoryRecord,
   type FounderProfile,
 } from '@/lib/actionFeedback';
+import { getRecurringEvents, type CEOEvent } from '@/lib/eventConsolidationEngine';
 
 export default function FounderIntelligencePage() {
   const navigate = useNavigate();
@@ -25,6 +26,7 @@ export default function FounderIntelligencePage() {
   const [actionUpdating, setActionUpdating] = useState<string | null>(null);
   const [founderProfile, setFounderProfile] = useState<FounderProfile | null>(null);
   const [crossProjectBriefing, setCrossProjectBriefing] = useState<CrossProjectBriefing | null>(null);
+  const [recurringEvents, setRecurringEvents] = useState<CEOEvent[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -45,6 +47,7 @@ export default function FounderIntelligencePage() {
     })();
     getFounderProfile().then(setFounderProfile).catch(() => {});
     try { setCrossProjectBriefing(generateCrossProjectBriefing()); } catch { /* silent */ }
+    getRecurringEvents().then(setRecurringEvents).catch(() => {});
   }, []);
 
   const handleAcceptAction = async (index: number) => {
@@ -333,6 +336,41 @@ export default function FounderIntelligencePage() {
                       ))}
                     </div>
                   </div>
+                </div>
+              </section>
+            )}
+
+            {/* Recurring Issues */}
+            {recurringEvents.length > 0 && (
+              <section className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <Repeat size={14} className="text-purple-500" />
+                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Recurring Issues</p>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 font-medium">
+                    {recurringEvents.length} pattern{recurringEvents.length !== 1 ? 's' : ''}
+                  </span>
+                </div>
+                <div className="space-y-3">
+                  {recurringEvents.map((evt) => (
+                    <div key={evt.id} className="flex items-start gap-3 border border-purple-100 dark:border-purple-800/30 rounded-lg p-3">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 dark:text-white line-clamp-2">{evt.event_name}</p>
+                        {evt.next_action && (
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-1">
+                            <span className="font-medium text-gray-600 dark:text-gray-300">Next:</span> {evt.next_action}
+                          </p>
+                        )}
+                        <div className="flex items-center gap-2 mt-1.5 text-[10px] text-gray-400">
+                          <span className="capitalize">{evt.event_type}</span>
+                          <span>&middot;</span>
+                          <span>Occurred {evt.recurrence_count} time{evt.recurrence_count !== 1 ? 's' : ''}</span>
+                        </div>
+                      </div>
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 flex-shrink-0">
+                        <Repeat size={10} /> Recurring
+                      </span>
+                    </div>
+                  ))}
                 </div>
               </section>
             )}

@@ -162,6 +162,18 @@ const CEOCockpit: React.FC = () => {
                           </p>
                         )}
 
+                        {/* Recurring badge */}
+                        {evt.is_recurring && (
+                          <div className="flex items-center gap-1 mt-2">
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300">
+                              Recurring Issue
+                            </span>
+                            {evt.recurrence_count > 0 && (
+                              <span className="text-[10px] text-gray-400">Occurred {evt.recurrence_count} time{evt.recurrence_count !== 1 ? 's' : ''}</span>
+                            )}
+                          </div>
+                        )}
+
                         {/* Signal count */}
                         <p className="text-[10px] text-gray-400 mt-2">{evt.summary}</p>
                       </div>

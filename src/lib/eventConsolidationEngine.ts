@@ -29,6 +29,10 @@ export interface CEOEvent {
   summary: string | null;
   next_action: string | null;
   risk_summary: string | null;
+  resolved_at: string | null;
+  last_updated_at: string | null;
+  recurrence_count: number;
+  is_recurring: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -355,13 +359,18 @@ export async function consolidateEvents(): Promise<CEOEvent[]> {
   // Group signals
   const groups = groupSignals(emails, tasks, risks);
 
-  // Generate events from groups
+  // Generate events from groups (with recurrence detection)
   const events: Omit<CEOEvent, 'id' | 'created_at' | 'updated_at'>[] = [];
 
   for (const group of groups) {
     const { score, riskLevel } = computePriorityScore(group);
+    const eventName = generateEventName(group);
+
+    // Detect recurrence against past resolved events
+    const recurrence = await detectRecurrence(eventName, group.eventType);
+
     events.push({
-      event_name: generateEventName(group),
+      event_name: eventName,
       event_type: group.eventType,
       priority_score: score,
       risk_level: riskLevel,
@@ -372,6 +381,10 @@ export async function consolidateEvents(): Promise<CEOEvent[]> {
       summary: `${group.emails.length} email${group.emails.length !== 1 ? 's' : ''}, ${group.tasks.length} task${group.tasks.length !== 1 ? 's' : ''}, ${group.risks.length} risk${group.risks.length !== 1 ? 's' : ''} consolidated.`,
       next_action: generateNextAction(group),
       risk_summary: generateRiskSummary(group),
+      resolved_at: null,
+      last_updated_at: new Date().toISOString(),
+      recurrence_count: recurrence.recurrence_count,
+      is_recurring: recurrence.is_recurring,
     });
   }
 
@@ -403,6 +416,13 @@ export async function consolidateEvents(): Promise<CEOEvent[]> {
     .order('priority_score', { ascending: false })
     .limit(5);
 
+  // Log history for newly created events
+  if (persistedEvents) {
+    for (const evt of persistedEvents) {
+      await logEventHistory(evt.id, 'created', null, evt as unknown as Record<string, unknown>);
+    }
+  }
+
   return (persistedEvents || []) as CEOEvent[];
 }
 
@@ -423,10 +443,181 @@ export async function getTopEvents(limit = 5): Promise<CEOEvent[]> {
 
 /**
  * Mark an event as resolved.
+ * Logs history entry with previous state.
  */
 export async function resolveEvent(eventId: string): Promise<void> {
+  const now = new Date().toISOString();
+
+  // Fetch current state for history
+  const { data: current } = await supabase
+    .from('ceo_events')
+    .select('*')
+    .eq('id', eventId)
+    .single();
+
   await supabase
     .from('ceo_events')
-    .update({ status: 'resolved', updated_at: new Date().toISOString() })
+    .update({
+      status: 'resolved',
+      resolved_at: now,
+      last_updated_at: now,
+      updated_at: now,
+    })
     .eq('id', eventId);
+
+  // Log history
+  if (current) {
+    await logEventHistory(eventId, 'resolved', current, {
+      ...current,
+      status: 'resolved',
+      resolved_at: now,
+    });
+  }
+}
+
+/**
+ * Transition event status (e.g. open → in_progress).
+ */
+export async function updateEventStatus(eventId: string, newStatus: EventStatus): Promise<void> {
+  const now = new Date().toISOString();
+
+  const { data: current } = await supabase
+    .from('ceo_events')
+    .select('*')
+    .eq('id', eventId)
+    .single();
+
+  const updatePayload: Record<string, string> = {
+    status: newStatus,
+    last_updated_at: now,
+    updated_at: now,
+  };
+  if (newStatus === 'resolved') {
+    updatePayload.resolved_at = now;
+  }
+
+  await supabase
+    .from('ceo_events')
+    .update(updatePayload)
+    .eq('id', eventId);
+
+  if (current) {
+    await logEventHistory(
+      eventId,
+      newStatus === 'resolved' ? 'resolved' : 'status_change',
+      current,
+      { ...current, status: newStatus },
+    );
+  }
+}
+
+/* ── Event History ── */
+
+/**
+ * Log a history entry for an event change.
+ */
+async function logEventHistory(
+  eventId: string,
+  changeType: 'created' | 'updated' | 'resolved' | 'status_change',
+  previousState: Record<string, unknown> | null,
+  newState: Record<string, unknown> | null,
+): Promise<void> {
+  try {
+    await supabase.from('ceo_event_history').insert({
+      event_id: eventId,
+      change_type: changeType,
+      previous_state: previousState,
+      new_state: newState,
+    });
+  } catch {
+    // Silent fail — history is non-blocking
+  }
+}
+
+/* ── Recurrence Detection ── */
+
+/**
+ * Check past resolved events for similarity to a new event.
+ * Matching rules:
+ * 1. Similar event_name (normalized substring match)
+ * 2. Same entity keywords (UPS, Angsana, investor names, etc.)
+ * 3. Same keyword cluster / event_type
+ *
+ * Returns recurrence_count and last_occurrence_date if match found.
+ */
+async function detectRecurrence(
+  eventName: string,
+  eventType: EventType,
+): Promise<{ recurrence_count: number; is_recurring: boolean; last_occurrence_date: string | null }> {
+  // Fetch past resolved events of the same type
+  const { data: pastEvents } = await supabase
+    .from('ceo_events')
+    .select('id, event_name, event_type, resolved_at, created_at, recurrence_count')
+    .eq('status', 'resolved')
+    .order('created_at', { ascending: false })
+    .limit(100);
+
+  if (!pastEvents || pastEvents.length === 0) {
+    return { recurrence_count: 0, is_recurring: false, last_occurrence_date: null };
+  }
+
+  // Normalize event name for comparison
+  const normalizedName = eventName.toLowerCase().replace(/[^a-z0-9\s]/g, '').trim();
+  const nameWords = normalizedName.split(/\s+/).filter((w) => w.length > 3);
+
+  // Extract entity keywords from the event name
+  const entityKeywords = [
+    'ups', 'dhl', 'fedex', 'angsana', 'singlera', 'ktph', 'hsa', 'fda',
+    'nmpa', 'cdsco', 'investor', 'shipment', 'clearance', 'customs',
+  ];
+  const nameEntities = entityKeywords.filter((ek) => normalizedName.includes(ek));
+
+  let matchCount = 0;
+  let lastOccurrence: string | null = null;
+
+  for (const past of pastEvents) {
+    const pastNormalized = past.event_name.toLowerCase().replace(/[^a-z0-9\s]/g, '').trim();
+
+    // Rule 1: Significant word overlap (3+ shared words of length > 3)
+    const pastWords = pastNormalized.split(/\s+/).filter((w: string) => w.length > 3);
+    const sharedWords = nameWords.filter((w) => pastWords.includes(w));
+    const wordMatch = sharedWords.length >= 2;
+
+    // Rule 2: Same entity keyword match
+    const pastEntities = entityKeywords.filter((ek) => pastNormalized.includes(ek));
+    const sharedEntities = nameEntities.filter((e) => pastEntities.includes(e));
+    const entityMatch = sharedEntities.length > 0;
+
+    // Rule 3: Same event type
+    const typeMatch = past.event_type === eventType;
+
+    // Match requires: (word overlap OR entity match) AND same type
+    if ((wordMatch || entityMatch) && typeMatch) {
+      matchCount += 1 + (past.recurrence_count || 0);
+      if (!lastOccurrence) {
+        lastOccurrence = past.resolved_at || past.created_at;
+      }
+    }
+  }
+
+  return {
+    recurrence_count: matchCount,
+    is_recurring: matchCount >= 2,
+    last_occurrence_date: lastOccurrence,
+  };
+}
+
+/**
+ * Fetch recurring events for the Founder Intelligence "Recurring Issues" section.
+ */
+export async function getRecurringEvents(): Promise<CEOEvent[]> {
+  const { data } = await supabase
+    .from('ceo_events')
+    .select('*')
+    .eq('is_recurring', true)
+    .in('status', ['open', 'in_progress'])
+    .order('recurrence_count', { ascending: false })
+    .limit(10);
+
+  return (data || []) as CEOEvent[];
 }

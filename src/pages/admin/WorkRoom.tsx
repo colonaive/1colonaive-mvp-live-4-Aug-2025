@@ -13,6 +13,8 @@ import {
   Inbox,
   Wrench,
   AlertTriangle,
+  CheckCircle2,
+  RefreshCw,
 } from 'lucide-react';
 import ActionCenterChat from '@/components/cockpit/ActionCenterChat';
 import { chatEngine } from '@/chief-of-staff/action-center/chatEngine';
@@ -20,7 +22,7 @@ import { promptGenerator } from '@/chief-of-staff/action-center/promptGenerator'
 import { emailComposer } from '@/chief-of-staff/action-center/emailComposer';
 import { decisionMemoryEngine } from '@/chief-of-staff/decision-memory/decisionMemoryEngine';
 import { decisionPatterns, type DecisionPattern } from '@/chief-of-staff/decision-memory/decisionPatterns';
-import { getTopEvents, type CEOEvent } from '@/lib/eventConsolidationEngine';
+import { getTopEvents, updateEventStatus, resolveEvent, type CEOEvent } from '@/lib/eventConsolidationEngine';
 
 const statusBadge = (status: string) => {
   const colors: Record<string, string> = {
@@ -53,14 +55,31 @@ export default function WorkRoom() {
   const [memoryStats, setMemoryStats] = useState(() => decisionMemoryEngine.getStats());
   const [activeEvent, setActiveEvent] = useState<CEOEvent | null>(null);
 
-  // Load event context if event_id is present
+  const [resolving, setResolving] = useState(false);
+
+  // Load event context if event_id is present — transition to in_progress
   useEffect(() => {
     if (!eventId) return;
-    getTopEvents(10).then((events) => {
+    getTopEvents(10).then(async (events) => {
       const found = events.find((e) => e.id === eventId);
-      if (found) setActiveEvent(found);
+      if (found) {
+        setActiveEvent(found);
+        // Auto-transition to in_progress when opening Work Room
+        if (found.status === 'open') {
+          await updateEventStatus(found.id, 'in_progress').catch(() => {});
+          setActiveEvent({ ...found, status: 'in_progress' });
+        }
+      }
     }).catch(() => {});
   }, [eventId]);
+
+  const handleResolveEvent = async () => {
+    if (!activeEvent) return;
+    setResolving(true);
+    await resolveEvent(activeEvent.id).catch(() => {});
+    setActiveEvent({ ...activeEvent, status: 'resolved', resolved_at: new Date().toISOString() });
+    setResolving(false);
+  };
 
   // Ensure decision memory is loaded
   React.useEffect(() => {
@@ -123,13 +142,29 @@ export default function WorkRoom() {
                 )}
                 <p className="text-[10px] text-gray-400 mt-1">{activeEvent.summary}</p>
               </div>
-              <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-medium uppercase flex-shrink-0 ${
-                activeEvent.risk_level === 'critical' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' :
-                activeEvent.risk_level === 'high' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' :
-                'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
-              }`}>
-                {activeEvent.risk_level}
-              </span>
+              <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-medium uppercase ${
+                  activeEvent.risk_level === 'critical' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' :
+                  activeEvent.risk_level === 'high' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' :
+                  'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
+                }`}>
+                  {activeEvent.risk_level}
+                </span>
+                {activeEvent.status === 'resolved' ? (
+                  <span className="flex items-center gap-1 text-[10px] font-medium text-emerald-600 dark:text-emerald-400">
+                    <CheckCircle2 size={12} /> Resolved
+                  </span>
+                ) : (
+                  <button
+                    onClick={handleResolveEvent}
+                    disabled={resolving}
+                    className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-medium bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-300 dark:hover:bg-emerald-900/50 transition-colors"
+                  >
+                    {resolving ? <RefreshCw size={12} className="animate-spin" /> : <CheckCircle2 size={12} />}
+                    Mark as Resolved
+                  </button>
+                )}
+              </div>
             </div>
           </section>
         )}
