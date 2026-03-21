@@ -21,6 +21,7 @@ export interface CEOEvent {
   event_name: string;
   event_type: EventType;
   priority_score: number;
+  base_priority_score: number | null;
   risk_level: RiskLevel;
   status: EventStatus;
   related_email_ids: string[];
@@ -36,12 +37,132 @@ export interface CEOEvent {
   is_stale: boolean;
   event_fingerprint: string | null;
   source_system: string[];
+  event_lock_status: 'unlocked' | 'locked';
+  event_locked_by: string | null;
+  event_locked_at: string | null;
   created_at: string;
   updated_at: string;
 }
 
 /** Events without action for this many hours are flagged stale */
 const STALE_THRESHOLD_HOURS = 72;
+
+/** Lock timeout in seconds — auto-release after this */
+const LOCK_TIMEOUT_SECONDS = 30;
+
+/* ── Event Locking (CTW-COCKPIT-02D.12) ── */
+
+/**
+ * Acquire a lock on an event before writing.
+ * Returns true if lock acquired, false if event is locked by another system.
+ * Stale locks (>30s) are auto-released before attempting acquisition.
+ */
+export async function acquireEventLock(eventId: string, sourceSystem: string): Promise<boolean> {
+  // Step 1: Check current lock state
+  const { data: event } = await supabase
+    .from('ceo_events')
+    .select('event_lock_status, event_locked_by, event_locked_at')
+    .eq('id', eventId)
+    .single();
+
+  if (!event) return false;
+
+  // Step 2: Auto-release stale locks (>30 seconds)
+  if (event.event_lock_status === 'locked' && event.event_locked_at) {
+    const lockedAt = new Date(event.event_locked_at).getTime();
+    const elapsed = (Date.now() - lockedAt) / 1000;
+    if (elapsed > LOCK_TIMEOUT_SECONDS) {
+      // Stale lock — auto-release
+      await supabase
+        .from('ceo_events')
+        .update({ event_lock_status: 'unlocked', event_locked_by: null, event_locked_at: null })
+        .eq('id', eventId);
+    } else {
+      // Locked by another system — reject
+      await logLockAttempt(eventId, sourceSystem, `Blocked: locked by ${event.event_locked_by}`);
+      return false;
+    }
+  }
+
+  // Step 3: Acquire lock
+  const { error } = await supabase
+    .from('ceo_events')
+    .update({
+      event_lock_status: 'locked',
+      event_locked_by: sourceSystem,
+      event_locked_at: new Date().toISOString(),
+    })
+    .eq('id', eventId)
+    .eq('event_lock_status', 'unlocked');
+
+  if (error) {
+    await logLockAttempt(eventId, sourceSystem, `Lock acquisition failed: ${error.message}`);
+    return false;
+  }
+
+  return true;
+}
+
+/**
+ * Release a lock on an event after writing is complete.
+ */
+export async function releaseEventLock(eventId: string): Promise<void> {
+  await supabase
+    .from('ceo_events')
+    .update({
+      event_lock_status: 'unlocked',
+      event_locked_by: null,
+      event_locked_at: null,
+    })
+    .eq('id', eventId);
+}
+
+/**
+ * Log a failed lock attempt for audit.
+ */
+async function logLockAttempt(eventId: string, attemptedBy: string, reason: string): Promise<void> {
+  try {
+    await supabase.from('ceo_event_lock_logs').insert({
+      event_id: eventId,
+      attempted_by: attemptedBy,
+      reason,
+    });
+  } catch {
+    // Silent fail — logging is non-blocking
+  }
+}
+
+/* ── Priority Decay (CTW-COCKPIT-02D.12) ── */
+
+/**
+ * Compute the effective priority score with time-based decay.
+ * Decay is runtime-only — never mutates the database.
+ *
+ * Decay factors:
+ * - <24h → 1.0 (no decay)
+ * - 24–48h → 0.8
+ * - 48–72h → 0.6
+ * - >72h → 0.4
+ */
+export function computeEffectivePriority(event: CEOEvent): { effectivePriority: number; decayApplied: boolean } {
+  const baseScore = event.base_priority_score ?? event.priority_score;
+  const lastUpdated = event.last_updated_at || event.created_at;
+  const hoursSinceUpdate = (Date.now() - new Date(lastUpdated).getTime()) / (1000 * 60 * 60);
+
+  let decayFactor: number;
+  if (hoursSinceUpdate < 24) {
+    decayFactor = 1.0;
+  } else if (hoursSinceUpdate < 48) {
+    decayFactor = 0.8;
+  } else if (hoursSinceUpdate < 72) {
+    decayFactor = 0.6;
+  } else {
+    decayFactor = 0.4;
+  }
+
+  const effectivePriority = Math.round(baseScore * decayFactor);
+  return { effectivePriority, decayApplied: decayFactor < 1.0 };
+}
 
 export type EventType = 'logistics' | 'investor' | 'regulatory' | 'product' | 'clinical' | 'partnership' | 'general';
 export type RiskLevel = 'low' | 'medium' | 'high' | 'critical';
@@ -379,6 +500,7 @@ async function findExistingByFingerprint(fingerprint: string): Promise<CEOEvent 
 /**
  * Merge new signal IDs into an existing event (cross-system dedup).
  * Appends related IDs and adds source_system if not already present.
+ * Respects event locking — acquires lock before write, releases after.
  */
 async function mergeIntoExistingEvent(
   existingEvent: CEOEvent,
@@ -387,27 +509,34 @@ async function mergeIntoExistingEvent(
   newRiskIds: string[],
   sourceSystem: string,
 ): Promise<void> {
-  const mergedEmails = [...new Set([...existingEvent.related_email_ids, ...newEmailIds])];
-  const mergedTasks = [...new Set([...existingEvent.related_task_ids, ...newTaskIds])];
-  const mergedRisks = [...new Set([...existingEvent.related_risk_ids, ...newRiskIds])];
+  // Acquire lock before writing
+  const locked = await acquireEventLock(existingEvent.id, sourceSystem);
+  if (!locked) return; // Skip merge if locked by another system
 
-  // Add source system if not already present
-  const currentSystems: string[] = Array.isArray(existingEvent.source_system)
-    ? existingEvent.source_system
-    : [existingEvent.source_system as unknown as string];
-  const mergedSystems = [...new Set([...currentSystems, sourceSystem])];
+  try {
+    const mergedEmails = [...new Set([...existingEvent.related_email_ids, ...newEmailIds])];
+    const mergedTasks = [...new Set([...existingEvent.related_task_ids, ...newTaskIds])];
+    const mergedRisks = [...new Set([...existingEvent.related_risk_ids, ...newRiskIds])];
 
-  await supabase
-    .from('ceo_events')
-    .update({
-      related_email_ids: mergedEmails,
-      related_task_ids: mergedTasks,
-      related_risk_ids: mergedRisks,
-      source_system: mergedSystems,
-      last_updated_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', existingEvent.id);
+    const currentSystems: string[] = Array.isArray(existingEvent.source_system)
+      ? existingEvent.source_system
+      : [existingEvent.source_system as unknown as string];
+    const mergedSystems = [...new Set([...currentSystems, sourceSystem])];
+
+    await supabase
+      .from('ceo_events')
+      .update({
+        related_email_ids: mergedEmails,
+        related_task_ids: mergedTasks,
+        related_risk_ids: mergedRisks,
+        source_system: mergedSystems,
+        last_updated_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', existingEvent.id);
+  } finally {
+    await releaseEventLock(existingEvent.id);
+  }
 }
 
 /* ── Public API ── */
@@ -479,6 +608,7 @@ export async function consolidateEvents(): Promise<CEOEvent[]> {
       event_name: eventName,
       event_type: group.eventType,
       priority_score: score,
+      base_priority_score: score,
       risk_level: riskLevel,
       status: 'open',
       related_email_ids: group.emails.map((e) => e.id),
@@ -494,6 +624,9 @@ export async function consolidateEvents(): Promise<CEOEvent[]> {
       is_stale: false,
       event_fingerprint: fingerprint,
       source_system: ['colonaive'],
+      event_lock_status: 'unlocked',
+      event_locked_by: null,
+      event_locked_at: null,
     });
   }
 
@@ -552,71 +685,83 @@ export async function getTopEvents(limit = 5): Promise<CEOEvent[]> {
 
 /**
  * Mark an event as resolved.
- * Logs history entry with previous state.
+ * Logs history entry with previous state. Respects event locking.
  */
 export async function resolveEvent(eventId: string): Promise<void> {
-  const now = new Date().toISOString();
+  const locked = await acquireEventLock(eventId, 'cockpit-resolve');
+  if (!locked) return;
 
-  // Fetch current state for history
-  const { data: current } = await supabase
-    .from('ceo_events')
-    .select('*')
-    .eq('id', eventId)
-    .single();
+  try {
+    const now = new Date().toISOString();
 
-  await supabase
-    .from('ceo_events')
-    .update({
-      status: 'resolved',
-      resolved_at: now,
-      last_updated_at: now,
-      updated_at: now,
-    })
-    .eq('id', eventId);
+    const { data: current } = await supabase
+      .from('ceo_events')
+      .select('*')
+      .eq('id', eventId)
+      .single();
 
-  // Log history
-  if (current) {
-    await logEventHistory(eventId, 'resolved', current, {
-      ...current,
-      status: 'resolved',
-      resolved_at: now,
-    });
+    await supabase
+      .from('ceo_events')
+      .update({
+        status: 'resolved',
+        resolved_at: now,
+        last_updated_at: now,
+        updated_at: now,
+      })
+      .eq('id', eventId);
+
+    if (current) {
+      await logEventHistory(eventId, 'resolved', current, {
+        ...current,
+        status: 'resolved',
+        resolved_at: now,
+      });
+    }
+  } finally {
+    await releaseEventLock(eventId);
   }
 }
 
 /**
- * Transition event status (e.g. open → in_progress).
+ * Transition event status (e.g. open → in_progress). Respects event locking.
  */
 export async function updateEventStatus(eventId: string, newStatus: EventStatus): Promise<void> {
-  const now = new Date().toISOString();
+  const locked = await acquireEventLock(eventId, 'cockpit-status-update');
+  if (!locked) return;
 
-  const { data: current } = await supabase
-    .from('ceo_events')
-    .select('*')
-    .eq('id', eventId)
-    .single();
+  try {
+    const now = new Date().toISOString();
 
-  const updatePayload: Record<string, string> = {
-    status: newStatus,
-    last_updated_at: now,
-    updated_at: now,
-  };
-  if (newStatus === 'resolved') {
-    updatePayload.resolved_at = now;
-  }
+    const { data: current } = await supabase
+      .from('ceo_events')
+      .select('*')
+      .eq('id', eventId)
+      .single();
 
-  await supabase
-    .from('ceo_events')
-    .update(updatePayload)
-    .eq('id', eventId);
+    const updatePayload: Record<string, string> = {
+      status: newStatus,
+      last_updated_at: now,
+      updated_at: now,
+    };
+    if (newStatus === 'resolved') {
+      updatePayload.resolved_at = now;
+    }
 
-  if (current) {
-    await logEventHistory(
-      eventId,
-      newStatus === 'resolved' ? 'resolved' : 'status_change',
-      current,
-      { ...current, status: newStatus },
-    );
+    await supabase
+      .from('ceo_events')
+      .update(updatePayload)
+      .eq('id', eventId);
+
+    if (current) {
+      await logEventHistory(
+        eventId,
+        newStatus === 'resolved' ? 'resolved' : 'status_change',
+        current,
+        { ...current, status: newStatus },
+      );
+    }
+  } finally {
+    await releaseEventLock(eventId);
   }
 }
 

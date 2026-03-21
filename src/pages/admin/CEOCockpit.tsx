@@ -17,7 +17,7 @@ import {
   Briefcase,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { consolidateEvents, getTopEvents, type CEOEvent } from '@/lib/eventConsolidationEngine';
+import { consolidateEvents, getTopEvents, computeEffectivePriority, type CEOEvent } from '@/lib/eventConsolidationEngine';
 import { dismissNudge, generateProactiveSignals, type ProactiveNudge } from '@/lib/proactiveEngine';
 import {
   generatePredictions,
@@ -147,9 +147,13 @@ const CEOCockpit: React.FC = () => {
             </div>
           ) : (
             <div className="space-y-3">
-              {/* Event cards — max 5 */}
+              {/* Event cards — max 5, sorted by effective priority (with decay) */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                {events.slice(0, 5).map((evt) => {
+                {[...events]
+                  .map((evt) => ({ ...evt, ...computeEffectivePriority(evt) }))
+                  .sort((a, b) => b.effectivePriority - a.effectivePriority)
+                  .slice(0, 5)
+                  .map((evt) => {
                   const colors = riskColors[evt.risk_level] || riskColors.low;
                   return (
                     <div
@@ -163,7 +167,9 @@ const CEOCockpit: React.FC = () => {
                           <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-medium uppercase ${colors.bg} ${colors.text}`}>
                             {eventTypeLabels[evt.event_type] || evt.event_type}
                           </span>
-                          <span className="text-[10px] text-gray-400 ml-auto">{evt.priority_score}/100</span>
+                          <span className="text-[10px] text-gray-400 ml-auto">
+                            {evt.decayApplied ? evt.effectivePriority : evt.priority_score}/100
+                          </span>
                         </div>
 
                         {/* Event name */}
@@ -205,6 +211,11 @@ const CEOCockpit: React.FC = () => {
                               <span className="text-[10px] text-gray-400">Occurred {evt.recurrence_count} time{evt.recurrence_count !== 1 ? 's' : ''}</span>
                             )}
                           </div>
+                        )}
+
+                        {/* Priority decay indicator */}
+                        {evt.decayApplied && (
+                          <p className="text-[10px] text-gray-400 mt-1">&#8595; aging priority</p>
                         )}
 
                         {/* Signal count */}
@@ -381,7 +392,10 @@ const CEOCockpit: React.FC = () => {
                 <p className="text-xs text-gray-400 text-center py-4">No events to show.</p>
               ) : (
                 <div className="space-y-3">
-                  {events.map((evt) => {
+                  {[...events]
+                    .map((evt) => ({ ...evt, ...computeEffectivePriority(evt) }))
+                    .sort((a, b) => b.effectivePriority - a.effectivePriority)
+                    .map((evt) => {
                     const colors = riskColors[evt.risk_level] || riskColors.low;
                     return (
                       <div key={evt.id} className="flex items-start gap-3 text-xs">
@@ -397,7 +411,10 @@ const CEOCockpit: React.FC = () => {
                           <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium uppercase ${colors.bg} ${colors.text}`}>
                             {evt.risk_level}
                           </span>
-                          <span className="text-[10px] text-gray-400">{evt.priority_score}/100</span>
+                          <span className="text-[10px] text-gray-400">
+                            {evt.decayApplied ? evt.effectivePriority : evt.priority_score}/100
+                            {evt.decayApplied && ' ↓'}
+                          </span>
                         </div>
                       </div>
                     );

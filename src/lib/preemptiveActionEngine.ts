@@ -9,7 +9,8 @@
  */
 
 import { supabase } from '@/supabase';
-import type { EventType } from '@/lib/eventConsolidationEngine';
+import type { EventType, CEOEvent } from '@/lib/eventConsolidationEngine';
+import { acquireEventLock, releaseEventLock } from '@/lib/eventConsolidationEngine';
 
 /* ── Types ── */
 
@@ -265,6 +266,29 @@ function logUnmatchedPrediction(
     });
   } catch {
     // Silent fail — logging is non-blocking
+  }
+}
+
+/**
+ * Update an event with locking protection (used by quick action execution).
+ * Acquires lock → applies update → releases lock.
+ */
+export async function updateEventWithLock(
+  eventId: string,
+  updates: Partial<CEOEvent>,
+  sourceSystem: string,
+): Promise<boolean> {
+  const locked = await acquireEventLock(eventId, sourceSystem);
+  if (!locked) return false;
+
+  try {
+    await supabase
+      .from('ceo_events')
+      .update({ ...updates, updated_at: new Date().toISOString() })
+      .eq('id', eventId);
+    return true;
+  } finally {
+    await releaseEventLock(eventId);
   }
 }
 
