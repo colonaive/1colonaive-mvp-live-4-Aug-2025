@@ -19,6 +19,7 @@ import {
   strategyImplicationsToActions,
 } from '@/lib/actionIntelligence';
 import { generateCrossProjectBriefing, type CrossProjectBriefing } from '@/lib/projectSignals';
+import { generateFounderDecisionBriefing, type FounderDecisionBriefing } from '@/lib/founderDecisionEngine';
 import { competitiveIntelligenceService } from '@/services/competitiveIntelligenceService';
 import { radarService } from '@/services/radarService';
 import { supabase } from '@/supabase';
@@ -55,6 +56,8 @@ export interface FounderBriefing {
     totalIngested: number;
   } | null;
   guardrailStatus: 'strict' | 'relaxed';
+  /** 4-layer Founder Decision Briefing (AG-FOUNDER-BRIEF-02) */
+  decisionBriefing: FounderDecisionBriefing | null;
 }
 
 export interface RiskItem {
@@ -87,12 +90,13 @@ const RISK_KEYWORDS = [
  * GUARDRAIL: Only trusted sources (direct_email, manual_entry) are included.
  */
 export async function generateFounderBriefing(): Promise<FounderBriefing> {
-  // Fetch all intelligence sources in parallel (including email intelligence)
-  const [radarSignals, earlyWarnings, strategyImplications, emailIntel] = await Promise.all([
+  // Fetch all intelligence sources in parallel (including email intelligence + decision engine)
+  const [radarSignals, earlyWarnings, strategyImplications, emailIntel, decisionBriefing] = await Promise.all([
     radarService.fetchTopSignals(7, 10).catch(() => []),
     competitiveIntelligenceService.fetchEarlyWarningSignals(10).catch(() => []),
     competitiveIntelligenceService.fetchStrategyImplications(10).catch(() => []),
     fetchEmailIntelligence().catch(() => null),
+    generateFounderDecisionBriefing().catch(() => null),
   ]);
 
   // Cross-project intelligence
@@ -138,12 +142,13 @@ export async function generateFounderBriefing(): Promise<FounderBriefing> {
   // Generate recommended actions
   const recommendedActions = generateRecommendations(topPriorities, criticalRisks);
 
-  // Build executive summary
+  // Build executive summary (enhanced with decision engine layer counts)
   const executiveSummary = buildExecutiveSummary(
     allCandidates.length,
     topPriorities,
     criticalRisks,
     crossProjectIntelligence,
+    decisionBriefing,
   );
 
   return {
@@ -156,6 +161,7 @@ export async function generateFounderBriefing(): Promise<FounderBriefing> {
     crossProjectIntelligence,
     emailIntelligence: emailIntel,
     guardrailStatus: 'strict',
+    decisionBriefing,
   };
 }
 
@@ -280,6 +286,7 @@ function buildExecutiveSummary(
   topPriorities: ScoredAction[],
   risks: RiskItem[],
   crossProject: CrossProjectBriefing | null,
+  decisionBriefing?: FounderDecisionBriefing | null,
 ): string {
   const highRiskCount = risks.filter((r) => r.severity === 'high').length;
   const topAction = topPriorities[0];
@@ -296,6 +303,11 @@ function buildExecutiveSummary(
     parts.push(`${highRiskCount} critical risk${highRiskCount > 1 ? 's' : ''} flagged requiring immediate attention.`);
   } else {
     parts.push('No critical risks detected in current signal landscape.');
+  }
+
+  if (decisionBriefing) {
+    const { todayCount, momentumCount, watchCount, opportunityCount } = decisionBriefing.layerSummary;
+    parts.push(`Decision engine: ${todayCount} execute, ${momentumCount} momentum, ${watchCount} watch, ${opportunityCount} opportunity items.`);
   }
 
   if (crossProject) {

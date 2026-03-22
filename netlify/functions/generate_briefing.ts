@@ -231,6 +231,153 @@ async function getProjectUpdates(supabase: any): Promise<string[]> {
   ];
 }
 
+/* ---------- decision engine layers (AG-FOUNDER-BRIEF-02) ---------- */
+
+async function fetchMomentumItems(supabase: any): Promise<string[]> {
+  const items: string[] = [];
+
+  try {
+    // Dormant take_action/investigate emails (48h–5d old)
+    const twoDaysAgo = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
+    const fiveDaysAgo = new Date(Date.now() - 120 * 60 * 60 * 1000).toISOString();
+
+    const { data: dormantEmails } = await supabase
+      .from('ceo_emails')
+      .select('sender_name, subject, received_at, classification')
+      .in('source_origin', TRUSTED_SOURCES)
+      .in('classification', ['take_action', 'investigate'])
+      .lte('received_at', twoDaysAgo)
+      .gte('received_at', fiveDaysAgo)
+      .order('received_at', { ascending: true })
+      .limit(5);
+
+    for (const email of dormantEmails || []) {
+      const ageMs = Date.now() - new Date(email.received_at).getTime();
+      const ageDays = Math.round(ageMs / (1000 * 60 * 60 * 24));
+      items.push(`🔄 ${email.sender_name} — ${email.subject} (dormant ${ageDays}d) [Inferred follow-up]`);
+    }
+
+    // Stale CEO events
+    const { data: staleEvents } = await supabase
+      .from('ceo_events')
+      .select('event_name, event_type, next_action, priority_score')
+      .eq('is_stale', true)
+      .in('status', ['open', 'in_progress'])
+      .order('priority_score', { ascending: false })
+      .limit(3);
+
+    for (const evt of staleEvents || []) {
+      items.push(`⏳ ${evt.event_name} — stale [${evt.event_type}]. Next: ${evt.next_action || 'Review'} [Inferred follow-up]`);
+    }
+
+    // Aging medium-priority tasks
+    const { data: agingTasks } = await supabase
+      .from('ceo_tasks')
+      .select('title, created_at')
+      .eq('status', 'open')
+      .in('source_origin', TRUSTED_SOURCES)
+      .eq('priority', 'medium')
+      .lte('created_at', twoDaysAgo)
+      .order('created_at', { ascending: true })
+      .limit(2);
+
+    for (const task of agingTasks || []) {
+      const ageMs = Date.now() - new Date(task.created_at).getTime();
+      const ageDays = Math.round(ageMs / (1000 * 60 * 60 * 24));
+      items.push(`📋 ${task.title} — open ${ageDays}d, needs push [Inferred follow-up]`);
+    }
+  } catch (e: any) {
+    console.error('Momentum fetch error:', e?.message);
+  }
+
+  return items.length > 0 ? items : ['No dormant threads or follow-ups detected'];
+}
+
+async function fetchWatchItems(supabase: any): Promise<string[]> {
+  const items: string[] = [];
+
+  try {
+    // Tracked entities (if table exists)
+    try {
+      const { data: entities } = await supabase
+        .from('tracked_entities')
+        .select('title, state, entity_type, requires_update_to, state_updated_at')
+        .eq('is_active', true)
+        .order('state_updated_at', { ascending: true })
+        .limit(3);
+
+      for (const e of entities || []) {
+        const icon = e.entity_type === 'shipment' ? '🚚' : e.entity_type === 'regulatory' ? '📋' : '👁';
+        const update = e.requires_update_to ? ` — update ${e.requires_update_to}` : '';
+        items.push(`${icon} ${e.title} [${e.state}]${update} [Verified]`);
+      }
+    } catch {
+      // Table may not exist yet
+    }
+
+    // Logistics & regulatory events
+    const { data: logEvents } = await supabase
+      .from('ceo_events')
+      .select('event_name, event_type, next_action, priority_score')
+      .in('event_type', ['logistics', 'regulatory'])
+      .in('status', ['open', 'in_progress'])
+      .order('priority_score', { ascending: false })
+      .limit(3);
+
+    for (const evt of logEvents || []) {
+      const icon = evt.event_type === 'logistics' ? '🚚' : '📋';
+      items.push(`${icon} ${evt.event_name} — ${evt.next_action || 'Monitor'} [Verified]`);
+    }
+  } catch (e: any) {
+    console.error('Watch fetch error:', e?.message);
+  }
+
+  return items;
+}
+
+async function fetchOpportunityItems(supabase: any): Promise<string[]> {
+  const items: string[] = [];
+
+  try {
+    // CRC news with high relevance = LinkedIn posting opportunity
+    const { data: crcNews } = await supabase
+      .from('crc_news_feed')
+      .select('title, relevance_score')
+      .gte('relevance_score', 65)
+      .order('relevance_score', { ascending: false })
+      .limit(2);
+
+    for (const news of crcNews || []) {
+      items.push(`✍️ LinkedIn opportunity: ${news.title} (${news.relevance_score}% relevance) [Strategic opportunity]`);
+    }
+
+    // Early warnings with opportunity angle
+    const { data: ewOpps } = await supabase
+      .from('ceo_early_warnings')
+      .select('title, market_implication, confidence_score')
+      .gte('confidence_score', 50)
+      .order('confidence_score', { ascending: false })
+      .limit(2);
+
+    for (const ew of ewOpps || []) {
+      const text = `${ew.title} ${ew.market_implication || ''}`.toLowerCase();
+      if (text.includes('opportunity') || text.includes('partnership') || text.includes('collaboration')) {
+        items.push(`🎯 ${ew.title} — ${ew.market_implication || 'Evaluate'} [Strategic opportunity]`);
+      }
+    }
+
+    // Fallback: static cross-project opportunities
+    if (items.length === 0) {
+      items.push('💡 COLONAiVE: KTPH Investigator Study — progress if bandwidth allows [Strategic opportunity]');
+      items.push('💡 ScienceHOD: Revenue pipeline development — early-stage monetisation [Strategic opportunity]');
+    }
+  } catch (e: any) {
+    console.error('Opportunity fetch error:', e?.message);
+  }
+
+  return items.length > 0 ? items : ['No strategic opportunities identified'];
+}
+
 /* ---------- briefing assembly ---------- */
 
 interface BriefingSection {
@@ -252,21 +399,47 @@ function buildBriefingText(date: string, sections: BriefingSection[]): string {
 }
 
 function buildBriefingHtml(date: string, sections: BriefingSection[]): string {
+  // Color map for the 4 decision engine layers
+  const layerColors: Record<string, { bg: string; border: string; text: string }> = {
+    'TODAY': { bg: '#fef2f2', border: '#ef4444', text: '#991b1b' },
+    'MOMENTUM': { bg: '#eff6ff', border: '#3b82f6', text: '#1e40af' },
+    'WATCH': { bg: '#fff7ed', border: '#f97316', text: '#9a3412' },
+    'OPPORTUNITY': { bg: '#fffbeb', border: '#f59e0b', text: '#92400e' },
+  };
+
   let html = `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">`;
-  html += `<h2 style="color:#0A385A;border-bottom:2px solid #0F766E;padding-bottom:8px;">Daily Executive Briefing</h2>`;
+  html += `<h2 style="color:#0A385A;border-bottom:2px solid #0F766E;padding-bottom:8px;">Founder Decision Briefing</h2>`;
   html += `<p style="color:#666;font-size:14px;">Date: ${date}</p>`;
   html += `<p style="color:#0F766E;font-size:12px;background:#f0fdf4;padding:6px 10px;border-radius:4px;border-left:3px solid #0F766E;">`;
   html += `<strong>Guardrail:</strong> STRICT MODE — only verified sources (direct_email, manual_entry) included<br/>`;
-  html += `<strong>Confidence:</strong> ● HIGH (direct source) &nbsp; ◐ MEDIUM (pattern match) &nbsp; ○ LOW (needs verification)</p>`;
+  html += `<strong>Labels:</strong> [Verified] = confirmed fact &nbsp; [Inferred follow-up] = system-detected &nbsp; [Strategic opportunity] = optional high-leverage</p>`;
+
   for (const s of sections) {
-    html += `<h3 style="color:#0F766E;margin-top:20px;">${s.heading}</h3><ul style="color:#333;font-size:14px;line-height:1.6;">`;
+    // Check if this is a decision engine layer
+    const layerKey = Object.keys(layerColors).find((k) => s.heading.startsWith(k));
+    const colors = layerKey ? layerColors[layerKey] : null;
+
+    if (colors) {
+      html += `<div style="background:${colors.bg};border-left:4px solid ${colors.border};padding:12px 16px;margin-top:20px;border-radius:4px;">`;
+      html += `<h3 style="color:${colors.text};margin:0 0 8px 0;font-size:15px;">${s.heading}</h3>`;
+      html += `<ul style="color:#333;font-size:14px;line-height:1.7;margin:0;padding-left:20px;">`;
+    } else {
+      html += `<h3 style="color:#0F766E;margin-top:20px;">${s.heading}</h3>`;
+      html += `<ul style="color:#333;font-size:14px;line-height:1.6;">`;
+    }
+
     for (const item of s.items) {
       html += `<li>${item}</li>`;
     }
     html += `</ul>`;
+
+    if (colors) {
+      html += `</div>`;
+    }
   }
+
   html += `<hr style="margin-top:24px;border:none;border-top:1px solid #ddd;"/>`;
-  html += `<p style="color:#999;font-size:12px;">COLONAiVE CEO Cockpit — Automated Daily Briefing | Intelligence Guardrails Active</p></div>`;
+  html += `<p style="color:#999;font-size:12px;">COLONAiVE Founder Decision Engine — Daily Briefing | Intelligence Guardrails Active</p></div>`;
   return html;
 }
 
@@ -395,14 +568,36 @@ export async function handler(event: any) {
 
     const sections: BriefingSection[] = [];
 
-    // TODAY (Execute) — take_action emails
+    // ── 4-Layer Decision Engine (AG-FOUNDER-BRIEF-02) ──
+
+    // Layer 1: TODAY — Execute
     if (actionableEmails) {
-      sections.push({ heading: 'TODAY — Execute Now', items: actionableEmails.takeAction });
-      sections.push({ heading: 'WATCH — Monitor', items: actionableEmails.watch });
+      sections.push({ heading: 'TODAY — Execute', items: actionableEmails.takeAction });
     } else {
-      sections.push({ heading: 'Inbox Highlights', items: inbox });
+      sections.push({ heading: 'TODAY — Execute', items: inbox });
     }
 
+    // Layer 2: MOMENTUM — Push Forward (dormant emails, stale events, aging tasks)
+    const momentumItems = await fetchMomentumItems(supabase);
+    sections.push({ heading: 'MOMENTUM — Push Forward', items: momentumItems });
+
+    // Layer 3: WATCH — Track Closely (logistics, regulatory, investigate emails)
+    const watchItems: string[] = [];
+    if (actionableEmails) {
+      watchItems.push(...actionableEmails.watch);
+    }
+    const operationalWatch = await fetchWatchItems(supabase);
+    watchItems.push(...operationalWatch);
+    sections.push({
+      heading: 'WATCH — Track Closely',
+      items: watchItems.length > 0 ? watchItems : ['No tracked entities requiring monitoring'],
+    });
+
+    // Layer 4: OPPORTUNITY — Use Your Time
+    const opportunityItems = await fetchOpportunityItems(supabase);
+    sections.push({ heading: 'OPPORTUNITY — Use Your Time', items: opportunityItems });
+
+    // Supporting sections
     sections.push({ heading: 'Open Tasks', items: tasks });
     sections.push({ heading: 'Open Risks', items: risks });
     sections.push({ heading: 'CRC Intelligence', items: crc });
@@ -426,7 +621,7 @@ export async function handler(event: any) {
     }
 
     // Send email
-    const emailSubject = `ColonAiVE Daily Executive Briefing — ${dateStr}`;
+    const emailSubject = `COLONAiVE Founder Decision Briefing — ${dateStr}`;
     const emailResult = await sendBriefingEmail(emailSubject, content, html);
 
     return {

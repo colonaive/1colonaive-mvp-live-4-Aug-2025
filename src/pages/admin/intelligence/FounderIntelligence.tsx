@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import {
   ArrowLeft, Target, RefreshCw, Zap, UserCircle, Globe,
   Check, X, CheckCircle2, Repeat,
+  Clock, Eye, Lightbulb, TrendingUp, Truck, FileCheck, ShieldAlert, AlertTriangle, PenLine,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { generateFounderBriefing, type FounderBriefing } from '@/lib/founderBriefing';
 import { generateCrossProjectBriefing, type CrossProjectBriefing, type ProjectId } from '@/lib/projectSignals';
 import type { ScoredAction } from '@/lib/actionIntelligence';
+import type { BriefingItem, BriefingItemLabel } from '@/lib/founderDecisionEngine';
 import {
   trackAction,
   markActionAccepted,
@@ -78,6 +80,63 @@ export default function FounderIntelligencePage() {
     setActionUpdating(null);
   };
 
+  /* ── Decision Engine Icon Mapper ── */
+  const getItemIcon = (icon?: string) => {
+    switch (icon) {
+      case 'zap': return <Zap size={14} className="text-amber-500" />;
+      case 'alert-triangle': return <AlertTriangle size={14} className="text-red-500" />;
+      case 'shield-alert': return <ShieldAlert size={14} className="text-red-600" />;
+      case 'clock': return <Clock size={14} className="text-blue-500" />;
+      case 'rotate-cw': return <RefreshCw size={14} className="text-blue-500" />;
+      case 'trending-up': return <TrendingUp size={14} className="text-indigo-500" />;
+      case 'truck': return <Truck size={14} className="text-orange-500" />;
+      case 'file-check': return <FileCheck size={14} className="text-purple-500" />;
+      case 'eye': return <Eye size={14} className="text-teal-500" />;
+      case 'lightbulb': return <Lightbulb size={14} className="text-yellow-500" />;
+      case 'pen-line': return <PenLine size={14} className="text-pink-500" />;
+      case 'target': return <Target size={14} className="text-emerald-500" />;
+      case 'microscope': return <Globe size={14} className="text-cyan-500" />;
+      default: return <Zap size={14} className="text-gray-400" />;
+    }
+  };
+
+  const getLabelBadge = (label: BriefingItemLabel) => {
+    switch (label) {
+      case 'verified_fact':
+        return <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 font-medium">Verified</span>;
+      case 'inferred_follow_up':
+        return <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 font-medium">Inferred</span>;
+      case 'strategic_opportunity':
+        return <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 font-medium">Opportunity</span>;
+    }
+  };
+
+  const renderBriefingItems = (items: BriefingItem[]) => (
+    <div className="space-y-2">
+      {items.map((item) => (
+        <div key={item.id} className="flex items-start gap-3 border border-gray-100 dark:border-gray-600 rounded-lg p-3 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
+          <div className="mt-0.5 flex-shrink-0">{getItemIcon(item.icon)}</div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between gap-2">
+              <p className="text-sm font-medium text-gray-900 dark:text-white line-clamp-2">{item.title}</p>
+              {getLabelBadge(item.label)}
+            </div>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">{item.rationale}</p>
+            <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+              <span className="text-[10px] text-gray-400">{item.source}</span>
+              {item.suggested_action && (
+                <>
+                  <span className="text-gray-300 dark:text-gray-600">|</span>
+                  <span className="text-[10px] text-indigo-500 dark:text-indigo-400 font-medium">{item.suggested_action}</span>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="bg-gradient-to-r from-[#0A385A] to-[#0F766E] px-6 py-6">
@@ -87,7 +146,7 @@ export default function FounderIntelligencePage() {
           </button>
           <div>
             <h1 className="text-xl font-bold text-white">Founder Intelligence</h1>
-            <p className="text-sm text-white/60">Action scoring, priorities & recommended next moves</p>
+            <p className="text-sm text-white/60">Decision engine, priorities & recommended next moves</p>
           </div>
         </div>
       </div>
@@ -125,6 +184,72 @@ export default function FounderIntelligencePage() {
               <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Executive Summary</p>
               <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed">{founderBriefing.executiveSummary}</p>
             </div>
+
+            {/* 4-Layer Decision Engine (AG-FOUNDER-BRIEF-02) */}
+            {founderBriefing.decisionBriefing && (
+              <div className="space-y-4">
+                {/* Layer summary bar */}
+                <div className="flex items-center gap-3 flex-wrap text-[11px]">
+                  <span className="font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Decision Engine</span>
+                  <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-300 font-medium">
+                    <Zap size={10} /> {founderBriefing.decisionBriefing.layerSummary.todayCount} Execute
+                  </span>
+                  <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300 font-medium">
+                    <TrendingUp size={10} /> {founderBriefing.decisionBriefing.layerSummary.momentumCount} Momentum
+                  </span>
+                  <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-300 font-medium">
+                    <Eye size={10} /> {founderBriefing.decisionBriefing.layerSummary.watchCount} Watch
+                  </span>
+                  <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300 font-medium">
+                    <Lightbulb size={10} /> {founderBriefing.decisionBriefing.layerSummary.opportunityCount} Opportunity
+                  </span>
+                </div>
+
+                {/* TODAY — EXECUTE */}
+                <section className="bg-white dark:bg-gray-800 rounded-xl border border-red-200 dark:border-red-800/30 p-5">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-2 h-2 rounded-full bg-red-500" />
+                    <p className="text-xs font-bold text-red-700 dark:text-red-400 uppercase tracking-wide">Today — Execute</p>
+                  </div>
+                  {founderBriefing.decisionBriefing.today.length === 0 ? (
+                    <p className="text-xs text-gray-400 italic">No urgent execution items today.</p>
+                  ) : renderBriefingItems(founderBriefing.decisionBriefing.today)}
+                </section>
+
+                {/* MOMENTUM — PUSH FORWARD */}
+                <section className="bg-white dark:bg-gray-800 rounded-xl border border-blue-200 dark:border-blue-800/30 p-5">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-2 h-2 rounded-full bg-blue-500" />
+                    <p className="text-xs font-bold text-blue-700 dark:text-blue-400 uppercase tracking-wide">Momentum — Push Forward</p>
+                  </div>
+                  {founderBriefing.decisionBriefing.momentum.length === 0 ? (
+                    <p className="text-xs text-gray-400 italic">No dormant threads or follow-ups detected.</p>
+                  ) : renderBriefingItems(founderBriefing.decisionBriefing.momentum)}
+                </section>
+
+                {/* WATCH — TRACK CLOSELY */}
+                <section className="bg-white dark:bg-gray-800 rounded-xl border border-orange-200 dark:border-orange-800/30 p-5">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-2 h-2 rounded-full bg-orange-500" />
+                    <p className="text-xs font-bold text-orange-700 dark:text-orange-400 uppercase tracking-wide">Watch — Track Closely</p>
+                  </div>
+                  {founderBriefing.decisionBriefing.watch.length === 0 ? (
+                    <p className="text-xs text-gray-400 italic">No tracked entities requiring monitoring.</p>
+                  ) : renderBriefingItems(founderBriefing.decisionBriefing.watch)}
+                </section>
+
+                {/* OPPORTUNITY — USE YOUR TIME */}
+                <section className="bg-white dark:bg-gray-800 rounded-xl border border-amber-200 dark:border-amber-800/30 p-5">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-2 h-2 rounded-full bg-amber-500" />
+                    <p className="text-xs font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wide">Opportunity — Use Your Time</p>
+                  </div>
+                  {founderBriefing.decisionBriefing.opportunity.length === 0 ? (
+                    <p className="text-xs text-gray-400 italic">No strategic opportunities identified.</p>
+                  ) : renderBriefingItems(founderBriefing.decisionBriefing.opportunity)}
+                </section>
+              </div>
+            )}
 
             {/* Priorities + Risks */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
